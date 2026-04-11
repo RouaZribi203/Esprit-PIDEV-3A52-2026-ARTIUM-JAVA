@@ -1,24 +1,24 @@
-package Services;
+package services;
 
-import Models.Personne;
+import entities.User;
 import utils.MyDatabase;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ServicePersonne implements Iservice <Personne> {
+public class ServicePersonne implements Iservice <User> {
     private Connection connection;
     public ServicePersonne() {
         connection = MyDatabase.getInstance().getConnection();
     }
 
     @Override
-    public void ajouter(Personne personne) throws SQLDataException {
+    public void add(User user) throws SQLDataException {
         String sql = "INSERT INTO personne (age, nom, prenom) VALUES ('"
-                + personne.getAge() + "', '"
-                + personne.getNom() + "', '"
-                + personne.getPrenom() + "')";
+                + user.getAge() + "', '"
+                + user.getNom() + "', '"
+                + user.getPrenom() + "')";
 
         try {
             Statement statement = connection.createStatement();
@@ -29,19 +29,19 @@ public class ServicePersonne implements Iservice <Personne> {
     }
 
     @Override
-    public void supprimer(Personne personne) throws SQLDataException {
+    public void delete(User user) throws SQLDataException {
 
     }
 
     @Override
-    public void modifier(Personne personne) throws SQLDataException {
+    public void update(User user) throws SQLDataException {
         String sql = "UPDATE personne SET nom = ?, prenom = ? , age = ? WHERE id = ?";
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1, personne.getNom());
-            preparedStatement.setString(2, personne.getPrenom());
-            preparedStatement.setInt(3, personne.getAge());
-            preparedStatement.setInt(4, personne.getId());
+            preparedStatement.setString(1, user.getNom());
+            preparedStatement.setString(2, user.getPrenom());
+            preparedStatement.setInt(3, user.getAge());
+            preparedStatement.setInt(4, user.getId());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             System.err.println(e.getMessage());        }
@@ -50,26 +50,26 @@ public class ServicePersonne implements Iservice <Personne> {
 
 
     @Override
-    public List<Personne> recuperer() throws SQLDataException {
+    public List<User> getAll() throws SQLDataException {
         String sql = "SELECT * FROM personne";
-        List<Personne> personneList = null;
+        List<User> userList = null;
         try {
             Statement statement = connection.createStatement();
             ResultSet rs = statement.executeQuery(sql);
-            personneList = new ArrayList<>();
+            userList = new ArrayList<>();
             while (rs.next()) {
-                Personne p = new Personne();
+                User p = new User();
                 p.setId(rs.getInt(1));
                 p.setAge(rs.getInt("age"));
                 p.setNom(rs.getString("nom"));
                 p.setPrenom(rs.getString("prenom"));
-                personneList.add(p);
+                userList.add(p);
 
             }
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-        return personneList;
+        return userList;
     }
 }

@@ -1,13 +1,11 @@
-package Services;
-
-import Models.Personne;
+package services;
 
 import java.sql.SQLDataException;
 import java.util.List;
 
 public interface Iservice <T> {
-    void ajouter (T t) throws SQLDataException;
-    void supprimer (T t) throws SQLDataException;
-    void modifier (T t) throws SQLDataException;
-    List<T> recuperer () throws SQLDataException;
+    void add (T t) throws SQLDataException;
+    void delete (T t) throws SQLDataException;
+    void update (T t) throws SQLDataException;
+    List<T> getAll () throws SQLDataException;
 }

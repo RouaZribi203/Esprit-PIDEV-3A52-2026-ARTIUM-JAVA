@@ -1,8 +1,7 @@
-package Test;
+package test;
 
-import Models.Personne;
-import Services.ServicePersonne;
-import utils.MyDatabase;
+import entities.User;
+import services.ServicePersonne;
 
 import java.sql.SQLDataException;
 
@@ -10,11 +9,11 @@ public class Main {
     public static void main(String[] args) {
         ServicePersonne servicePersonne = new ServicePersonne();
         try {
-            servicePersonne.ajouter(new Personne("Yassine","Dhaya",90));
-            servicePersonne.ajouter(new Personne("Rihem","MATTOUSI",190));
-            servicePersonne.ajouter(new Personne("Falten","Foulen",70));
-            servicePersonne.modifier(new Personne("TEsting","Hmed",33));
-            System.out.println(servicePersonne.recuperer());
+            servicePersonne.add(new User("Yassine","Dhaya",90));
+            servicePersonne.add(new User("Rihem","MATTOUSI",190));
+            servicePersonne.add(new User("Falten","Foulen",70));
+            servicePersonne.update(new User("TEsting","Hmed",33));
+            System.out.println(servicePersonne.getAll());
         } catch (SQLDataException e) {
             throw new RuntimeException(e);
         }
