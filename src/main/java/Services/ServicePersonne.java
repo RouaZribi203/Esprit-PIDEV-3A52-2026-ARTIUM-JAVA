@@ -59,7 +59,6 @@ public class ServicePersonne implements Iservice <User> {
             userList = new ArrayList<>();
             while (rs.next()) {
                 User p = new User();
-                p.setId(rs.getInt(1));
                 p.setAge(rs.getInt("age"));
                 p.setNom(rs.getString("nom"));
                 p.setPrenom(rs.getString("prenom"));

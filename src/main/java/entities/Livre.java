@@ -1,20 +1,12 @@
 package entities;
 
-public class Livre {
-    private Integer id;
+public class Livre extends Oeuvre {
     private String categorie;
     private Double prixLocation;
     private byte[] fichierPdf;
 
     public Livre() {
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
+        setClasse("livre");
     }
 
     public String getCategorie() {
@@ -41,4 +33,3 @@ public class Livre {
         this.fichierPdf = fichierPdf;
     }
 }
-

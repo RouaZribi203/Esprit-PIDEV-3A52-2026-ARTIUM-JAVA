@@ -4,8 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Musique {
-    private Integer id;
+public class Musique extends Oeuvre {
     private String genre;
     private String audio;
     private LocalDateTime updatedAt;
@@ -14,14 +13,7 @@ public class Musique {
     private List<Playlist> playlists = new ArrayList<>();
 
     public Musique() {
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
+        setClasse("musique");
     }
 
     public String getGenre() {

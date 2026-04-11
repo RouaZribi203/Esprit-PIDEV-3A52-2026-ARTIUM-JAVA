@@ -17,10 +17,6 @@ public class LocationLivre {
         return id;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
     public LocalDateTime getDateDebut() {
         return dateDebut;
     }

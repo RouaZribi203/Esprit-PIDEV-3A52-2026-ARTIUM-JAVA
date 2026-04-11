@@ -16,10 +16,6 @@ public class UserConnection {
         return id;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
     public LocalDateTime getConnectedAt() {
         return connectedAt;
     }

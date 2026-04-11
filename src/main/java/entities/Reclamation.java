@@ -20,10 +20,6 @@ public class Reclamation {
         return id;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
     public String getTexte() {
         return texte;
     }
