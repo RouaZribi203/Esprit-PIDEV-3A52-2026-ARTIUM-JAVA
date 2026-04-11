@@ -6,7 +6,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuButton;
-import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -20,18 +19,6 @@ public class NavbarController {
 
         void onThemeSelected(boolean darkMode);
     }
-
-    @FXML
-    private Button sidebarToggleButton;
-
-    @FXML
-    private MenuButton themeMenuButton;
-
-    @FXML
-    private MenuItem lightThemeItem;
-
-    @FXML
-    private MenuItem darkThemeItem;
 
     @FXML
     private Button notificationsButton;
@@ -86,6 +73,12 @@ public class NavbarController {
     private void onSwitchToArtistView() {
         userMenuButton.setText("Artiste");
         switchScene("/views/artist/ArtistMain.fxml", "/views/styles/artist-theme.css", "Artist Dashboard");
+    }
+
+    @FXML
+    private void onSwitchToAmateurView() {
+        userMenuButton.setText("Amateur");
+        switchScene("/views/amateur/AmateurMain.fxml", "/views/styles/amateur-theme.css", "Amateur Dashboard");
     }
 
     @FXML

@@ -1,0 +1,294 @@
+/* Amateur front-office theme placeholders */
+.amateur-root {
+    -fx-background-color: #f4f6f9;
+}
+
+.amateur-shell {
+    -fx-background-color: transparent;
+}
+
+.amateur-page-card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 12;
+}
+
+.amateur-left-sidebar {
+    -fx-background-color: transparent;
+}
+.amateur-root {
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-background-color: #d2d7df;
+}
+
+.amateur-root .label {
+    -fx-text-fill: #2f3e52;
+}
+
+.amateur-root .scroll-pane,
+.amateur-root .scroll-pane > .viewport,
+.amateur-root .scroll-pane .content,
+.amateur-shell,
+.amateur-page-host,
+.amateur-content-column {
+    -fx-background-color: transparent;
+}
+
+.amateur-scroll {
+    -fx-background: #d2d7df;
+    -fx-background-color: transparent;
+}
+
+.amateur-navbar {
+    -fx-background-color: #f8f9fb;
+    -fx-border-color: #d9dce3;
+    -fx-border-width: 0 0 1 0;
+}
+
+.amateur-search-field {
+    -fx-background-color: #f4f5f7;
+    -fx-border-color: #c8cdd7;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 0 12 0 12;
+    -fx-prompt-text-fill: #9aa3b2;
+}
+
+.amateur-root .button,
+.amateur-root .menu-button,
+.amateur-root .combo-box-base,
+.amateur-root .date-picker,
+.amateur-root .text-field,
+.amateur-root .text-area {
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+}
+
+.amateur-icon-button,
+.amateur-nav-link,
+.amateur-nav-menu,
+.amateur-avatar-menu {
+    -fx-background-color: #eef1f5;
+    -fx-border-color: #d4d9e1;
+    -fx-text-fill: #3b4250;
+    -fx-font-weight: 700;
+}
+
+.amateur-nav-link.active,
+.amateur-nav-menu.active {
+    -fx-background-color: #ebedff;
+    -fx-border-color: #bfc6ff;
+    -fx-text-fill: #3d3bc2;
+}
+
+.amateur-page-card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-color: #e8ecf2;
+    -fx-border-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(60, 60, 60, 0.07), 10, 0, 0, 2);
+}
+
+.page-title {
+    -fx-font-size: 36px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1c2b3f;
+}
+
+.page-subtitle {
+    -fx-font-size: 16px;
+    -fx-text-fill: #63758d;
+}
+
+.page-caption,
+.sidebar-stat-label,
+.sidebar-copyright,
+.mini-audio-artist {
+    -fx-text-fill: #6c7b90;
+}
+
+.empty-state-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 10;
+    -fx-border-color: #e8ecf2;
+    -fx-border-radius: 10;
+}
+
+.empty-state-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1f2d3d;
+}
+
+.amateur-left-sidebar {
+    -fx-background-color: transparent;
+}
+
+.sidebar-card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-color: #e8ecf2;
+    -fx-border-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(60, 60, 60, 0.07), 10, 0, 0, 2);
+}
+
+.sidebar-cover {
+    -fx-background-color: linear-gradient(to right, #3d3bc2, #5865f2);
+    -fx-background-radius: 12 12 0 0;
+}
+
+.sidebar-avatar {
+    -fx-background-color: #edf0f5;
+    -fx-background-radius: 999;
+    -fx-border-color: white;
+    -fx-border-radius: 999;
+    -fx-border-width: 3;
+}
+
+.sidebar-avatar-symbol {
+    -fx-font-size: 22px;
+    -fx-text-fill: #8e9aad;
+}
+
+.sidebar-name {
+    -fx-font-size: 18px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1f2d3d;
+}
+
+.sidebar-role,
+.sidebar-bio {
+    -fx-text-fill: #68788f;
+}
+
+.sidebar-stat-value {
+    -fx-font-size: 22px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1f2d3d;
+}
+
+.sidebar-divider {
+    -fx-background-color: #e2e7ef;
+}
+
+.sidebar-nav-block {
+    -fx-padding: 0 12 0 12;
+}
+
+.sidebar-nav-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: #2f3e52;
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 10 12 10 12;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+}
+
+.sidebar-nav-button:hover {
+    -fx-background-color: #eef1ff;
+    -fx-text-fill: #3d3bc2;
+}
+
+.sidebar-nav-button.active {
+    -fx-background-color: #e4e8ff;
+    -fx-text-fill: #2f349a;
+}
+
+.sidebar-footer-actions {
+    -fx-padding: 0 12 14 12;
+}
+
+.sidebar-edit-link {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: #3d3bc2;
+    -fx-font-weight: 700;
+}
+
+.mini-audio-player {
+    -fx-background-color: #212529;
+    -fx-border-color: #343a40 transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+}
+
+.mini-audio-player Label,
+.mini-audio-title {
+    -fx-text-fill: white;
+}
+
+.mini-seek-slider .track {
+    -fx-background-color: #495057;
+}
+
+.mini-seek-slider .thumb {
+    -fx-background-color: #198754;
+}
+
+.badge-pill {
+    -fx-background-color: #edf2ff;
+    -fx-background-radius: 999;
+    -fx-padding: 6 12 6 12;
+    -fx-text-fill: #3d3bc2;
+    -fx-font-weight: 700;
+}
+
+.music-card {
+    -fx-background-color: #212529;
+    -fx-border-color: #495057;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.music-card .label,
+.music-card .button {
+    -fx-text-fill: white;
+}
+
+.amateur-root .tab-pane {
+    -fx-background-color: transparent;
+}
+
+.amateur-root .tab-pane .tab-header-area .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+.amateur-root .tab-pane .tab {
+    -fx-background-color: #e9edf4;
+    -fx-background-radius: 8 8 0 0;
+    -fx-border-color: #d8dee7;
+}
+
+.amateur-root .tab-pane .tab:selected {
+    -fx-background-color: white;
+    -fx-border-color: #d3dae5;
+}
+
+.amateur-root.dark-mode {
+    -fx-background-color: #1a2235;
+}
+
+.amateur-root.dark-mode .amateur-navbar,
+.amateur-root.dark-mode .amateur-page-card,
+.amateur-root.dark-mode .sidebar-card {
+    -fx-background-color: #243149;
+    -fx-border-color: #324262;
+}
+
+.amateur-root.dark-mode .label,
+.amateur-root.dark-mode .page-title,
+.amateur-root.dark-mode .sidebar-name,
+.amateur-root.dark-mode .sidebar-stat-value {
+    -fx-text-fill: #edf2ff;
+}
+
+.amateur-root.dark-mode .page-subtitle,
+.amateur-root.dark-mode .sidebar-role,
+.amateur-root.dark-mode .sidebar-bio,
+.amateur-root.dark-mode .sidebar-stat-label,
+.amateur-root.dark-mode .sidebar-copyright {
+    -fx-text-fill: #b7c4dc;
+}

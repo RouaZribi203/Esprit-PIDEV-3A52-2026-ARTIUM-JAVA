@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1">
+    <top>
+        <VBox spacing="10.0" styleClass="amateur-page-card">
+            <padding>
+                <Insets bottom="20.0" left="24.0" right="24.0" top="24.0" />
+            </padding>
+            <Label styleClass="page-title" text="Bibliothèque numérique" />
+            <HBox spacing="10.0">
+                <TextField HBox.hgrow="ALWAYS" promptText="Titre ou catégorie" />
+                <ComboBox prefWidth="180.0" promptText="Catégorie" />
+                <Button mnemonicParsing="false" text="Recherche" />
+            </HBox>
+            <HBox spacing="8.0">
+                <Label styleClass="badge-pill" text="Livres numériques" />
+                <Label styleClass="badge-pill" text="Accès immédiat" />
+                <Label styleClass="badge-pill" text="Louer &amp; Lire" />
+            </HBox>
+        </VBox>
+    </top>
+    <center>
+        <VBox spacing="14.0" styleClass="amateur-page-card">
+            <padding>
+                <Insets bottom="24.0" left="24.0" right="24.0" top="0.0" />
+            </padding>
+            <Label styleClass="page-subtitle" text="Section de recommandation et grille des livres." />
+            <GridPane hgap="14.0" vgap="14.0">
+                <Label text="Recommandations" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+                <Label text="Grille des livres" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+                <StackPane minHeight="120.0" styleClass="empty-state-card" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+                <StackPane minHeight="240.0" styleClass="empty-state-card" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+            </GridPane>
+        </VBox>
+    </center>
+</BorderPane>
+

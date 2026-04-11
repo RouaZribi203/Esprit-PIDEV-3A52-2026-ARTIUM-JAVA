@@ -24,6 +24,8 @@
     <MenuButton mnemonicParsing="false" prefHeight="36.0" styleClass="artist-avatar-menu" text="Admin">
         <items>
             <MenuItem mnemonicParsing="false" onAction="#onSwitchToAdminView" text="Mode admin" />
+            <MenuItem mnemonicParsing="false" onAction="#onSwitchToArtistView" text="Mode artiste" />
+            <MenuItem mnemonicParsing="false" onAction="#onSwitchToAmateurView" text="Mode amateur" />
             <SeparatorMenuItem />
             <MenuItem mnemonicParsing="false" onAction="#onThemeLight" text="Theme clair" />
             <MenuItem mnemonicParsing="false" onAction="#onThemeDark" text="Theme sombre" />

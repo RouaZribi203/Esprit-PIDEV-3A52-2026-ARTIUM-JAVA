@@ -49,6 +49,16 @@ public class NavbarArtisteController {
     }
 
     @FXML
+    private void onSwitchToArtistView() {
+        switchScene("/views/artist/ArtistMain.fxml", "/views/styles/artist-theme.css", "Artist Dashboard");
+    }
+
+    @FXML
+    private void onSwitchToAmateurView() {
+        switchScene("/views/amateur/AmateurMain.fxml", "/views/styles/amateur-theme.css", "Amateur Dashboard");
+    }
+
+    @FXML
     private void onNotificationsClick() {
         notificationsButton.setText("!!");
     }

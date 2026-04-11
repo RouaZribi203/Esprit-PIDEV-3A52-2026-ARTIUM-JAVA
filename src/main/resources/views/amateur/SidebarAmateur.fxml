@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefWidth="320.0" spacing="14.0" styleClass="amateur-left-sidebar" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.amateur.SidebarAmateurController">
+    <VBox spacing="0.0" styleClass="sidebar-card">
+        <StackPane prefHeight="50.0" styleClass="sidebar-cover">
+            <Label styleClass="sidebar-cover-text" text="" />
+        </StackPane>
+        <VBox alignment="CENTER" spacing="8.0">
+            <padding>
+                <Insets bottom="16.0" left="16.0" right="16.0" top="-20.0" />
+            </padding>
+            <StackPane prefHeight="64.0" prefWidth="64.0" styleClass="sidebar-avatar">
+                <Label styleClass="sidebar-avatar-symbol" text="👤" />
+            </StackPane>
+            <Label styleClass="sidebar-name" text="Zribi roua" />
+            <Label styleClass="sidebar-role" text="Amateur d'art" />
+            <Label styleClass="sidebar-bio" text="Structure de la fiche profil amateur." wrapText="true" />
+
+            <HBox alignment="CENTER" spacing="12.0">
+                <VBox alignment="CENTER" spacing="4.0" HBox.hgrow="ALWAYS">
+                    <Label styleClass="sidebar-stat-value" text="siliana" />
+                    <Label styleClass="sidebar-stat-label" text="Ville" />
+                </VBox>
+                <Region prefWidth="1.0" styleClass="sidebar-divider" />
+                <VBox alignment="CENTER" spacing="4.0" HBox.hgrow="ALWAYS">
+                    <Label styleClass="sidebar-stat-value" text="25 Apr 2003" />
+                    <Label styleClass="sidebar-stat-label" text="Date de naissance" />
+                </VBox>
+            </HBox>
+        </VBox>
+
+        <VBox spacing="4.0" styleClass="sidebar-nav-block">
+            <Button fx:id="feedButton" mnemonicParsing="false" onAction="#onFeedClick" styleClass="sidebar-nav-button" text="🏠 Fil d'actualités" />
+            <Button fx:id="favorisButton" mnemonicParsing="false" onAction="#onFavorisClick" styleClass="sidebar-nav-button" text="⭐ Favoris" />
+            <Button fx:id="evenementsButton" mnemonicParsing="false" onAction="#onEvenementsClick" styleClass="sidebar-nav-button" text="📅 Évènements" />
+            <Button fx:id="bibliothequeButton" mnemonicParsing="false" onAction="#onBibliothequeClick" styleClass="sidebar-nav-button" text="📚 Bibliothèque" />
+            <Button fx:id="reclamationsButton" mnemonicParsing="false" onAction="#onReclamationsClick" styleClass="sidebar-nav-button" text="⚠ Réclamations" />
+        </VBox>
+
+        <VBox spacing="8.0" styleClass="sidebar-footer-actions">
+            <Button mnemonicParsing="false" onAction="#onEditProfileClick" styleClass="sidebar-edit-link" text="Modifier Profile" />
+            <Label styleClass="sidebar-copyright" text="©2026 Artium" />
+        </VBox>
+    </VBox>
+</VBox>
+

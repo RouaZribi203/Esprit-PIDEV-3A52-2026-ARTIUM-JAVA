@@ -29,7 +29,7 @@
         <items>
             <MenuItem mnemonicParsing="false" onAction="#onSwitchToAdminView" text="Mode admin" />
             <MenuItem mnemonicParsing="false" onAction="#onSwitchToArtistView" text="Mode artiste" />
-            <SeparatorMenuItem />
+            <MenuItem mnemonicParsing="false" onAction="#onSwitchToAmateurView" text="Mode amateur" />
             <MenuItem mnemonicParsing="false" onAction="#onProfileClick" text="Profil" />
             <MenuItem mnemonicParsing="false" onAction="#onLogoutClick" text="Se deconnecter" />
         </items>

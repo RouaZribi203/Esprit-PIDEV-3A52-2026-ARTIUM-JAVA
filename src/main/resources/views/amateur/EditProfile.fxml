@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.amateur.EditProfileController">
+    <top>
+        <VBox spacing="8.0" styleClass="amateur-page-card">
+            <padding>
+                <Insets bottom="20.0" left="24.0" right="24.0" top="24.0" />
+            </padding>
+            <Label styleClass="page-title" text="Modifier le profil" />
+            <Label styleClass="page-subtitle" text="Structure du drawer profil amateur avec centre d'intérêt." wrapText="true" />
+        </VBox>
+    </top>
+    <center>
+        <VBox spacing="14.0" styleClass="amateur-page-card">
+            <padding>
+                <Insets bottom="24.0" left="24.0" right="24.0" top="0.0" />
+            </padding>
+            <GridPane hgap="12.0" vgap="12.0">
+                <Label text="Nom" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <TextField GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                <Label text="Prénom" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <TextField GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <Label text="Email" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                <TextField GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <Label text="Ville" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                <TextField GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                <Label text="Date de naissance" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                <DatePicker GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                <Label text="Biographie" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+                <TextArea prefRowCount="4" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                <Label text="Centre d'intérêt" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+                <ComboBox prefWidth="220.0" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+            </GridPane>
+            <Label styleClass="page-subtitle" text="Changer le mot de passe" />
+            <HBox spacing="10.0">
+                <PasswordField HBox.hgrow="ALWAYS" promptText="Ancien mot de passe" />
+                <PasswordField HBox.hgrow="ALWAYS" promptText="Nouveau mot de passe" />
+                <PasswordField HBox.hgrow="ALWAYS" promptText="Confirmation" />
+            </HBox>
+            <Button mnemonicParsing="false" text="Enregistrer" />
+        </VBox>
+    </center>
+</BorderPane>
+

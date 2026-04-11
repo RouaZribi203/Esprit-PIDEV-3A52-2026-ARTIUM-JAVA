@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+
+<HBox alignment="CENTER_LEFT" prefHeight="66.0" spacing="12.0" styleClass="amateur-navbar" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.amateur.NavbarAmateurController">
+    <padding>
+        <Insets bottom="10.0" left="16.0" right="16.0" top="10.0" />
+    </padding>
+
+    <Button fx:id="anchorButton" mnemonicParsing="false" prefHeight="34.0" prefWidth="34.0" styleClass="amateur-icon-button" text="☰" />
+    <TextField prefHeight="36.0" prefWidth="260.0" promptText="Recherche..." styleClass="amateur-search-field" />
+
+    <Region HBox.hgrow="ALWAYS" />
+
+    <MenuButton fx:id="oeuvresButton" mnemonicParsing="false" prefHeight="36.0" styleClass="amateur-nav-menu" text="Oeuvres">
+        <items>
+            <MenuItem mnemonicParsing="false" onAction="#onFeedClick" text="Toutes les oeuvres" />
+            <MenuItem mnemonicParsing="false" onAction="#onFeedPeinturesClick" text="Peintures" />
+            <MenuItem mnemonicParsing="false" onAction="#onFeedSculpturesClick" text="Sculptures" />
+            <MenuItem mnemonicParsing="false" onAction="#onFeedPhotosClick" text="Photographies" />
+            <MenuItem mnemonicParsing="false" onAction="#onFeedRecommendationsClick" text="Recommandations" />
+        </items>
+    </MenuButton>
+
+    <Button fx:id="bibliothequeButton" mnemonicParsing="false" onAction="#onBibliothequeClick" prefHeight="36.0" styleClass="amateur-nav-link" text="Bibliothèque" />
+    <Button fx:id="musiqueButton" mnemonicParsing="false" onAction="#onMusiqueClick" prefHeight="36.0" styleClass="amateur-nav-link" text="Musique" />
+
+    <Region HBox.hgrow="ALWAYS" />
+
+    <Button fx:id="notificationsButton" mnemonicParsing="false" onAction="#onNotificationsClick" prefHeight="34.0" prefWidth="34.0" styleClass="amateur-icon-button" text="🔔" />
+
+    <MenuButton mnemonicParsing="false" prefHeight="36.0" styleClass="amateur-avatar-menu" text="Amateur">
+        <items>
+            <MenuItem mnemonicParsing="false" onAction="#onSwitchToAdminView" text="Mode admin" />
+            <MenuItem mnemonicParsing="false" onAction="#onSwitchToArtistView" text="Mode artiste" />
+            <MenuItem mnemonicParsing="false" onAction="#onSwitchToAmateurView" text="Mode amateur" />
+            <SeparatorMenuItem />
+            <MenuItem mnemonicParsing="false" onAction="#onThemeLight" text="Clair" />
+            <MenuItem mnemonicParsing="false" onAction="#onThemeDark" text="Sombre" />
+            <SeparatorMenuItem />
+            <MenuItem mnemonicParsing="false" onAction="#onLogoutClick" text="Se déconnecter" />
+        </items>
+    </MenuButton>
+</HBox>
+

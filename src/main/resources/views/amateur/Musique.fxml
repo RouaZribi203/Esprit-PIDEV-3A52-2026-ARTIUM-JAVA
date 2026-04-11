@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.amateur.MusicfrontController">
+    <top>
+        <VBox spacing="10.0" styleClass="amateur-page-card music-card">
+            <padding>
+                <Insets bottom="20.0" left="24.0" right="24.0" top="24.0" />
+            </padding>
+            <Label styleClass="page-title" text="Découvrir Musique" />
+            <HBox spacing="10.0">
+                <TextField HBox.hgrow="ALWAYS" promptText="Titre, description, artiste" />
+                <ComboBox prefWidth="160.0" promptText="Trier par" />
+                <Button mnemonicParsing="false" text="↑ / ↓" />
+            </HBox>
+        </VBox>
+    </top>
+    <center>
+        <VBox spacing="14.0" styleClass="amateur-page-card music-card">
+            <padding>
+                <Insets bottom="24.0" left="24.0" right="24.0" top="0.0" />
+            </padding>
+            <Label text="Grille des musiques" />
+            <StackPane minHeight="340.0" styleClass="empty-state-card music-empty-state">
+                <Label text="Le mini player reste caché sur cette page" />
+            </StackPane>
+        </VBox>
+    </center>
+</BorderPane>
+

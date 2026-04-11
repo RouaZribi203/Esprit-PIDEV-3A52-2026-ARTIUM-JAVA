@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1">
+    <top>
+        <VBox spacing="10.0" styleClass="amateur-page-card">
+            <padding>
+                <Insets bottom="20.0" left="24.0" right="24.0" top="24.0" />
+            </padding>
+            <Label styleClass="page-title" text="Découvrir les évènements" />
+            <HBox spacing="10.0">
+                <TextField HBox.hgrow="ALWAYS" promptText="Rechercher..." />
+                <Button mnemonicParsing="false" text="Rechercher" />
+            </HBox>
+            <TabPane prefHeight="70.0">
+                <tabs>
+                    <Tab closable="false" text="Tous" />
+                    <Tab closable="false" text="Exposition" />
+                    <Tab closable="false" text="Concert" />
+                    <Tab closable="false" text="Spectacle" />
+                    <Tab closable="false" text="Conférence" />
+                </tabs>
+            </TabPane>
+        </VBox>
+    </top>
+    <center>
+        <VBox spacing="14.0" styleClass="amateur-page-card">
+            <padding>
+                <Insets bottom="24.0" left="24.0" right="24.0" top="0.0" />
+            </padding>
+            <StackPane minHeight="320.0" styleClass="empty-state-card">
+                <Label text="Grille des évènements amateur" />
+            </StackPane>
+        </VBox>
+    </center>
+</BorderPane>
+

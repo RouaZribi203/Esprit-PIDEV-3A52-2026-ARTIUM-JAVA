@@ -22,6 +22,10 @@ public class MainFX extends Application {
         switchScene("/views/MainLayout.fxml", "/views/styles/dashboard.css", "Admin Dashboard");
     }
 
+    public static void switchToAmateurView() {
+        switchScene("/views/amateur/AmateurMain.fxml", "/views/styles/amateur-theme.css", "Amateur Dashboard");
+    }
+
     private static void switchScene(String fxmlPath, String stylesheetPath, String title) {
         if (primaryStage == null) {
             return;
@@ -40,7 +44,7 @@ public class MainFX extends Application {
         }
     }
 
-    public void start(Stage stage) throws Exception {
+    public void start(Stage stage) {
         primaryStage = stage;
         switchToAdminView();
     }
