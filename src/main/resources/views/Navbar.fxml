@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 
-<HBox alignment="CENTER_LEFT" prefHeight="66.0" spacing="10.0" styleClass="navbar" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.NavbarController">
+<HBox alignment="CENTER_LEFT" prefHeight="66.0" spacing="10.0" styleClass="navbar" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.NavbarController">
     <padding>
         <Insets bottom="10.0" left="16.0" right="16.0" top="10.0" />
     </padding>
