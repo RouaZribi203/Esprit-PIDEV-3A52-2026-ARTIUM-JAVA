@@ -22,6 +22,7 @@ public class MainFX extends Application {
     }
 
     public static void main(String[] args) {
+        //commentaire de test
         launch(args);
     }
 }
