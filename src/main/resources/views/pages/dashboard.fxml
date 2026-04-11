@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="dashboard-scroll" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.DashboardController">
+    <content>
+        <VBox spacing="14.0" styleClass="page-root">
+            <padding>
+                <Insets bottom="18.0" left="18.0" right="18.0" top="16.0" />
+            </padding>
+
+            <VBox spacing="4.0">
+                <Label styleClass="page-title" text="Tableau de Bord" />
+                <Label styleClass="page-subtitle" text="Welcome to the admin dashboard" />
+            </VBox>
+
+            <HBox fx:id="statsContainer" spacing="10.0" />
+
+            <HBox spacing="12.0">
+                <VBox spacing="8.0" styleClass="list-card" HBox.hgrow="ALWAYS">
+                    <padding>
+                        <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
+                    </padding>
+                    <Label styleClass="section-title" text="Inscriptions (6 derniers mois)" />
+                    <StackPane fx:id="lineChartContainer" prefHeight="250.0" />
+                </VBox>
+
+                <VBox prefWidth="320.0" spacing="8.0" styleClass="list-card">
+                    <padding>
+                        <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
+                    </padding>
+                    <Label styleClass="section-title" text="Repartition des roles" />
+                    <StackPane fx:id="rolePieContainer" prefHeight="250.0" />
+                </VBox>
+            </HBox>
+
+            <HBox spacing="12.0">
+                <VBox spacing="8.0" styleClass="list-card" HBox.hgrow="ALWAYS">
+                    <padding>
+                        <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
+                    </padding>
+                    <Label styleClass="section-title" text="Inscriptions recentes (24h)" />
+                    <ListView fx:id="signupsList" prefHeight="170.0" VBox.vgrow="ALWAYS" />
+                </VBox>
+
+                <VBox spacing="8.0" styleClass="list-card" HBox.hgrow="ALWAYS">
+                    <padding>
+                        <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
+                    </padding>
+                    <Label styleClass="section-title" text="Reclamations recentes" />
+                    <ListView fx:id="reclamationsList" prefHeight="170.0" VBox.vgrow="ALWAYS" />
+                </VBox>
+            </HBox>
+
+            <HBox spacing="12.0">
+                <VBox spacing="8.0" styleClass="list-card" HBox.hgrow="ALWAYS">
+                    <padding>
+                        <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
+                    </padding>
+                    <Label styleClass="section-title" text="Top artistes" />
+                    <ListView fx:id="topArtistesList" prefHeight="210.0" VBox.vgrow="ALWAYS" />
+                </VBox>
+
+                <StackPane fx:id="calendarContainer" prefWidth="360.0" />
+            </HBox>
+        </VBox>
+    </content>
+</ScrollPane>
+
+
+
