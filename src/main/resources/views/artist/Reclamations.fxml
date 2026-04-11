@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="12.0" styleClass="artist-card page-root" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.artist.ReclamationsArtisteController">
+    <padding><Insets bottom="16.0" left="16.0" right="16.0" top="16.0" /></padding>
+    <Label styleClass="page-title-small" text="Reclamations" />
+    <TabPane>
+        <tabs>
+            <Tab closable="false" text="Envoyer Reclamation" />
+            <Tab closable="false" text="Mes Reclamations" />
+        </tabs>
+    </TabPane>
+    <Label styleClass="page-subtitle-small" text="Structure prete: formulaire d'envoi + liste filtree + details/reponses." wrapText="true" />
+</VBox>
+

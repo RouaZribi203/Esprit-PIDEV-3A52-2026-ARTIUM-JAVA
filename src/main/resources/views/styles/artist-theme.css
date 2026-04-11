@@ -1,0 +1,191 @@
+.artist-root {
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-background-color: #f1f4f8;
+}
+
+.artist-navbar {
+    -fx-background-color: white;
+    -fx-border-color: #dfe4ea;
+    -fx-border-width: 0 0 1 0;
+}
+
+.artist-search-field {
+    -fx-background-color: #f7f9fc;
+    -fx-border-color: #d6deea;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.artist-icon-button {
+    -fx-background-color: #eef2f8;
+    -fx-border-color: #d7dde7;
+    -fx-background-radius: 17;
+    -fx-border-radius: 17;
+    -fx-font-weight: 700;
+}
+
+.artist-avatar-menu {
+    -fx-background-color: #edf2f8;
+    -fx-border-color: #d7dde7;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-font-weight: 700;
+}
+
+.artist-scroll,
+.artist-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.artist-left-column {
+    -fx-pref-width: 860;
+}
+
+.artist-page-host {
+    -fx-background-color: transparent;
+}
+
+.profile-card,
+.artist-card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-color: #dee2e6;
+    -fx-border-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);
+}
+
+.profile-cover {
+    -fx-background-color: linear-gradient(to right, #733f31, #c67b52);
+    -fx-background-radius: 12 12 0 0;
+}
+
+.cover-title {
+    -fx-text-fill: rgba(255, 255, 255, 0.85);
+    -fx-font-size: 20px;
+    -fx-font-weight: 700;
+}
+
+.profile-avatar {
+    -fx-background-color: #e5e9ef;
+    -fx-background-radius: 44;
+    -fx-border-color: white;
+    -fx-border-width: 3;
+    -fx-border-radius: 44;
+}
+
+.avatar-text {
+    -fx-text-fill: #7a8596;
+    -fx-font-size: 26px;
+    -fx-font-weight: 700;
+}
+
+.profile-name {
+    -fx-font-size: 26px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1f2937;
+}
+
+.profile-meta,
+.card-text,
+.page-subtitle-small {
+    -fx-text-fill: #6c757d;
+    -fx-font-size: 13px;
+}
+
+.edit-profile-button {
+    -fx-background-color: #f8d7da;
+    -fx-text-fill: #842029;
+    -fx-background-radius: 8;
+    -fx-font-weight: 600;
+}
+
+.tab-nav {
+    -fx-border-color: #e5e7eb transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+}
+
+.tab-nav-item {
+    -fx-background-color: transparent;
+    -fx-text-fill: #6c757d;
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+    -fx-border-color: transparent transparent #dee2e6 transparent;
+    -fx-border-width: 0 0 2 0;
+}
+
+.tab-nav-item.active {
+    -fx-text-fill: #0d6efd;
+    -fx-border-color: transparent transparent #0d6efd transparent;
+}
+
+.card-title {
+    -fx-font-size: 30px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #111827;
+}
+
+.page-title-small {
+    -fx-font-size: 18px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #111827;
+}
+
+.badge-primary,
+.badge-success,
+.badge-warning,
+.badge-info,
+.badge-danger {
+    -fx-padding: 2 8;
+    -fx-background-radius: 4;
+    -fx-font-weight: 600;
+}
+
+.badge-primary {
+    -fx-background-color: #cfe2ff;
+    -fx-text-fill: #084298;
+}
+
+.badge-success {
+    -fx-background-color: #d1e7dd;
+    -fx-text-fill: #0f5132;
+}
+
+.badge-warning {
+    -fx-background-color: #fff3cd;
+    -fx-text-fill: #664d03;
+}
+
+.badge-info {
+    -fx-background-color: #cff4fc;
+    -fx-text-fill: #055160;
+}
+
+.badge-danger {
+    -fx-background-color: #f8d7da;
+    -fx-text-fill: #842029;
+}
+
+.artist-root.dark-mode {
+    -fx-background-color: #151c2d;
+}
+
+.artist-root.dark-mode .artist-card,
+.artist-root.dark-mode .profile-card,
+.artist-root.dark-mode .artist-navbar {
+    -fx-background-color: #1f2a40;
+    -fx-border-color: #2f3b57;
+}
+
+.artist-root.dark-mode .profile-name,
+.artist-root.dark-mode .card-title,
+.artist-root.dark-mode .page-title-small {
+    -fx-text-fill: #edf2ff;
+}
+
+.artist-root.dark-mode .profile-meta,
+.artist-root.dark-mode .card-text,
+.artist-root.dark-mode .page-subtitle-small,
+.artist-root.dark-mode .tab-nav-item {
+    -fx-text-fill: #b7c4dc;
+}
+

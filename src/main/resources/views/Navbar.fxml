@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 
@@ -26,6 +27,9 @@
 
     <MenuButton fx:id="userMenuButton" mnemonicParsing="false" prefHeight="34.0" styleClass="avatar-menu" text="Admin">
         <items>
+            <MenuItem mnemonicParsing="false" onAction="#onSwitchToAdminView" text="Mode admin" />
+            <MenuItem mnemonicParsing="false" onAction="#onSwitchToArtistView" text="Mode artiste" />
+            <SeparatorMenuItem />
             <MenuItem mnemonicParsing="false" onAction="#onProfileClick" text="Profil" />
             <MenuItem mnemonicParsing="false" onAction="#onLogoutClick" text="Se deconnecter" />
         </items>

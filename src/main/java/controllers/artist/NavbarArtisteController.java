@@ -1,55 +1,32 @@
-package controllers;
+package controllers.artist;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.MenuButton;
-import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.Objects;
 
-public class NavbarController {
+public class NavbarArtisteController {
 
     public interface ActionHandler {
-        void onToggleSidebar();
-
         void onThemeSelected(boolean darkMode);
     }
-
-    @FXML
-    private Button sidebarToggleButton;
-
-    @FXML
-    private MenuButton themeMenuButton;
-
-    @FXML
-    private MenuItem lightThemeItem;
-
-    @FXML
-    private MenuItem darkThemeItem;
 
     @FXML
     private Button notificationsButton;
 
     @FXML
-    private MenuButton userMenuButton;
+    private Button anchorButton;
 
     private ActionHandler actionHandler;
 
     public void setActionHandler(ActionHandler actionHandler) {
         this.actionHandler = actionHandler;
-    }
-
-    @FXML
-    private void onSidebarToggle() {
-        if (actionHandler != null) {
-            actionHandler.onToggleSidebar();
-        }
     }
 
     @FXML
@@ -67,34 +44,22 @@ public class NavbarController {
     }
 
     @FXML
+    private void onSwitchToAdminView() {
+        switchScene("/views/MainLayout.fxml", "/views/styles/dashboard.css", "Admin Dashboard");
+    }
+
+    @FXML
     private void onNotificationsClick() {
         notificationsButton.setText("!!");
     }
 
     @FXML
-    private void onProfileClick() {
-        userMenuButton.setText("Admin");
-    }
-
-    @FXML
-    private void onSwitchToAdminView() {
-        userMenuButton.setText("Admin");
-        switchScene("/views/MainLayout.fxml", "/views/styles/dashboard.css", "Admin Dashboard");
-    }
-
-    @FXML
-    private void onSwitchToArtistView() {
-        userMenuButton.setText("Artiste");
-        switchScene("/views/artist/ArtistMain.fxml", "/views/styles/artist-theme.css", "Artist Dashboard");
-    }
-
-    @FXML
     private void onLogoutClick() {
-        userMenuButton.setText("Deconnexion");
+        // Placeholder for authentication redirection.
     }
 
     private void switchScene(String fxmlPath, String stylesheetPath, String title) {
-        Stage stage = (Stage) userMenuButton.getScene().getWindow();
+        Stage stage = (Stage) anchorButton.getScene().getWindow();
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();

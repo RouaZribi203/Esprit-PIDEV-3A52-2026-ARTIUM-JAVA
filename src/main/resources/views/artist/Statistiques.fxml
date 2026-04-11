@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="12.0" styleClass="artist-card page-root" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.artist.StatistiquesArtisteController">
+    <padding><Insets bottom="16.0" left="16.0" right="16.0" top="16.0" /></padding>
+    <Label styleClass="page-title-small" text="Statistiques" />
+    <Label styleClass="page-subtitle-small" text="Structure prete: PieChart, LineChart, BarChart, et top amateurs actifs." wrapText="true" />
+</VBox>
+

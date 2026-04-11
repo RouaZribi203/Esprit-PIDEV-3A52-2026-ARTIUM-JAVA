@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefWidth="320.0" spacing="14.0" styleClass="artist-right-column" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.artist.SidebarArtisteController">
+    <VBox spacing="10.0" styleClass="artist-card">
+        <padding>
+            <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
+        </padding>
+        <Label styleClass="card-title" text="A propos" />
+        <Label fx:id="bioLabel" styleClass="card-text" text="hello" wrapText="true" />
+        <Label styleClass="card-text" text="Ne(e): 04 May 1999" />
+        <Label styleClass="card-text" text="Inscrit le: 11 Apr 2026" />
+        <Label styleClass="card-text" text="Email: zribiroua789@gmail.com" />
+    </VBox>
+
+    <VBox spacing="10.0" styleClass="artist-card">
+        <padding>
+            <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
+        </padding>
+        <Label styleClass="card-title" text="Statistiques" />
+
+        <HBox alignment="CENTER_LEFT" spacing="8.0"><Label styleClass="card-text" text="Oeuvres ajoutees" /><Region HBox.hgrow="ALWAYS" /><Label styleClass="badge-primary" text="0" /></HBox>
+        <HBox alignment="CENTER_LEFT" spacing="8.0"><Label styleClass="card-text" text="Reclamations faites" /><Region HBox.hgrow="ALWAYS" /><Label styleClass="badge-warning" text="0" /></HBox>
+        <HBox alignment="CENTER_LEFT" spacing="8.0"><Label styleClass="card-text" text="Evenements crees" /><Region HBox.hgrow="ALWAYS" /><Label styleClass="badge-info" text="0" /></HBox>
+        <HBox alignment="CENTER_LEFT" spacing="8.0"><Label styleClass="card-text" text="Commentaires recus" /><Region HBox.hgrow="ALWAYS" /><Label styleClass="badge-success" text="0" /></HBox>
+        <HBox alignment="CENTER_LEFT" spacing="8.0"><Label styleClass="card-text" text="Likes recus" /><Region HBox.hgrow="ALWAYS" /><Label styleClass="badge-danger" text="0" /></HBox>
+    </VBox>
+</VBox>
+
