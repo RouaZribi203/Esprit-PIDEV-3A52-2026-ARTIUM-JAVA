@@ -327,6 +327,30 @@
     -fx-text-fill: #111827;
 }
 
+.oeuvre-post-avatar {
+    -fx-min-width: 40;
+    -fx-min-height: 40;
+    -fx-max-width: 40;
+    -fx-max-height: 40;
+    -fx-background-color: #e8eef9;
+    -fx-border-color: #d5def0;
+    -fx-border-width: 1;
+    -fx-background-radius: 20;
+    -fx-border-radius: 20;
+}
+
+.oeuvre-post-avatar-text {
+    -fx-font-size: 17px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #4b5d8a;
+}
+
+.oeuvre-post-specialite {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #8b95a5;
+}
+
 .oeuvre-post-date {
     -fx-font-size: 12px;
     -fx-text-fill: #6b7280;
@@ -518,6 +542,19 @@
 .artist-root.dark-mode .oeuvre-post-author,
 .artist-root.dark-mode .oeuvre-post-title {
     -fx-text-fill: #edf2ff;
+}
+
+.artist-root.dark-mode .oeuvre-post-avatar {
+    -fx-background-color: #324061;
+    -fx-border-color: #46557a;
+}
+
+.artist-root.dark-mode .oeuvre-post-avatar-text {
+    -fx-text-fill: #dbe6ff;
+}
+
+.artist-root.dark-mode .oeuvre-post-specialite {
+    -fx-text-fill: #b7c4dc;
 }
 
 .artist-root.dark-mode .oeuvre-post-date,

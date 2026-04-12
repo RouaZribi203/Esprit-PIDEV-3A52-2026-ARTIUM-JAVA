@@ -22,15 +22,13 @@
             <ComboBox fx:id="typeCombo" prefWidth="160.0" promptText="Type" styleClass="collections-filter-combo" />
             <Button mnemonicParsing="false" onAction="#onFilterClick" styleClass="collections-search-button" text="Filtrer" />
             <Region HBox.hgrow="ALWAYS" />
-            <Button mnemonicParsing="false" styleClass="collections-add-button" text="Ajouter une Oeuvre" />
+            <Button fx:id="addOeuvreButton" mnemonicParsing="false" onAction="#onAddOeuvreClick" styleClass="collections-add-button" text="Ajouter une Oeuvre" />
         </HBox>
 
         <Label fx:id="emptyStateLabel" styleClass="page-subtitle-small" text="Chargement des oeuvres..." wrapText="true" />
 
-        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="oeuvres-feed-scroll" VBox.vgrow="ALWAYS">
-            <content>
-                <VBox fx:id="oeuvresContainer" spacing="12.0" styleClass="oeuvres-feed-list" />
-            </content>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="NEVER" styleClass="oeuvres-feed-scroll" VBox.vgrow="ALWAYS">
+            <VBox fx:id="oeuvresContainer" spacing="12.0" styleClass="oeuvres-feed-list" />
         </ScrollPane>
     </VBox>
 </VBox>

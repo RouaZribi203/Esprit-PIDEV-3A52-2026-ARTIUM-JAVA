@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLDataException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,17 +25,96 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
 
     @Override
     public void add(Oeuvre t) throws SQLDataException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        String titre = t.getTitre() == null ? "" : t.getTitre().trim();
+        String description = t.getDescription() == null ? "" : t.getDescription().trim();
+        Integer collectionId = t.getCollectionId();
+
+        if (titre.isEmpty()) {
+            throw new SQLDataException("Le titre de l'oeuvre est obligatoire.");
+        }
+        if (description.isEmpty()) {
+            throw new SQLDataException("La description est obligatoire.");
+        }
+        if (collectionId == null) {
+            throw new SQLDataException("La collection est obligatoire.");
+        }
+        if (t.getImage() == null || t.getImage().length == 0) {
+            throw new SQLDataException("L'image est obligatoire.");
+        }
+
+        String type = t.getType() == null || t.getType().trim().isEmpty() ? "Oeuvre" : t.getType().trim();
+        LocalDate dateCreation = t.getDateCreation() == null ? LocalDate.now() : t.getDateCreation();
+
+        String sql = "INSERT INTO oeuvre (titre, description, date_creation, image, type, collection_id, classe) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setString(1, titre);
+            preparedStatement.setString(2, description);
+            preparedStatement.setDate(3, Date.valueOf(dateCreation));
+            preparedStatement.setBytes(4, t.getImage());
+            preparedStatement.setString(5, type);
+            preparedStatement.setInt(6, collectionId);
+            preparedStatement.setString(7, "oeuvre");
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new SQLDataException(e.getMessage());
+        }
     }
 
     @Override
     public void delete(Oeuvre t) throws SQLDataException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (t == null || t.getId() == null) {
+            throw new SQLDataException("L'identifiant de l'oeuvre est obligatoire.");
+        }
+
+        String sql = "DELETE FROM oeuvre WHERE id = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, t.getId());
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new SQLDataException(e.getMessage());
+        }
     }
 
     @Override
     public void update(Oeuvre t) throws SQLDataException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (t == null || t.getId() == null) {
+            throw new SQLDataException("L'identifiant de l'oeuvre est obligatoire.");
+        }
+
+        String titre = t.getTitre() == null ? "" : t.getTitre().trim();
+        String description = t.getDescription() == null ? "" : t.getDescription().trim();
+        Integer collectionId = t.getCollectionId();
+
+        if (titre.isEmpty()) {
+            throw new SQLDataException("Le titre de l'oeuvre est obligatoire.");
+        }
+        if (description.isEmpty()) {
+            throw new SQLDataException("La description est obligatoire.");
+        }
+        if (collectionId == null) {
+            throw new SQLDataException("La collection est obligatoire.");
+        }
+        if (t.getImage() == null || t.getImage().length == 0) {
+            throw new SQLDataException("L'image est obligatoire.");
+        }
+
+        String type = t.getType() == null || t.getType().trim().isEmpty() ? "Oeuvre" : t.getType().trim();
+        LocalDate dateCreation = t.getDateCreation() == null ? LocalDate.now() : t.getDateCreation();
+
+        String sql = "UPDATE oeuvre SET titre = ?, description = ?, date_creation = ?, image = ?, type = ?, collection_id = ?, classe = ? WHERE id = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setString(1, titre);
+            preparedStatement.setString(2, description);
+            preparedStatement.setDate(3, Date.valueOf(dateCreation));
+            preparedStatement.setBytes(4, t.getImage());
+            preparedStatement.setString(5, type);
+            preparedStatement.setInt(6, collectionId);
+            preparedStatement.setString(7, "oeuvre");
+            preparedStatement.setInt(8, t.getId());
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new SQLDataException(e.getMessage());
+        }
     }
 
     @Override
@@ -52,6 +132,45 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
         } catch (SQLException e) {
             throw new SQLDataException(e.getMessage());
         }
+    }
+   ///remove to artist service
+    public ArtistIdentity getArtisteIdentityById(int artisteId) {
+        String[] tables = new String[] {"user", "users", "personne", "personnes"};
+        String[] specialiteColumns = new String[] {"specialite", "speciality"};
+
+        for (String table : tables) {
+            for (String specialiteColumn : specialiteColumns) {
+                String sql = "SELECT nom, prenom, " + specialiteColumn + " AS specialite FROM `" + table + "` WHERE id = ? LIMIT 1";
+                try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                    preparedStatement.setInt(1, artisteId);
+                    try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                        if (resultSet.next()) {
+                            String nom = trimOrEmpty(resultSet.getString("nom"));
+                            String prenom = trimOrEmpty(resultSet.getString("prenom"));
+                            String specialite = trimOrEmpty(resultSet.getString("specialite"));
+
+                            String fullName = (prenom + " " + nom).trim();
+                            if (fullName.isEmpty()) {
+                                fullName = "Artiste";
+                            }
+                            if (specialite.isEmpty()) {
+                                specialite = "Specialite inconnue";
+                            }
+
+                            return new ArtistIdentity(fullName, specialite);
+                        }
+                    }
+                } catch (SQLException ignored) {
+                    // Try next table/column candidate.
+                }
+            }
+        }
+
+        return new ArtistIdentity("Artiste", "Specialite inconnue");
+    }
+
+    private String trimOrEmpty(String value) {
+        return value == null ? "" : value.trim();
     }
 
     public List<OeuvreFeedItem> getFeedByArtisteId(int artisteId) throws SQLDataException {
@@ -188,6 +307,24 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
 
         public int getLikeCount() {
             return likeCount;
+        }
+    }
+ ////remove to artist service
+    public static class ArtistIdentity {
+        private final String fullName;
+        private final String specialite;
+
+        public ArtistIdentity(String fullName, String specialite) {
+            this.fullName = fullName;
+            this.specialite = specialite;
+        }
+
+        public String getFullName() {
+            return fullName;
+        }
+
+        public String getSpecialite() {
+            return specialite;
         }
     }
 }
