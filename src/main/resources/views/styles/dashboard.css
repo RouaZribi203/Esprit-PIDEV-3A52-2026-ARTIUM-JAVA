@@ -114,13 +114,13 @@
 }
 
 .page-title {
-    -fx-font-size: 47px;
+    -fx-font-size: 25px;
     -fx-font-weight: 700;
     -fx-text-fill: #1c2b3f;
 }
 
 .page-subtitle {
-    -fx-font-size: 19px;
+    -fx-font-size: 15px;
     -fx-text-fill: #314865;
 }
 
@@ -220,6 +220,9 @@
     -fx-font-size: 12px;
     -fx-text-fill: #63758d;
 }
+
+/*style galerie*/
+/*fin*/
 
 .calendar-day-header {
     -fx-font-size: 12px;
