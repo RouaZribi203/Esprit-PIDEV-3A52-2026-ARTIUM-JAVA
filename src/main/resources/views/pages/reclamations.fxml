@@ -1,16 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox spacing="8.0" styleClass="page-root" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1">
+<VBox spacing="12.0" styleClass="page-root" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.pages.reclamations.ReclamationsController">
     <padding>
         <Insets bottom="20.0" left="26.0" right="20.0" top="24.0" />
     </padding>
     <children>
-        <Label styleClass="page-title" text="Reclamations" />
-        <Label styleClass="page-subtitle" text="Suivi et resolution des reclamations" />
+        <VBox spacing="4.0">
+            <Label styleClass="page-title" text="Liste des reclamations" />
+            <Label styleClass="page-subtitle" text="Suivi et resolution des reclamations" />
+        </VBox>
+
+        <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 6 0 2 0;">
+            <ToggleButton fx:id="tabAll" text="Tous les types" selected="true">
+                <toggleGroup>
+                    <ToggleGroup fx:id="typeTabsGroup" />
+                </toggleGroup>
+            </ToggleButton>
+            <ToggleButton fx:id="tabPaiement" text="Paiement" toggleGroup="$typeTabsGroup" />
+            <ToggleButton fx:id="tabOeuvre" text="Oeuvre" toggleGroup="$typeTabsGroup" />
+            <ToggleButton fx:id="tabEvenement" text="Evenement" toggleGroup="$typeTabsGroup" />
+            <ToggleButton fx:id="tabCompte" text="Compte" toggleGroup="$typeTabsGroup" />
+        </HBox>
+
+        <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 6 0 10 0;">
+            <TextField fx:id="searchField" promptText="Rechercher" prefWidth="320" />
+            <ComboBox fx:id="statutFilter" promptText="Tous les statuts" prefWidth="180" />
+        </HBox>
+
+        <HBox spacing="12" style="-fx-padding: 10 12 10 12; -fx-background-color: #f3f5f9; -fx-background-radius: 10; -fx-border-color: #e8ecf2; -fx-border-radius: 10;">
+            <Label text="Texte" style="-fx-font-weight: 700;" HBox.hgrow="ALWAYS" />
+            <Label text="Date envoi" style="-fx-font-weight: 700;" prefWidth="140" />
+            <Label text="Utilisateur" style="-fx-font-weight: 700;" prefWidth="160" />
+            <Label text="Type" style="-fx-font-weight: 700;" prefWidth="130" />
+            <Label text="Statut" style="-fx-font-weight: 700;" prefWidth="120" />
+            <Label text="" prefWidth="40" />
+        </HBox>
+
+        <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color:transparent;">
+            <content>
+                <GridPane fx:id="cardsContainer" hgap="0" vgap="0" style="-fx-padding: 0;" />
+            </content>
+        </ScrollPane>
     </children>
 </VBox>
 

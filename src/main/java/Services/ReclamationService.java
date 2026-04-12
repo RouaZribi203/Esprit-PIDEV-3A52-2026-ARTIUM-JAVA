@@ -12,7 +12,7 @@ public class ReclamationService implements Iservice<Reclamation> {
 
     Connection connection;
 
-    private static final String INSERT_SQL = "INSERT INTO reclamation values (texte,date_creation,statut,type,file_name,updated_at,user_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_SQL = "INSERT INTO reclamation(texte,date_creation,statut,type,file_name,updated_at,user_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
     private static final String UPDATE_SQL = "UPDATE reclamation SET texte = ?, date_creation = ?, statut = ?, type = ?, file_name = ? ,updated_at = ?,user_id=?  WHERE id = ?";
     private static final String SELECT_ALL_SQL = "SELECT id, texte, date_creation, statut, type,file_name, updated_at, user_id FROM reclamation";
     private static final String DELETE_SQL = "DELETE FROM reclamation WHERE id = ?";
@@ -25,7 +25,7 @@ public class ReclamationService implements Iservice<Reclamation> {
     public void add(Reclamation reclamation) throws SQLDataException {
         try (PreparedStatement statement = connection.prepareStatement(INSERT_SQL)) {
             statement.setString(1, reclamation.getTexte());
-            statement.setTimestamp(2,java.sql.Timestamp.valueOf(reclamation.getDateCreation().toString()));
+            statement.setTimestamp(2,java.sql.Timestamp.valueOf(reclamation.getDateCreation()));
             statement.setString(3, reclamation.getStatut());
             statement.setString(4, reclamation.getType());
             statement.setString(5, reclamation.getFileName());

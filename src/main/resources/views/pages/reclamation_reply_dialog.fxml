@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="10.0" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.pages.reclamations.ReclamationReplyDialogController">
+    <padding>
+        <Insets top="14" right="14" bottom="14" left="14"/>
+    </padding>
+
+    <children>
+        <HBox spacing="8">
+            <Label text="Reclamation ID:" />
+            <Label fx:id="reclamationIdLabel" text="-" style="-fx-font-weight: bold;" />
+        </HBox>
+
+        <Label text="Texte reclamation:" />
+        <TextArea fx:id="reclamationTexteArea" prefRowCount="5" wrapText="true" />
+
+        <Separator />
+
+        <Label text="Anciennes reponses (double clic pour modifier):" />
+        <ListView fx:id="historyList" prefHeight="160" />
+
+        <Separator />
+
+        <HBox spacing="8" alignment="CENTER_LEFT">
+            <Label text="Ajouter une ou plusieurs reponses:" />
+            <Button fx:id="addFieldBtn" text="+" onAction="#onAddField" />
+        </HBox>
+
+        <ScrollPane fitToWidth="true" prefViewportHeight="200">
+            <content>
+                <VBox fx:id="replyFieldsBox" spacing="10" />
+            </content>
+        </ScrollPane>
+
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <Button fx:id="cancelBtn" text="Annuler" onAction="#onCancel" />
+            <Button fx:id="deleteBtn" text="Supprimer reponse" onAction="#onDeleteReponse" />
+            <Button fx:id="updateBtn" text="Mettre a jour" onAction="#onUpdate" />
+            <Button fx:id="saveBtn" text="Enregistrer" onAction="#onSave" />
+        </HBox>
+    </children>
+</VBox>
+
+
