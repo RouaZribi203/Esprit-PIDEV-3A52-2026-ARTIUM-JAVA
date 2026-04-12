@@ -5,16 +5,23 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox spacing="12.0" styleClass="artist-card page-root" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.artist.CollectionsController">
-    <padding><Insets bottom="16.0" left="16.0" right="16.0" top="16.0" /></padding>
-    <HBox alignment="CENTER_LEFT" spacing="10.0">
-        <TextField promptText="Rechercher une collection..." HBox.hgrow="ALWAYS" />
-        <Button mnemonicParsing="false" text="Ajouter Collection" />
-    </HBox>
-    <Label styleClass="page-title-small" text="Collections" />
-    <Label styleClass="page-subtitle-small" text="Structure prete: liste accordion + grille d'oeuvres (a implementer)." wrapText="true" />
-</VBox>
+<VBox spacing="12.0" styleClass="page-root collections-page" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.artist.CollectionsController">
+    <padding><Insets bottom="12.0" left="12.0" right="12.0" top="12.0" /></padding>
 
+    <VBox spacing="10.0" styleClass="collections-body-card" VBox.vgrow="ALWAYS">
+        <padding><Insets bottom="12.0" left="12.0" right="12.0" top="12.0" /></padding>
+
+        <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="collections-toolbar">
+            <TextField fx:id="searchField" prefWidth="320.0" promptText="Rechercher une Collection..." styleClass="collections-search-field" />
+            <Button mnemonicParsing="false" onAction="#onSearchClick" styleClass="collections-search-button" text="Search" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button mnemonicParsing="false" onAction="#onAddCollectionClick" styleClass="collections-add-button" text="+ Ajouter Collection" />
+        </HBox>
+
+        <Label fx:id="emptyStateLabel" styleClass="page-subtitle-small" text="Chargement des collections..." wrapText="true" />
+        <VBox fx:id="collectionsContainer" spacing="0.0" VBox.vgrow="ALWAYS" />
+    </VBox>
+</VBox>

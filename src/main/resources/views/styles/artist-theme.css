@@ -165,6 +165,153 @@
     -fx-text-fill: #842029;
 }
 
+.collections-page {
+    -fx-padding: 8;
+}
+
+.collections-body-card {
+    -fx-background-color: white;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 1;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+}
+
+.collections-toolbar {
+    -fx-padding: 2 0 8 0;
+}
+
+.collections-search-field {
+    -fx-background-color: #f8f9fc;
+    -fx-border-color: #d6deea;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 8 12;
+    -fx-font-size: 14px;
+}
+
+.collections-search-button {
+    -fx-background-color: #3f44d4;
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-background-radius: 8;
+    -fx-padding: 8 18;
+    -fx-cursor: hand;
+}
+
+.collections-add-button {
+    -fx-background-color: #e6ecfa;
+    -fx-text-fill: #3f44d4;
+    -fx-font-weight: 700;
+    -fx-background-radius: 8;
+    -fx-padding: 8 14;
+    -fx-cursor: hand;
+}
+
+.collection-row {
+    -fx-padding: 12 8;
+    -fx-alignment: center-left;
+}
+
+.collection-title {
+    -fx-text-fill: #111827;
+    -fx-font-size: 17px;
+    -fx-font-weight: 700;
+}
+
+.collection-description {
+    -fx-text-fill: #8b95a5;
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+}
+
+.collection-action {
+    -fx-text-fill: #111827;
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+}
+
+.collection-separator .line {
+    -fx-border-color: #dfe4ea;
+    -fx-border-width: 1 0 0 0;
+}
+
+.collections-list-card {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+
+.collection-popup {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+}
+
+.popup-title {
+    -fx-font-size: 30px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #111827;
+}
+
+.popup-field-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #6b7280;
+}
+
+.popup-input {
+    -fx-background-color: #f8f9fc;
+    -fx-border-color: #d6deea;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.popup-input-valid {
+    -fx-border-color: #16a34a;
+    -fx-background-color: #f0fdf4;
+}
+
+.popup-input-invalid {
+    -fx-border-color: #dc2626;
+    -fx-background-color: #fef2f2;
+}
+
+.popup-error {
+    -fx-text-fill: #dc2626;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+}
+
+.popup-counter {
+    -fx-text-fill: #6b7280;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+}
+
+.popup-counter-limit {
+    -fx-text-fill: #dc2626;
+}
+
+.popup-close-button {
+    -fx-background-color: #111827;
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-background-radius: 8;
+    -fx-padding: 8 14;
+}
+
+.popup-confirm-button {
+    -fx-background-color: #3f44d4;
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-background-radius: 8;
+    -fx-padding: 8 14;
+}
+
 .artist-root.dark-mode {
     -fx-background-color: #151c2d;
 }
@@ -186,6 +333,74 @@
 .artist-root.dark-mode .card-text,
 .artist-root.dark-mode .page-subtitle-small,
 .artist-root.dark-mode .tab-nav-item {
+    -fx-text-fill: #b7c4dc;
+}
+
+.artist-root.dark-mode .collections-body-card {
+    -fx-background-color: #1f2a40;
+    -fx-border-color: #2f3b57;
+}
+
+.artist-root.dark-mode .collections-search-field {
+    -fx-background-color: #2a3551;
+    -fx-border-color: #43506f;
+    -fx-text-fill: #edf2ff;
+    -fx-prompt-text-fill: #b7c4dc;
+}
+
+.artist-root.dark-mode .collections-add-button {
+    -fx-background-color: #2d3956;
+    -fx-text-fill: #c6d2f1;
+}
+
+.artist-root.dark-mode .collection-title,
+.artist-root.dark-mode .collection-action {
+    -fx-text-fill: #edf2ff;
+}
+
+.artist-root.dark-mode .collection-description {
+    -fx-text-fill: #b7c4dc;
+}
+
+.artist-root.dark-mode .collection-separator .line {
+    -fx-border-color: #2f3b57;
+}
+
+.artist-root.dark-mode .collections-list-card {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.artist-root.dark-mode .collection-popup {
+    -fx-background-color: #1f2a40;
+}
+
+.artist-root.dark-mode .popup-title {
+    -fx-text-fill: #edf2ff;
+}
+
+.artist-root.dark-mode .popup-field-label {
+    -fx-text-fill: #b7c4dc;
+}
+
+.artist-root.dark-mode .popup-input {
+    -fx-background-color: #2a3551;
+    -fx-border-color: #43506f;
+    -fx-text-fill: #edf2ff;
+    -fx-prompt-text-fill: #b7c4dc;
+}
+
+.artist-root.dark-mode .popup-input-valid {
+    -fx-border-color: #22c55e;
+    -fx-background-color: #1f3a2d;
+}
+
+.artist-root.dark-mode .popup-input-invalid {
+    -fx-border-color: #ef4444;
+    -fx-background-color: #3d2126;
+}
+
+.artist-root.dark-mode .popup-counter {
     -fx-text-fill: #b7c4dc;
 }
 
