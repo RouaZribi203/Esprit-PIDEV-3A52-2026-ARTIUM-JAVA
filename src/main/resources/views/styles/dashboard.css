@@ -221,8 +221,106 @@
     -fx-text-fill: #63758d;
 }
 
-/*style galerie*/
-/*fin*/
+.primary-action-button {
+    -fx-background-color: #3d3bc2;
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-background-radius: 8;
+    -fx-padding: 8 16 8 16;
+    -fx-cursor: hand;
+}
+
+.primary-action-button:hover {
+    -fx-background-color: #3432ad;
+}
+
+.secondary-action-button {
+    -fx-background-color: #f1f4f8;
+    -fx-border-color: #ced6e0;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-text-fill: #2f3e52;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+}
+
+.danger-action-button {
+    -fx-background-color: #ffe8ea;
+    -fx-border-color: #f3b7be;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-text-fill: #a63038;
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+}
+
+.gallery-search-field {
+    -fx-background-color: #f6f7fb;
+    -fx-border-color: #d7dce6;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 8 10 8 10;
+}
+
+.gallery-scroll,
+.gallery-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.gallery-flow {
+    -fx-background-color: transparent;
+}
+
+.gallery-card {
+    -fx-background-color: #fdfefe;
+    -fx-border-color: #e4e9f0;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(60,60,60,0.08), 8, 0, 0, 1);
+}
+
+.gallery-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(60,60,60,0.15), 12, 0, 0, 3);
+}
+
+.gallery-name {
+    -fx-font-size: 17px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #223247;
+}
+
+.gallery-capacity {
+    -fx-font-size: 12px;
+    -fx-text-fill: #5d7090;
+}
+
+.gallery-meta {
+    -fx-font-size: 13px;
+    -fx-text-fill: #3c4f67;
+}
+
+.gallery-details {
+    -fx-background-color: #f5f7fb;
+    -fx-background-radius: 8;
+    -fx-border-color: #dde4ef;
+    -fx-border-radius: 8;
+}
+
+.gallery-detail-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #41566f;
+}
+
+.gallery-detail-value {
+    -fx-font-size: 12px;
+    -fx-text-fill: #42586f;
+}
+
+.gallery-form-root {
+    -fx-background-color: #f5f7fb;
+    -fx-min-width: 520;
+}
 
 .calendar-day-header {
     -fx-font-size: 12px;
