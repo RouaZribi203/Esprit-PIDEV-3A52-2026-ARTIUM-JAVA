@@ -12,6 +12,7 @@ import java.sql.SQLDataException;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.text.Normalizer;
 
 
 public class ReclamationsController {
@@ -145,11 +146,17 @@ public class ReclamationsController {
     private boolean matchesStatut(Reclamation r, String selected) {
         if (selected == null || selected.equals("Tous")) return true;
         String s = normalize(r.getStatut());
-        if ("Traite".equals(selected)) {
-            return s.contains("traite") || s.contains("trait");
+        String sel = normalize(selected);
+
+        // normalize status values from DB: "non traitée", "NON_TRAITEE", "traitee", "en_cours"...
+        boolean isNon = s.contains("nontra") || s.contains("non tra") || s.contains("non-tr") || s.contains("en cours") || s.contains("encours") || s.contains("pending");
+        boolean isTraite = s.contains("traite") || s.contains("trait") || s.contains("resolu") || s.contains("resolved") || s.contains("done");
+
+        if (sel.contains("traite") && !sel.contains("non")) {
+            return isTraite && !isNon;
         }
-        if ("Non traite".equals(selected)) {
-            return s.contains("non") || s.contains("en cours") || s.contains("nontraite");
+        if (sel.contains("non")) {
+            return isNon;
         }
         return true;
     }
@@ -173,7 +180,10 @@ public class ReclamationsController {
     }
 
     private String normalize(String s) {
-        return safe(s).toLowerCase(Locale.ROOT).replace("_", " ").replace("-", " ").replace("  ", " ");
+        String v = safe(s).toLowerCase(Locale.ROOT).replace("_", " ").replace("-", " ");
+        v = Normalizer.normalize(v, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+        while (v.contains("  ")) v = v.replace("  ", " ");
+        return v.trim();
     }
 
     private String safe(String s) {

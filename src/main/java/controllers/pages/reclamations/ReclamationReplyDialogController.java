@@ -84,12 +84,8 @@ public class ReclamationReplyDialogController {
         ta.setWrapText(true);
         ta.setPrefRowCount(3);
 
-        Button removeBtn = new Button("Supprimer ce champ");
-
         VBox wrapper = new VBox(6);
-        wrapper.getChildren().addAll(ta, removeBtn);
-
-        removeBtn.setOnAction(e -> replyFieldsBox.getChildren().remove(wrapper));
+        wrapper.getChildren().add(ta);
         replyFieldsBox.getChildren().add(wrapper);
     }
 

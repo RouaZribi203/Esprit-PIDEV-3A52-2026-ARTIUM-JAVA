@@ -26,13 +26,13 @@
 
         <Separator />
 
-        <Label text="Anciennes reponses (double clic pour modifier):" />
+        <Label text="Reponses (double clic pour modifier):" />
         <ListView fx:id="historyList" prefHeight="160" />
 
         <Separator />
 
         <HBox spacing="8" alignment="CENTER_LEFT">
-            <Label text="Ajouter une ou plusieurs reponses:" />
+            <Label text="Ajouter une autre reponse:" />
             <Button fx:id="addFieldBtn" text="+" onAction="#onAddField" />
         </HBox>
 
