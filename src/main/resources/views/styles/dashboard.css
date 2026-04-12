@@ -262,6 +262,26 @@
     -fx-padding: 8 10 8 10;
 }
 
+.gallery-form-text-area {
+    -fx-background-color: #f6f7fb;
+    -fx-border-color: #d7dce6;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 8 10 8 10;
+    -fx-background-insets: 0;
+}
+
+.gallery-form-text-area .content {
+    -fx-background-color: #f6f7fb;
+    -fx-background-radius: 8;
+}
+
+.form-validation-error {
+    -fx-text-fill: #c62828;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+}
+
 .gallery-scroll,
 .gallery-scroll > .viewport {
     -fx-background-color: transparent;
