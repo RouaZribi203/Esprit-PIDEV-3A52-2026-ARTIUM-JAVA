@@ -14,6 +14,14 @@ public class MainFX extends Application {
 
     private static Stage primaryStage;
 
+    public static void switchToAuthLandingView() {
+        switchScene("/views/auth/Landing.fxml", "/views/styles/auth.css", "Artium | Accueil");
+    }
+
+    public static void switchToRegistrationView() {
+        switchScene("/views/pages/inscription.fxml", "/views/styles/auth.css", "Artium | Inscription");
+    }
+
     public static void switchToArtistView() {
         switchScene("/views/artist/ArtistMain.fxml", "/views/styles/artist-theme.css", "Artist Dashboard");
     }
@@ -33,10 +41,12 @@ public class MainFX extends Application {
         try {
             FXMLLoader loader = new FXMLLoader(MainFX.class.getResource(fxmlPath));
             Parent root = loader.load();
-            Scene scene = new Scene(root);
+            Scene scene = new Scene(root, 1100, 650);
             URL stylesheet = Objects.requireNonNull(MainFX.class.getResource(stylesheetPath), "Missing stylesheet");
             scene.getStylesheets().add(stylesheet.toExternalForm());
             primaryStage.setTitle(title);
+            primaryStage.setMinWidth(1100);
+            primaryStage.setMinHeight(650);
             primaryStage.setScene(scene);
             primaryStage.show();
         } catch (IOException e) {
@@ -46,7 +56,7 @@ public class MainFX extends Application {
 
     public void start(Stage stage) {
         primaryStage = stage;
-        switchToAdminView();
+        switchToAuthLandingView();
     }
 
     public static void main(String[] args) {

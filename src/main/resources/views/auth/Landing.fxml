@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1"
+			fx:controller="controllers.AuthLandingController"
+			stylesheets="@../styles/auth.css"
+			styleClass="auth-root">
+	<top>
+		<HBox spacing="12" alignment="CENTER_LEFT" styleClass="auth-topbar">
+			<padding>
+				<Insets top="14" right="18" bottom="14" left="18"/>
+			</padding>
+			<Label text="Artium" styleClass="auth-brand-mini"/>
+			<Region HBox.hgrow="ALWAYS"/>
+			<Button text="Accueil" styleClass="auth-topbar-link"/>
+			<Button text="Se connecter" onAction="#onLoginClick" styleClass="auth-topbar-ghost"/>
+			<Button text="Aide" onAction="#onHelpClick" styleClass="auth-topbar-link"/>
+			<Button text="Créer un compte" onAction="#onCreateAccount" styleClass="auth-topbar-primary"/>
+		</HBox>
+	</top>
+
+	<center>
+		<StackPane styleClass="auth-landing-shell">
+			<HBox spacing="0" alignment="CENTER" maxWidth="1100" styleClass="auth-landing-card">
+				<VBox spacing="18" alignment="CENTER_LEFT" styleClass="auth-landing-hero" HBox.hgrow="ALWAYS">
+					<padding>
+						<Insets top="44" right="44" bottom="44" left="44"/>
+					</padding>
+					<Label text="Artium" styleClass="auth-brand"/>
+					<Label text="Découvrez le monde créatif" wrapText="true" styleClass="auth-hero-title"/>
+					<Label text="Rejoignez une expérience desktop plus claire, plus fluide et plus élégante pour l'inscription." wrapText="true" styleClass="auth-hero-text"/>
+					<HBox spacing="10" styleClass="auth-chip-row">
+						<Label text="Rapide" styleClass="auth-chip"/>
+						<Label text="Sécurisé" styleClass="auth-chip"/>
+						<Label text="Moderne" styleClass="auth-chip"/>
+					</HBox>
+				</VBox>
+
+				<VBox spacing="16" alignment="CENTER_LEFT" styleClass="auth-landing-panel" HBox.hgrow="ALWAYS">
+					<padding>
+						<Insets top="44" right="44" bottom="44" left="44"/>
+					</padding>
+					<Label text="Bienvenue" styleClass="auth-panel-kicker"/>
+					<Label text="Commencez votre inscription" wrapText="true" styleClass="auth-panel-title"/>
+					<Label text="Choisissez le parcours adapté à votre application desktop et accédez à une interface plus présentable." wrapText="true" styleClass="auth-panel-text"/>
+					<VBox spacing="12" styleClass="auth-landing-actions">
+						<Button text="Créer mon compte" onAction="#onCreateAccount" styleClass="auth-primary-button" maxWidth="Infinity"/>
+						<Button text="J'ai déjà un compte" onAction="#onLoginClick" styleClass="auth-secondary-button" maxWidth="Infinity"/>
+					</VBox>
+				</VBox>
+			</HBox>
+		</StackPane>
+	</center>
+</BorderPane>
+

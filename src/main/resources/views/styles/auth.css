@@ -1,0 +1,287 @@
+/* Base */
+.auth-root {
+	-fx-font-family: "Segoe UI", "Inter", "Arial";
+	-fx-background-color: linear-gradient(to bottom right, #eef3ff 0%, #f7f9ff 45%, #eef2fb 100%);
+}
+
+.auth-landing-shell,
+.auth-signup-shell {
+	-fx-padding: 24;
+}
+
+.auth-card,
+.auth-landing-card {
+	-fx-background-color: rgba(255, 255, 255, 0.92);
+	-fx-background-radius: 24;
+	-fx-border-radius: 24;
+	-fx-effect: dropshadow(gaussian, rgba(30, 41, 59, 0.15), 26, 0.18, 0, 12);
+}
+
+/* Top bar */
+.auth-topbar {
+	-fx-background-color: rgba(255, 255, 255, 0.88);
+	-fx-border-color: rgba(99, 102, 241, 0.12);
+	-fx-border-width: 0 0 1 0;
+}
+
+.auth-brand-mini,
+.auth-brand {
+	-fx-text-fill: #243b7a;
+	-fx-font-weight: 800;
+}
+
+.auth-brand-mini {
+	-fx-font-size: 19px;
+}
+
+.auth-topbar-link,
+.auth-topbar-ghost,
+.auth-topbar-primary {
+	-fx-background-radius: 999;
+	-fx-padding: 8 14;
+	-fx-font-weight: 700;
+	-fx-cursor: hand;
+}
+
+.auth-topbar-link {
+	-fx-background-color: transparent;
+	-fx-text-fill: #334155;
+}
+
+.auth-topbar-ghost {
+	-fx-background-color: transparent;
+	-fx-text-fill: #4f46e5;
+	-fx-border-color: #c7d2fe;
+	-fx-border-radius: 999;
+	-fx-border-width: 1;
+}
+
+.auth-topbar-primary,
+.auth-primary-button {
+	-fx-background-color: linear-gradient(to right, #4338ca, #4f46e5);
+	-fx-text-fill: white;
+	-fx-background-radius: 14;
+	-fx-font-weight: 700;
+	-fx-cursor: hand;
+}
+
+.auth-topbar-primary:hover,
+.auth-primary-button:hover {
+	-fx-background-color: linear-gradient(to right, #3f37b8, #4338ca);
+}
+
+/* Landing hero */
+.auth-landing-card {
+	-fx-max-width: 1100;
+}
+
+.auth-landing-hero,
+.auth-signup-hero {
+	-fx-background-color: linear-gradient(to bottom right, #273c95 0%, #5164d9 60%, #7382ff 100%);
+	-fx-background-radius: 24 0 0 24;
+}
+
+.auth-landing-panel,
+.auth-signup-card {
+	-fx-background-radius: 0 24 24 0;
+}
+
+.auth-hero-title,
+.auth-title {
+	-fx-text-fill: #ffffff;
+	-fx-font-size: 32px;
+	-fx-font-weight: 800;
+	-fx-line-spacing: 0.2em;
+}
+
+.auth-hero-text,
+.auth-subtitle,
+.auth-panel-text,
+.auth-helper-text,
+.auth-message {
+	-fx-font-size: 13px;
+	-fx-line-spacing: 0.5em;
+}
+
+.auth-hero-text,
+.auth-panel-text,
+.auth-helper-text {
+	-fx-text-fill: #667085;
+}
+
+.auth-panel-kicker,
+.auth-section-title {
+	-fx-text-fill: #4f46e5;
+	-fx-font-size: 13px;
+	-fx-font-weight: 800;
+}
+
+.auth-panel-title,
+.auth-title {
+	-fx-text-fill: #111827;
+}
+
+.auth-chip-row {
+	-fx-padding: 2 0 0 0;
+}
+
+.auth-chip {
+	-fx-background-color: rgba(255, 255, 255, 0.18);
+	-fx-text-fill: #ffffff;
+	-fx-background-radius: 999;
+	-fx-padding: 7 14;
+	-fx-font-size: 12px;
+	-fx-font-weight: 700;
+}
+
+/* Form */
+.auth-stepper {
+	-fx-padding: 2 0 4 0;
+}
+
+.auth-step-badge {
+	-fx-min-width: 34;
+	-fx-min-height: 34;
+	-fx-alignment: center;
+	-fx-background-color: #e5e7eb;
+	-fx-text-fill: #6b7280;
+	-fx-font-weight: 800;
+	-fx-background-radius: 999;
+}
+
+.auth-step-badge.active {
+	-fx-background-color: #4f46e5;
+	-fx-text-fill: white;
+}
+
+.auth-step-badge.done {
+	-fx-background-color: #22c55e;
+	-fx-text-fill: white;
+}
+
+.auth-field-label {
+	-fx-text-fill: #334155;
+	-fx-font-size: 13px;
+	-fx-font-weight: 700;
+}
+
+.auth-input {
+	-fx-background-color: white;
+	-fx-background-radius: 22;
+	-fx-border-radius: 22;
+	-fx-border-color: #cbd5e1;
+	-fx-border-width: 1;
+	-fx-padding: 11 14;
+	-fx-font-size: 14px;
+}
+
+.combo-box-base.auth-input {
+	-fx-background-color: white;
+	-fx-background-radius: 22;
+	-fx-border-radius: 22;
+	-fx-border-color: #cbd5e1;
+	-fx-border-width: 1;
+	-fx-font-size: 14px;
+}
+
+.combo-box-base.auth-input:focused {
+	-fx-border-color: #4f46e5;
+	-fx-effect: dropshadow(gaussian, rgba(79, 70, 229, 0.18), 14, 0.15, 0, 0);
+}
+
+.combo-box-base.auth-input > .list-cell {
+	-fx-padding: 11 14;
+}
+
+.auth-input:focused {
+	-fx-border-color: #4f46e5;
+	-fx-effect: dropshadow(gaussian, rgba(79, 70, 229, 0.18), 14, 0.15, 0, 0);
+}
+
+.auth-textarea {
+	-fx-pref-row-count: 4;
+}
+
+.auth-role-toggle,
+.auth-secondary-button,
+.auth-link-button {
+	-fx-cursor: hand;
+}
+
+.auth-role-toggle {
+	-fx-background-color: #edf2ff;
+	-fx-text-fill: #334155;
+	-fx-background-radius: 999;
+	-fx-border-radius: 999;
+	-fx-border-color: transparent;
+	-fx-font-weight: 700;
+	-fx-padding: 10 16;
+}
+
+.auth-role-toggle:selected {
+	-fx-background-color: #4f46e5;
+	-fx-text-fill: white;
+}
+
+.auth-secondary-button {
+	-fx-background-color: transparent;
+	-fx-text-fill: #334155;
+	-fx-font-weight: 700;
+	-fx-background-radius: 14;
+	-fx-border-color: #c7d2fe;
+	-fx-border-width: 1.2;
+	-fx-border-radius: 14;
+	-fx-padding: 12 18;
+}
+
+.auth-secondary-button:hover,
+.auth-topbar-link:hover,
+.auth-link-button:hover {
+	-fx-background-color: #eef2ff;
+}
+
+.auth-link-button {
+	-fx-background-color: transparent;
+	-fx-text-fill: #4f46e5;
+	-fx-font-weight: 700;
+	-fx-padding: 0;
+}
+
+.auth-photo-preview {
+	-fx-min-width: 150;
+	-fx-min-height: 150;
+	-fx-background-color: #cbd5e1;
+	-fx-background-radius: 18;
+	-fx-border-radius: 18;
+	-fx-border-color: rgba(255,255,255,0.55);
+	-fx-border-width: 1;
+}
+
+.auth-photo-placeholder {
+	-fx-text-fill: white;
+	-fx-font-weight: 700;
+	-fx-opacity: 0.85;
+}
+
+.auth-message {
+	-fx-min-height: 20;
+}
+
+.auth-message.error {
+	-fx-text-fill: #dc2626;
+}
+
+.auth-message.success {
+	-fx-text-fill: #16a34a;
+}
+
+.auth-signup-card {
+	-fx-background-color: rgba(255, 255, 255, 0.96);
+}
+
+.auth-scroll,
+.auth-scroll > .viewport {
+	-fx-background-color: transparent;
+}
+
+
