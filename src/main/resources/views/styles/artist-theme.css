@@ -263,6 +263,43 @@
     -fx-background-radius: 6;
 }
 
+.collection-expand-trigger {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 3 8;
+    -fx-cursor: hand;
+}
+
+.collection-expand-trigger:hover {
+    -fx-background-color: #eef2f8;
+    -fx-background-radius: 6;
+}
+
+.collection-preview-box {
+    -fx-background-color: #f8f9fc;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 8;
+}
+
+.collection-preview-row {
+    -fx-alignment: center-left;
+}
+
+.collection-thumbnail-wrapper {
+    -fx-border-color: #dfe4ea;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.collection-preview-empty {
+    -fx-font-size: 12px;
+    -fx-text-fill: #8b95a5;
+}
+
 .collection-menu {
     -fx-background-color: white;
     -fx-background-radius: 8;
@@ -396,6 +433,81 @@
     -fx-font-size: 12px;
     -fx-text-fill: #6b7280;
     -fx-font-weight: 600;
+}
+
+.oeuvre-post-stat-chip {
+    -fx-background-color: #eef2f8;
+    -fx-background-radius: 999;
+    -fx-padding: 4 10;
+}
+
+.oeuvre-post-stat-icon {
+    -fx-fill: #6b7280;
+}
+
+.oeuvre-post-stat-count {
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #4b5563;
+}
+
+.oeuvre-post-comments-box {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 10;
+}
+
+.oeuvre-post-comments-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #374151;
+}
+
+.oeuvre-post-comments-empty,
+.oeuvre-post-comments-more {
+    -fx-font-size: 12px;
+    -fx-text-fill: #6b7280;
+}
+
+.oeuvre-post-comment-row {
+    -fx-padding: 2 0 4 0;
+}
+
+.oeuvre-post-comment-avatar {
+    -fx-min-width: 30;
+    -fx-min-height: 30;
+    -fx-max-width: 30;
+    -fx-max-height: 30;
+    -fx-background-color: #e8eef9;
+    -fx-border-color: #d5def0;
+    -fx-border-width: 1;
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+}
+
+.oeuvre-post-comment-avatar-text {
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #4b5d8a;
+}
+
+.oeuvre-post-comment-author {
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #111827;
+}
+
+.oeuvre-post-comment-date {
+    -fx-font-size: 11px;
+    -fx-text-fill: #9ca3af;
+}
+
+.oeuvre-post-comment-text {
+    -fx-font-size: 12px;
+    -fx-text-fill: #4b5563;
 }
 
 .collection-popup {
@@ -564,6 +676,44 @@
     -fx-text-fill: #b7c4dc;
 }
 
+.artist-root.dark-mode .oeuvre-post-stat-chip {
+    -fx-background-color: #33415f;
+}
+
+.artist-root.dark-mode .oeuvre-post-stat-icon {
+    -fx-fill: #b7c4dc;
+}
+
+.artist-root.dark-mode .oeuvre-post-stat-count {
+    -fx-text-fill: #dbe6ff;
+}
+
+.artist-root.dark-mode .oeuvre-post-comments-box {
+    -fx-background-color: #24314a;
+    -fx-border-color: #3f4b6c;
+}
+
+.artist-root.dark-mode .oeuvre-post-comments-title,
+.artist-root.dark-mode .oeuvre-post-comment-author {
+    -fx-text-fill: #edf2ff;
+}
+
+.artist-root.dark-mode .oeuvre-post-comments-empty,
+.artist-root.dark-mode .oeuvre-post-comments-more,
+.artist-root.dark-mode .oeuvre-post-comment-date,
+.artist-root.dark-mode .oeuvre-post-comment-text {
+    -fx-text-fill: #b7c4dc;
+}
+
+.artist-root.dark-mode .oeuvre-post-comment-avatar {
+    -fx-background-color: #324061;
+    -fx-border-color: #46557a;
+}
+
+.artist-root.dark-mode .oeuvre-post-comment-avatar-text {
+    -fx-text-fill: #dbe6ff;
+}
+
 .artist-root.dark-mode .oeuvre-post-tags {
     -fx-text-fill: #8ea8ff;
 }
@@ -575,6 +725,23 @@
 
 .artist-root.dark-mode .collection-menu-trigger:hover {
     -fx-background-color: #2d3956;
+}
+
+.artist-root.dark-mode .collection-expand-trigger:hover {
+    -fx-background-color: #2d3956;
+}
+
+.artist-root.dark-mode .collection-preview-box {
+    -fx-background-color: #24314a;
+    -fx-border-color: #3f4b6c;
+}
+
+.artist-root.dark-mode .collection-thumbnail-wrapper {
+    -fx-border-color: #46557a;
+}
+
+.artist-root.dark-mode .collection-preview-empty {
+    -fx-text-fill: #b7c4dc;
 }
 
 .artist-root.dark-mode .collection-menu {

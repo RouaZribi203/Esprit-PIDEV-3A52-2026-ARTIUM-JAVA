@@ -73,10 +73,18 @@ public class OeuvreCollectionService implements services.Iservice<CollectionOeuv
 
     @Override
     public void delete(CollectionOeuvre collectionOeuvre) throws SQLDataException {
-        String sql = "DELETE FROM collections WHERE id = ?";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setInt(1, collectionOeuvre.getId());
-            preparedStatement.executeUpdate();
+        try {
+            // Cascade delete: supprimer toutes les oeuvres de la collection
+            // (et leurs commentaires associés)
+            OeuvreService oeuvreService = new OeuvreService();
+            oeuvreService.deleteByCollectionId(collectionOeuvre.getId());
+
+            // Puis supprimer la collection elle-même
+            String sql = "DELETE FROM collections WHERE id = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setInt(1, collectionOeuvre.getId());
+                preparedStatement.executeUpdate();
+            }
         } catch (SQLException e) {
             throw new SQLDataException(e.getMessage());
         }
@@ -122,6 +130,27 @@ public class OeuvreCollectionService implements services.Iservice<CollectionOeuv
             }
         }
         return collections;
+    }
+
+    public List<byte[]> getOeuvreImagesByCollectionId(int collectionId, int limit) throws SQLException {
+        List<byte[]> images = new ArrayList<>();
+        int safeLimit = limit <= 0 ? 6 : limit;
+        String sql = "SELECT image FROM oeuvre WHERE collection_id = ? AND image IS NOT NULL ORDER BY id DESC LIMIT ?";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, collectionId);
+            preparedStatement.setInt(2, safeLimit);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    byte[] image = resultSet.getBytes("image");
+                    if (image != null && image.length > 0) {
+                        images.add(image);
+                    }
+                }
+            }
+        }
+
+        return images;
     }
 
     private CollectionOeuvre mapCollection(ResultSet resultSet) throws SQLException {
