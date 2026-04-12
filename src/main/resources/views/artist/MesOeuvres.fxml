@@ -4,19 +4,33 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox spacing="12.0" styleClass="artist-card page-root" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.artist.MesOeuvresController">
-    <padding><Insets bottom="16.0" left="16.0" right="16.0" top="16.0" /></padding>
-    <HBox alignment="CENTER_LEFT" spacing="10.0">
-        <TextField promptText="Recherche par titre" HBox.hgrow="ALWAYS" />
-        <ComboBox promptText="Type" prefWidth="170.0" />
-        <Button mnemonicParsing="false" text="Ajouter une Oeuvre" />
-    </HBox>
-    <Label styleClass="page-title-small" text="Mes Oeuvres" />
-    <Label styleClass="page-subtitle-small" text="Structure prete: filtres + grille de cartes + actions Modifier/Supprimer." wrapText="true" />
-</VBox>
+<VBox spacing="12.0" styleClass="page-root collections-page" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.artist.MesOeuvresController">
+    <padding><Insets bottom="12.0" left="12.0" right="12.0" top="12.0" /></padding>
 
+    <VBox spacing="10.0" styleClass="collections-body-card" VBox.vgrow="ALWAYS">
+        <padding><Insets bottom="12.0" left="12.0" right="12.0" top="12.0" /></padding>
+
+        <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="collections-toolbar">
+            <TextField fx:id="searchField" prefWidth="260.0" promptText="Rechercher une oeuvre..." styleClass="collections-search-field" />
+            <Button mnemonicParsing="false" onAction="#onSearchClick" styleClass="collections-search-button" text="Search" />
+            <ComboBox fx:id="typeCombo" prefWidth="160.0" promptText="Type" styleClass="collections-filter-combo" />
+            <Button mnemonicParsing="false" onAction="#onFilterClick" styleClass="collections-search-button" text="Filtrer" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button mnemonicParsing="false" styleClass="collections-add-button" text="Ajouter une Oeuvre" />
+        </HBox>
+
+        <Label fx:id="emptyStateLabel" styleClass="page-subtitle-small" text="Chargement des oeuvres..." wrapText="true" />
+
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="oeuvres-feed-scroll" VBox.vgrow="ALWAYS">
+            <content>
+                <VBox fx:id="oeuvresContainer" spacing="12.0" styleClass="oeuvres-feed-list" />
+            </content>
+        </ScrollPane>
+    </VBox>
+</VBox>

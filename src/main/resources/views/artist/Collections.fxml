@@ -16,9 +16,9 @@
 
         <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="collections-toolbar">
             <TextField fx:id="searchField" prefWidth="320.0" promptText="Rechercher une Collection..." styleClass="collections-search-field" />
-            <Button mnemonicParsing="false" onAction="#onSearchClick" styleClass="collections-search-button" text="Search" />
+            <Button fx:id="searchButton" mnemonicParsing="false" onAction="#onSearchClick" styleClass="collections-search-button" text="Search" />
             <Region HBox.hgrow="ALWAYS" />
-            <Button mnemonicParsing="false" onAction="#onAddCollectionClick" styleClass="collections-add-button" text="+ Ajouter Collection" />
+            <Button fx:id="addCollectionButton" mnemonicParsing="false" onAction="#onAddCollectionClick" styleClass="collections-add-button" text="Ajouter Collection" />
         </HBox>
 
         <Label fx:id="emptyStateLabel" styleClass="page-subtitle-small" text="Chargement des collections..." wrapText="true" />

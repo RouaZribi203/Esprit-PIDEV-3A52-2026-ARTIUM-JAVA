@@ -209,6 +209,24 @@
     -fx-cursor: hand;
 }
 
+.collections-filter-combo {
+    -fx-background-color: #f8f9fc;
+    -fx-border-color: #d6deea;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 2 10;
+    -fx-font-size: 14px;
+}
+
+.collections-filter-combo .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.collections-filter-combo .arrow {
+    -fx-background-color: #64748b;
+}
+
 .collection-row {
     -fx-padding: 12 8;
     -fx-alignment: center-left;
@@ -226,10 +244,50 @@
     -fx-font-weight: 500;
 }
 
-.collection-action {
+.collection-actions {
+    -fx-alignment: center-right;
+}
+
+.collection-menu-trigger {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
     -fx-text-fill: #111827;
-    -fx-font-size: 16px;
+    -fx-font-size: 18px;
     -fx-font-weight: 700;
+    -fx-padding: 2 10;
+    -fx-cursor: hand;
+}
+
+.collection-menu-trigger:hover {
+    -fx-background-color: #eef2f8;
+    -fx-background-radius: 6;
+}
+
+.collection-menu {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-border-color: #dfe4ea;
+    -fx-border-radius: 8;
+    -fx-padding: 4;
+}
+
+.collection-menu .menu-item {
+    -fx-padding: 8 12;
+}
+
+.collection-menu .menu-item .label {
+    -fx-text-fill: #4b5563;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+
+.collection-menu .menu-item:focused {
+    -fx-background-color: #eef2f8;
+    -fx-background-radius: 6;
+}
+
+.collection-menu .menu-item.collection-menu-delete .label {
+    -fx-text-fill: #dc3545;
 }
 
 .collection-separator .line {
@@ -243,6 +301,77 @@
     -fx-border-width: 0;
     -fx-background-radius: 0;
     -fx-border-radius: 0;
+}
+
+.oeuvres-feed-scroll,
+.oeuvres-feed-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.oeuvres-feed-list {
+    -fx-padding: 4 2 8 2;
+}
+
+.oeuvre-post-card {
+    -fx-background-color: #f8f9fc;
+    -fx-border-color: #dfe4ea;
+    -fx-border-width: 1;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-padding: 12;
+}
+
+.oeuvre-post-author {
+    -fx-font-size: 15px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #111827;
+}
+
+.oeuvre-post-date {
+    -fx-font-size: 12px;
+    -fx-text-fill: #6b7280;
+}
+
+.oeuvre-post-title {
+    -fx-font-size: 28px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #111827;
+}
+
+.oeuvre-post-description {
+    -fx-font-size: 13px;
+    -fx-text-fill: #6b7280;
+}
+
+.oeuvre-post-tags {
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #3f44d4;
+}
+
+.oeuvre-post-image-wrapper {
+    -fx-background-color: white;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 10;
+    -fx-alignment: center;
+}
+
+.oeuvre-post-image-placeholder {
+    -fx-text-fill: #9ca3af;
+    -fx-font-size: 13px;
+}
+
+.oeuvre-post-stats {
+    -fx-alignment: center-left;
+}
+
+.oeuvre-post-stat {
+    -fx-font-size: 12px;
+    -fx-text-fill: #6b7280;
+    -fx-font-weight: 600;
 }
 
 .collection-popup {
@@ -353,8 +482,18 @@
     -fx-text-fill: #c6d2f1;
 }
 
+.artist-root.dark-mode .collections-filter-combo {
+    -fx-background-color: #2a3551;
+    -fx-border-color: #43506f;
+    -fx-text-fill: #edf2ff;
+}
+
+.artist-root.dark-mode .collections-filter-combo .arrow {
+    -fx-background-color: #b7c4dc;
+}
+
 .artist-root.dark-mode .collection-title,
-.artist-root.dark-mode .collection-action {
+.artist-root.dark-mode .collection-menu-trigger {
     -fx-text-fill: #edf2ff;
 }
 
@@ -369,6 +508,53 @@
 .artist-root.dark-mode .collections-list-card {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
+}
+
+.artist-root.dark-mode .oeuvre-post-card {
+    -fx-background-color: #2a3551;
+    -fx-border-color: #3f4b6c;
+}
+
+.artist-root.dark-mode .oeuvre-post-author,
+.artist-root.dark-mode .oeuvre-post-title {
+    -fx-text-fill: #edf2ff;
+}
+
+.artist-root.dark-mode .oeuvre-post-date,
+.artist-root.dark-mode .oeuvre-post-description,
+.artist-root.dark-mode .oeuvre-post-stat,
+.artist-root.dark-mode .oeuvre-post-image-placeholder {
+    -fx-text-fill: #b7c4dc;
+}
+
+.artist-root.dark-mode .oeuvre-post-tags {
+    -fx-text-fill: #8ea8ff;
+}
+
+.artist-root.dark-mode .oeuvre-post-image-wrapper {
+    -fx-background-color: #1f2a40;
+    -fx-border-color: #3f4b6c;
+}
+
+.artist-root.dark-mode .collection-menu-trigger:hover {
+    -fx-background-color: #2d3956;
+}
+
+.artist-root.dark-mode .collection-menu {
+    -fx-background-color: #24314a;
+    -fx-border-color: #3a4767;
+}
+
+.artist-root.dark-mode .collection-menu .menu-item .label {
+    -fx-text-fill: #dbe6ff;
+}
+
+.artist-root.dark-mode .collection-menu .menu-item:focused {
+    -fx-background-color: #2d3956;
+}
+
+.artist-root.dark-mode .collection-menu .menu-item.collection-menu-delete .label {
+    -fx-text-fill: #ff8686;
 }
 
 .artist-root.dark-mode .collection-popup {

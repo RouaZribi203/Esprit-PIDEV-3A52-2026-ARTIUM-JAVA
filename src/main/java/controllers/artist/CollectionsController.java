@@ -6,22 +6,29 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.shape.SVGPath;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.geometry.Side;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class CollectionsController {
     private static final int DESCRIPTION_MIN_LENGTH = 10;
@@ -30,6 +37,12 @@ public class CollectionsController {
 
     @FXML
     private TextField searchField;
+
+    @FXML
+    private Button searchButton;
+
+    @FXML
+    private Button addCollectionButton;
 
     @FXML
     private VBox collectionsContainer;
@@ -45,8 +58,29 @@ public class CollectionsController {
 
     @FXML
     public void initialize() {
+        applyIcons();
         loadCollections();
         searchField.textProperty().addListener((observable, oldValue, newValue) -> applyFilter(newValue));
+    }
+
+    private void applyIcons() {
+        if (searchButton != null) {
+            searchButton.setGraphic(createIcon("M15.5 14h-.79l-.28-.27A6.5 6.5 0 1 0 14 15.5l.27.28v.79L20 21.49 21.49 20 15.5 14z", 0.6, "#ffffff"));
+            searchButton.setGraphicTextGap(6);
+        }
+        if (addCollectionButton != null) {
+            addCollectionButton.setGraphic(createIcon("M19 11H13V5h-2v6H5v2h6v6h2v-6h6z", 0.72, "#3f44d4"));
+            addCollectionButton.setGraphicTextGap(6);
+        }
+    }
+
+    private SVGPath createIcon(String path, double scale, String fillColor) {
+        SVGPath icon = new SVGPath();
+        icon.setContent(path);
+        icon.setScaleX(scale);
+        icon.setScaleY(scale);
+        icon.setStyle("-fx-fill: " + fillColor + ";");
+        return icon;
     }
 
     @FXML
@@ -56,16 +90,21 @@ public class CollectionsController {
 
     @FXML
     private void onAddCollectionClick() {
-        showAddCollectionPopup();
+        showCollectionPopup(null);
     }
 
-    private void showAddCollectionPopup() {
+    private void showEditCollectionPopup(CollectionOeuvre collection) {
+        showCollectionPopup(collection);
+    }
+
+    private void showCollectionPopup(CollectionOeuvre collectionToEdit) {
+        boolean editMode = collectionToEdit != null;
         Stage popupStage = new Stage();
         popupStage.initModality(Modality.APPLICATION_MODAL);
         popupStage.initOwner(searchField.getScene().getWindow());
-        popupStage.setTitle("Ajouter une collection");
+        popupStage.setTitle(editMode ? "Modifier la collection" : "Ajouter une collection");
 
-        Label headerLabel = new Label("Ajouter une Collection");
+        Label headerLabel = new Label(editMode ? "Modifier la Collection" : "Ajouter une Collection");
         headerLabel.getStyleClass().add("popup-title");
 
         Label titreLabel = new Label("Titre");
@@ -85,6 +124,11 @@ public class CollectionsController {
         descriptionArea.setPromptText("Entrez la description");
         descriptionArea.getStyleClass().add("popup-input");
         descriptionArea.setPrefRowCount(4);
+
+        if (editMode) {
+            titreField.setText(collectionToEdit.getTitre() == null ? "" : collectionToEdit.getTitre());
+            descriptionArea.setText(collectionToEdit.getDescription() == null ? "" : collectionToEdit.getDescription());
+        }
 
         Label descriptionErrorLabel = new Label();
         descriptionErrorLabel.getStyleClass().add("popup-error");
@@ -124,10 +168,14 @@ public class CollectionsController {
 
         Button closeButton = new Button("Fermer");
         closeButton.getStyleClass().add("popup-close-button");
+        closeButton.setGraphic(createIcon("M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z", 0.52, "#ffffff"));
+        closeButton.setGraphicTextGap(6);
         closeButton.setOnAction(event -> popupStage.close());
 
-        Button confirmButton = new Button("Ajouter Collection");
+        Button confirmButton = new Button(editMode ? "Enregistrer" : "Ajouter Collection");
         confirmButton.getStyleClass().add("popup-confirm-button");
+        confirmButton.setGraphic(createIcon("M9 16.17 4.83 12 3.41 13.41 9 19l12-12-1.41-1.41z", 0.58, "#ffffff"));
+        confirmButton.setGraphicTextGap(6);
         confirmButton.setOnAction(event -> {
             String titre = titreField.getText() == null ? "" : titreField.getText().trim();
             String description = descriptionArea.getText() == null ? "" : descriptionArea.getText().trim();
@@ -151,16 +199,26 @@ public class CollectionsController {
             }
 
             try {
-                if (oeuvreCollectionService.existsByTitreAndArtisteId(titre, artisteId)) {
+                boolean alreadyExists = oeuvreCollectionService.existsByTitreAndArtisteId(titre, artisteId);
+                boolean isSameCollectionTitle = editMode
+                        && normalizeText(titre).equals(normalizeText(collectionToEdit.getTitre()));
+
+                if (alreadyExists && !isSameCollectionTitle) {
                     showFieldError(titreErrorLabel, titreField, "Cette collection existe deja pour cet artiste.");
                     return;
                 }
 
-                CollectionOeuvre collection = new CollectionOeuvre();
-                collection.setTitre(titre);
-                collection.setDescription(description.isEmpty() ? null : description);
-                collection.setArtisteId(artisteId);
-                oeuvreCollectionService.add(collection);
+                if (editMode) {
+                    collectionToEdit.setTitre(titre);
+                    collectionToEdit.setDescription(description);
+                    oeuvreCollectionService.update(collectionToEdit);
+                } else {
+                    CollectionOeuvre collection = new CollectionOeuvre();
+                    collection.setTitre(titre);
+                    collection.setDescription(description);
+                    collection.setArtisteId(artisteId);
+                    oeuvreCollectionService.add(collection);
+                }
 
                 popupStage.close();
                 loadCollections();
@@ -197,6 +255,52 @@ public class CollectionsController {
 
         popupStage.setScene(scene);
         popupStage.showAndWait();
+    }
+
+    private String normalizeText(String value) {
+        return value == null ? "" : value.trim().toLowerCase();
+    }
+
+    private ContextMenu buildCollectionActionsMenu(CollectionOeuvre collection) {
+        MenuItem editItem = new MenuItem("Modifier");
+        editItem.getStyleClass().add("collection-menu-edit");
+        editItem.setGraphic(createIcon("M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z", 0.58, "#6b7280"));
+        editItem.setOnAction(event -> showEditCollectionPopup(collection));
+
+        MenuItem deleteItem = new MenuItem("Supprimer");
+        deleteItem.getStyleClass().add("collection-menu-delete");
+        deleteItem.setGraphic(createIcon("M6 7h12v2H6V7zm2 3h8v10H8V10zm3-6h2l1 1h4v2H6V5h4l1-1z", 0.58, "#dc3545"));
+        deleteItem.setOnAction(event -> onDeleteCollection(collection));
+
+        ContextMenu contextMenu = new ContextMenu(editItem, deleteItem);
+        contextMenu.getStyleClass().add("collection-menu");
+        return contextMenu;
+    }
+
+    private void onDeleteCollection(CollectionOeuvre collection) {
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmation.initOwner(searchField.getScene().getWindow());
+        confirmation.setTitle("Supprimer la collection");
+        confirmation.setHeaderText(null);
+        confirmation.setContentText("Voulez-vous supprimer la collection '" + collection.getTitre() + "' ?");
+
+        Optional<ButtonType> result = confirmation.showAndWait();
+        if (result.isEmpty() || result.get() != ButtonType.OK) {
+            return;
+        }
+
+        try {
+            oeuvreCollectionService.delete(collection);
+            loadCollections();
+            applyFilter(searchField.getText());
+        } catch (SQLException e) {
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.initOwner(searchField.getScene().getWindow());
+            errorAlert.setTitle("Erreur");
+            errorAlert.setHeaderText("Suppression impossible");
+            errorAlert.setContentText(e.getMessage() == null ? "Une erreur est survenue." : e.getMessage());
+            errorAlert.showAndWait();
+        }
     }
 
     private boolean validateDescriptionField(TextArea descriptionArea, Label descriptionErrorLabel) {
@@ -298,16 +402,23 @@ public class CollectionsController {
             Region spacer = new Region();
             HBox.setHgrow(spacer, Priority.ALWAYS);
 
-            HBox actions = new HBox(12);
+            HBox actions = new HBox(6);
             actions.getStyleClass().add("collection-actions");
 
-            Label menuLabel = new Label("...");
-            menuLabel.getStyleClass().add("collection-action");
+            Button menuButton = new Button("...");
+            menuButton.getStyleClass().add("collection-menu-trigger");
+            menuButton.setFocusTraversable(false);
 
-            Label expandLabel = new Label("v");
-            expandLabel.getStyleClass().add("collection-action");
+            ContextMenu actionsMenu = buildCollectionActionsMenu(collection);
+            menuButton.setOnAction(event -> {
+                if (actionsMenu.isShowing()) {
+                    actionsMenu.hide();
+                } else {
+                    actionsMenu.show(menuButton, Side.BOTTOM, 0, 4);
+                }
+            });
 
-            actions.getChildren().addAll(menuLabel, expandLabel);
+            actions.getChildren().add(menuButton);
             row.getChildren().addAll(textBox, spacer, actions);
             collectionsContainer.getChildren().add(row);
 
