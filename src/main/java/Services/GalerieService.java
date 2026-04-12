@@ -28,7 +28,7 @@ public class GalerieService implements Iservice<Galerie> {
             statement.setInt(5, galerie.getCapaciteMax());
             statement.executeUpdate();
         } catch (SQLException e) {
-            throw new SQLDataException("Erreur lors de l'ajout de la galerie: " + e.getMessage());
+            throw new SQLDataException("Erreur lors de l'ajout de galerie: " + e.getMessage());
         }
     }
 
