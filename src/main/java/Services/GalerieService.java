@@ -15,6 +15,7 @@ public class GalerieService implements Iservice<Galerie> {
 
     private static final String INSERT_SQL = "INSERT INTO galerie (nom, adresse, localisation, description, capacite_max) VALUES (?, ?, ?, ?, ?)";
     private static final String UPDATE_SQL = "UPDATE galerie SET nom = ?, adresse = ?, localisation = ?, description = ?, capacite_max = ? WHERE id = ?";
+    private static final String SELECT_ALL_SQL = "SELECT id, nom, adresse, localisation, description, capacite_max FROM galerie";
 
     @Override
     public void add(Galerie galerie) throws SQLDataException {
@@ -56,8 +57,26 @@ public class GalerieService implements Iservice<Galerie> {
 
     @Override
     public List<Galerie> getAll() throws SQLDataException {
-        return List.of();
-    }
+        List<Galerie> galeries = new ArrayList<>();
 
+        try (Statement statement = MyDatabase.getInstance().getConnection().createStatement();
+             ResultSet resultSet = statement.executeQuery(SELECT_ALL_SQL)) {
+
+            while (resultSet.next()) {
+                Galerie galerie = new Galerie();
+                galerie.setId(resultSet.getInt("id"));
+                galerie.setNom(resultSet.getString("nom"));
+                galerie.setAdresse(resultSet.getString("adresse"));
+                galerie.setLocalisation(resultSet.getString("localisation"));
+                galerie.setDescription(resultSet.getString("description"));
+                galerie.setCapaciteMax(resultSet.getInt("capacite_max"));
+                galeries.add(galerie);
+            }
+        } catch (SQLException e) {
+            throw new SQLDataException("Erreur lors de la recuperation des galeries: " + e.getMessage());
+        }
+
+        return galeries;
+    }
 }
 
