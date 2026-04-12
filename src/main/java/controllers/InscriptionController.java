@@ -1,5 +1,6 @@
 package controllers;
 
+import Services.UserService;
 import entities.User;
 import javafx.animation.FadeTransition;
 import javafx.fxml.FXML;
@@ -21,8 +22,8 @@ import javafx.stage.FileChooser;
 import javafx.util.Duration;
 
 import java.io.File;
+import java.sql.SQLDataException;
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.regex.Pattern;
 
 public class InscriptionController {
@@ -74,6 +75,7 @@ public class InscriptionController {
 	@FXML private Button submitButton;
 
 	private final User draftUser = new User();
+	private final UserService userService = new UserService();
 	private int currentStep = 1;
 	private String selectedPhotoPath;
 
@@ -136,13 +138,18 @@ public class InscriptionController {
 			return;
 		}
 		User user = buildUser();
-		Alert alert = new Alert(Alert.AlertType.INFORMATION);
-		alert.setTitle("Inscription prête");
-		alert.setHeaderText("Votre formulaire est bien structuré");
-		alert.setContentText("Les données sont collectées correctement. Vous pouvez maintenant brancher la persistance métier.");
-		alert.showAndWait();
-		clearForm();
-		MainFX.switchToAuthLandingView();
+		try {
+			userService.add(user);
+			Alert alert = new Alert(Alert.AlertType.INFORMATION);
+			alert.setTitle("Inscription confirmée");
+			alert.setHeaderText("Votre compte a été enregistré");
+			alert.setContentText("Les données ont été sauvegardées avec succès.");
+			alert.showAndWait();
+			clearForm();
+			MainFX.switchToAuthLandingView();
+		} catch (SQLDataException e) {
+			setMessage("Erreur de sauvegarde: " + e.getMessage(), true);
+		}
 	}
 
 	private boolean validateCurrentStep() {
@@ -271,7 +278,6 @@ public class InscriptionController {
 		draftUser.setPhotoProfil(selectedPhotoPath);
 		draftUser.setDateInscription(LocalDate.now());
 		draftUser.setStatut("pending");
-		draftUser.setAge(dateNaissancePicker.getValue() == null ? null : Period.between(dateNaissancePicker.getValue(), LocalDate.now()).getYears());
 		return draftUser;
 	}
 

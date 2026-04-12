@@ -25,19 +25,15 @@ public class User {
     private String centreInteret;
     private String photoReferencePath;
 
-    // Legacy field kept for compatibility with existing ServicePersonne.
-    private Integer age;
-
     // Relation many-to-many via oeuvre_user (loaded by service layer).
     private List<Oeuvre> oeuvres = new ArrayList<>();
 
     public User() {
     }
 
-    public User(String nom, String prenom, Integer age) {
+    public User(String nom, String prenom) {
         this.nom = nom;
         this.prenom = prenom;
-        this.age = age;
     }
 
     public Integer getId() {
@@ -180,13 +176,6 @@ public class User {
         this.photoReferencePath = photoReferencePath;
     }
 
-    public Integer getAge() {
-        return age;
-    }
-
-    public void setAge(Integer age) {
-        this.age = age;
-    }
 
     public List<Oeuvre> getOeuvres() {
         return oeuvres;
