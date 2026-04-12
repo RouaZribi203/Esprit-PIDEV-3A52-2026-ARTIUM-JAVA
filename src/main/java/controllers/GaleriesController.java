@@ -3,6 +3,7 @@ package controllers;
 import entities.Galerie;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -159,13 +160,20 @@ public class GaleriesController {
     }
 
     private void handleDelete(Galerie galerieToDelete) {
-        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        ButtonType deleteButton = new ButtonType("Supprimer", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancelButton = new ButtonType("Annuler", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION, "", deleteButton, cancelButton);
         confirmAlert.setTitle("Confirmer la suppression");
         confirmAlert.setHeaderText("Supprimer la galerie: " + safe(galerieToDelete.getNom()) + " ?");
         confirmAlert.setContentText("Cette action est irreversible.");
 
+        applyAlertTheme(confirmAlert);
+        styleAlertButton(confirmAlert, cancelButton, "secondary-action-button");
+        styleAlertButton(confirmAlert, deleteButton, "danger-action-button");
+
         Optional<ButtonType> result = confirmAlert.showAndWait();
-        if (result.isEmpty() || result.get() != ButtonType.OK) {
+        if (result.isEmpty() || result.get() != deleteButton) {
             return;
         }
 
@@ -214,6 +222,22 @@ public class GaleriesController {
         alert.setHeaderText(title);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private void applyAlertTheme(Alert alert) {
+        URL stylesheet = getClass().getResource("/views/styles/dashboard.css");
+        if (stylesheet != null) {
+            alert.getDialogPane().getStylesheets().add(stylesheet.toExternalForm());
+        }
+        alert.getDialogPane().getStyleClass().add("app-alert");
+    }
+
+    private void styleAlertButton(Alert alert, ButtonType buttonType, String styleClass) {
+        Node node = alert.getDialogPane().lookupButton(buttonType);
+        if (node instanceof Button button) {
+            button.getStyleClass().add(styleClass);
+            button.setMinWidth(110);
+        }
     }
 
     private String safe(String value) {
