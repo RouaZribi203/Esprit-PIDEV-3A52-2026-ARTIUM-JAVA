@@ -91,8 +91,6 @@ public class GaleriesController {
 
         return contains(galerie.getNom(), search)
                 || contains(galerie.getAdresse(), search)
-                || contains(galerie.getLocalisation(), search)
-                || contains(galerie.getDescription(), search)
                 || contains(galerie.getId() == null ? null : String.valueOf(galerie.getId()), search);
     }
 
