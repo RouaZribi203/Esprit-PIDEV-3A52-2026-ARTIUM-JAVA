@@ -29,8 +29,8 @@
 
         <HBox alignment="CENTER_LEFT" spacing="10.0">
             <TextField fx:id="rechercheField" promptText="Rechercher galerie (nom, adresse, localisation...)" styleClass="gallery-search-field" HBox.hgrow="ALWAYS" />
-            <Label text="Filtrer par" />
-            <ComboBox fx:id="filtreComboBox" prefWidth="190.0" />
+            <Label text="Trier par" />
+            <ComboBox fx:id="filtreComboBox" prefWidth="190.0" styleClass="gallery-sort-combo" />
         </HBox>
 
         <Label fx:id="emptyStateLabel" styleClass="section-subtitle" text="Aucune galerie trouvee." visible="false" managed="false" />
