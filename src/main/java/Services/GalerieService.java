@@ -16,6 +16,7 @@ public class GalerieService implements Iservice<Galerie> {
     private static final String INSERT_SQL = "INSERT INTO galerie (nom, adresse, localisation, description, capacite_max) VALUES (?, ?, ?, ?, ?)";
     private static final String UPDATE_SQL = "UPDATE galerie SET nom = ?, adresse = ?, localisation = ?, description = ?, capacite_max = ? WHERE id = ?";
     private static final String SELECT_ALL_SQL = "SELECT id, nom, adresse, localisation, description, capacite_max FROM galerie";
+    private static final String DELETE_SQL = "DELETE FROM galerie WHERE id = ?";
 
     @Override
     public void add(Galerie galerie) throws SQLDataException {
@@ -33,7 +34,16 @@ public class GalerieService implements Iservice<Galerie> {
 
     @Override
     public void delete(Galerie galerie) throws SQLDataException {
+        if (galerie == null || galerie.getId() == null) {
+            throw new SQLDataException("Impossible de supprimer une galerie sans ID");
+        }
 
+        try (PreparedStatement statement = MyDatabase.getInstance().getConnection().prepareStatement(DELETE_SQL)) {
+            statement.setInt(1, galerie.getId());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new SQLDataException("Erreur lors de la suppression de la galerie: " + e.getMessage());
+        }
     }
 
     @Override
