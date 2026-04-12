@@ -129,15 +129,12 @@
                 <VBox spacing="8">
                     <Label text="S'inscrire en tant que" styleClass="field-label"/>
                     <HBox spacing="10">
-                        <RadioButton text="Utilisateur" styleClass="role-radio"
+                        <RadioButton text="Amateur" styleClass="role-radio"
                                      toggleGroup="$roleGroup" selected="true"
                                      userData="ROLE_AMATEUR"/>
                         <RadioButton text="Artiste" styleClass="role-radio"
                                      toggleGroup="$roleGroup"
                                      userData="ROLE_ARTIST"/>
-                        <RadioButton text="Amateur" styleClass="role-radio"
-                                     toggleGroup="$roleGroup"
-                                     userData="ROLE_ENTHUSIAST"/>
                     </HBox>
                 </VBox>
 

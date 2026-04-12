@@ -31,6 +31,9 @@ public class SignUpController {
     @FXML private ToggleGroup roleGroup;
     @FXML private Label errorLabel;
 
+    // Reuse one service instance across multiple sign-up attempts.
+    private final ServiceUser service = new ServiceUser();
+
     @FXML
     private void onSignUp() {
         errorLabel.setStyle("-fx-text-fill: #e74c3c;");
@@ -83,7 +86,6 @@ public class SignUpController {
         user.setStatut("active");
 
         try {
-            ServiceUser service = new ServiceUser();
             if (service.emailExists(email)) {
                 showError("Un compte avec cet e-mail existe déjà.");
                 return;
