@@ -14,6 +14,10 @@ public class MainFX extends Application {
 
     private static Stage primaryStage;
 
+    public static void switchToSignUpView() {
+        switchScene("/views/SignUp.fxml", "/views/styles/signup.css", "Artium — Créer un compte");
+    }
+
     public static void switchToArtistView() {
         switchScene("/views/artist/ArtistMain.fxml", "/views/styles/artist-theme.css", "Artist Dashboard");
     }
@@ -46,7 +50,9 @@ public class MainFX extends Application {
 
     public void start(Stage stage) {
         primaryStage = stage;
-        switchToAdminView();
+        primaryStage.setMinWidth(900);
+        primaryStage.setMinHeight(600);
+        switchToSignUpView();
     }
 
     public static void main(String[] args) {

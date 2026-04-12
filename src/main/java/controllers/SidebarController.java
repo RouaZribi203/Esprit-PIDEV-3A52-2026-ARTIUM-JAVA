@@ -57,6 +57,9 @@ public class SidebarController {
     private Button reclamationsButton;
 
     @FXML
+    private Button signUpButton;
+
+    @FXML
     private Region sidebarSpacer;
 
     private NavigationHandler navigationHandler;
@@ -194,6 +197,11 @@ public class SidebarController {
     @FXML
     private void onReclamationsClick() {
         navigate("reclamations");
+    }
+
+    @FXML
+    private void onSignUpClick() {
+        MainFX.switchToSignUpView();
     }
 
     private void navigate(String route) {
