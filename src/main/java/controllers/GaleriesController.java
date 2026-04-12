@@ -6,7 +6,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import services.GalerieService;
@@ -26,7 +26,7 @@ public class GaleriesController {
     private ComboBox<String> filtreComboBox;
 
     @FXML
-    private FlowPane galeriesFlowPane;
+    private GridPane galeriesListContainer;
 
     @FXML
     private Label emptyStateLabel;
@@ -101,27 +101,22 @@ public class GaleriesController {
             return Comparator.comparing(galerie -> galerie.getId() == null ? 0 : galerie.getId(), Comparator.reverseOrder());
         }
 
-        switch (selectedFilter) {
-            case "ID (A-Z)":
-                return Comparator.comparing(galerie -> galerie.getId() == null ? 0 : galerie.getId());
-            case "Nom (A-Z)":
-                return Comparator.comparing(galerie -> safe(galerie.getNom()));
-            case "Nom (Z-A)":
-                return Comparator.comparing((Galerie galerie) -> safe(galerie.getNom())).reversed();
-            case "Capacite (croissant)":
-                return Comparator.comparing(galerie -> galerie.getCapaciteMax() == null ? 0 : galerie.getCapaciteMax());
-            case "Capacite (decroissant)":
-                return Comparator.comparing((Galerie galerie) -> galerie.getCapaciteMax() == null ? 0 : galerie.getCapaciteMax()).reversed();
-            case "ID (Z-A)":
-            default:
-                return Comparator.comparing((Galerie galerie) -> galerie.getId() == null ? 0 : galerie.getId()).reversed();
-        }
+        return switch (selectedFilter) {
+            case "ID (A-Z)" -> Comparator.comparing(galerie -> galerie.getId() == null ? 0 : galerie.getId());
+            case "Nom (A-Z)" -> Comparator.comparing(galerie -> safe(galerie.getNom()));
+            case "Nom (Z-A)" -> Comparator.comparing((Galerie galerie) -> safe(galerie.getNom())).reversed();
+            case "Capacite (croissant)" -> Comparator.comparing(galerie -> galerie.getCapaciteMax() == null ? 0 : galerie.getCapaciteMax());
+            case "Capacite (decroissant)" -> Comparator.comparing((Galerie galerie) -> galerie.getCapaciteMax() == null ? 0 : galerie.getCapaciteMax()).reversed();
+            case "ID (Z-A)" -> Comparator.comparing((Galerie galerie) -> galerie.getId() == null ? 0 : galerie.getId()).reversed();
+            default -> Comparator.comparing((Galerie galerie) -> galerie.getId() == null ? 0 : galerie.getId()).reversed();
+        };
     }
 
     private void renderCards(List<Galerie> galeries) {
-        galeriesFlowPane.getChildren().clear();
+        galeriesListContainer.getChildren().clear();
 
-        for (Galerie galerie : galeries) {
+        for (int index = 0; index < galeries.size(); index++) {
+            Galerie galerie = galeries.get(index);
             try {
                 FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(getClass().getResource("/views/components/galerie-card.fxml")));
                 Parent card = loader.load();
@@ -137,7 +132,9 @@ public class GaleriesController {
                         handleDelete(galerieToDelete);
                     }
                 });
-                galeriesFlowPane.getChildren().add(card);
+                int column = index % 3;
+                int row = index / 3;
+                galeriesListContainer.add(card, column, row);
             } catch (IOException e) {
                 showError("Affichage impossible", "Erreur pendant le rendu d'une carte galerie.");
                 return;
