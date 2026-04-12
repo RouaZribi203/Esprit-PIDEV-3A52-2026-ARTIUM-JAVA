@@ -3,7 +3,6 @@ package Services;
 import entities.Reclamation;
 import utils.MyDatabase;
 
-import javax.xml.transform.Result;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +15,7 @@ public class ReclamationService implements Iservice<Reclamation> {
     private static final String UPDATE_SQL = "UPDATE reclamation SET texte = ?, date_creation = ?, statut = ?, type = ?, file_name = ? ,updated_at = ?,user_id=?  WHERE id = ?";
     private static final String SELECT_ALL_SQL = "SELECT id, texte, date_creation, statut, type,file_name, updated_at, user_id FROM reclamation";
     private static final String DELETE_SQL = "DELETE FROM reclamation WHERE id = ?";
+    private static final String UPDATE_STATUT_SQL = "UPDATE reclamation SET statut = ? WHERE id = ?";
 
     public ReclamationService(){
         connection = MyDatabase.getInstance().getConnection();
@@ -121,5 +121,15 @@ public class ReclamationService implements Iservice<Reclamation> {
         }
 
         return reclamation;
+    }
+
+    public void updateStatutById(int id, String statut) throws SQLDataException {
+        try (PreparedStatement statement = connection.prepareStatement(UPDATE_STATUT_SQL)) {
+            statement.setString(1, statut);
+            statement.setInt(2, id);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new SQLDataException("Erreur lors de la modification du statut: " + e.getMessage());
+        }
     }
 }

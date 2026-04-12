@@ -124,6 +124,29 @@ public class ReclamationReplyDialogController {
         }
     }
 
+    private void markReclamationTraite() {
+        if (reclamation == null || reclamation.getId() == null) return;
+        try {
+            // Update only statut to avoid failing because of other columns
+            reclamationService.updateStatutById(reclamation.getId(), "Traitée");
+            reclamation.setStatut("Traitée");
+        } catch (Exception ignored) {
+        }
+    }
+
+    private void syncStatutWithReponses() {
+        if (reclamation == null || reclamation.getId() == null) return;
+        try {
+            List<Reponse> reps = reponseService.getByReclamationId(reclamation.getId());
+            boolean hasReps = reps != null && !reps.isEmpty();
+
+            String target = hasReps ? "Traitée" : "Non traitée";
+            reclamationService.updateStatutById(reclamation.getId(), target);
+            reclamation.setStatut(target);
+        } catch (Exception ignored) {
+        }
+    }
+
     @FXML
     private void onSave() {
         if (reclamation == null || reclamation.getId() == null) {
@@ -143,8 +166,10 @@ public class ReclamationReplyDialogController {
             }
         }
 
+
         if (contenus.isEmpty()) {
-            showError("Validation", "Veuillez saisir au moins une reponse.");
+            syncStatutWithReponses();
+            close();
             return;
         }
 
@@ -157,11 +182,7 @@ public class ReclamationReplyDialogController {
                 reponseService.add(r);
             }
 
-            try {
-                reclamation.setStatut("Traite");
-                reclamationService.update(reclamation);
-            } catch (Exception ignored) {
-            }
+            markReclamationTraite();
 
             close();
         } catch (Exception e) {
@@ -206,6 +227,8 @@ public class ReclamationReplyDialogController {
             reponseService.update(selectedForEdit);
             loadHistory();
 
+            markReclamationTraite();
+
             selectedForEdit = null;
             updateBtn.setDisable(true);
             ta.clear();
@@ -234,6 +257,9 @@ public class ReclamationReplyDialogController {
         try {
             reponseService.deleteById(selected.getId());
             loadHistory();
+
+
+            syncStatutWithReponses();
 
             historyList.getSelectionModel().clearSelection();
 
