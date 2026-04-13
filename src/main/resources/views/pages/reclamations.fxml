@@ -18,7 +18,6 @@
     <children>
         <VBox spacing="4.0">
             <Label styleClass="page-title" text="Liste des reclamations" />
-            <Label styleClass="page-subtitle" text="Suivi et resolution des reclamations" />
         </VBox>
 
         <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 6 0 2 0;">
