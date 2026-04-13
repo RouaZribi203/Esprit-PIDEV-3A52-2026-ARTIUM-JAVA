@@ -13,6 +13,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
@@ -300,6 +301,18 @@ public class MusiquesController {
         try {
             List<Musique> musiques = musiqueService.getAll();
             tracks.setAll(musiques);
+
+            if (tracks.isEmpty()) {
+                currentTrackIndex = -1;
+                stopPlayer();
+                nowPlayingTitleLabel.setText("Selectionnez une musique");
+                nowPlayingMetaLabel.setText("Genre: -");
+                playerStatusLabel.setText("Pret");
+                playPauseButton.setText("Play");
+            } else if (currentTrackIndex >= tracks.size()) {
+                currentTrackIndex = -1;
+            }
+
             renderTrackGrid();
             boolean hasData = !tracks.isEmpty();
             emptyListLabel.setVisible(!hasData);
@@ -443,6 +456,31 @@ public class MusiquesController {
         }
     }
 
+    private void handleDeleteMusique(Musique musique) {
+        if (musique == null || musique.getId() == null) {
+            setFeedback("Impossible de supprimer cette musique (id manquant).", false);
+            return;
+        }
+
+        try {
+            if (currentTrackIndex >= 0 && currentTrackIndex < tracks.size()) {
+                Musique current = tracks.get(currentTrackIndex);
+                if (current.getId() != null && current.getId().equals(musique.getId())) {
+                    stopPlayer();
+                    currentTrackIndex = -1;
+                    playPauseButton.setText("Play");
+                    playerStatusLabel.setText("Pret");
+                }
+            }
+
+            musiqueService.delete(musique);
+            setFeedback("Musique supprimee avec succes.", true);
+            refreshMusiquesList();
+        } catch (SQLDataException e) {
+            setFeedback("Erreur lors de la suppression: " + e.getMessage(), false);
+        }
+    }
+
     private VBox createTrackCard(Musique musique, int index) {
         VBox card = new VBox(6);
         card.setPrefWidth(170);
@@ -458,11 +496,20 @@ public class MusiquesController {
         titleLabel.setWrapText(true);
         titleLabel.setStyle("-fx-text-fill: #ffffff; -fx-font-weight: bold;");
 
+        Button deleteButton = new Button("Supprimer");
+        deleteButton.setStyle("-fx-background-color: #b00020; -fx-text-fill: white; -fx-font-size: 11px;");
+        deleteButton.setOnAction(event -> {
+            event.consume();
+            handleDeleteMusique(musique);
+        });
+
+        HBox titleRow = new HBox(8, titleLabel, deleteButton);
+
         String genre = musique.getGenre() != null ? musique.getGenre() : "-";
         Label metaLabel = new Label("Genre: " + genre);
         metaLabel.setStyle("-fx-text-fill: #b0b0b0;");
 
-        card.getChildren().addAll(coverNode, titleLabel, metaLabel);
+        card.getChildren().addAll(coverNode, titleRow, metaLabel);
         card.setOnMouseClicked(event -> playTrackAtIndex(index, true));
         return card;
     }

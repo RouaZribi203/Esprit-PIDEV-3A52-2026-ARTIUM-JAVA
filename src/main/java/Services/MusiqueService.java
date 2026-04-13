@@ -101,7 +101,44 @@ public class MusiqueService implements Iservice<Musique> {
 
     @Override
     public void delete(Musique musique) throws SQLDataException {
-        throw new SQLDataException("Suppression non implementee pour le moment.");
+        if (connection == null) {
+            throw new SQLDataException("Connexion a la base de donnees indisponible.");
+        }
+        if (musique == null || musique.getId() == null) {
+            throw new SQLDataException("Identifiant musique manquant pour la suppression.");
+        }
+
+        String deleteMusique = "DELETE FROM musique WHERE id = ?";
+        String deleteOeuvre = "DELETE FROM oeuvre WHERE id = ?";
+
+        try {
+            connection.setAutoCommit(false);
+            try (PreparedStatement musiqueStatement = connection.prepareStatement(deleteMusique);
+                 PreparedStatement oeuvreStatement = connection.prepareStatement(deleteOeuvre)) {
+                musiqueStatement.setInt(1, musique.getId());
+                musiqueStatement.executeUpdate();
+
+                oeuvreStatement.setInt(1, musique.getId());
+                int deleted = oeuvreStatement.executeUpdate();
+                if (deleted == 0) {
+                    throw new SQLDataException("Aucune musique trouvee avec l'identifiant " + musique.getId());
+                }
+            }
+            connection.commit();
+        } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException rollbackException) {
+                throw new SQLDataException("Echec lors du rollback apres erreur de suppression musique: " + rollbackException.getMessage());
+            }
+            throw new SQLDataException("Impossible de supprimer la musique: " + e.getMessage());
+        } finally {
+            try {
+                connection.setAutoCommit(true);
+            } catch (SQLException ignored) {
+                // Restore auto-commit best effort for next service calls.
+            }
+        }
     }
 
     @Override
@@ -115,7 +152,7 @@ public class MusiqueService implements Iservice<Musique> {
             throw new SQLDataException("Connexion a la base de donnees indisponible.");
         }
 
-        String query = "SELECT o.titre, o.description, o.date_creation, o.collection_id, o.type, o.classe, o.image, m.genre, m.audio, m.updated_at "
+        String query = "SELECT o.id, o.titre, o.description, o.date_creation, o.collection_id, o.type, o.classe, o.image, m.genre, m.audio, m.updated_at "
                 + "FROM musique m INNER JOIN oeuvre o ON o.id = m.id ORDER BY o.id DESC";
 
         List<Musique> musiques = new ArrayList<>();
@@ -123,6 +160,7 @@ public class MusiqueService implements Iservice<Musique> {
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
                 Musique musique = new Musique();
+                musique.setId(resultSet.getInt("id"));
                 musique.setTitre(resultSet.getString("titre"));
                 musique.setDescription(resultSet.getString("description"));
                 Date dateCreation = resultSet.getDate("date_creation");
