@@ -115,7 +115,7 @@ public class MusiqueService implements Iservice<Musique> {
             throw new SQLDataException("Connexion a la base de donnees indisponible.");
         }
 
-        String query = "SELECT o.titre, o.description, o.date_creation, o.collection_id, o.type, o.classe, m.genre, m.audio, m.updated_at "
+        String query = "SELECT o.titre, o.description, o.date_creation, o.collection_id, o.type, o.classe, o.image, m.genre, m.audio, m.updated_at "
                 + "FROM musique m INNER JOIN oeuvre o ON o.id = m.id ORDER BY o.id DESC";
 
         List<Musique> musiques = new ArrayList<>();
@@ -132,6 +132,7 @@ public class MusiqueService implements Iservice<Musique> {
                 musique.setCollectionId(resultSet.getInt("collection_id"));
                 musique.setType(resultSet.getString("type"));
                 musique.setClasse(resultSet.getString("classe"));
+                musique.setImage(resultSet.getBytes("image"));
                 musique.setGenre(resultSet.getString("genre"));
                 musique.setAudio(resultSet.getString("audio"));
                 Timestamp updatedAt = resultSet.getTimestamp("updated_at");

@@ -5,19 +5,23 @@ import entities.Musique;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.FileChooser;
 import utils.MyDatabase;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -60,7 +64,7 @@ public class MusiquesController {
     private VBox formSection;
 
     @FXML
-    private ListView<Musique> musiqueListView;
+    private TilePane musiqueGrid;
 
     @FXML
     private Label emptyListLabel;
@@ -97,7 +101,6 @@ public class MusiquesController {
         genreComboBox.setItems(genres);
         loadCollections();
         feedbackLabel.setText("");
-        configureTrackList();
         showListView();
         refreshMusiquesList();
     }
@@ -114,7 +117,7 @@ public class MusiquesController {
     @FXML
     private void handlePlayPause() {
         if (mediaPlayer == null) {
-            int selectedIndex = musiqueListView.getSelectionModel().getSelectedIndex();
+            int selectedIndex = currentTrackIndex;
             if (selectedIndex < 0 && !tracks.isEmpty()) {
                 selectedIndex = 0;
             }
@@ -152,14 +155,6 @@ public class MusiquesController {
         }
         int targetIndex = currentTrackIndex >= tracks.size() - 1 ? 0 : currentTrackIndex + 1;
         playTrackAtIndex(targetIndex, true);
-    }
-
-    @FXML
-    private void handleTrackClicked() {
-        int selectedIndex = musiqueListView.getSelectionModel().getSelectedIndex();
-        if (selectedIndex >= 0) {
-            playTrackAtIndex(selectedIndex, true);
-        }
     }
 
     @FXML
@@ -256,23 +251,6 @@ public class MusiquesController {
         feedbackLabel.setStyle(success ? "-fx-text-fill: #1f7a1f;" : "-fx-text-fill: #b00020;");
     }
 
-    private void configureTrackList() {
-        musiqueListView.setItems(tracks);
-        musiqueListView.setCellFactory(list -> new ListCell<>() {
-            @Override
-            protected void updateItem(Musique item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    String titre = item.getTitre() != null ? item.getTitre() : "Sans titre";
-                    String genre = item.getGenre() != null ? item.getGenre() : "-";
-                    setText(titre + "  |  " + genre);
-                }
-            }
-        });
-    }
-
     private void loadCollections() {
         List<CollectionChoice> choices = new ArrayList<>();
         String[] queries = {
@@ -311,6 +289,7 @@ public class MusiquesController {
         try {
             List<Musique> musiques = musiqueService.getAll();
             tracks.setAll(musiques);
+            renderTrackGrid();
             boolean hasData = !tracks.isEmpty();
             emptyListLabel.setVisible(!hasData);
             emptyListLabel.setManaged(!hasData);
@@ -319,6 +298,7 @@ public class MusiquesController {
             }
         } catch (SQLDataException e) {
             tracks.clear();
+            renderTrackGrid();
             emptyListLabel.setText("Impossible de charger les musiques: " + e.getMessage());
             emptyListLabel.setVisible(true);
             emptyListLabel.setManaged(true);
@@ -353,7 +333,7 @@ public class MusiquesController {
         Media media = new Media(source);
         mediaPlayer = new MediaPlayer(media);
         currentTrackIndex = index;
-        musiqueListView.getSelectionModel().select(index);
+        renderTrackGrid();
         updateNowPlayingLabels(selectedTrack);
 
         mediaPlayer.setOnReady(() -> {
@@ -399,6 +379,72 @@ public class MusiquesController {
             mediaPlayer.stop();
             mediaPlayer.dispose();
             mediaPlayer = null;
+        }
+    }
+
+    private void renderTrackGrid() {
+        musiqueGrid.getChildren().clear();
+        for (int i = 0; i < tracks.size(); i++) {
+            Musique musique = tracks.get(i);
+            musiqueGrid.getChildren().add(createTrackCard(musique, i));
+        }
+    }
+
+    private VBox createTrackCard(Musique musique, int index) {
+        VBox card = new VBox(6);
+        card.setPrefWidth(170);
+        card.setMaxWidth(170);
+        card.setStyle(index == currentTrackIndex
+                ? "-fx-background-color: #202020; -fx-background-radius: 8; -fx-border-color: #1DB954; -fx-border-radius: 8; -fx-padding: 8;"
+                : "-fx-background-color: #202020; -fx-background-radius: 8; -fx-padding: 8;");
+
+        Node coverNode = buildCoverNode(musique.getImage());
+
+        String titre = musique.getTitre() != null ? musique.getTitre() : "Sans titre";
+        Label titleLabel = new Label(titre);
+        titleLabel.setWrapText(true);
+        titleLabel.setStyle("-fx-text-fill: #ffffff; -fx-font-weight: bold;");
+
+        String genre = musique.getGenre() != null ? musique.getGenre() : "-";
+        Label metaLabel = new Label("Genre: " + genre);
+        metaLabel.setStyle("-fx-text-fill: #b0b0b0;");
+
+        card.getChildren().addAll(coverNode, titleLabel, metaLabel);
+        card.setOnMouseClicked(event -> playTrackAtIndex(index, true));
+        return card;
+    }
+
+    private Node buildCoverNode(byte[] imageBytes) {
+        StackPane placeholder = new StackPane();
+        placeholder.setPrefSize(150, 150);
+        placeholder.setStyle("-fx-background-color: #2b2b2b; -fx-background-radius: 6;");
+
+        if (imageBytes == null || imageBytes.length == 0) {
+            Label noImageLabel = new Label("No cover");
+            noImageLabel.setStyle("-fx-text-fill: #8a8a8a;");
+            placeholder.getChildren().add(noImageLabel);
+            return placeholder;
+        }
+
+        try {
+            Image image = new Image(new ByteArrayInputStream(imageBytes));
+            if (image.isError()) {
+                Label noImageLabel = new Label("No cover");
+                noImageLabel.setStyle("-fx-text-fill: #8a8a8a;");
+                placeholder.getChildren().add(noImageLabel);
+                return placeholder;
+            }
+
+            ImageView imageView = new ImageView(image);
+            imageView.setFitWidth(150);
+            imageView.setFitHeight(150);
+            imageView.setPreserveRatio(false);
+            return imageView;
+        } catch (Exception ex) {
+            Label noImageLabel = new Label("No cover");
+            noImageLabel.setStyle("-fx-text-fill: #8a8a8a;");
+            placeholder.getChildren().add(noImageLabel);
+            return placeholder;
         }
     }
 
