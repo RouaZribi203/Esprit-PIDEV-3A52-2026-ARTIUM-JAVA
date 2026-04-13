@@ -19,8 +19,7 @@
     <!-- Header page (comme Galeries) -->
     <HBox alignment="CENTER_LEFT">
         <VBox spacing="4.0" HBox.hgrow="ALWAYS">
-            <Label styleClass="page-title" text="Gestion des reclamations" />
-            <Label styleClass="page-subtitle" text="Recherche, filtre et reponse aux reclamations" />
+            <Label styleClass="page-title" text="Liste des reclamations" />
         </VBox>
     </HBox>
 
