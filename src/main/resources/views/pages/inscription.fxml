@@ -12,6 +12,8 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -30,26 +32,33 @@
 	</fx:define>
 
 	<left>
-		<VBox spacing="18" alignment="CENTER_LEFT" styleClass="auth-signup-hero">
+		<VBox spacing="20" alignment="CENTER_LEFT" prefWidth="550" minWidth="550" styleClass="auth-landing-hero auth-landing-hero-fluid">
 			<padding>
-				<Insets top="44" right="44" bottom="44" left="44"/>
+				<Insets top="48" right="48" bottom="48" left="48"/>
 			</padding>
-			<Label text="Artium" styleClass="auth-brand"/>
-			<Label text="Explore the World" styleClass="auth-hero-title"/>
-			<Label text="Rejoignez votre espace desktop avec une inscription plus fluide, plus claire et plus dynamique." wrapText="true" styleClass="auth-hero-text"/>
+			<StackPane styleClass="auth-hero-logo-wrap">
+				<ImageView fitWidth="250" preserveRatio="true" smooth="true" cache="true" styleClass="auth-hero-logo">
+					<image>
+						<Image url="@../images/logo2.png"/>
+					</image>
+				</ImageView>
+			</StackPane>
+			<Label text="Communaute Artium" styleClass="auth-panel-kicker"/>
+			<Label text="Creez votre compte en quelques etapes" wrapText="true" styleClass="auth-hero-title auth-landing-title"/>
+			<Label text="Explorez un espace où la créativité s’exprime librement, où chaque œuvre reflète une vision unique et où l’art prend vie à travers des styles modernes et inspirants." wrapText="true" styleClass="auth-hero-text auth-landing-text"/>
 			<HBox spacing="10" styleClass="auth-chip-row">
 				<Label text="Rapide" styleClass="auth-chip"/>
 				<Label text="Sécurisé" styleClass="auth-chip"/>
-				<Label text="Guidé" styleClass="auth-chip"/>
+				<Label text="Moderne" styleClass="auth-chip"/>
 			</HBox>
 		</VBox>
 	</left>
 
 	<center>
-		<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="auth-scroll">
+		<ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefWidth="550" minWidth="550" styleClass="auth-scroll">
 			<content>
 				<StackPane styleClass="auth-signup-shell">
-					<VBox spacing="18" maxWidth="720" styleClass="auth-card auth-signup-card">
+					<VBox spacing="18" maxWidth="720" styleClass="auth-card auth-signup-card auth-panel-block">
 						<padding>
 							<Insets top="34" right="34" bottom="34" left="34"/>
 						</padding>

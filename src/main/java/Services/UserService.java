@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLDataException;
 import java.sql.SQLException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Base64;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import java.util.regex.Pattern;
 
 public class UserService implements Iservice<User> {
 
@@ -27,6 +29,7 @@ public class UserService implements Iservice<User> {
     private static final int SALT_LENGTH = 16;
     private static final String[] SPECIALITE_COLUMNS = {"specialite", "specailite"};
     private static final String[] CENTRE_INTERET_COLUMNS = {"centre_interet", "centre_iteret"};
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
     private final Connection connection;
     private final String specialiteColumn;
@@ -78,11 +81,91 @@ public class UserService implements Iservice<User> {
         }
     }
 
+    public User authenticate(String email, String rawPassword) throws SQLDataException {
+        if (isBlank(email) || isBlank(rawPassword)) {
+            throw new SQLDataException("Veuillez saisir votre e-mail et votre mot de passe.");
+        }
+        if (connection == null) {
+            throw new SQLDataException("Connexion base de donnees indisponible.");
+        }
+
+        String sql = "SELECT * FROM `user` WHERE LOWER(TRIM(`email`)) = LOWER(TRIM(?)) LIMIT 1";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, email.trim());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    throw new SQLDataException("Adresse e-mail ou mot de passe incorrect.");
+                }
+
+                String storedPassword = rs.getString("mdp");
+                if (!matchesPassword(rawPassword, storedPassword)) {
+                    throw new SQLDataException("Adresse e-mail ou mot de passe incorrect.");
+                }
+
+                return mapUser(rs);
+            }
+        } catch (SQLDataException e) {
+            throw e;
+        } catch (SQLException e) {
+            throw new SQLDataException("Authentification impossible: " + e.getMessage());
+        }
+    }
+
+    public void resetPasswordByEmail(String email, String newPassword) throws SQLDataException {
+        if (isBlank(email) || !EMAIL_PATTERN.matcher(email.trim()).matches()) {
+            throw new SQLDataException("Veuillez saisir une adresse e-mail valide.");
+        }
+        if (isBlank(newPassword) || newPassword.length() < 8) {
+            throw new SQLDataException("Le mot de passe doit contenir au moins 8 caractères.");
+        }
+        if (connection == null) {
+            throw new SQLDataException("Connexion base de donnees indisponible.");
+        }
+
+        String updateSql = "UPDATE `user` SET `mdp` = ? WHERE LOWER(TRIM(`email`)) = LOWER(TRIM(?))";
+        try (PreparedStatement ps = connection.prepareStatement(updateSql)) {
+            ps.setString(1, hashPassword(newPassword));
+            ps.setString(2, email.trim());
+            int affectedRows = ps.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLDataException("Aucun compte trouvé avec cette adresse e-mail.");
+            }
+        } catch (SQLDataException e) {
+            throw e;
+        } catch (SQLException e) {
+            throw new SQLDataException("Réinitialisation impossible: " + e.getMessage());
+        }
+    }
+
     private String getInsertUserSql() {
         return "INSERT INTO `user` " +
                 "(`nom`, `prenom`, `date_naissance`, `email`, `mdp`, `role`, `statut`, `date_inscription`, " +
                 "`num_tel`, `ville`, `biographie`, `" + specialiteColumn + "`, `" + centreInteretColumn + "`, `photo_reference_path`, `photo_profil`) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    }
+
+    private User mapUser(ResultSet rs) throws SQLException {
+        User user = new User();
+        user.setNom(rs.getString("nom"));
+        user.setPrenom(rs.getString("prenom"));
+        user.setDateNaissance(rs.getDate("date_naissance") == null ? null : rs.getDate("date_naissance").toLocalDate());
+        user.setEmail(rs.getString("email"));
+        user.setMdp(rs.getString("mdp"));
+        user.setRole(rs.getString("role"));
+        user.setStatut(rs.getString("statut"));
+        user.setDateInscription(rs.getDate("date_inscription") == null ? null : rs.getDate("date_inscription").toLocalDate());
+        user.setNumTel(rs.getString("num_tel"));
+        user.setVille(rs.getString("ville"));
+        user.setBiographie(rs.getString("biographie"));
+        user.setSpecialite(safeGetString(rs, specialiteColumn));
+        user.setCentreInteret(safeGetString(rs, centreInteretColumn));
+        user.setPhotoReferencePath(rs.getString("photo_reference_path"));
+        user.setPhotoProfil(rs.getString("photo_profil"));
+        return user;
+    }
+
+    private String safeGetString(ResultSet rs, String column) throws SQLException {
+        return column == null ? null : rs.getString(column);
     }
 
     private String normalizeRole(String role) throws SQLDataException {
@@ -194,6 +277,34 @@ public class UserService implements Iservice<User> {
                     Base64.getEncoder().encodeToString(hash);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             throw new SQLDataException("Hachage du mot de passe impossible: " + e.getMessage());
+        }
+    }
+
+    private boolean matchesPassword(String rawPassword, String storedPassword) throws SQLDataException {
+        if (isBlank(storedPassword)) {
+            return false;
+        }
+
+        if (!storedPassword.startsWith("pbkdf2_sha256$")) {
+            return rawPassword.equals(storedPassword);
+        }
+
+        String[] parts = storedPassword.split("\\$");
+        if (parts.length != 4) {
+            return false;
+        }
+
+        try {
+            int iterations = Integer.parseInt(parts[1]);
+            byte[] salt = Base64.getDecoder().decode(parts[2]);
+            byte[] expectedHash = Base64.getDecoder().decode(parts[3]);
+
+            PBEKeySpec spec = new PBEKeySpec(rawPassword.toCharArray(), salt, iterations, expectedHash.length * 8);
+            SecretKeyFactory factory = SecretKeyFactory.getInstance(HASH_ALGORITHM);
+            byte[] computedHash = factory.generateSecret(spec).getEncoded();
+            return MessageDigest.isEqual(expectedHash, computedHash);
+        } catch (IllegalArgumentException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+            throw new SQLDataException("Verification du mot de passe impossible: " + e.getMessage());
         }
     }
 

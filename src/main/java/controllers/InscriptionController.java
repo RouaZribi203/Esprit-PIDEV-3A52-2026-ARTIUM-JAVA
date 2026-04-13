@@ -110,7 +110,7 @@ public class InscriptionController {
 
 	@FXML
 	private void onBackToLanding() {
-		MainFX.switchToAuthLandingView();
+		MainFX.switchToLoginView();
 	}
 
 	@FXML
@@ -146,7 +146,7 @@ public class InscriptionController {
 			alert.setContentText("Les données ont été sauvegardées avec succès.");
 			alert.showAndWait();
 			clearForm();
-			MainFX.switchToAuthLandingView();
+			MainFX.switchToLoginView();
 		} catch (SQLDataException e) {
 			setMessage("Erreur de sauvegarde: " + e.getMessage(), true);
 		}

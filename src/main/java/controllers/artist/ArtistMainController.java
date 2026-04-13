@@ -32,7 +32,7 @@ public class ArtistMainController {
 
         navbarIncludeController.setActionHandler(this::applyTheme);
 
-        onNavigate("collections");
+        onNavigate("oeuvres");
     }
 
     private void onNavigate(String route) {

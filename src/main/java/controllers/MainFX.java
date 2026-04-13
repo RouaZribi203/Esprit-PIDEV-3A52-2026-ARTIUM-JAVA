@@ -18,8 +18,16 @@ public class MainFX extends Application {
         switchScene("/views/auth/Landing.fxml", "/views/styles/auth.css", "Artium | Accueil");
     }
 
+    public static void switchToLoginView() {
+        switchScene("/views/auth/Connexion.fxml", "/views/styles/auth.css", "Artium | Connexion");
+    }
+
     public static void switchToRegistrationView() {
         switchScene("/views/pages/inscription.fxml", "/views/styles/auth.css", "Artium | Inscription");
+    }
+
+    public static void switchToForgotPasswordView() {
+        switchScene("/views/auth/ForgotPassword.fxml", "/views/styles/auth.css", "Artium | Mot de passe oublie");
     }
 
     public static void switchToArtistView() {
