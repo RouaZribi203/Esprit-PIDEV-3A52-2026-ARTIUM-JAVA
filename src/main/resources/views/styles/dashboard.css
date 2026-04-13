@@ -210,6 +210,93 @@
     -fx-effect: dropshadow(gaussian, rgba(60,60,60,0.07), 10, 0, 0, 2);
 }
 
+/* ---------------- Reclamations (cards) ---------------- */
+.reclamations-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+.reclamations-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.reclamation-tab {
+    -fx-background-color: #eef1f5;
+    -fx-border-color: #d4d9e1;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-text-fill: #243146;
+    -fx-font-weight: 700;
+    -fx-padding: 6 14 6 14;
+    -fx-cursor: hand;
+}
+
+.reclamation-tab:selected {
+    -fx-background-color: rgba(61, 59, 194, 0.18);
+    -fx-border-color: rgba(61, 59, 194, 0.35);
+    -fx-text-fill: #3d3bc2;
+}
+
+.reclamation-search-field {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #d4d9e1;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 8 12 8 12;
+}
+
+.reclamation-filter-combo {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #d4d9e1;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+}
+
+.reclamation-card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-color: #e6ebf3;
+    -fx-border-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(60,60,60,0.06), 10, 0, 0, 2);
+}
+
+.reclamation-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(60,60,60,0.12), 16, 0, 0, 4);
+}
+
+.reclamation-status-badge {
+    -fx-padding: 3 10 3 10;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-font-weight: 800;
+    -fx-font-size: 12px;
+}
+
+.reclamation-status-badge.traite {
+    -fx-background-color: #e8f7ee;
+    -fx-border-color: #bfe8cf;
+    -fx-text-fill: #197c43;
+}
+
+.reclamation-status-badge.nontraite {
+    -fx-background-color: #ffebee;
+    -fx-border-color: #ffcdd2;
+    -fx-text-fill: #b71c1c;
+}
+
+.dots-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #5b6678;
+    -fx-font-size: 16px;
+    -fx-padding: 2 8;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+}
+
+.dots-button:hover {
+    -fx-background-color: rgba(0,0,0,0.06);
+}
+/* ---------------- Reclamations (cards) ---------------- */
 .section-title {
     -fx-font-size: 15px;
     -fx-font-weight: 700;

@@ -7,6 +7,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Region;
 
 import java.sql.SQLDataException;
 import java.time.format.DateTimeFormatter;
@@ -96,6 +97,9 @@ public class ReclamationsController {
                     }
                 });
 
+                if (card instanceof Region region) {
+                    region.setMaxWidth(Double.MAX_VALUE);
+                }
                 cardsContainer.add(card, 0, index);
             } catch (Exception e) {
                 showError("Affichage impossible", "Erreur pendant le rendu d'une carte reclamation: " + e.getMessage());

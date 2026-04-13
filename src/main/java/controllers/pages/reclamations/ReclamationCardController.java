@@ -10,6 +10,8 @@ import javafx.scene.input.MouseButton;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.text.Normalizer;
+
 
 public class ReclamationCardController {
 
@@ -36,9 +38,40 @@ public class ReclamationCardController {
         dateLabel.setText(dateText == null ? "" : dateText);
         userLabel.setText(userText == null ? "-" : userText);
         typeLabel.setText(reclamation.getType() == null ? "" : reclamation.getType());
-        statutLabel.setText(reclamation.getStatut() == null ? "" : reclamation.getStatut());
+        String statut = reclamation.getStatut() == null ? "" : reclamation.getStatut();
+        statutLabel.setText(statut);
+        applyStatutBadgeStyle(statut);
 
         initMenu();
+    }
+
+    private void applyStatutBadgeStyle(String statut) {
+        if (statutLabel == null) return;
+
+        statutLabel.getStyleClass().removeAll("traite", "nontraite");
+        String s = statut == null ? "" : normalize(statut);
+
+        // IMPORTANT: "non traite" contient le mot "traite" => on detecte d'abord le NON.
+        boolean isNon = s.contains("non")
+                || s.contains("en cours")
+                || s.contains("pending")
+                || s.contains("non traite")
+                || s.contains("nontraite");
+        boolean isTraite = !isNon && (s.contains("traite") || s.contains("resolu") || s.contains("resolved") || s.contains("done"));
+
+        if (isTraite) {
+            statutLabel.getStyleClass().add("traite");
+        } else {
+            statutLabel.getStyleClass().add("nontraite");
+        }
+    }
+
+    private static String normalize(String value) {
+        String s = value == null ? "" : value;
+        s = s.toLowerCase().replace("_", " ").replace("-", " ");
+        s = Normalizer.normalize(s, Normalizer.Form.NFD).replaceAll("\\p{M}", ""); // remove accents
+        while (s.contains("  ")) s = s.replace("  ", " ");
+        return s.trim();
     }
 
     private void initMenu() {
