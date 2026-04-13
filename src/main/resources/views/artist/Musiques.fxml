@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
@@ -14,49 +15,74 @@
         <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
     </padding>
 
-    <Label styleClass="page-title-small" text="Ajouter une nouvelle musique" />
+    <HBox alignment="CENTER_LEFT" spacing="12.0">
+        <Label styleClass="page-title-small" text="Musiques" />
+        <Button fx:id="toggleFormButton" mnemonicParsing="false" onAction="#handleToggleForm" text="Ajouter une musique" />
+    </HBox>
 
-    <VBox spacing="6.0">
-        <Label text="Titre *" />
-        <TextField fx:id="titreField" promptText="entrez le titre de la musique" />
-        <Label text="3-255 caractères" style="-fx-text-fill: #a0a0a0;" />
+    <VBox spacing="8.0">
+        <Label text="Musiques disponibles" />
+        <ListView fx:id="musiqueListView" onMouseClicked="#handleTrackClicked" prefHeight="320.0" />
+        <Label fx:id="emptyListLabel" style="-fx-text-fill: #a0a0a0;" text="Aucune musique disponible pour le moment." wrapText="true" />
     </VBox>
 
-    <VBox spacing="6.0">
-        <Label text="Description *" />
-        <TextArea fx:id="descriptionArea" prefRowCount="5" promptText="entrez la description de la musique" wrapText="true" />
-        <Label text="10-5000 caractères" style="-fx-text-fill: #a0a0a0;" />
-    </VBox>
-
-    <VBox spacing="6.0">
-        <Label text="Genre *" />
-        <ComboBox fx:id="genreComboBox" promptText="Sélectionnez un genre" />
-    </VBox>
-
-    <VBox spacing="6.0">
-        <Label text="Collection *" />
-        <ComboBox fx:id="collectionComboBox" promptText="Sélectionnez une collection" />
-    </VBox>
-
-    <VBox spacing="6.0">
-        <Label text="Image de Couverture" />
+    <VBox spacing="6.0" style="-fx-background-color: #171717; -fx-background-radius: 8; -fx-padding: 12;">
+        <Label style="-fx-text-fill: #ffffff; -fx-font-size: 14px; -fx-font-weight: bold;" text="Lecture en cours" />
+        <Label fx:id="nowPlayingTitleLabel" style="-fx-text-fill: #ffffff;" text="Selectionnez une musique" wrapText="true" />
+        <Label fx:id="nowPlayingMetaLabel" style="-fx-text-fill: #b0b0b0;" text="Genre: -" />
         <HBox spacing="10.0">
-            <TextField fx:id="imagePathField" editable="false" promptText="Cliquez pour parcourir" HBox.hgrow="ALWAYS" />
-            <Button mnemonicParsing="false" onAction="#handleChooseImage" text="Parcourir" />
+            <Button mnemonicParsing="false" onAction="#handlePreviousTrack" text="Prev" />
+            <Button fx:id="playPauseButton" mnemonicParsing="false" onAction="#handlePlayPause" text="Play" />
+            <Button mnemonicParsing="false" onAction="#handleNextTrack" text="Next" />
+            <Label fx:id="playerStatusLabel" style="-fx-text-fill: #a0a0a0;" text="Pret" />
         </HBox>
-        <Label text="Max 5MB (JPEG, PNG)" style="-fx-text-fill: #a0a0a0;" />
     </VBox>
 
-    <VBox spacing="6.0">
-        <Label text="Fichier Audio *" />
-        <HBox spacing="10.0">
-            <TextField fx:id="audioPathField" editable="false" promptText="Cliquez pour parcourir" HBox.hgrow="ALWAYS" />
-            <Button mnemonicParsing="false" onAction="#handleChooseAudio" text="Parcourir" />
-        </HBox>
-        <Label text="MP3, WAV, AAC" style="-fx-text-fill: #a0a0a0;" />
-    </VBox>
+    <VBox fx:id="formSection" spacing="14.0" visible="false" managed="false">
+        <Label text="Ajouter une nouvelle musique" />
 
-    <Button mnemonicParsing="false" onAction="#handleCreateMusique" text="Créer" />
-    <Label fx:id="feedbackLabel" wrapText="true" />
+        <VBox spacing="6.0">
+            <Label text="Titre *" />
+            <TextField fx:id="titreField" promptText="entrez le titre de la musique" />
+            <Label text="3-255 caractères" style="-fx-text-fill: #a0a0a0;" />
+        </VBox>
+
+        <VBox spacing="6.0">
+            <Label text="Description *" />
+            <TextArea fx:id="descriptionArea" prefRowCount="5" promptText="entrez la description de la musique" wrapText="true" />
+            <Label text="10-5000 caractères" style="-fx-text-fill: #a0a0a0;" />
+        </VBox>
+
+        <VBox spacing="6.0">
+            <Label text="Genre *" />
+            <ComboBox fx:id="genreComboBox" promptText="Sélectionnez un genre" />
+        </VBox>
+
+        <VBox spacing="6.0">
+            <Label text="Collection" />
+            <ComboBox fx:id="collectionComboBox" promptText="Sélectionnez une collection" />
+        </VBox>
+
+        <VBox spacing="6.0">
+            <Label text="Image de Couverture" />
+            <HBox spacing="10.0">
+                <TextField fx:id="imagePathField" editable="false" promptText="Cliquez pour parcourir" HBox.hgrow="ALWAYS" />
+                <Button mnemonicParsing="false" onAction="#handleChooseImage" text="Parcourir" />
+            </HBox>
+            <Label text="Max 5MB (JPEG, PNG)" style="-fx-text-fill: #a0a0a0;" />
+        </VBox>
+
+        <VBox spacing="6.0">
+            <Label text="Fichier Audio *" />
+            <HBox spacing="10.0">
+                <TextField fx:id="audioPathField" editable="false" promptText="Cliquez pour parcourir" HBox.hgrow="ALWAYS" />
+                <Button mnemonicParsing="false" onAction="#handleChooseAudio" text="Parcourir" />
+            </HBox>
+            <Label text="MP3, WAV, AAC" style="-fx-text-fill: #a0a0a0;" />
+        </VBox>
+
+        <Button mnemonicParsing="false" onAction="#handleCreateMusique" text="Créer" />
+        <Label fx:id="feedbackLabel" wrapText="true" />
+    </VBox>
 </VBox>
 

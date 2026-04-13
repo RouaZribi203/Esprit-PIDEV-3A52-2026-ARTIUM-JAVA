@@ -11,7 +11,7 @@ import java.sql.SQLDataException;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MusiqueService implements Iservice<Musique> {
@@ -110,8 +110,42 @@ public class MusiqueService implements Iservice<Musique> {
     }
 
     @Override
-    public List<Musique> getAll() {
-        return Collections.emptyList();
+    public List<Musique> getAll() throws SQLDataException {
+        if (connection == null) {
+            throw new SQLDataException("Connexion a la base de donnees indisponible.");
+        }
+
+        String query = "SELECT o.titre, o.description, o.date_creation, o.collection_id, o.type, o.classe, m.genre, m.audio, m.updated_at "
+                + "FROM musique m INNER JOIN oeuvre o ON o.id = m.id ORDER BY o.id DESC";
+
+        List<Musique> musiques = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement(query);
+             ResultSet resultSet = statement.executeQuery()) {
+            while (resultSet.next()) {
+                Musique musique = new Musique();
+                musique.setTitre(resultSet.getString("titre"));
+                musique.setDescription(resultSet.getString("description"));
+                Date dateCreation = resultSet.getDate("date_creation");
+                if (dateCreation != null) {
+                    musique.setDateCreation(dateCreation.toLocalDate());
+                }
+                musique.setCollectionId(resultSet.getInt("collection_id"));
+                musique.setType(resultSet.getString("type"));
+                musique.setClasse(resultSet.getString("classe"));
+                musique.setGenre(resultSet.getString("genre"));
+                musique.setAudio(resultSet.getString("audio"));
+                Timestamp updatedAt = resultSet.getTimestamp("updated_at");
+                if (updatedAt != null) {
+                    musique.setUpdatedAt(updatedAt.toLocalDateTime());
+                }
+
+                musiques.add(musique);
+            }
+        } catch (SQLException e) {
+            throw new SQLDataException("Impossible de charger les musiques: " + e.getMessage());
+        }
+
+        return musiques;
     }
 }
 
