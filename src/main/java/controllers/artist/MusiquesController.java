@@ -17,6 +17,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
+import javafx.scene.media.MediaException;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.FileChooser;
 import utils.MyDatabase;
@@ -32,7 +33,11 @@ import java.sql.Statement;
 import java.sql.SQLDataException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 public class MusiquesController {
 
@@ -95,6 +100,7 @@ public class MusiquesController {
     );
     private MediaPlayer mediaPlayer;
     private int currentTrackIndex = -1;
+    private static final Set<String> PLAYABLE_EXTENSIONS = new HashSet<>(Arrays.asList("mp3", "m4a", "wav"));
 
     @FXML
     public void initialize() {
@@ -176,7 +182,7 @@ public class MusiquesController {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Choisir un fichier audio");
         chooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Audio", "*.mp3", "*.wav", "*.aac", "*.m4a", "*.flac", "*.ogg", "*.wma")
+                new FileChooser.ExtensionFilter("Audio lisible (JavaFX)", "*.mp3", "*.m4a", "*.wav")
         );
 
         File file = chooser.showOpenDialog(audioPathField.getScene().getWindow());
@@ -206,6 +212,11 @@ public class MusiquesController {
 
         if (genre.isEmpty() || audioPath.isEmpty()) {
             setFeedback("Veuillez renseigner le genre et le fichier audio.", false);
+            return;
+        }
+
+        if (!isPlayableAudioPath(audioPath)) {
+            setFeedback("Format audio non supporte. Utilisez: MP3, M4A ou WAV.", false);
             return;
         }
 
@@ -330,24 +341,46 @@ public class MusiquesController {
         }
 
         stopPlayer();
-        Media media = new Media(source);
-        mediaPlayer = new MediaPlayer(media);
-        currentTrackIndex = index;
-        renderTrackGrid();
-        updateNowPlayingLabels(selectedTrack);
+        try {
+            Media media = new Media(source);
+            mediaPlayer = new MediaPlayer(media);
+            currentTrackIndex = index;
+            renderTrackGrid();
+            updateNowPlayingLabels(selectedTrack);
 
-        mediaPlayer.setOnReady(() -> {
-            if (autoPlay) {
-                mediaPlayer.play();
-                playPauseButton.setText("Pause");
-                playerStatusLabel.setText("Lecture en cours");
-            } else {
-                playPauseButton.setText("Play");
-                playerStatusLabel.setText("Pret");
+            mediaPlayer.setOnReady(() -> {
+                if (autoPlay) {
+                    mediaPlayer.play();
+                    playPauseButton.setText("Pause");
+                    playerStatusLabel.setText("Lecture en cours");
+                } else {
+                    playPauseButton.setText("Play");
+                    playerStatusLabel.setText("Pret");
+                }
+            });
+            mediaPlayer.setOnEndOfMedia(this::handleNextTrack);
+            mediaPlayer.setOnError(() -> playerStatusLabel.setText(describeMediaError(mediaPlayer.getError())));
+        } catch (MediaException mediaException) {
+            playPauseButton.setText("Play");
+            playerStatusLabel.setText(describeMediaError(mediaException));
+        } catch (RuntimeException runtimeException) {
+            playPauseButton.setText("Play");
+            playerStatusLabel.setText("Impossible de lire ce fichier audio");
+        }
+    }
+
+    private String describeMediaError(Throwable throwable) {
+        if (throwable instanceof MediaException mediaException) {
+            if (mediaException.getType() == MediaException.Type.MEDIA_UNSUPPORTED) {
+                return "Format non pris en charge par JavaFX (ex: OPUS)";
             }
-        });
-        mediaPlayer.setOnEndOfMedia(this::handleNextTrack);
-        mediaPlayer.setOnError(() -> playerStatusLabel.setText("Impossible de lire ce fichier audio"));
+
+            String message = mediaException.getMessage();
+            if (message != null && message.toLowerCase().contains("unrecognized file signature")) {
+                return "Codec audio non pris en charge (essayez MP3/M4A/WAV)";
+            }
+        }
+        return "Impossible de lire ce fichier audio";
     }
 
     private void updateNowPlayingLabels(Musique musique) {
@@ -372,6 +405,26 @@ public class MusiquesController {
             return null;
         }
         return file.toURI().toString();
+    }
+
+    private boolean isPlayableAudioPath(String audioPath) {
+        if (audioPath == null || audioPath.isBlank()) {
+            return false;
+        }
+
+        String normalized = audioPath.trim();
+        int questionMarkIndex = normalized.indexOf('?');
+        if (questionMarkIndex >= 0) {
+            normalized = normalized.substring(0, questionMarkIndex);
+        }
+
+        int dotIndex = normalized.lastIndexOf('.');
+        if (dotIndex < 0 || dotIndex == normalized.length() - 1) {
+            return false;
+        }
+
+        String extension = normalized.substring(dotIndex + 1).toLowerCase(Locale.ROOT);
+        return PLAYABLE_EXTENSIONS.contains(extension);
     }
 
     private void stopPlayer() {

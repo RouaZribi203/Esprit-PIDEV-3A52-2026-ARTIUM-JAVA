@@ -83,7 +83,7 @@
                 <TextField fx:id="audioPathField" editable="false" promptText="Cliquez pour parcourir" HBox.hgrow="ALWAYS" />
                 <Button mnemonicParsing="false" onAction="#handleChooseAudio" text="Parcourir" />
             </HBox>
-            <Label text="MP3, WAV, AAC" style="-fx-text-fill: #a0a0a0;" />
+            <Label text="Formats acceptes: MP3, M4A, WAV" style="-fx-text-fill: #a0a0a0;" />
         </VBox>
 
         <Button mnemonicParsing="false" onAction="#handleCreateMusique" text="Créer" />
