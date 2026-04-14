@@ -10,6 +10,7 @@ import javafx.scene.input.MouseButton;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.net.URL;
 import java.text.Normalizer;
 
 
@@ -106,7 +107,15 @@ public class ReclamationCardController {
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setTitle("Repondre a la reclamation #" + reclamation.getId());
-            stage.setScene(new Scene(root));
+
+            Scene scene = new Scene(root);
+            // Important: appliquer explicitement le CSS du dialog + le theme global
+            URL dialogCss = getClass().getResource("/views/styles/reclamation-reply-dialog.css");
+            if (dialogCss != null) scene.getStylesheets().add(dialogCss.toExternalForm());
+
+            URL appCss = getClass().getResource("/views/styles/dashboard.css");
+            if (appCss != null) scene.getStylesheets().add(appCss.toExternalForm());
+            stage.setScene(scene);
             stage.showAndWait();
         } catch (Exception ex) {
             Alert a = new Alert(Alert.AlertType.ERROR);

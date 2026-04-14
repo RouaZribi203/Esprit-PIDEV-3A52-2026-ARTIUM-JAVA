@@ -22,7 +22,6 @@ public class ReclamationReplyDialogController {
 
     @FXML private VBox replyFieldsBox;
 
-    @FXML private Button addFieldBtn;
     @FXML private Button saveBtn;
     @FXML private Button updateBtn;
     @FXML private Button deleteBtn;
