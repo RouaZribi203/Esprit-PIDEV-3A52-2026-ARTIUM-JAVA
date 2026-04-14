@@ -329,23 +329,75 @@ public abstract class BaseUsersBackofficeController {
 
     private void showDetails(User user) {
         Alert details = new Alert(Alert.AlertType.INFORMATION);
-        details.setTitle("Details utilisateur");
-        details.setHeaderText(user.getNom() + " " + user.getPrenom());
+        details.setTitle("Details " + managedRoleLabel().toLowerCase(Locale.ROOT));
+        details.setHeaderText(null);
+        details.getDialogPane().getStyleClass().addAll("users-dialog-pane", "users-details-dialog");
+        if (searchField != null && searchField.getScene() != null) {
+            details.getDialogPane().getStylesheets().addAll(searchField.getScene().getStylesheets());
+        }
+        details.getDialogPane().setPrefSize(560, 440);
 
-        String roleSpecific = "Artiste".equalsIgnoreCase(managedRole())
-                ? "Specialite: " + safe(user.getSpecialite())
-                : "Centre interet: " + safe(user.getCentreInteret());
+        Label modeChip = new Label("Consultation");
+        modeChip.getStyleClass().add("users-dialog-status-chip");
+        Label roleChip = new Label(managedRoleLabel());
+        roleChip.getStyleClass().add("users-dialog-role-chip");
+        HBox chipRow = new HBox(8, modeChip, roleChip);
+        chipRow.getStyleClass().add("users-dialog-chip-row");
 
-        String content = String.join("\n",
-                "Email: " + safe(user.getEmail()),
-                "Tel: " + safe(user.getNumTel()),
-                "Ville: " + safe(user.getVille()),
-                "Date naissance: " + (user.getDateNaissance() == null ? "-" : user.getDateNaissance().toString()),
-                "Statut: " + safe(user.getStatut()),
-                roleSpecific,
-                "Biographie: " + safe(user.getBiographie()));
-        details.setContentText(content);
+        Label title = new Label(safe(user.getNom()) + " " + safe(user.getPrenom()));
+        title.getStyleClass().addAll("users-dialog-title", "users-details-title");
+        Label subtitle = new Label("Vue complète du profil utilisateur.");
+        subtitle.getStyleClass().addAll("users-dialog-subtitle", "users-details-subtitle");
+
+        VBox hero = new VBox(6, chipRow, title, subtitle);
+        hero.getStyleClass().addAll("users-dialog-hero", "users-details-hero");
+
+        String roleSpecificLabel = "Artiste".equalsIgnoreCase(managedRole()) ? "Specialite" : "Centre interet";
+        String roleSpecificValue = "Artiste".equalsIgnoreCase(managedRole()) ? safe(user.getSpecialite()) : safe(user.getCentreInteret());
+
+        VBox identityCard = new VBox(8,
+                createDetailsRow("Email", safe(user.getEmail())),
+                createDetailsRow("Telephone", safe(user.getNumTel())),
+                createDetailsRow("Ville", safe(user.getVille())),
+                createDetailsRow("Date naissance", user.getDateNaissance() == null ? "-" : user.getDateNaissance().toString()),
+                createDetailsRow("Statut", formatStatusLabel(user.getStatut())),
+                createDetailsRow(roleSpecificLabel, roleSpecificValue)
+        );
+        identityCard.getStyleClass().addAll("users-dialog-section-card", "users-details-card");
+
+        Label bioTitle = new Label("Biographie");
+        bioTitle.getStyleClass().add("users-dialog-section-title");
+        Label bioText = new Label(safe(user.getBiographie()));
+        bioText.setWrapText(true);
+        bioText.getStyleClass().add("users-details-bio-text");
+        VBox bioCard = new VBox(8, bioTitle, bioText);
+        bioCard.getStyleClass().addAll("users-dialog-section-card", "users-details-card");
+
+        VBox content = new VBox(12, hero, identityCard, bioCard);
+        content.getStyleClass().add("users-dialog-content");
+        details.getDialogPane().setContent(content);
+
+        Button closeButton = (Button) details.getDialogPane().lookupButton(ButtonType.OK);
+        if (closeButton != null) {
+            closeButton.getStyleClass().addAll("card-action-button", "card-soft-button");
+            closeButton.setText("Fermer");
+        }
         details.showAndWait();
+    }
+
+    private HBox createDetailsRow(String label, String value) {
+        Label keyLabel = new Label(label);
+        keyLabel.getStyleClass().add("users-dialog-label");
+
+        Label valueLabel = new Label(value);
+        valueLabel.getStyleClass().add("user-info-value");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        HBox row = new HBox(8, keyLabel, spacer, valueLabel);
+        row.getStyleClass().add("user-info-row");
+        return row;
     }
 
     private Optional<User> showUserDialog(User existingUser) {

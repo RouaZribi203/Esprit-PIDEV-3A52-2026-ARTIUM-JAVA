@@ -1,6 +1,6 @@
 /* Amateur front-office theme placeholders */
 .amateur-root {
-    -fx-background-color: #f4f6f9;
+    -fx-background-color: #eaf3ff;
 }
 
 .amateur-shell {
@@ -19,7 +19,7 @@
 }
 .amateur-root {
     -fx-font-family: "Segoe UI", Arial, sans-serif;
-    -fx-background-color: #d2d7df;
+    -fx-background-color: #eaf3ff;
 }
 
 .amateur-root .label {
@@ -36,7 +36,7 @@
 }
 
 .amateur-scroll {
-    -fx-background: #d2d7df;
+    -fx-background: #eaf3ff;
     -fx-background-color: transparent;
 }
 
