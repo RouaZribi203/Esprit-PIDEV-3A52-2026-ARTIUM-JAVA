@@ -74,12 +74,62 @@ public class CommentaireService implements services.Iservice<Commentaire> {
 
     @Override
     public void delete(Commentaire commentaire) throws SQLDataException {
-        // TODO: implement
+        if (commentaire == null || commentaire.getId() == null) {
+            throw new SQLDataException("L'identifiant du commentaire est obligatoire.");
+        }
+
+        String[] tableCandidates = new String[] {"commentaire", "commentaires", "comments"};
+        for (String table : tableCandidates) {
+            String sql = "DELETE FROM " + table + " WHERE id = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setInt(1, commentaire.getId());
+                preparedStatement.executeUpdate();
+                return;
+            } catch (SQLException ignored) {
+                // Essayer la prochaine table.
+            }
+        }
+
+        throw new SQLDataException("Impossible de supprimer le commentaire.");
     }
 
     @Override
     public void update(Commentaire commentaire) throws SQLDataException {
-        // TODO: implement
+        if (commentaire == null || commentaire.getId() == null) {
+            throw new SQLDataException("L'identifiant du commentaire est obligatoire.");
+        }
+
+        String text = trimOrEmpty(commentaire.getTexte());
+        if (text.isEmpty()) {
+            throw new SQLDataException("Le commentaire est obligatoire.");
+        }
+
+        Date commentDate = Date.valueOf(commentaire.getDateCommentaire() == null
+                ? java.time.LocalDate.now()
+                : commentaire.getDateCommentaire());
+
+        String[] tableCandidates = new String[] {"commentaire", "commentaires", "comments"};
+        String[] textColumnCandidates = new String[] {"texte", "contenu", "content", "commentaire"};
+        String[] dateColumnCandidates = new String[] {"date_commentaire", "date_creation", "created_at", "createdAt"};
+
+        for (String table : tableCandidates) {
+            for (String textColumn : textColumnCandidates) {
+                for (String dateColumn : dateColumnCandidates) {
+                    String sql = "UPDATE " + table + " SET " + textColumn + " = ?, " + dateColumn + " = ? WHERE id = ?";
+                    try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                        preparedStatement.setString(1, text);
+                        preparedStatement.setDate(2, commentDate);
+                        preparedStatement.setInt(3, commentaire.getId());
+                        preparedStatement.executeUpdate();
+                        return;
+                    } catch (SQLException ignored) {
+                        // Essayer la prochaine combinaison table/colonnes.
+                    }
+                }
+            }
+        }
+
+        throw new SQLDataException("Impossible de modifier le commentaire.");
     }
 
     @Override
@@ -114,6 +164,7 @@ public class CommentaireService implements services.Iservice<Commentaire> {
                                     List<Commentaire> comments = new ArrayList<>();
                                     while (resultSet.next()) {
                                         Commentaire comment = new Commentaire();
+                                        comment.setId(resultSet.getInt("id"));
                                         comment.setOeuvreId(resultSet.getInt("oeuvre_id"));
                                         comment.setTexte(trimOrEmpty(resultSet.getString("comment_text")));
 

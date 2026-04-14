@@ -531,3 +531,77 @@
     -fx-font-weight: 600;
 }
 
+.oeuvre-post-comment-menu-trigger {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: #111827;
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-padding: 1 8;
+    -fx-cursor: hand;
+}
+
+.oeuvre-post-comment-menu-trigger:hover {
+    -fx-background-color: #eef2f8;
+    -fx-background-radius: 6;
+}
+
+.comment-menu {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-border-color: #dfe4ea;
+    -fx-border-radius: 8;
+    -fx-padding: 4;
+}
+
+.comment-menu .menu-item {
+    -fx-padding: 8 12;
+}
+
+.comment-menu .menu-item .label {
+    -fx-text-fill: #4b5563;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+}
+
+.comment-menu .menu-item:focused {
+    -fx-background-color: #eef2f8;
+    -fx-background-radius: 6;
+}
+
+.comment-menu .menu-item.comment-menu-delete .label {
+    -fx-text-fill: #dc2626;
+}
+
+.oeuvre-post-comment-edit-row {
+    -fx-padding: 2 0 0 0;
+}
+
+.oeuvre-post-comment-edit-input {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #cfd8e3;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 6 10;
+    -fx-font-size: 12px;
+}
+
+.oeuvre-post-comment-action {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: #64748b;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-padding: 2 4;
+    -fx-cursor: hand;
+}
+
+.oeuvre-post-comment-action:hover {
+    -fx-text-fill: #3f44d4;
+}
+
+.oeuvre-post-comment-action.danger {
+    -fx-text-fill: #dc2626;
+}
+

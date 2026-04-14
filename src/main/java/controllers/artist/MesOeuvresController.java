@@ -42,8 +42,10 @@ import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -52,7 +54,7 @@ public class MesOeuvresController {
     private static final int DESCRIPTION_MIN_LENGTH = 10;
     private static final int DESCRIPTION_MAX_LENGTH = 500;
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.FRANCE);
-    private static final DateTimeFormatter COMMENT_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm", Locale.FRANCE);
+    private static final DateTimeFormatter COMMENT_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.FRANCE);
     private static final double POST_IMAGE_MAX_WIDTH = 760;
     private static final double POST_IMAGE_MAX_HEIGHT = 360;
 
@@ -72,6 +74,7 @@ public class MesOeuvresController {
     private final OeuvreCollectionService oeuvreCollectionService = new OeuvreCollectionService();
     private final CommentaireService commentaireService = new CommentaireService();
     private final List<Oeuvre> allOeuvres = new ArrayList<>();
+    private final Map<Integer, String> collectionHashtagById = new HashMap<>();
     private String artistDisplayName = "Artiste";
     private String artistSpecialite = "Specialite inconnue";
 
@@ -519,6 +522,10 @@ public class MesOeuvresController {
         descLabel.setWrapText(true);
 
         String tags = toHashtag(oeuvre.getType());
+        String collectionTag = getCollectionHashtag(oeuvre);
+        if (!collectionTag.isEmpty()) {
+            tags = (tags + " " + collectionTag).trim();
+        }
         Label tagsLabel = new Label(tags.trim());
         tagsLabel.getStyleClass().add("oeuvre-post-tags");
 
@@ -669,7 +676,7 @@ public class MesOeuvresController {
         if (dateCommentaire == null) {
             return "Date inconnue";
         }
-        return COMMENT_DATE_FORMATTER.format(dateCommentaire.atStartOfDay());
+        return COMMENT_DATE_FORMATTER.format(dateCommentaire);
     }
 
     private ContextMenu buildPostActionsMenu(Oeuvre oeuvre) {
@@ -794,6 +801,30 @@ public class MesOeuvresController {
             return "A";
         }
         return safe.substring(0, 1).toUpperCase(Locale.ROOT);
+    }
+
+    private String getCollectionHashtag(Oeuvre oeuvre) {
+        if (oeuvre == null || oeuvre.getCollectionId() == null) {
+            return "";
+        }
+
+        Integer collectionId = oeuvre.getCollectionId();
+        if (collectionHashtagById.containsKey(collectionId)) {
+            return collectionHashtagById.get(collectionId);
+        }
+
+        String hashtag = "";
+        try {
+            CollectionOeuvre collection = oeuvreCollectionService.getCollectionById(collectionId);
+            if (collection != null) {
+                hashtag = toHashtag(collection.getTitre());
+            }
+        } catch (Exception ignored) {
+            hashtag = "";
+        }
+
+        collectionHashtagById.put(collectionId, hashtag);
+        return hashtag;
     }
 
     private String resolveTypeFromSpecialite(String specialite) {

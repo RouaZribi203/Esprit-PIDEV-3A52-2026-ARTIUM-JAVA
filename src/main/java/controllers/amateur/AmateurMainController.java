@@ -45,7 +45,7 @@ public class AmateurMainController {
         navbarIncludeController.setActiveRoute(route);
         sidebarIncludeController.setActiveItem(route);
         miniAudioPlayerIncludeController.setVisibleForRoute(route);
-        loadAmateurView(resolveRoute(route));
+        loadAmateurView(route, resolveRoute(route));
     }
 
     private String resolveRoute(String route) {
@@ -54,9 +54,8 @@ public class AmateurMainController {
             case "feed-peintures":
             case "feed-sculptures":
             case "feed-photos":
-                return "/views/amateur/Feed.fxml";
             case "feed-recommandations":
-                return "/views/amateur/FeedReco.fxml";
+                return "/views/amateur/Feed.fxml";
             case "favoris":
                 return "/views/amateur/Favoris.fxml";
             case "evenements":
@@ -100,10 +99,17 @@ public class AmateurMainController {
         }
     }
 
-    private void loadAmateurView(String fxmlPath) {
+    private void loadAmateurView(String route, String fxmlPath) {
         try {
             URL resource = Objects.requireNonNull(getClass().getResource(fxmlPath), "FXML not found: " + fxmlPath);
-            Node page = FXMLLoader.load(resource);
+            FXMLLoader loader = new FXMLLoader(resource);
+            Node page = loader.load();
+
+            Object controller = loader.getController();
+            if (controller instanceof FeedController feedController) {
+                feedController.setRouteFilter(route);
+            }
+
             amateurContentArea.getChildren().setAll(page);
         } catch (IOException e) {
             throw new IllegalStateException("Failed to load amateur page: " + fxmlPath, e);

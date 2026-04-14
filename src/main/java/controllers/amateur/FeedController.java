@@ -1,14 +1,21 @@
 package controllers.amateur;
 
 import Services.CommentaireService;
+import Services.OeuvreCollectionService;
 import Services.OeuvreService;
+import entities.CollectionOeuvre;
 import entities.Commentaire;
 import entities.Oeuvre;
 import entities.User;
 import javafx.fxml.FXML;
+import javafx.geometry.Side;
 import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -24,13 +31,16 @@ import java.io.File;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
 
 public class FeedController {
 
 	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.FRANCE);
-	private static final DateTimeFormatter COMMENT_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm", Locale.FRANCE);
+	private static final DateTimeFormatter COMMENT_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.FRANCE);
 	private static final double POST_IMAGE_MAX_WIDTH = 760;
 	private static final double POST_IMAGE_MAX_HEIGHT = 360;
 	// TODO: remplacer par l'ID utilisateur de session.
@@ -46,13 +56,23 @@ public class FeedController {
 	private Label emptyStateLabel;
 
 	private final OeuvreService oeuvreService = new OeuvreService();
+	private final OeuvreCollectionService oeuvreCollectionService = new OeuvreCollectionService();
 	private final CommentaireService commentaireService = new CommentaireService();
 	private final List<Oeuvre> allOeuvres = new ArrayList<>();
+	private final Map<Integer, String> collectionHashtagById = new HashMap<>();
+	private final Map<Integer, CollectionOeuvre> collectionById = new HashMap<>();
+	private final Map<Integer, User> artistById = new HashMap<>();
+	private String currentRouteFilter = "feed";
 
 	@FXML
 	public void initialize() {
 		searchField.textProperty().addListener((observable, oldValue, newValue) -> applySearch());
 		loadOeuvres();
+	}
+
+	public void setRouteFilter(String route) {
+		currentRouteFilter = route == null ? "feed" : route;
+		applySearch();
 	}
 
 	@FXML
@@ -91,19 +111,23 @@ public class FeedController {
 		VBox card = new VBox(10);
 		card.getStyleClass().add("oeuvre-post-card");
 
+		User artist = loadArtistForOeuvre(oeuvre);
+		String artistName = buildArtistName(artist);
+		String artistSpecialite = buildArtistSpecialite(artist);
+
 		HBox topRow = new HBox(10);
 		topRow.setAlignment(Pos.CENTER_LEFT);
 
 		StackPane avatar = new StackPane();
 		avatar.getStyleClass().add("oeuvre-post-avatar");
-		Label avatarLetter = new Label("A");
+		Label avatarLetter = new Label(getInitialLetter(artistName));
 		avatarLetter.getStyleClass().add("oeuvre-post-avatar-text");
 		avatar.getChildren().add(avatarLetter);
 
 		VBox identityBox = new VBox(1);
-		Label authorLabel = new Label("Artiste");
+		Label authorLabel = new Label(artistName);
 		authorLabel.getStyleClass().add("oeuvre-post-author");
-		Label specialiteLabel = new Label("Createur");
+		Label specialiteLabel = new Label(artistSpecialite);
 		specialiteLabel.getStyleClass().add("oeuvre-post-specialite");
 		identityBox.getChildren().addAll(authorLabel, specialiteLabel);
 
@@ -121,7 +145,12 @@ public class FeedController {
 		descLabel.getStyleClass().add("oeuvre-post-description");
 		descLabel.setWrapText(true);
 
-		Label tagsLabel = new Label(toHashtag(oeuvre.getType()));
+		String tags = toHashtag(oeuvre.getType());
+		String collectionTag = getCollectionHashtag(oeuvre);
+		if (!collectionTag.isEmpty()) {
+			tags = (tags + " " + collectionTag).trim();
+		}
+		Label tagsLabel = new Label(tags);
 		tagsLabel.getStyleClass().add("oeuvre-post-tags");
 
 		StackPane imageWrapper = new StackPane();
@@ -336,9 +365,125 @@ public class FeedController {
 		textLabel.setWrapText(true);
 
 		header.getChildren().addAll(authorLabel, dateLabel);
+
+		if (comment.getUserId() != null && comment.getUserId() == CURRENT_USER_ID) {
+			Button menuTrigger = new Button("...");
+			menuTrigger.getStyleClass().add("oeuvre-post-comment-menu-trigger");
+			menuTrigger.setFocusTraversable(false);
+
+			ContextMenu menu = buildCommentActionsMenu(comment, textLabel, body, dateLabel);
+			menuTrigger.setOnAction(event -> {
+				if (menu.isShowing()) {
+					menu.hide();
+				} else {
+					menu.show(menuTrigger, Side.BOTTOM, 0, 4);
+				}
+			});
+
+			header.getChildren().add(menuTrigger);
+		}
+
 		body.getChildren().addAll(header, textLabel);
 		row.getChildren().addAll(avatar, body);
 		return row;
+	}
+
+	private ContextMenu buildCommentActionsMenu(Commentaire comment, Label textLabel, VBox body, Label dateLabel) {
+		MenuItem editItem = new MenuItem("Modifier");
+		editItem.getStyleClass().add("comment-menu-edit");
+		editItem.setGraphic(createColoredIcon("M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z", 0.48, "#6b7280"));
+		editItem.setOnAction(event -> activateInlineEdit(comment, textLabel, body, dateLabel));
+
+		MenuItem deleteItem = new MenuItem("Supprimer");
+		deleteItem.getStyleClass().add("comment-menu-delete");
+		deleteItem.setGraphic(createColoredIcon("M6 7h12v2H6V7zm2 3h8v10H8V10zm3-6h2l1 1h4v2H6V5h4l1-1z", 0.48, "#dc2626"));
+		deleteItem.setOnAction(event -> onDeleteComment(comment));
+
+		ContextMenu menu = new ContextMenu(editItem, deleteItem);
+		menu.getStyleClass().add("comment-menu");
+		return menu;
+	}
+
+	private void activateInlineEdit(Commentaire comment, Label textLabel, VBox body, Label dateLabel) {
+		TextField editField = new TextField(fallback(comment.getTexte(), ""));
+		editField.getStyleClass().add("oeuvre-post-comment-edit-input");
+		HBox.setHgrow(editField, Priority.ALWAYS);
+
+		Button saveButton = new Button("Enregistrer");
+		saveButton.getStyleClass().add("oeuvre-post-comment-action");
+
+		Button cancelButton = new Button("Annuler");
+		cancelButton.getStyleClass().add("oeuvre-post-comment-action");
+
+		HBox editRow = new HBox(8, editField, saveButton, cancelButton);
+		editRow.setAlignment(Pos.CENTER_LEFT);
+		editRow.getStyleClass().add("oeuvre-post-comment-edit-row");
+
+		int textIndex = body.getChildren().indexOf(textLabel);
+		if (textIndex >= 0) {
+			body.getChildren().set(textIndex, editRow);
+		}
+
+		Runnable cancelEdit = () -> {
+			int editIndex = body.getChildren().indexOf(editRow);
+			if (editIndex >= 0) {
+				body.getChildren().set(editIndex, textLabel);
+			}
+		};
+
+		Runnable saveEdit = () -> {
+			String updatedText = safeText(editField.getText());
+			if (updatedText.isEmpty()) {
+				cancelEdit.run();
+				return;
+			}
+
+			try {
+				comment.setTexte(updatedText);
+				comment.setDateCommentaire(LocalDate.now());
+				commentaireService.update(comment);
+				textLabel.setText(updatedText);
+				dateLabel.setText(formatCommentDate(comment.getDateCommentaire()));
+				cancelEdit.run();
+			} catch (Exception e) {
+				Alert error = new Alert(Alert.AlertType.ERROR);
+				error.setTitle("Erreur");
+				error.setHeaderText("Modification impossible");
+				error.setContentText(e.getMessage() == null ? "Une erreur est survenue." : e.getMessage());
+				error.showAndWait();
+			}
+		};
+
+		saveButton.setOnAction(event -> saveEdit.run());
+		cancelButton.setOnAction(event -> cancelEdit.run());
+		editField.setOnAction(event -> saveEdit.run());
+	}
+
+	private void onDeleteComment(Commentaire comment) {
+		if (comment == null || comment.getId() == null) {
+			return;
+		}
+
+		Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+		confirmation.setTitle("Supprimer le commentaire");
+		confirmation.setHeaderText(null);
+		confirmation.setContentText("Voulez-vous supprimer ce commentaire ?");
+
+		Optional<ButtonType> result = confirmation.showAndWait();
+		if (result.isEmpty() || result.get() != ButtonType.OK) {
+			return;
+		}
+
+		try {
+			commentaireService.delete(comment);
+			loadOeuvres();
+		} catch (Exception e) {
+			Alert error = new Alert(Alert.AlertType.ERROR);
+			error.setTitle("Erreur");
+			error.setHeaderText("Suppression impossible");
+			error.setContentText(e.getMessage() == null ? "Une erreur est survenue." : e.getMessage());
+			error.showAndWait();
+		}
 	}
 
 	private SVGPath createColoredIcon(String path, double scale, String fillColor) {
@@ -439,6 +584,84 @@ public class FeedController {
 		return safe.substring(0, 1).toUpperCase(Locale.ROOT);
 	}
 
+	private String getCollectionHashtag(Oeuvre oeuvre) {
+		if (oeuvre == null || oeuvre.getCollectionId() == null) {
+			return "";
+		}
+
+		Integer collectionId = oeuvre.getCollectionId();
+		if (collectionHashtagById.containsKey(collectionId)) {
+			return collectionHashtagById.get(collectionId);
+		}
+
+		String hashtag = "";
+		try {
+			CollectionOeuvre collection = getCollectionById(collectionId);
+			if (collection != null) {
+				hashtag = toHashtag(collection.getTitre());
+			}
+		} catch (Exception ignored) {
+			hashtag = "";
+		}
+
+		collectionHashtagById.put(collectionId, hashtag);
+		return hashtag;
+	}
+
+	private CollectionOeuvre getCollectionById(Integer collectionId) throws Exception {
+		if (collectionId == null) {
+			return null;
+		}
+		if (collectionById.containsKey(collectionId)) {
+			return collectionById.get(collectionId);
+		}
+		CollectionOeuvre collection = oeuvreCollectionService.getCollectionById(collectionId);
+		collectionById.put(collectionId, collection);
+		return collection;
+	}
+
+	private User loadArtistForOeuvre(Oeuvre oeuvre) {
+		if (oeuvre == null || oeuvre.getCollectionId() == null) {
+			return null;
+		}
+
+		try {
+			CollectionOeuvre collection = getCollectionById(oeuvre.getCollectionId());
+			if (collection == null || collection.getArtisteId() == null) {
+				return null;
+			}
+
+			Integer artisteId = collection.getArtisteId();
+			if (artistById.containsKey(artisteId)) {
+				return artistById.get(artisteId);
+			}
+
+			User artist = oeuvreService.getUserById(artisteId);
+			artistById.put(artisteId, artist);
+			return artist;
+		} catch (Exception ignored) {
+			return null;
+		}
+	}
+
+	private String buildArtistName(User artist) {
+		if (artist == null) {
+			return "Artiste";
+		}
+		String prenom = safeText(artist.getPrenom());
+		String nom = safeText(artist.getNom());
+		String fullName = (prenom + " " + nom).trim();
+		return fullName.isEmpty() ? "Artiste" : fullName;
+	}
+
+	private String buildArtistSpecialite(User artist) {
+		if (artist == null) {
+			return "Createur";
+		}
+		String specialite = safeText(artist.getSpecialite());
+		return specialite.isEmpty() ? "Createur" : specialite;
+	}
+
 	private void applySearch() {
 		String keyword = safeText(searchField.getText()).toLowerCase(Locale.ROOT);
 		List<Oeuvre> filtered = new ArrayList<>();
@@ -452,13 +675,32 @@ public class FeedController {
 					|| title.contains(keyword)
 					|| desc.contains(keyword)
 					|| type.contains(keyword);
+			boolean routeOk = matchesRouteFilter(oeuvre);
 
-			if (keywordOk) {
+			if (keywordOk && routeOk) {
 				filtered.add(oeuvre);
 			}
 		}
 
 		renderOeuvres(filtered);
+	}
+
+	private boolean matchesRouteFilter(Oeuvre oeuvre) {
+		String type = safeText(oeuvre == null ? "" : oeuvre.getType()).toLowerCase(Locale.ROOT);
+		switch (currentRouteFilter) {
+			case "feed-peintures":
+				return type.contains("peint");
+			case "feed-sculptures":
+				return type.contains("sculpt");
+			case "feed-photos":
+				return type.contains("photo");
+			case "feed-recommandations":
+				// Recommandations simples: oeuvres ayant deja au moins 1 commentaire.
+				return !loadCommentsForOeuvre(oeuvre).isEmpty();
+			case "feed":
+			default:
+				return true;
+		}
 	}
 }
 

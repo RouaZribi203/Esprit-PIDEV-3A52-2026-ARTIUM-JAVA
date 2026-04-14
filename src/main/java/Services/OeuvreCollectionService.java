@@ -132,6 +132,19 @@ public class OeuvreCollectionService implements services.Iservice<CollectionOeuv
         return collections;
     }
 
+    public CollectionOeuvre getCollectionById(int collectionId) throws SQLException {
+        String sql = "SELECT id, titre, description, artiste_id FROM collections WHERE id = ? LIMIT 1";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, collectionId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return mapCollection(resultSet);
+                }
+            }
+        }
+        return null;
+    }
+
     public List<byte[]> getOeuvreImagesByCollectionId(int collectionId, int limit) throws SQLException {
         List<byte[]> images = new ArrayList<>();
         int safeLimit = limit <= 0 ? 6 : limit;

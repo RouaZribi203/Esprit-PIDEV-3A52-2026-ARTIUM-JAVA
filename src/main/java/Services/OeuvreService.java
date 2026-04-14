@@ -206,25 +206,21 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
      * Retourne un user par son ID (pour affichage auteur commentaire, etc.).
      */
     public User getUserById(int userId) {
-        String[] tables = new String[] {"user", "users", "personne", "personnes"};
-
-        for (String table : tables) {
-            String sql = "SELECT id, nom, prenom, photoProfil, specialite FROM `" + table + "` WHERE id = ? LIMIT 1";
-            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-                preparedStatement.setInt(1, userId);
-                try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    if (resultSet.next()) {
-                        User user = new User();
-                        user.setNom(trimOrEmpty(resultSet.getString("nom")));
-                        user.setPrenom(trimOrEmpty(resultSet.getString("prenom")));
-                        user.setPhotoProfil(trimOrEmpty(resultSet.getString("photoProfil")));
-                        user.setSpecialite(trimOrEmpty(resultSet.getString("specialite")));
-                        return user;
-                    }
+        String sql = "SELECT id, nom, prenom, photo_profil AS photoProfil, specialite FROM `user` WHERE id = ? LIMIT 1";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, userId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    User user = new User();
+                    user.setNom(trimOrEmpty(resultSet.getString("nom")));
+                    user.setPrenom(trimOrEmpty(resultSet.getString("prenom")));
+                    user.setPhotoProfil(trimOrEmpty(resultSet.getString("photoProfil")));
+                    user.setSpecialite(trimOrEmpty(resultSet.getString("specialite")));
+                    return user;
                 }
-            } catch (SQLException ignored) {
-                // Try next table.
             }
+        } catch (SQLException ignored) {
+            // Keep null fallback for caller-side graceful handling.
         }
 
         return null;
