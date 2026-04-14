@@ -6,9 +6,13 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -17,6 +21,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
+import javafx.geometry.Side;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaException;
 import javafx.scene.media.MediaPlayer;
@@ -481,6 +486,19 @@ public class MusiquesController {
         }
     }
 
+    private boolean confirmDeleteMusique(Musique musique) {
+        String titre = musique != null && musique.getTitre() != null ? musique.getTitre() : "cette musique";
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirmer la suppression");
+        alert.setHeaderText("Supprimer \"" + titre + "\" ?");
+        alert.setContentText("Cette action est definitive.");
+
+        return alert.showAndWait()
+                .filter(buttonType -> buttonType == ButtonType.OK)
+                .isPresent();
+    }
+
     private VBox createTrackCard(Musique musique, int index) {
         VBox card = new VBox(6);
         card.setPrefWidth(170);
@@ -496,14 +514,33 @@ public class MusiquesController {
         titleLabel.setWrapText(true);
         titleLabel.setStyle("-fx-text-fill: #ffffff; -fx-font-weight: bold;");
 
-        Button deleteButton = new Button("Supprimer");
-        deleteButton.setStyle("-fx-background-color: #b00020; -fx-text-fill: white; -fx-font-size: 11px;");
-        deleteButton.setOnAction(event -> {
+        Button menuButton = new Button("⋮");
+        menuButton.setStyle("-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px; -fx-padding: 0 6 0 6; -fx-cursor: hand;");
+
+        MenuItem editItem = new MenuItem("Modifier");
+        editItem.setDisable(true);
+
+        MenuItem deleteItem = new MenuItem("Supprimer");
+
+        ContextMenu actionsMenu = new ContextMenu(editItem, deleteItem);
+
+        menuButton.setOnMouseClicked(event -> {
             event.consume();
-            handleDeleteMusique(musique);
+            if (actionsMenu.isShowing()) {
+                actionsMenu.hide();
+            } else {
+                actionsMenu.show(menuButton, Side.BOTTOM, 0, 0);
+            }
         });
 
-        HBox titleRow = new HBox(8, titleLabel, deleteButton);
+        deleteItem.setOnAction(event -> {
+            event.consume();
+            if (confirmDeleteMusique(musique)) {
+                handleDeleteMusique(musique);
+            }
+        });
+
+        HBox titleRow = new HBox(8, titleLabel, menuButton);
 
         String genre = musique.getGenre() != null ? musique.getGenre() : "-";
         Label metaLabel = new Label("Genre: " + genre);
