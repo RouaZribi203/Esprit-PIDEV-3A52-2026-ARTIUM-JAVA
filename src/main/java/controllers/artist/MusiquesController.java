@@ -102,18 +102,16 @@ public class MusiquesController {
     private final MusiqueService musiqueService = new MusiqueService();
     private final ObservableList<Musique> tracks = FXCollections.observableArrayList();
     private final ObservableList<String> genres = FXCollections.observableArrayList(
-            "Pop",
-            "Rap",
             "Rock",
+            "Pop",
             "Jazz",
-            "Classique",
-            "Soul",
-            "R&B",
-            "Electro"
+            "Classique"
     );
     private MediaPlayer mediaPlayer;
     private int currentTrackIndex = -1;
     private static final Set<String> PLAYABLE_EXTENSIONS = new HashSet<>(Arrays.asList("mp3", "m4a", "wav"));
+    private static final Set<String> IMAGE_EXTENSIONS = new HashSet<>(Arrays.asList("png", "jpg", "jpeg"));
+    private static final long MAX_IMAGE_SIZE_BYTES = 5L * 1024L * 1024L;
     private Integer editingMusiqueId;
     private LocalDate editingDateCreation;
     private byte[] editingImageBytes;
@@ -195,7 +193,14 @@ public class MusiquesController {
 
         File file = chooser.showOpenDialog(imagePathField.getScene().getWindow());
         if (file != null) {
-            imagePathField.setText(file.getAbsolutePath());
+            String selectedPath = file.getAbsolutePath();
+            String validationError = validateImagePath(selectedPath);
+            if (validationError != null) {
+                imagePathField.clear();
+                setFeedback(validationError, false);
+                return;
+            }
+            imagePathField.setText(selectedPath);
         }
     }
 
@@ -244,6 +249,17 @@ public class MusiquesController {
             return;
         }
 
+        String imageValidationError = validateImagePath(imagePath);
+        if (imageValidationError != null) {
+            setFeedback(imageValidationError, false);
+            return;
+        }
+
+        if (!editMode && imagePath.isEmpty()) {
+            setFeedback("Veuillez ajouter une image de couverture (JPEG/PNG, max 5 MB).", false);
+            return;
+        }
+
         Musique musique = new Musique();
         musique.setTitre(titre);
         musique.setDescription(description);
@@ -263,6 +279,12 @@ public class MusiquesController {
                 return;
             }
         }
+
+        if (imageBytes == null || imageBytes.length == 0) {
+            setFeedback("Image de couverture obligatoire. Veuillez choisir un fichier JPEG/PNG (max 5 MB).", false);
+            return;
+        }
+
         musique.setImage(imageBytes);
 
         try {
@@ -529,6 +551,37 @@ public class MusiquesController {
 
         String extension = normalized.substring(dotIndex + 1).toLowerCase(Locale.ROOT);
         return PLAYABLE_EXTENSIONS.contains(extension);
+    }
+
+    private String validateImagePath(String imagePath) {
+        if (imagePath == null || imagePath.isBlank()) {
+            return null;
+        }
+
+        File imageFile = new File(imagePath.trim());
+        if (!imageFile.exists() || !imageFile.isFile()) {
+            return "Image introuvable. Veuillez choisir un fichier valide.";
+        }
+        if (!imageFile.canRead()) {
+            return "Image non lisible. Verifiez les permissions du fichier.";
+        }
+
+        String fileName = imageFile.getName();
+        int dotIndex = fileName.lastIndexOf('.');
+        if (dotIndex < 0 || dotIndex == fileName.length() - 1) {
+            return "Format image non supporte. Utilisez JPEG ou PNG.";
+        }
+
+        String extension = fileName.substring(dotIndex + 1).toLowerCase(Locale.ROOT);
+        if (!IMAGE_EXTENSIONS.contains(extension)) {
+            return "Format image non supporte. Utilisez JPEG ou PNG.";
+        }
+
+        if (imageFile.length() > MAX_IMAGE_SIZE_BYTES) {
+            return "Image trop volumineuse. Taille max: 5 MB.";
+        }
+
+        return null;
     }
 
     private void stopPlayer() {
