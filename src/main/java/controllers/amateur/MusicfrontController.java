@@ -11,7 +11,6 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -88,6 +87,24 @@ public class MusicfrontController {
 	private Label playlistFeedbackLabel;
 
 	@FXML
+	private VBox playlistDetailSection;
+
+	@FXML
+	private Label playlistDetailTitleLabel;
+
+	@FXML
+	private Label playlistDetailMetaLabel;
+
+	@FXML
+	private Button closePlaylistDetailButton;
+
+	@FXML
+	private Label playlistSongsEmptyLabel;
+
+	@FXML
+	private VBox playlistSongsBox;
+
+	@FXML
 	private TilePane playlistGrid;
 
 	private final MusiqueService musiqueService = new MusiqueService();
@@ -95,6 +112,7 @@ public class MusicfrontController {
 	private final ObservableList<Musique> allTracks = FXCollections.observableArrayList();
 	private final ObservableList<Musique> visibleTracks = FXCollections.observableArrayList();
 	private final ObservableList<Playlist> playlists = FXCollections.observableArrayList();
+	private Integer selectedPlaylistId;
 	private static final java.util.Set<String> IMAGE_EXTENSIONS = new java.util.HashSet<>(java.util.Arrays.asList("png", "jpg", "jpeg"));
 	private static final long MAX_IMAGE_SIZE_BYTES = 5L * 1024L * 1024L;
 
@@ -108,8 +126,12 @@ public class MusicfrontController {
 		if (createPlaylistButton != null) {
 			createPlaylistButton.setText("Créer la playlist");
 		}
+		if (closePlaylistDetailButton != null) {
+			closePlaylistDetailButton.setText("Fermer");
+		}
 		setActiveSection(true);
 		hidePlaylistForm();
+		hidePlaylistDetails();
 		setPlaylistFeedback("Créez une playlist puis cliquez sur + Playlist depuis une musique.", false);
 		refreshTracks();
 		refreshPlaylists();
@@ -134,6 +156,14 @@ public class MusicfrontController {
 	@FXML
 	private void handleShowPlaylistsSection() {
 		setActiveSection(false);
+		if (playlistDetailSection != null && playlists.isEmpty()) {
+			hidePlaylistDetails();
+		}
+	}
+
+	@FXML
+	private void handleClosePlaylistDetail() {
+		hidePlaylistDetails();
 	}
 
 	@FXML
@@ -263,9 +293,18 @@ public class MusicfrontController {
 		try {
 			playlists.setAll(playlistService.getAll());
 			renderPlaylistGrid();
+			if (playlistDetailSection != null && playlistDetailSection.isVisible()) {
+				Playlist refreshed = findPlaylistById(selectedPlaylistId);
+				if (refreshed != null) {
+					showPlaylistDetails(refreshed);
+				} else {
+					hidePlaylistDetails();
+				}
+			}
 		} catch (SQLDataException e) {
 			playlists.clear();
 			renderPlaylistGrid();
+			hidePlaylistDetails();
 			setPlaylistFeedback("Impossible de charger les playlists: " + e.getMessage(), false);
 		}
 	}
@@ -498,6 +537,92 @@ public class MusicfrontController {
 		playlistFeedbackLabel.setStyle(success ? "-fx-text-fill: #198754;" : "-fx-text-fill: #b00020;");
 	}
 
+	private void showPlaylistDetails(Playlist playlist) {
+		if (playlist == null) {
+			hidePlaylistDetails();
+			return;
+		}
+
+		selectedPlaylistId = playlist.getId();
+
+		if (playlistDetailSection != null) {
+			playlistDetailSection.setVisible(true);
+			playlistDetailSection.setManaged(true);
+		}
+		if (playlistDetailTitleLabel != null) {
+			playlistDetailTitleLabel.setText(safePlaylistName(playlist));
+		}
+		if (playlistDetailMetaLabel != null) {
+			playlistDetailMetaLabel.setText((playlist.getDescription() != null && !playlist.getDescription().isBlank() ? playlist.getDescription() + " · " : "")
+					+ (playlist.getMusiques() != null ? playlist.getMusiques().size() : 0) + " musique(s)");
+		}
+
+		if (playlistSongsBox != null) {
+			playlistSongsBox.getChildren().clear();
+			java.util.List<Musique> musiques = fetchPlaylistTracks(playlist);
+			boolean empty = musiques.isEmpty();
+			if (playlistSongsEmptyLabel != null) {
+				playlistSongsEmptyLabel.setVisible(empty);
+				playlistSongsEmptyLabel.setManaged(empty);
+			}
+			for (Musique track : musiques) {
+				HBox row = new HBox(8);
+				Label name = new Label(track.getTitre() != null ? track.getTitre() : "Sans titre");
+				name.setStyle("-fx-text-fill: white; -fx-font-weight: 700;");
+				Button playBtn = new Button("Play");
+				playBtn.setOnAction(event -> playTrackFromPlaylist(track));
+				row.getChildren().addAll(name, playBtn);
+				playlistSongsBox.getChildren().add(row);
+			}
+		}
+	}
+
+	private java.util.List<Musique> fetchPlaylistTracks(Playlist playlist) {
+		try {
+			if (playlist != null && playlist.getId() != null) {
+				java.util.List<Musique> musiques = playlistService.getMusiquesForPlaylist(playlist.getId());
+				playlist.setMusiques(musiques);
+				return musiques;
+			}
+		} catch (SQLDataException e) {
+			setPlaylistFeedback("Impossible de charger les musiques de la playlist: " + e.getMessage(), false);
+		}
+		return java.util.List.of();
+	}
+
+	private Playlist findPlaylistById(Integer playlistId) {
+		if (playlistId == null) {
+			return null;
+		}
+		for (Playlist playlist : playlists) {
+			if (playlist.getId() != null && playlist.getId().equals(playlistId)) {
+				return playlist;
+			}
+		}
+		return null;
+	}
+
+	private void hidePlaylistDetails() {
+		selectedPlaylistId = null;
+		if (playlistDetailSection != null) {
+			playlistDetailSection.setVisible(false);
+			playlistDetailSection.setManaged(false);
+		}
+		if (playlistSongsBox != null) {
+			playlistSongsBox.getChildren().clear();
+		}
+		if (playlistSongsEmptyLabel != null) {
+			playlistSongsEmptyLabel.setVisible(true);
+			playlistSongsEmptyLabel.setManaged(true);
+		}
+		if (playlistDetailTitleLabel != null) {
+			playlistDetailTitleLabel.setText("Aucune playlist sélectionnée");
+		}
+		if (playlistDetailMetaLabel != null) {
+			playlistDetailMetaLabel.setText("Cliquez sur une playlist pour voir ses musiques.");
+		}
+	}
+
 	private void setNowPlayingTitle(String text) {
 		if (nowPlayingTitleLabel != null) {
 			nowPlayingTitleLabel.setText(text);
@@ -584,53 +709,14 @@ public class MusicfrontController {
 		Button openButton = new Button("Ouvrir");
 		openButton.setOnAction(event -> {
 			event.consume();
-			showPlaylistPopup(playlist);
+			showPlaylistDetails(playlist);
 		});
 
-		card.setOnMouseClicked(event -> showPlaylistPopup(playlist));
+		card.setOnMouseClicked(event -> showPlaylistDetails(playlist));
 		card.getChildren().addAll(coverNode, nameLabel, descriptionLabel, countLabel, openButton);
 		return card;
 	}
 
-	private void showPlaylistPopup(Playlist playlist) {
-		if (playlist == null) {
-			return;
-		}
-
-		javafx.stage.Stage popup = new javafx.stage.Stage();
-		popup.setTitle("Playlist - " + safePlaylistName(playlist));
-
-		VBox content = new VBox(10);
-		content.setPadding(new javafx.geometry.Insets(12));
-		content.setStyle("-fx-background-color: #1f2937;");
-
-		Label title = new Label(safePlaylistName(playlist));
-		title.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;");
-		content.getChildren().add(title);
-
-		java.util.List<Musique> musiques = playlist.getMusiques() != null ? playlist.getMusiques() : java.util.List.of();
-		if (musiques.isEmpty()) {
-			Label empty = new Label("Aucune musique dans cette playlist.");
-			empty.setStyle("-fx-text-fill: #cbd5e1;");
-			content.getChildren().add(empty);
-		} else {
-			for (Musique track : musiques) {
-				HBox row = new HBox(8);
-				Label name = new Label(track.getTitre() != null ? track.getTitre() : "Sans titre");
-				name.setStyle("-fx-text-fill: white;");
-				Button playBtn = new Button("Play");
-				playBtn.setOnAction(event -> playTrackFromPlaylist(track));
-				row.getChildren().addAll(name, playBtn);
-				content.getChildren().add(row);
-			}
-		}
-
-		ScrollPane scroll = new ScrollPane(content);
-		scroll.setFitToWidth(true);
-		scroll.setPrefSize(480, 420);
-		popup.setScene(new javafx.scene.Scene(scroll));
-		popup.show();
-	}
 
 	private void playTrackFromPlaylist(Musique track) {
 		if (track == null) {

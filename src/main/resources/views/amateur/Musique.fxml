@@ -55,6 +55,19 @@
                     <Button fx:id="togglePlaylistFormButton" mnemonicParsing="false" onAction="#handleTogglePlaylistForm" text="Nouvelle playlist" />
                 </HBox>
 
+                <VBox fx:id="playlistDetailSection" spacing="8.0" visible="false" managed="false" style="-fx-background-color: rgba(255,255,255,0.04); -fx-background-radius: 8; -fx-padding: 12;">
+                    <HBox spacing="10.0">
+                        <VBox spacing="2.0" HBox.hgrow="ALWAYS">
+                            <Label fx:id="playlistDetailTitleLabel" style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;" text="Aucune playlist sélectionnée" />
+                            <Label fx:id="playlistDetailMetaLabel" style="-fx-text-fill: #cbd5e1;" text="Cliquez sur une playlist pour voir ses musiques." wrapText="true" />
+                        </VBox>
+                        <Button fx:id="closePlaylistDetailButton" mnemonicParsing="false" onAction="#handleClosePlaylistDetail" text="Fermer" />
+                    </HBox>
+
+                    <Label fx:id="playlistSongsEmptyLabel" styleClass="page-caption" text="Aucune musique dans cette playlist." wrapText="true" />
+                    <VBox fx:id="playlistSongsBox" spacing="8.0" />
+                </VBox>
+
                 <VBox fx:id="playlistFormSection" spacing="10.0" style="-fx-background-color: rgba(255,255,255,0.04); -fx-background-radius: 8; -fx-padding: 12;" visible="false" managed="false">
                     <Label text="Créer une playlist" />
                     <TextField fx:id="playlistNameField" promptText="Nom de la playlist" />
