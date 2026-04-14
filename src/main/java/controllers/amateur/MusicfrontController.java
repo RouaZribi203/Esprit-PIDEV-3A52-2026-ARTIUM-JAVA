@@ -31,6 +31,8 @@ import java.util.Locale;
 
 public class MusicfrontController {
 
+	private static MusicfrontController activeController;
+
 	@FXML
 	private TextField searchField;
 
@@ -101,6 +103,7 @@ public class MusicfrontController {
 
 	@FXML
 	public void initialize() {
+		activeController = this;
 		searchField.textProperty().addListener((obs, oldValue, newValue) -> filterTracks(newValue));
 		if (createPlaylistButton != null) {
 			createPlaylistButton.setText("Créer la playlist");
@@ -229,12 +232,12 @@ public class MusicfrontController {
 		MediaPlayer.Status status = mediaPlayer.getStatus();
 		if (status == MediaPlayer.Status.PLAYING) {
 			mediaPlayer.pause();
-			playPauseButton.setText("Play");
-			playerStatusLabel.setText("En pause");
+			setPlayPauseText("Play");
+			setPlayerStatusText("En pause");
 		} else {
 			mediaPlayer.play();
-			playPauseButton.setText("Pause");
-			playerStatusLabel.setText("Lecture en cours");
+			setPlayPauseText("Pause");
+			setPlayerStatusText("Lecture en cours");
 		}
 	}
 
@@ -292,10 +295,10 @@ public class MusicfrontController {
 		if (visibleTracks.isEmpty()) {
 			currentTrackIndex = -1;
 			stopPlayer();
-			nowPlayingTitleLabel.setText("Selectionnez une musique");
-			nowPlayingMetaLabel.setText("Genre: -");
-			playerStatusLabel.setText("Pret");
-			playPauseButton.setText("Play");
+			setNowPlayingTitle("Selectionnez une musique");
+			setNowPlayingMeta("Genre: -");
+			setPlayerStatusText("Pret");
+			setPlayPauseText("Play");
 		} else if (currentTrackIndex >= visibleTracks.size()) {
 			currentTrackIndex = -1;
 		}
@@ -324,7 +327,7 @@ public class MusicfrontController {
 		Musique selectedTrack = visibleTracks.get(index);
 		String source = toMediaSource(selectedTrack.getAudio());
 		if (source == null) {
-			playerStatusLabel.setText("Fichier audio introuvable");
+			setPlayerStatusText("Fichier audio introuvable");
 			return;
 		}
 
@@ -338,17 +341,17 @@ public class MusicfrontController {
 
 			mediaPlayer.setOnReady(() -> {
 				mediaPlayer.play();
-				playPauseButton.setText("Pause");
-				playerStatusLabel.setText("Lecture en cours");
+				setPlayPauseText("Pause");
+				setPlayerStatusText("Lecture en cours");
 			});
 			mediaPlayer.setOnEndOfMedia(this::handleNextTrack);
-			mediaPlayer.setOnError(() -> playerStatusLabel.setText(describeMediaError(mediaPlayer.getError())));
+			mediaPlayer.setOnError(() -> setPlayerStatusText(describeMediaError(mediaPlayer.getError())));
 		} catch (MediaException mediaException) {
-			playPauseButton.setText("Play");
-			playerStatusLabel.setText(describeMediaError(mediaException));
+			setPlayPauseText("Play");
+			setPlayerStatusText(describeMediaError(mediaException));
 		} catch (RuntimeException runtimeException) {
-			playPauseButton.setText("Play");
-			playerStatusLabel.setText("Impossible de lire ce fichier audio");
+			setPlayPauseText("Play");
+			setPlayerStatusText("Impossible de lire ce fichier audio");
 		}
 	}
 
@@ -399,8 +402,8 @@ public class MusicfrontController {
 	private void updateNowPlayingLabels(Musique musique) {
 		String titre = musique.getTitre() != null ? musique.getTitre() : "Sans titre";
 		String genre = musique.getGenre() != null ? musique.getGenre() : "-";
-		nowPlayingTitleLabel.setText(titre);
-		nowPlayingMetaLabel.setText("Genre: " + genre);
+		setNowPlayingTitle(titre);
+		setNowPlayingMeta("Genre: " + genre);
 	}
 
 	private String toMediaSource(String audioPath) {
@@ -493,6 +496,30 @@ public class MusicfrontController {
 		}
 		playlistFeedbackLabel.setText(message);
 		playlistFeedbackLabel.setStyle(success ? "-fx-text-fill: #198754;" : "-fx-text-fill: #b00020;");
+	}
+
+	private void setNowPlayingTitle(String text) {
+		if (nowPlayingTitleLabel != null) {
+			nowPlayingTitleLabel.setText(text);
+		}
+	}
+
+	private void setNowPlayingMeta(String text) {
+		if (nowPlayingMetaLabel != null) {
+			nowPlayingMetaLabel.setText(text);
+		}
+	}
+
+	private void setPlayerStatusText(String text) {
+		if (playerStatusLabel != null) {
+			playerStatusLabel.setText(text);
+		}
+	}
+
+	private void setPlayPauseText(String text) {
+		if (playPauseButton != null) {
+			playPauseButton.setText(text);
+		}
 	}
 
 	private void addMusicToPlaylistWithChoice(Musique musique) {
@@ -626,7 +653,7 @@ public class MusicfrontController {
 
 		String source = toMediaSource(track.getAudio());
 		if (source == null) {
-			playerStatusLabel.setText("Fichier audio introuvable");
+			setPlayerStatusText("Fichier audio introuvable");
 			return;
 		}
 
@@ -639,13 +666,13 @@ public class MusicfrontController {
 			updateNowPlayingLabels(track);
 			mediaPlayer.setOnReady(() -> {
 				mediaPlayer.play();
-				playPauseButton.setText("Pause");
-				playerStatusLabel.setText("Lecture en cours");
+				setPlayPauseText("Pause");
+				setPlayerStatusText("Lecture en cours");
 			});
-			mediaPlayer.setOnError(() -> playerStatusLabel.setText(describeMediaError(mediaPlayer.getError())));
+			mediaPlayer.setOnError(() -> setPlayerStatusText(describeMediaError(mediaPlayer.getError())));
 		} catch (MediaException mediaException) {
-			playPauseButton.setText("Play");
-			playerStatusLabel.setText(describeMediaError(mediaException));
+			setPlayPauseText("Play");
+			setPlayerStatusText(describeMediaError(mediaException));
 		}
 	}
 
@@ -727,6 +754,26 @@ public class MusicfrontController {
 		public String toString() {
 			return name;
 		}
+	}
+
+	public static MusicfrontController getActiveController() {
+		return activeController;
+	}
+
+	public void togglePlayPauseFromMini() {
+		handlePlayPause();
+	}
+
+	public void playPreviousFromMini() {
+		handlePreviousTrack();
+	}
+
+	public void playNextFromMini() {
+		handleNextTrack();
+	}
+
+	public boolean isCurrentlyPlaying() {
+		return mediaPlayer != null && mediaPlayer.getStatus() == MediaPlayer.Status.PLAYING;
 	}
 
 	private Node buildCoverNode(byte[] imageBytes) {

@@ -28,25 +28,40 @@ public class MiniAudioPlayerController {
     }
 
     public void setVisibleForRoute(String route) {
-        boolean isMusicPage = "musique".equals(route);
-        playerBar.setVisible(!isMusicPage);
-        playerBar.setManaged(!isMusicPage);
+        playerBar.setVisible(true);
+        playerBar.setManaged(true);
     }
 
     @FXML
     private void onTogglePlay() {
-        playing = !playing;
+        MusicfrontController activeMusicController = MusicfrontController.getActiveController();
+        if (activeMusicController != null) {
+            activeMusicController.togglePlayPauseFromMini();
+            playing = activeMusicController.isCurrentlyPlaying();
+        } else {
+            playing = !playing;
+        }
         togglePlayButton.setText(playing ? "||" : ">");
     }
 
     @FXML
     private void onPrevTrack() {
-        // Placeholder for queue previous action.
+        MusicfrontController activeMusicController = MusicfrontController.getActiveController();
+        if (activeMusicController != null) {
+            activeMusicController.playPreviousFromMini();
+            playing = activeMusicController.isCurrentlyPlaying();
+            togglePlayButton.setText(playing ? "||" : ">");
+        }
     }
 
     @FXML
     private void onNextTrack() {
-        // Placeholder for queue next action.
+        MusicfrontController activeMusicController = MusicfrontController.getActiveController();
+        if (activeMusicController != null) {
+            activeMusicController.playNextFromMini();
+            playing = activeMusicController.isCurrentlyPlaying();
+            togglePlayButton.setText(playing ? "||" : ">");
+        }
     }
 
     @FXML
@@ -56,4 +71,5 @@ public class MiniAudioPlayerController {
         }
     }
 }
+
 

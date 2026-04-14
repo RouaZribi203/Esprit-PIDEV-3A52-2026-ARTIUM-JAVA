@@ -67,7 +67,7 @@
                 </VBox>
 
                 <Label fx:id="playlistFeedbackLabel" wrapText="true" />
-                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="210.0" styleClass="amateur-scroll">
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="430.0" styleClass="amateur-scroll">
                     <content>
                         <TilePane fx:id="playlistGrid" hgap="12.0" prefColumns="3" vgap="12.0" />
                     </content>
@@ -76,21 +76,5 @@
         </VBox>
     </center>
 
-    <bottom>
-        <VBox spacing="8.0" styleClass="amateur-page-card music-card">
-            <padding>
-                <Insets bottom="16.0" left="24.0" right="24.0" top="16.0" />
-            </padding>
-            <Label text="Lecture en cours" />
-            <Label fx:id="nowPlayingTitleLabel" styleClass="mini-audio-title" text="Selectionnez une musique" wrapText="true" />
-            <Label fx:id="nowPlayingMetaLabel" styleClass="mini-audio-artist" text="Genre: -" />
-            <HBox spacing="10.0">
-                <Button mnemonicParsing="false" onAction="#handlePreviousTrack" text="Prev" />
-                <Button fx:id="playPauseButton" mnemonicParsing="false" onAction="#handlePlayPause" text="Play" />
-                <Button mnemonicParsing="false" onAction="#handleNextTrack" text="Next" />
-                <Label fx:id="playerStatusLabel" styleClass="page-caption" text="Pret" />
-            </HBox>
-        </VBox>
-    </bottom>
 </BorderPane>
 
