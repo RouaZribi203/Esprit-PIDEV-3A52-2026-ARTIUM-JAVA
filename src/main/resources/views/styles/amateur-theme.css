@@ -90,6 +90,146 @@
     -fx-effect: dropshadow(gaussian, rgba(60, 60, 60, 0.07), 10, 0, 0, 2);
 }
 
+.amateur-events-page {
+    -fx-background-color: transparent;
+}
+
+.amateur-events-hero,
+.amateur-events-body {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-color: #e8ecf2;
+    -fx-border-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(60, 60, 60, 0.07), 10, 0, 0, 2);
+}
+
+.amateur-events-hero {
+    -fx-padding: 18 24 18 24;
+}
+
+.amateur-events-body {
+    -fx-padding: 0;
+}
+
+.amateur-search-field {
+    -fx-background-color: #f7f9fc;
+    -fx-border-color: #d6deea;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 10 12 10 12;
+    -fx-prompt-text-fill: #9aa3b2;
+}
+
+.amateur-search-button,
+.amateur-primary-pill {
+    -fx-background-color: #3d3bc2;
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-background-radius: 8;
+}
+
+.amateur-primary-pill {
+    -fx-padding: 8 14 8 14;
+}
+
+.amateur-search-button {
+    -fx-padding: 8 16 8 16;
+}
+
+.amateur-category-tabs {
+    -fx-padding: 6 0 0 0;
+    -fx-border-color: transparent transparent #e2e8f0 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.amateur-tab-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #64748b;
+    -fx-font-weight: 700;
+    -fx-padding: 8 4 10 4;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent transparent transparent transparent;
+    -fx-cursor: hand;
+}
+
+.amateur-tab-button.active {
+    -fx-text-fill: #3d3bc2;
+    -fx-border-color: transparent transparent #3d3bc2 transparent;
+    -fx-border-width: 0 0 3 0;
+}
+
+.amateur-events-scroll,
+.amateur-events-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.amateur-events-flow {
+    -fx-background-color: transparent;
+}
+
+.amateur-event-card {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 14;
+    -fx-background-radius: 14;
+    -fx-effect: dropshadow(gaussian, rgba(60, 60, 60, 0.08), 8, 0, 0, 2);
+}
+
+.amateur-event-cover {
+    -fx-background-color: #f3f4f6;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+}
+
+.amateur-event-cover .image-view {
+    -fx-background-radius: 10;
+}
+
+.amateur-event-badge {
+    -fx-background-color: rgba(0, 0, 0, 0.65);
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-padding: 4 8 4 8;
+    -fx-background-radius: 8;
+    -fx-font-size: 12px;
+}
+
+.amateur-details-chip {
+    -fx-background-color: transparent;
+    -fx-border-color: #d0d7e2;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-min-width: 42;
+    -fx-min-height: 32;
+}
+
+.amateur-event-title {
+    -fx-font-size: 17px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #111827;
+}
+
+.amateur-event-meta {
+    -fx-font-size: 12px;
+    -fx-text-fill: #94a3b8;
+}
+
+.amateur-event-status {
+    -fx-font-size: 13px;
+    -fx-text-fill: #9ca3af;
+}
+
+.amateur-event-price {
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #5a6478;
+}
+
+.amateur-event-description {
+    -fx-font-size: 13px;
+    -fx-text-fill: #64748b;
+}
+
 .page-title {
     -fx-font-size: 36px;
     -fx-font-weight: 700;
