@@ -17,6 +17,7 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
@@ -36,6 +37,22 @@ import java.util.regex.Pattern;
 public abstract class BaseUsersBackofficeController {
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
+    private static final String STATUT_ACTIVE = "Activé";
+    private static final String STATUT_BLOQUE = "Bloqué";
+    private static final String[] CENTRES_INTERET = {
+            "Peinture",
+            "Sculpture",
+            "Photographie",
+            "Musique",
+            "Lecture"
+    };
+    private static final String[] SPECIALITES_ARTISTE = {
+            "Peintre",
+            "Sculpteur",
+            "Photographe",
+            "Musicien",
+            "Auteur"
+    };
 
     @FXML
     protected TextField searchField;
@@ -248,9 +265,9 @@ public abstract class BaseUsersBackofficeController {
     private String formatStatusLabel(String status) {
         String normalized = safe(status).toLowerCase(Locale.ROOT);
         return switch (normalized) {
-            case "active" -> "Actif";
+            case "activé", "active" -> "Activé";
+            case "bloqué", "blocked" -> "Bloqué";
             case "pending" -> "En attente";
-            case "blocked" -> "Bloque";
             default -> normalized.substring(0, 1).toUpperCase(Locale.ROOT) + normalized.substring(1);
         };
     }
@@ -258,9 +275,9 @@ public abstract class BaseUsersBackofficeController {
     private String statusStyleClass(String status) {
         String normalized = safe(status).toLowerCase(Locale.ROOT);
         return switch (normalized) {
-            case "active" -> "status-active";
+            case "activé", "active" -> "status-active";
+            case "bloqué", "blocked" -> "status-blocked";
             case "pending" -> "status-pending";
-            case "blocked" -> "status-blocked";
             default -> "status-neutral";
         };
     }
@@ -291,7 +308,16 @@ public abstract class BaseUsersBackofficeController {
 
         Dialog<User> dialog = new Dialog<>();
         dialog.setTitle(creation ? "Ajouter " + managedRoleLabel().toLowerCase(Locale.ROOT) : "Modifier " + managedRoleLabel().toLowerCase(Locale.ROOT));
-        dialog.setHeaderText(creation ? "Nouveau " + managedRoleLabel().toLowerCase(Locale.ROOT) : "Mise a jour des informations");
+        dialog.setHeaderText(null);
+        dialog.getDialogPane().getStyleClass().add("users-dialog-pane");
+        if (searchField != null && searchField.getScene() != null) {
+            dialog.getDialogPane().getStylesheets().addAll(searchField.getScene().getStylesheets());
+        }
+        dialog.getDialogPane().setGraphic(null);
+        dialog.setResizable(false);
+        dialog.getDialogPane().setPrefSize(560, 640);
+        dialog.getDialogPane().setMinSize(560, 640);
+        dialog.getDialogPane().setMaxSize(560, 640);
 
         ButtonType saveButtonType = new ButtonType("Enregistrer", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
@@ -299,6 +325,7 @@ public abstract class BaseUsersBackofficeController {
         GridPane form = new GridPane();
         form.setHgap(10);
         form.setVgap(10);
+        form.getStyleClass().add("users-dialog-form");
 
         TextField nomField = new TextField();
         TextField prenomField = new TextField();
@@ -308,17 +335,37 @@ public abstract class BaseUsersBackofficeController {
         PasswordField confirmPasswordField = new PasswordField();
         TextField telField = new TextField();
         TextField villeField = new TextField();
-        ComboBox<String> statutCombo = new ComboBox<>(FXCollections.observableArrayList("active", "pending", "blocked"));
-        TextField roleSpecificField = new TextField();
+        ComboBox<String> statutCombo = new ComboBox<>(FXCollections.observableArrayList(STATUT_ACTIVE, STATUT_BLOQUE));
+        ComboBox<String> roleSpecificCombo = new ComboBox<>();
         TextArea bioArea = new TextArea();
         Label formErrorLabel = new Label();
 
+        nomField.getStyleClass().add("users-dialog-field");
+        prenomField.getStyleClass().add("users-dialog-field");
+        dateNaissancePicker.getStyleClass().add("users-dialog-field");
+        emailField.getStyleClass().add("users-dialog-field");
+        passwordField.getStyleClass().add("users-dialog-field");
+        confirmPasswordField.getStyleClass().add("users-dialog-field");
+        telField.getStyleClass().add("users-dialog-field");
+        villeField.getStyleClass().add("users-dialog-field");
+        statutCombo.getStyleClass().add("users-dialog-field");
+        bioArea.getStyleClass().addAll("users-dialog-field", "users-dialog-textarea");
+        roleSpecificCombo.getStyleClass().add("users-dialog-field");
+
         bioArea.setPrefRowCount(3);
 
-        String roleSpecificLabel = "Artiste".equalsIgnoreCase(managedRole()) ? "Specialite" : "Centre interet";
+        boolean artistRole = "Artiste".equalsIgnoreCase(managedRole());
+        String roleSpecificLabel = artistRole ? "Specialite" : "Centre interet";
+        String dialogModeLabel = creation ? "Nouveau profil" : "Modification du profil";
+        String dialogHint = creation
+                ? "Crée une fiche utilisateur claire, premium et bien structurée."
+                : "Mets à jour les informations avec une présentation plus soignée.";
+
+        roleSpecificCombo.getItems().setAll(artistRole ? SPECIALITES_ARTISTE : CENTRES_INTERET);
+        roleSpecificCombo.setPromptText(artistRole ? "Choisissez une spécialité" : "Choisissez un centre d'interet");
 
         if (creation) {
-            statutCombo.setValue("active");
+            statutCombo.setValue(STATUT_ACTIVE);
         }
 
         if (!creation) {
@@ -328,41 +375,150 @@ public abstract class BaseUsersBackofficeController {
             emailField.setText(existingUser.getEmail());
             telField.setText(existingUser.getNumTel());
             villeField.setText(existingUser.getVille());
-            statutCombo.setValue(existingUser.getStatut());
+            statutCombo.setValue(normalizeStatutValue(existingUser.getStatut()));
             bioArea.setText(existingUser.getBiographie());
-            roleSpecificField.setText("Artiste".equalsIgnoreCase(managedRole()) ? safe(existingUser.getSpecialite()) : safe(existingUser.getCentreInteret()));
+            String existingRoleSpecific = artistRole ? safe(existingUser.getSpecialite()) : safe(existingUser.getCentreInteret());
+            selectComboValue(roleSpecificCombo, existingRoleSpecific);
         }
 
-        int row = 0;
-        form.add(new Label("Nom"), 0, row);
-        form.add(nomField, 1, row++);
-        form.add(new Label("Prenom"), 0, row);
-        form.add(prenomField, 1, row++);
-        form.add(new Label("Date naissance"), 0, row);
-        form.add(dateNaissancePicker, 1, row++);
-        form.add(new Label("Email"), 0, row);
-        form.add(emailField, 1, row++);
-        form.add(new Label("Mot de passe"), 0, row);
+        Label modeChip = new Label(dialogModeLabel);
+        modeChip.getStyleClass().add("users-dialog-mode-chip");
+
+        Label roleChip = new Label(managedRoleLabel());
+        roleChip.getStyleClass().add("users-dialog-role-chip");
+
+        Label statusChip = new Label(creation ? "Création" : "Édition");
+        statusChip.getStyleClass().add("users-dialog-status-chip");
+
+        Label dialogTitle = new Label((creation ? "Créer " : "Modifier ") + managedRoleLabel().toLowerCase(Locale.ROOT));
+        dialogTitle.getStyleClass().add("users-dialog-title");
+
+        Label dialogSubtitle = new Label(dialogHint);
+        dialogSubtitle.getStyleClass().add("users-dialog-subtitle");
+
+        HBox chipRow = new HBox(8, modeChip, roleChip, statusChip);
+        chipRow.getStyleClass().add("users-dialog-chip-row");
+
+        VBox hero = new VBox(6, chipRow, dialogTitle, dialogSubtitle);
+        hero.getStyleClass().add("users-dialog-hero");
+
+        VBox identityCard = new VBox(10);
+        identityCard.getStyleClass().add("users-dialog-section-card");
+
+        Label identityTitle = new Label("Identité");
+        identityTitle.getStyleClass().add("users-dialog-section-title");
+        Label identitySubtitle = new Label("Les informations de base du profil.");
+        identitySubtitle.getStyleClass().add("users-dialog-section-subtitle");
+        VBox identityHeader = new VBox(2, identityTitle, identitySubtitle);
+
+        GridPane identityGrid = new GridPane();
+        identityGrid.setHgap(10);
+        identityGrid.setVgap(10);
+        Label nomLabel = new Label("Nom");
+        nomLabel.getStyleClass().add("users-dialog-label");
+        Label prenomLabel = new Label("Prenom");
+        prenomLabel.getStyleClass().add("users-dialog-label");
+        Label naissanceLabel = new Label("Date naissance");
+        naissanceLabel.getStyleClass().add("users-dialog-label");
         passwordField.setPromptText(creation ? "Minimum 8 caracteres" : "Laisser vide pour conserver");
-        form.add(passwordField, 1, row++);
-        form.add(new Label("Confirmation"), 0, row);
-        form.add(confirmPasswordField, 1, row++);
-        form.add(new Label("Telephone"), 0, row);
-        form.add(telField, 1, row++);
-        form.add(new Label("Ville"), 0, row);
-        form.add(villeField, 1, row++);
-        form.add(new Label("Statut"), 0, row);
-        form.add(statutCombo, 1, row++);
-        form.add(new Label(roleSpecificLabel), 0, row);
-        form.add(roleSpecificField, 1, row++);
-        form.add(new Label("Biographie"), 0, row);
-        form.add(bioArea, 1, row);
+        Label emailLabel = new Label("Email");
+        emailLabel.getStyleClass().add("users-dialog-label");
+        Label passwordLabel = new Label("Mot de passe");
+        passwordLabel.getStyleClass().add("users-dialog-label");
+        Label confirmationLabel = new Label("Confirmation");
+        confirmationLabel.getStyleClass().add("users-dialog-label");
+        Label telephoneLabel = new Label("Telephone");
+        telephoneLabel.getStyleClass().add("users-dialog-label");
+        Label villeLabel = new Label("Ville");
+        villeLabel.getStyleClass().add("users-dialog-label");
+        Label statutLabel = new Label("Statut");
+        statutLabel.getStyleClass().add("users-dialog-label");
+        Label roleSpecificTextLabel = new Label(roleSpecificLabel);
+        roleSpecificTextLabel.getStyleClass().add("users-dialog-label");
+        Label biographieLabel = new Label("Biographie");
+        biographieLabel.getStyleClass().add("users-dialog-label");
 
-        VBox dialogContent = new VBox(10, form, formErrorLabel);
-        formErrorLabel.getStyleClass().add("dialog-error");
-        dialog.getDialogPane().setContent(dialogContent);
+        identityGrid.add(nomLabel, 0, 0);
+        identityGrid.add(nomField, 1, 0);
+        identityGrid.add(prenomLabel, 0, 1);
+        identityGrid.add(prenomField, 1, 1);
+        identityGrid.add(naissanceLabel, 0, 2);
+        identityGrid.add(dateNaissancePicker, 1, 2);
 
-        Node saveButton = dialog.getDialogPane().lookupButton(saveButtonType);
+        VBox identityCardContent = new VBox(10, identityHeader, identityGrid);
+        identityCard.getChildren().add(identityCardContent);
+
+        VBox contactCard = new VBox(10);
+        contactCard.getStyleClass().add("users-dialog-section-card");
+        Label contactTitle = new Label("Coordonnées");
+        contactTitle.getStyleClass().add("users-dialog-section-title");
+        Label contactSubtitle = new Label("Email, téléphone et ville de contact.");
+        contactSubtitle.getStyleClass().add("users-dialog-section-subtitle");
+        VBox contactHeader = new VBox(2, contactTitle, contactSubtitle);
+
+        GridPane contactGrid = new GridPane();
+        contactGrid.setHgap(10);
+        contactGrid.setVgap(10);
+        contactGrid.add(emailLabel, 0, 0);
+        contactGrid.add(emailField, 1, 0);
+        contactGrid.add(telephoneLabel, 0, 1);
+        contactGrid.add(telField, 1, 1);
+        contactGrid.add(villeLabel, 0, 2);
+        contactGrid.add(villeField, 1, 2);
+
+        contactCard.getChildren().addAll(contactHeader, contactGrid);
+
+        VBox securityCard = new VBox(10);
+        securityCard.getStyleClass().add("users-dialog-section-card");
+        Label securityTitle = new Label("Sécurité et statut");
+        securityTitle.getStyleClass().add("users-dialog-section-title");
+        Label securitySubtitle = new Label("Accès, rôle et état du compte.");
+        securitySubtitle.getStyleClass().add("users-dialog-section-subtitle");
+        VBox securityHeader = new VBox(2, securityTitle, securitySubtitle);
+
+        GridPane securityGrid = new GridPane();
+        securityGrid.setHgap(10);
+        securityGrid.setVgap(10);
+        securityGrid.add(passwordLabel, 0, 0);
+        securityGrid.add(passwordField, 1, 0);
+        securityGrid.add(confirmationLabel, 0, 1);
+        securityGrid.add(confirmPasswordField, 1, 1);
+        securityGrid.add(statutLabel, 0, 2);
+        securityGrid.add(statutCombo, 1, 2);
+        securityGrid.add(roleSpecificTextLabel, 0, 3);
+        securityGrid.add(roleSpecificCombo, 1, 3);
+
+        securityCard.getChildren().addAll(securityHeader, securityGrid);
+
+        VBox bioCard = new VBox(10);
+        bioCard.getStyleClass().addAll("users-dialog-section-card", "users-dialog-bio-card");
+        Label bioTitle = new Label("Biographie");
+        bioTitle.getStyleClass().add("users-dialog-section-title");
+        Label bioSubtitle = new Label("Une présentation courte et soignée du profil.");
+        bioSubtitle.getStyleClass().add("users-dialog-section-subtitle");
+        VBox bioHeader = new VBox(2, bioTitle, bioSubtitle);
+        bioCard.getChildren().addAll(bioHeader, bioArea);
+
+        VBox dialogContent = new VBox(14, hero, identityCard, contactCard, securityCard, bioCard, formErrorLabel);
+        dialogContent.getStyleClass().add("users-dialog-content");
+        dialogContent.setFillWidth(true);
+        formErrorLabel.getStyleClass().addAll("dialog-error", "users-dialog-error");
+
+        ScrollPane dialogScroll = new ScrollPane(dialogContent);
+        dialogScroll.getStyleClass().add("users-dialog-scroll");
+        dialogScroll.setFitToWidth(true);
+        dialogScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        dialogScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        dialogScroll.setPannable(true);
+        dialogScroll.setPrefViewportWidth(520);
+        dialogScroll.setPrefViewportHeight(540);
+        dialog.getDialogPane().setContent(dialogScroll);
+
+        Button saveButton = (Button) dialog.getDialogPane().lookupButton(saveButtonType);
+        saveButton.getStyleClass().add("primary-action-button");
+        Button cancelButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.CANCEL);
+        cancelButton.getStyleClass().addAll("card-action-button", "card-soft-button");
+
         saveButton.addEventFilter(ActionEvent.ACTION, event -> {
             String validationError = validateForm(
                     creation,
@@ -375,7 +531,7 @@ public abstract class BaseUsersBackofficeController {
                     telField.getText(),
                     villeField.getText(),
                     statutCombo.getValue(),
-                    roleSpecificField.getText());
+                    roleSpecificCombo.getValue());
 
             if (validationError != null) {
                 formErrorLabel.setText(validationError);
@@ -407,11 +563,11 @@ public abstract class BaseUsersBackofficeController {
             user.setVille(clean(villeField.getText()));
             user.setBiographie(clean(bioArea.getText()));
             user.setDateInscription(user.getDateInscription() == null ? LocalDate.now() : user.getDateInscription());
-            if ("Artiste".equalsIgnoreCase(managedRole())) {
-                user.setSpecialite(clean(roleSpecificField.getText()));
+            if (artistRole) {
+                user.setSpecialite(clean(roleSpecificCombo.getValue()));
                 user.setCentreInteret(null);
             } else {
-                user.setCentreInteret(clean(roleSpecificField.getText()));
+                user.setCentreInteret(clean(roleSpecificCombo.getValue()));
                 user.setSpecialite(null);
             }
             return user;
@@ -452,6 +608,32 @@ public abstract class BaseUsersBackofficeController {
                     : "Le centre interet est obligatoire.";
         }
         return null;
+    }
+
+    private String normalizeStatutValue(String status) {
+        String normalized = safe(status).trim().toLowerCase(Locale.ROOT);
+        return switch (normalized) {
+            case "activé", "active" -> STATUT_ACTIVE;
+            case "bloqué", "blocked" -> STATUT_BLOQUE;
+            default -> STATUT_ACTIVE;
+        };
+    }
+
+    private void selectComboValue(ComboBox<String> comboBox, String value) {
+        if (comboBox == null) {
+            return;
+        }
+
+        String cleaned = clean(value);
+        if (isBlank(cleaned)) {
+            comboBox.setValue(null);
+            return;
+        }
+
+        if (!comboBox.getItems().contains(cleaned)) {
+            comboBox.getItems().add(0, cleaned);
+        }
+        comboBox.setValue(cleaned);
     }
 
     private void setMessage(String message, boolean error) {
