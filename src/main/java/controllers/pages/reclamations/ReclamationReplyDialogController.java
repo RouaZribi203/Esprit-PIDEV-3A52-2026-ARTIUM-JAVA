@@ -35,6 +35,7 @@ public class ReclamationReplyDialogController {
     private Reponse selectedForEdit;
 
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final int MIN_REPONSE_LEN = 10;
 
     @FXML
     public void initialize() {
@@ -166,6 +167,13 @@ public class ReclamationReplyDialogController {
             }
         }
 
+        for (String c : contenus) {
+            if (c.length() < MIN_REPONSE_LEN) {
+                showError("Validation", "La reponse doit contenir au moins " + MIN_REPONSE_LEN + " caracteres.");
+                return;
+            }
+        }
+
 
         if (contenus.isEmpty()) {
             syncStatutWithReponses();
@@ -218,6 +226,11 @@ public class ReclamationReplyDialogController {
         String newText = ta.getText() == null ? "" : ta.getText().trim();
         if (newText.isEmpty()) {
             showError("Validation", "La reponse ne peut pas etre vide.");
+            return;
+        }
+
+        if (newText.length() < MIN_REPONSE_LEN) {
+            showError("Validation", "La reponse doit contenir au moins " + MIN_REPONSE_LEN + " caracteres.");
             return;
         }
 
