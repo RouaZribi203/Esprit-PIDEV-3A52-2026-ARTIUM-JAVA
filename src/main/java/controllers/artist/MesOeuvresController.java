@@ -2,11 +2,11 @@ package controllers.artist;
 
 import Services.CommentaireService;
 import Services.OeuvreCollectionService;
-import Services.OeuvreService.ArtistIdentity;
 import Services.OeuvreService;
-import Services.OeuvreService.OeuvreFeedItem;
 import entities.CollectionOeuvre;
+import entities.Commentaire;
 import entities.Oeuvre;
+import entities.User;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.geometry.Side;
@@ -40,7 +40,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +70,8 @@ public class MesOeuvresController {
 
     private final OeuvreService oeuvreService = new OeuvreService();
     private final OeuvreCollectionService oeuvreCollectionService = new OeuvreCollectionService();
-    private final List<OeuvreFeedItem> allFeedItems = new ArrayList<>();
+    private final CommentaireService commentaireService = new CommentaireService();
+    private final List<Oeuvre> allOeuvres = new ArrayList<>();
     private String artistDisplayName = "Artiste";
     private String artistSpecialite = "Specialite inconnue";
 
@@ -83,14 +83,24 @@ public class MesOeuvresController {
         applyIcons();
         loadArtistIdentity();
         searchField.textProperty().addListener((observable, oldValue, newValue) -> applySearch());
-        loadFeed();
+        loadOeuvres();
     }
 
     private void loadArtistIdentity() {
         try {
-            ArtistIdentity identity = oeuvreService.getArtisteIdentityById(artisteId);
-            artistDisplayName = safeText(identity.getFullName()).isEmpty() ? "Artiste" : identity.getFullName();
-            artistSpecialite = safeText(identity.getSpecialite()).isEmpty() ? "Specialite inconnue" : identity.getSpecialite();
+            User artist = oeuvreService.getUserById(artisteId);
+            if (artist == null) {
+                artistDisplayName = "Artiste";
+                artistSpecialite = "Specialite inconnue";
+                return;
+            }
+            String nom = safeText(artist.getNom());
+            String prenom = safeText(artist.getPrenom());
+            String fullName = (prenom + " " + nom).trim();
+            artistDisplayName = fullName.isEmpty() ? "Artiste" : fullName;
+
+            String specialite = safeText(artist.getSpecialite());
+            artistSpecialite = specialite.isEmpty() ? "Specialite inconnue" : specialite;
         } catch (Exception ignored) {
             artistDisplayName = "Artiste";
             artistSpecialite = "Specialite inconnue";
@@ -303,7 +313,7 @@ public class MesOeuvresController {
                 }
 
                 popupStage.close();
-                loadFeed();
+                loadOeuvres();
             } catch (Exception e) {
                 showFieldError(titreError, titreField, e.getMessage() == null ? (editMode ? "Erreur modification oeuvre." : "Erreur ajout oeuvre.") : e.getMessage());
             }
@@ -431,11 +441,11 @@ public class MesOeuvresController {
         errorLabel.setVisible(false);
     }
 
-    private void loadFeed() {
+    private void loadOeuvres() {
         try {
-            allFeedItems.clear();
-            allFeedItems.addAll(oeuvreService.getFeedByArtisteId(artisteId));
-            renderFeed(allFeedItems);
+            allOeuvres.clear();
+            allOeuvres.addAll(oeuvreService.getOeuvresByArtisteId(artisteId));
+            renderOeuvres(allOeuvres);
         } catch (Exception e) {
             oeuvresContainer.getChildren().clear();
             emptyStateLabel.setText("Erreur chargement oeuvres: " + e.getMessage());
@@ -444,23 +454,22 @@ public class MesOeuvresController {
     }
 
 
-    private void renderFeed(List<OeuvreFeedItem> items) {
+    private void renderOeuvres(List<Oeuvre> oeuvres) {
         oeuvresContainer.getChildren().clear();
 
-        if (items.isEmpty()) {
+        if (oeuvres.isEmpty()) {
             emptyStateLabel.setText("Aucune oeuvre trouvee.");
             emptyStateLabel.setVisible(true);
             return;
         }
 
         emptyStateLabel.setVisible(false);
-        for (OeuvreFeedItem item : items) {
-            oeuvresContainer.getChildren().add(buildPostCard(item));
+        for (Oeuvre oeuvre : oeuvres) {
+            oeuvresContainer.getChildren().add(buildPostCard(oeuvre));
         }
     }
 
-    private VBox buildPostCard(OeuvreFeedItem item) {
-        Oeuvre oeuvre = item.getOeuvre();
+    private VBox buildPostCard(Oeuvre oeuvre) {
 
         VBox card = new VBox(10);
         card.getStyleClass().add("oeuvre-post-card");
@@ -491,7 +500,7 @@ public class MesOeuvresController {
         actionsButton.getStyleClass().add("collection-menu-trigger");
         actionsButton.setFocusTraversable(false);
 
-        ContextMenu actionsMenu = buildPostActionsMenu(item);
+        ContextMenu actionsMenu = buildPostActionsMenu(oeuvre);
         actionsButton.setOnAction(event -> {
             if (actionsMenu.isShowing()) {
                 actionsMenu.hide();
@@ -509,7 +518,7 @@ public class MesOeuvresController {
         descLabel.getStyleClass().add("oeuvre-post-description");
         descLabel.setWrapText(true);
 
-        String tags = toHashtag(oeuvre.getType()) + " " + toHashtag(item.getCollectionTitre());
+        String tags = toHashtag(oeuvre.getType());
         Label tagsLabel = new Label(tags.trim());
         tagsLabel.getStyleClass().add("oeuvre-post-tags");
 
@@ -527,15 +536,17 @@ public class MesOeuvresController {
             imageWrapper.getChildren().add(imageView);
         }
 
+        List<Commentaire> comments = loadCommentsForOeuvre(oeuvre);
+
         HBox statsRow = new HBox(14);
         statsRow.getStyleClass().add("oeuvre-post-stats");
         statsRow.getChildren().addAll(
-                buildStatChip("M12.1 18.55 10.55 17.14C5.4 12.47 2 9.39 2 5.6 2 2.52 4.42 0 7.5 0c1.74 0 3.41.81 4.5 2.09C13.09.81 14.76 0 16.5 0 19.58 0 22 2.52 22 5.6c0 3.79-3.4 6.87-8.55 11.55z", item.getLikeCount()),
-                buildStatChip("M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z", item.getCommentCount()),
-                buildStatChip("M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z", item.getFavoriteCount())
+                buildStatChip("M12.1 18.55 10.55 17.14C5.4 12.47 2 9.39 2 5.6 2 2.52 4.42 0 7.5 0c1.74 0 3.41.81 4.5 2.09C13.09.81 14.76 0 16.5 0 19.58 0 22 2.52 22 5.6c0 3.79-3.4 6.87-8.55 11.55z", 0),
+                buildStatChip("M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z", comments.size()),
+                buildStatChip("M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z", 0)
         );
 
-        VBox commentsPreviewBox = buildCommentsPreview(item);
+        VBox commentsPreviewBox = buildCommentsPreview(comments);
 
         card.getChildren().addAll(topRow, titleLabel, descLabel, tagsLabel, imageWrapper, statsRow, commentsPreviewBox);
         return card;
@@ -556,7 +567,20 @@ public class MesOeuvresController {
         return statChip;
     }
 
-    private VBox buildCommentsPreview(OeuvreFeedItem item) {
+    private List<Commentaire> loadCommentsForOeuvre(Oeuvre oeuvre) {
+        if (oeuvre == null || oeuvre.getId() == null) {
+            return new ArrayList<>();
+        }
+
+        try {
+            List<Commentaire> comments = commentaireService.getCommentsByOeuvreId(oeuvre.getId());
+            return comments == null ? new ArrayList<>() : comments;
+        } catch (Exception ignored) {
+            return new ArrayList<>();
+        }
+    }
+
+    private VBox buildCommentsPreview(List<Commentaire> comments) {
         VBox commentsBox = new VBox(8);
         commentsBox.getStyleClass().add("oeuvre-post-comments-box");
 
@@ -564,7 +588,6 @@ public class MesOeuvresController {
         title.getStyleClass().add("oeuvre-post-comments-title");
         commentsBox.getChildren().add(title);
 
-        List<CommentaireService.CommentPreview> comments = item.getCommentsPreview();
         if (comments == null || comments.isEmpty()) {
             Label emptyLabel = new Label("Aucun commentaire pour le moment.");
             emptyLabel.getStyleClass().add("oeuvre-post-comments-empty");
@@ -572,13 +595,13 @@ public class MesOeuvresController {
             return commentsBox;
         }
 
-        for (CommentaireService.CommentPreview comment : comments) {
-            commentsBox.getChildren().add(buildCommentRow(comment));
+        int displayCount = Math.min(3, comments.size());
+        for (int i = 0; i < displayCount; i++) {
+            commentsBox.getChildren().add(buildCommentRow(comments.get(i)));
         }
 
-        int hiddenCount = item.getCommentCount() - comments.size();
-        if (hiddenCount > 0) {
-            Label moreLabel = new Label("+" + hiddenCount + " autres commentaires");
+        if (comments.size() > 3) {
+            Label moreLabel = new Label("+" + (comments.size() - 3) + " autres commentaires");
             moreLabel.getStyleClass().add("oeuvre-post-comments-more");
             commentsBox.getChildren().add(moreLabel);
         }
@@ -586,18 +609,35 @@ public class MesOeuvresController {
         return commentsBox;
     }
 
-    private HBox buildCommentRow(CommentaireService.CommentPreview comment) {
+    private HBox buildCommentRow(Commentaire comment) {
         HBox row = new HBox(8);
         row.setAlignment(Pos.TOP_LEFT);
         row.getStyleClass().add("oeuvre-post-comment-row");
 
         StackPane avatar = new StackPane();
         avatar.getStyleClass().add("oeuvre-post-comment-avatar");
-        ImageView profileImage = createImageFromSource(comment.getAuthorPhoto());
+
+        // Récupérer le user via son ID pour affichage
+        User user = null;
+        if (comment.getUserId() != null) {
+            user = oeuvreService.getUserById(comment.getUserId());
+        }
+
+        String authorName = "Utilisateur";
+        String authorPhoto = null;
+        if (user != null) {
+            String prenom = safeText(user.getPrenom());
+            String nom = safeText(user.getNom());
+            authorName = (prenom + " " + nom).trim();
+            if (authorName.isEmpty()) authorName = "Utilisateur";
+            authorPhoto = user.getPhotoProfil();
+        }
+
+        ImageView profileImage = createImageFromSource(authorPhoto);
         if (profileImage != null) {
             avatar.getChildren().add(profileImage);
         } else {
-            Label initial = new Label(getInitialLetter(comment.getAuthorName()));
+            Label initial = new Label(getInitialLetter(authorName));
             initial.getStyleClass().add("oeuvre-post-comment-avatar-text");
             avatar.getChildren().add(initial);
         }
@@ -608,13 +648,13 @@ public class MesOeuvresController {
         HBox header = new HBox(8);
         header.setAlignment(Pos.CENTER_LEFT);
 
-        Label authorLabel = new Label(fallback(comment.getAuthorName(), "Utilisateur"));
+        Label authorLabel = new Label(authorName);
         authorLabel.getStyleClass().add("oeuvre-post-comment-author");
 
-        Label dateLabel = new Label(formatCommentDate(comment.getPostedAt()));
+        Label dateLabel = new Label(formatCommentDate(comment.getDateCommentaire()));
         dateLabel.getStyleClass().add("oeuvre-post-comment-date");
 
-        Label textLabel = new Label(fallback(comment.getText(), "..."));
+        Label textLabel = new Label(fallback(comment.getTexte(), "..."));
         textLabel.getStyleClass().add("oeuvre-post-comment-text");
         textLabel.setWrapText(true);
 
@@ -625,16 +665,23 @@ public class MesOeuvresController {
         return row;
     }
 
-    private ContextMenu buildPostActionsMenu(OeuvreFeedItem item) {
+    private String formatCommentDate(LocalDate dateCommentaire) {
+        if (dateCommentaire == null) {
+            return "Date inconnue";
+        }
+        return COMMENT_DATE_FORMATTER.format(dateCommentaire.atStartOfDay());
+    }
+
+    private ContextMenu buildPostActionsMenu(Oeuvre oeuvre) {
         MenuItem editItem = new MenuItem("Modifier");
         editItem.getStyleClass().add("collection-menu-edit");
         editItem.setGraphic(createColoredIcon("M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z", 0.58, "#6b7280"));
-        editItem.setOnAction(event -> showOeuvrePopup(item.getOeuvre()));
+        editItem.setOnAction(event -> showOeuvrePopup(oeuvre));
 
         MenuItem deleteItem = new MenuItem("Supprimer");
         deleteItem.getStyleClass().add("collection-menu-delete");
         deleteItem.setGraphic(createColoredIcon("M6 7h12v2H6V7zm2 3h8v10H8V10zm3-6h2l1 1h4v2H6V5h4l1-1z", 0.58, "#dc3545"));
-        deleteItem.setOnAction(event -> onDeleteOeuvre(item.getOeuvre()));
+        deleteItem.setOnAction(event -> onDeleteOeuvre(oeuvre));
 
         ContextMenu menu = new ContextMenu(editItem, deleteItem);
         menu.getStyleClass().add("collection-menu");
@@ -655,7 +702,7 @@ public class MesOeuvresController {
 
         try {
             oeuvreService.delete(oeuvre);
-            loadFeed();
+            loadOeuvres();
         } catch (Exception e) {
             Alert errorAlert = new Alert(Alert.AlertType.ERROR);
             errorAlert.initOwner(addOeuvreButton.getScene().getWindow());
@@ -724,12 +771,6 @@ public class MesOeuvresController {
         return DATE_FORMATTER.format(date);
     }
 
-    private String formatCommentDate(LocalDateTime date) {
-        if (date == null) {
-            return "Date inconnue";
-        }
-        return COMMENT_DATE_FORMATTER.format(date);
-    }
 
     private String toHashtag(String value) {
         String cleaned = safeText(value);
@@ -774,26 +815,23 @@ public class MesOeuvresController {
 
     private void applySearch() {
         String keyword = safeText(searchField.getText()).toLowerCase();
-        List<OeuvreFeedItem> filtered = new ArrayList<>();
+        List<Oeuvre> filtered = new ArrayList<>();
 
-        for (OeuvreFeedItem item : allFeedItems) {
-            Oeuvre oeuvre = item.getOeuvre();
+        for (Oeuvre oeuvre : allOeuvres) {
             String title = safeText(oeuvre.getTitre()).toLowerCase();
             String desc = safeText(oeuvre.getDescription()).toLowerCase();
             String type = safeText(oeuvre.getType()).toLowerCase();
-            String collection = safeText(item.getCollectionTitre()).toLowerCase();
 
             boolean keywordOk = keyword.isEmpty()
                     || title.contains(keyword)
                     || desc.contains(keyword)
-                    || type.contains(keyword)
-                    || collection.contains(keyword);
+                    || type.contains(keyword);
 
             if (keywordOk) {
-                filtered.add(item);
+                filtered.add(oeuvre);
             }
         }
 
-        renderFeed(filtered);
+        renderOeuvres(filtered);
     }
 }

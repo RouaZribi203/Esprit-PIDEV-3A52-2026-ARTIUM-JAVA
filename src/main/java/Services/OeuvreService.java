@@ -1,5 +1,6 @@
 package Services;
 
+import entities.User;
 import entities.Oeuvre;
 import utils.MyDatabase;
 
@@ -11,10 +12,7 @@ import java.sql.SQLException;
 import java.sql.SQLDataException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class OeuvreService implements services.Iservice<Oeuvre> {
 
@@ -178,48 +176,12 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
             throw new SQLDataException(e.getMessage());
         }
     }
-   ///remove to artist service
-    public ArtistIdentity getArtisteIdentityById(int artisteId) {
-        String[] tables = new String[] {"user", "users", "personne", "personnes"};
-        String[] specialiteColumns = new String[] {"specialite", "speciality"};
 
-        for (String table : tables) {
-            for (String specialiteColumn : specialiteColumns) {
-                String sql = "SELECT nom, prenom, " + specialiteColumn + " AS specialite FROM `" + table + "` WHERE id = ? LIMIT 1";
-                try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-                    preparedStatement.setInt(1, artisteId);
-                    try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                        if (resultSet.next()) {
-                            String nom = trimOrEmpty(resultSet.getString("nom"));
-                            String prenom = trimOrEmpty(resultSet.getString("prenom"));
-                            String specialite = trimOrEmpty(resultSet.getString("specialite"));
-
-                            String fullName = (prenom + " " + nom).trim();
-                            if (fullName.isEmpty()) {
-                                fullName = "Artiste";
-                            }
-                            if (specialite.isEmpty()) {
-                                specialite = "Specialite inconnue";
-                            }
-
-                            return new ArtistIdentity(fullName, specialite);
-                        }
-                    }
-                } catch (SQLException ignored) {
-                    // Try next table/column candidate.
-                }
-            }
-        }
-
-        return new ArtistIdentity("Artiste", "Specialite inconnue");
-    }
-
-    private String trimOrEmpty(String value) {
-        return value == null ? "" : value.trim();
-    }
-
-    public List<OeuvreFeedItem> getFeedByArtisteId(int artisteId) throws SQLDataException {
-        String sql = "SELECT o.id, o.titre, o.description, o.date_creation, o.image, o.type, o.collection_id, c.titre AS collection_titre "
+    /**
+     * Retourne la liste des oeuvres d'un artiste (simple, sans engagement data).
+     */
+    public List<Oeuvre> getOeuvresByArtisteId(int artisteId) throws SQLDataException {
+        String sql = "SELECT o.id, o.titre, o.description, o.date_creation, o.image, o.type, o.collection_id "
                 + "FROM oeuvre o "
                 + "INNER JOIN collections c ON c.id = o.collection_id "
                 + "WHERE c.artiste_id = ? "
@@ -227,148 +189,49 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setInt(1, artisteId);
-
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                List<OeuvreFeedItem> feedItems = new ArrayList<>();
+                List<Oeuvre> oeuvres = new ArrayList<>();
                 while (resultSet.next()) {
-                    Oeuvre oeuvre = mapOeuvre(resultSet);
-                    String collectionTitre = resultSet.getString("collection_titre");
-                    feedItems.add(new OeuvreFeedItem(oeuvre, collectionTitre, 0));
+                    oeuvres.add(mapOeuvre(resultSet));
                 }
-
-                applyEngagementData(feedItems);
-                return feedItems;
+                return oeuvres;
             }
         } catch (SQLException e) {
             throw new SQLDataException(e.getMessage());
         }
     }
 
-    private void applyEngagementData(List<OeuvreFeedItem> feedItems) {
-        Map<Integer, Integer> likeCountByOeuvreId = loadLikeCounts(feedItems);
-        Map<Integer, Integer> favoriteCountByOeuvreId = loadFavoriteCounts(feedItems);
 
-        // Load comments data via CommentaireService
-        CommentaireService commentService = new CommentaireService();
-        List<Integer> oeuvreIds = new ArrayList<>();
-        for (OeuvreFeedItem item : feedItems) {
-            oeuvreIds.add(item.getOeuvre().getId());
-        }
-        Map<Integer, Integer> commentCountByOeuvreId = commentService.getCommentCounts(oeuvreIds);
-        Map<Integer, List<CommentaireService.CommentPreview>> commentsPreviewByOeuvreId = commentService.getCommentsPreview(oeuvreIds, 3);
+    /**
+     * Retourne un user par son ID (pour affichage auteur commentaire, etc.).
+     */
+    public User getUserById(int userId) {
+        String[] tables = new String[] {"user", "users", "personne", "personnes"};
 
-        for (int i = 0; i < feedItems.size(); i++) {
-            OeuvreFeedItem item = feedItems.get(i);
-            Integer oeuvreId = item.getOeuvre().getId();
-            int likeCount = likeCountByOeuvreId.getOrDefault(oeuvreId, 0);
-            int commentCount = commentCountByOeuvreId.getOrDefault(oeuvreId, 0);
-            int favoriteCount = favoriteCountByOeuvreId.getOrDefault(oeuvreId, 0);
-            List<CommentaireService.CommentPreview> commentsPreview = commentsPreviewByOeuvreId.getOrDefault(oeuvreId, Collections.emptyList());
-
-            feedItems.set(
-                    i,
-                    new OeuvreFeedItem(
-                            item.getOeuvre(),
-                            item.getCollectionTitre(),
-                            likeCount,
-                            commentCount,
-                            favoriteCount,
-                            commentsPreview
-                    )
-            );
-        }
-    }
-
-    private Map<Integer, Integer> loadLikeCounts(List<OeuvreFeedItem> feedItems) {
-        Map<Integer, Integer> counts = new HashMap<>();
-        if (feedItems.isEmpty()) {
-            return counts;
-        }
-
-        String placeholders = buildPlaceholders(feedItems.size());
-        if (placeholders.isEmpty()) {
-            return counts;
-        }
-
-        String[] tableCandidates = new String[] {"likes", "like_entity", "likeentity"};
-        String[] countExprCandidates = new String[] {
-                "COALESCE(SUM(CASE WHEN liked = 1 THEN 1 ELSE 0 END), 0)",
-                "COUNT(*)"
-        };
-
-        for (String table : tableCandidates) {
-            for (String countExpr : countExprCandidates) {
-                String sql = "SELECT oeuvre_id, " + countExpr + " AS total FROM " + table
-                        + " WHERE oeuvre_id IN (" + placeholders + ") GROUP BY oeuvre_id";
-                try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-                    bindOeuvreIds(preparedStatement, feedItems);
-                    try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                        while (resultSet.next()) {
-                            counts.put(resultSet.getInt("oeuvre_id"), resultSet.getInt("total"));
-                        }
+        for (String table : tables) {
+            String sql = "SELECT id, nom, prenom, photoProfil, specialite FROM `" + table + "` WHERE id = ? LIMIT 1";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setInt(1, userId);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        User user = new User();
+                        user.setNom(trimOrEmpty(resultSet.getString("nom")));
+                        user.setPrenom(trimOrEmpty(resultSet.getString("prenom")));
+                        user.setPhotoProfil(trimOrEmpty(resultSet.getString("photoProfil")));
+                        user.setSpecialite(trimOrEmpty(resultSet.getString("specialite")));
+                        return user;
                     }
-                    return counts;
-                } catch (SQLException ignored) {
-                    // Try next possible table/expression.
                 }
+            } catch (SQLException ignored) {
+                // Try next table.
             }
         }
 
-        return counts;
+        return null;
     }
 
-    private Map<Integer, Integer> loadFavoriteCounts(List<OeuvreFeedItem> feedItems) {
-        Map<Integer, Integer> counts = new HashMap<>();
-        if (feedItems.isEmpty()) {
-            return counts;
-        }
-
-        String placeholders = buildPlaceholders(feedItems.size());
-        if (placeholders.isEmpty()) {
-            return counts;
-        }
-
-        String[] tableCandidates = new String[] {"oeuvre_user", "favoris", "favorites"};
-        String[] oeuvreColumnCandidates = new String[] {"oeuvre_id", "oeuvreId"};
-
-        for (String table : tableCandidates) {
-            for (String oeuvreColumn : oeuvreColumnCandidates) {
-                String sql = "SELECT " + oeuvreColumn + " AS oeuvre_id, COUNT(*) AS total FROM " + table
-                        + " WHERE " + oeuvreColumn + " IN (" + placeholders + ") GROUP BY " + oeuvreColumn;
-                try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-                    bindOeuvreIds(preparedStatement, feedItems);
-                    try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                        while (resultSet.next()) {
-                            counts.put(resultSet.getInt("oeuvre_id"), resultSet.getInt("total"));
-                        }
-                    }
-                    return counts;
-                } catch (SQLException ignored) {
-                    // Try next possible table/column.
-                }
-            }
-        }
-
-        return counts;
-    }
-
-
-    private String buildPlaceholders(int size) {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < size; i++) {
-            if (i > 0) {
-                builder.append(',');
-            }
-            builder.append('?');
-        }
-        return builder.toString();
-    }
-
-    private void bindOeuvreIds(PreparedStatement preparedStatement, List<OeuvreFeedItem> feedItems) throws SQLException {
-        int index = 1;
-        for (OeuvreFeedItem item : feedItems) {
-            preparedStatement.setInt(index++, item.getOeuvre().getId());
-        }
+    private String trimOrEmpty(String value) {
+        return value == null ? "" : value.trim();
     }
 
     private Oeuvre mapOeuvre(ResultSet resultSet) throws SQLException {
@@ -391,77 +254,5 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
         }
 
         return oeuvre;
-    }
-
-    public static class OeuvreFeedItem {
-        private final Oeuvre oeuvre;
-        private final String collectionTitre;
-        private final int likeCount;
-        private final int commentCount;
-        private final int favoriteCount;
-        private final List<CommentaireService.CommentPreview> commentsPreview;
-
-        public OeuvreFeedItem(Oeuvre oeuvre, String collectionTitre, int likeCount) {
-            this(oeuvre, collectionTitre, likeCount, 0, 0, new ArrayList<>());
-        }
-
-        public OeuvreFeedItem(
-                Oeuvre oeuvre,
-                String collectionTitre,
-                int likeCount,
-                int commentCount,
-                int favoriteCount,
-                List<CommentaireService.CommentPreview> commentsPreview
-        ) {
-            this.oeuvre = oeuvre;
-            this.collectionTitre = collectionTitre;
-            this.likeCount = likeCount;
-            this.commentCount = commentCount;
-            this.favoriteCount = favoriteCount;
-            this.commentsPreview = commentsPreview == null ? new ArrayList<>() : commentsPreview;
-        }
-
-        public Oeuvre getOeuvre() {
-            return oeuvre;
-        }
-
-        public String getCollectionTitre() {
-            return collectionTitre;
-        }
-
-        public int getLikeCount() {
-            return likeCount;
-        }
-
-        public int getCommentCount() {
-            return commentCount;
-        }
-
-        public int getFavoriteCount() {
-            return favoriteCount;
-        }
-
-        public List<CommentaireService.CommentPreview> getCommentsPreview() {
-            return commentsPreview;
-        }
-    }
-
-    ////remove to artist service
-    public static class ArtistIdentity {
-        private final String fullName;
-        private final String specialite;
-
-        public ArtistIdentity(String fullName, String specialite) {
-            this.fullName = fullName;
-            this.specialite = specialite;
-        }
-
-        public String getFullName() {
-            return fullName;
-        }
-
-        public String getSpecialite() {
-            return specialite;
-        }
     }
 }
