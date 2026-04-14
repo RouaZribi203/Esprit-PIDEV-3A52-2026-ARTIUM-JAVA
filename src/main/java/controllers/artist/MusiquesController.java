@@ -1,7 +1,9 @@
 package controllers.artist;
 
 import Services.MusiqueService;
+import Services.PlaylistService;
 import entities.Musique;
+import entities.Playlist;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -52,6 +54,18 @@ public class MusiquesController {
     private TextField titreField;
 
     @FXML
+    private TextField searchField;
+
+    @FXML
+    private ComboBox<String> sortMusicComboBox;
+
+    @FXML
+    private TextField playlistSearchField;
+
+    @FXML
+    private ComboBox<String> sortPlaylistComboBox;
+
+    @FXML
     private TextArea descriptionArea;
 
     @FXML
@@ -79,7 +93,25 @@ public class MusiquesController {
     private TilePane musiqueGrid;
 
     @FXML
+    private TilePane playlistGrid;
+
+    @FXML
     private Label emptyListLabel;
+
+    @FXML
+    private Label playlistEmptyListLabel;
+
+    @FXML
+    private Button musiqueSectionButton;
+
+    @FXML
+    private Button playlistsSectionButton;
+
+    @FXML
+    private VBox musiqueSection;
+
+    @FXML
+    private VBox playlistsSection;
 
     @FXML
     private Label nowPlayingTitleLabel;
@@ -100,7 +132,11 @@ public class MusiquesController {
     private Button submitMusiqueButton;
 
     private final MusiqueService musiqueService = new MusiqueService();
-    private final ObservableList<Musique> tracks = FXCollections.observableArrayList();
+    private final PlaylistService playlistService = new PlaylistService();
+    private final ObservableList<Musique> allTracks = FXCollections.observableArrayList();
+    private final ObservableList<Musique> visibleTracks = FXCollections.observableArrayList();
+    private final ObservableList<Playlist> allPlaylists = FXCollections.observableArrayList();
+    private final ObservableList<Playlist> visiblePlaylists = FXCollections.observableArrayList();
     private final ObservableList<String> genres = FXCollections.observableArrayList(
             "Rock",
             "Pop",
@@ -124,7 +160,59 @@ public class MusiquesController {
         feedbackLabel.setText("");
         resetEditMode();
         showListView();
+        setActiveSection(true);
+        
+        // Add search functionality
+        if (searchField != null) {
+            searchField.textProperty().addListener((obs, oldValue, newValue) -> filterTracks(newValue));
+        }
+        
+        // Add sort combo box
+        if (sortMusicComboBox != null) {
+            sortMusicComboBox.setItems(FXCollections.observableArrayList(
+                    "Titre (A-Z)", "Titre (Z-A)", "Genre (A-Z)", "Récent"
+            ));
+            sortMusicComboBox.getSelectionModel().selectFirst();
+            sortMusicComboBox.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> filterTracks(searchField != null ? searchField.getText() : null));
+        }
+
+        if (playlistSearchField != null) {
+            playlistSearchField.textProperty().addListener((obs, oldValue, newValue) -> filterPlaylists(newValue));
+        }
+
+        if (sortPlaylistComboBox != null) {
+            sortPlaylistComboBox.setItems(FXCollections.observableArrayList(
+                    "Nom (A-Z)", "Nom (Z-A)", "Récent"
+            ));
+            sortPlaylistComboBox.getSelectionModel().selectFirst();
+            sortPlaylistComboBox.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> filterPlaylists(playlistSearchField != null ? playlistSearchField.getText() : null));
+        }
+        
         refreshMusiquesList();
+        refreshPlaylistsList();
+    }
+
+    @FXML
+    private void handleShowMusiqueSection() {
+        setActiveSection(true);
+    }
+
+    @FXML
+    private void handleShowPlaylistsSection() {
+        setActiveSection(false);
+    }
+
+    @FXML
+    private void handleSearchPlaylist() {
+        filterPlaylists(playlistSearchField != null ? playlistSearchField.getText() : null);
+    }
+
+    @FXML
+    private void handleClearPlaylistSearch() {
+        if (playlistSearchField != null) {
+            playlistSearchField.clear();
+        }
+        filterPlaylists(null);
     }
 
     @FXML
@@ -144,7 +232,7 @@ public class MusiquesController {
     private void handlePlayPause() {
         if (mediaPlayer == null) {
             int selectedIndex = currentTrackIndex;
-            if (selectedIndex < 0 && !tracks.isEmpty()) {
+            if (selectedIndex < 0 && !visibleTracks.isEmpty()) {
                 selectedIndex = 0;
             }
             if (selectedIndex >= 0) {
@@ -167,19 +255,19 @@ public class MusiquesController {
 
     @FXML
     private void handlePreviousTrack() {
-        if (tracks.isEmpty()) {
+        if (visibleTracks.isEmpty()) {
             return;
         }
-        int targetIndex = currentTrackIndex <= 0 ? tracks.size() - 1 : currentTrackIndex - 1;
+        int targetIndex = currentTrackIndex <= 0 ? visibleTracks.size() - 1 : currentTrackIndex - 1;
         playTrackAtIndex(targetIndex, true);
     }
 
     @FXML
     private void handleNextTrack() {
-        if (tracks.isEmpty()) {
+        if (visibleTracks.isEmpty()) {
             return;
         }
-        int targetIndex = currentTrackIndex >= tracks.size() - 1 ? 0 : currentTrackIndex + 1;
+        int targetIndex = currentTrackIndex >= visibleTracks.size() - 1 ? 0 : currentTrackIndex + 1;
         playTrackAtIndex(targetIndex, true);
     }
 
@@ -413,32 +501,31 @@ public class MusiquesController {
     private void refreshMusiquesList() {
         try {
             List<Musique> musiques = musiqueService.getAll();
-            tracks.setAll(musiques);
-
-            if (tracks.isEmpty()) {
-                currentTrackIndex = -1;
-                stopPlayer();
-                nowPlayingTitleLabel.setText("Selectionnez une musique");
-                nowPlayingMetaLabel.setText("Genre: -");
-                playerStatusLabel.setText("Pret");
-                playPauseButton.setText("Play");
-            } else if (currentTrackIndex >= tracks.size()) {
-                currentTrackIndex = -1;
-            }
-
-            renderTrackGrid();
-            boolean hasData = !tracks.isEmpty();
-            emptyListLabel.setVisible(!hasData);
-            emptyListLabel.setManaged(!hasData);
-            if (hasData && currentTrackIndex < 0) {
-                updateNowPlayingLabels(tracks.get(0));
-            }
+            allTracks.setAll(musiques);
+            filterTracks(searchField != null ? searchField.getText() : null);
         } catch (SQLDataException e) {
-            tracks.clear();
+            allTracks.clear();
+            visibleTracks.clear();
             renderTrackGrid();
             emptyListLabel.setText("Impossible de charger les musiques: " + e.getMessage());
             emptyListLabel.setVisible(true);
             emptyListLabel.setManaged(true);
+        }
+    }
+
+    private void refreshPlaylistsList() {
+        try {
+            allPlaylists.setAll(playlistService.getAll());
+            filterPlaylists(playlistSearchField != null ? playlistSearchField.getText() : null);
+        } catch (SQLDataException e) {
+            allPlaylists.clear();
+            visiblePlaylists.clear();
+            renderPlaylistGrid();
+            if (playlistEmptyListLabel != null) {
+                playlistEmptyListLabel.setText("Impossible de charger les playlists: " + e.getMessage());
+                playlistEmptyListLabel.setVisible(true);
+                playlistEmptyListLabel.setManaged(true);
+            }
         }
     }
 
@@ -454,12 +541,33 @@ public class MusiquesController {
         updateFormTexts();
     }
 
+    private void setActiveSection(boolean showMusique) {
+        if (musiqueSection != null) {
+            musiqueSection.setVisible(showMusique);
+            musiqueSection.setManaged(showMusique);
+        }
+        if (playlistsSection != null) {
+            playlistsSection.setVisible(!showMusique);
+            playlistsSection.setManaged(!showMusique);
+        }
+        if (musiqueSectionButton != null) {
+            musiqueSectionButton.setStyle(showMusique
+                    ? "-fx-background-color: #1f7a1f; -fx-text-fill: white;"
+                    : "-fx-background-color: #4b5563; -fx-text-fill: white;");
+        }
+        if (playlistsSectionButton != null) {
+            playlistsSectionButton.setStyle(!showMusique
+                    ? "-fx-background-color: #1f7a1f; -fx-text-fill: white;"
+                    : "-fx-background-color: #4b5563; -fx-text-fill: white;");
+        }
+    }
+
     private void playTrackAtIndex(int index, boolean autoPlay) {
-        if (index < 0 || index >= tracks.size()) {
+        if (index < 0 || index >= visibleTracks.size()) {
             return;
         }
 
-        Musique selectedTrack = tracks.get(index);
+        Musique selectedTrack = visibleTracks.get(index);
         String source = toMediaSource(selectedTrack.getAudio());
         if (source == null) {
             playerStatusLabel.setText("Fichier audio introuvable");
@@ -594,8 +702,8 @@ public class MusiquesController {
 
     private void renderTrackGrid() {
         musiqueGrid.getChildren().clear();
-        for (int i = 0; i < tracks.size(); i++) {
-            Musique musique = tracks.get(i);
+        for (int i = 0; i < visibleTracks.size(); i++) {
+            Musique musique = visibleTracks.get(i);
             musiqueGrid.getChildren().add(createTrackCard(musique, i));
         }
     }
@@ -607,8 +715,8 @@ public class MusiquesController {
         }
 
         try {
-            if (currentTrackIndex >= 0 && currentTrackIndex < tracks.size()) {
-                Musique current = tracks.get(currentTrackIndex);
+            if (currentTrackIndex >= 0 && currentTrackIndex < visibleTracks.size()) {
+                Musique current = visibleTracks.get(currentTrackIndex);
                 if (current.getId() != null && current.getId().equals(musique.getId())) {
                     stopPlayer();
                     currentTrackIndex = -1;
@@ -732,6 +840,202 @@ public class MusiquesController {
             placeholder.getChildren().add(noImageLabel);
             return placeholder;
         }
+    }
+
+    private void filterTracks(String query) {
+        String normalizedQuery = query == null ? "" : query.trim().toLowerCase(Locale.ROOT);
+
+        visibleTracks.setAll(allTracks.stream()
+                .filter(track -> normalizedQuery.isEmpty() || matchesQuery(track, normalizedQuery))
+                .toList());
+
+        // Apply sorting
+        applySortToTracks();
+
+        if (visibleTracks.isEmpty()) {
+            currentTrackIndex = -1;
+            stopPlayer();
+            nowPlayingTitleLabel.setText("Selectionnez une musique");
+            nowPlayingMetaLabel.setText("Genre: -");
+            playerStatusLabel.setText("Pret");
+            playPauseButton.setText("Play");
+        } else if (currentTrackIndex >= visibleTracks.size()) {
+            currentTrackIndex = -1;
+        }
+
+        renderTrackGrid();
+        emptyListLabel.setVisible(visibleTracks.isEmpty());
+        emptyListLabel.setManaged(visibleTracks.isEmpty());
+
+        if (!visibleTracks.isEmpty() && currentTrackIndex < 0) {
+            updateNowPlayingLabels(visibleTracks.get(0));
+        }
+    }
+
+    private void filterPlaylists(String query) {
+        String normalizedQuery = query == null ? "" : query.trim().toLowerCase(Locale.ROOT);
+
+        visiblePlaylists.setAll(allPlaylists.stream()
+                .filter(playlist -> normalizedQuery.isEmpty() || matchesPlaylistQuery(playlist, normalizedQuery))
+                .toList());
+
+        applySortToPlaylists();
+        renderPlaylistGrid();
+
+        if (playlistEmptyListLabel != null) {
+            playlistEmptyListLabel.setVisible(visiblePlaylists.isEmpty());
+            playlistEmptyListLabel.setManaged(visiblePlaylists.isEmpty());
+        }
+    }
+
+    private boolean matchesPlaylistQuery(Playlist playlist, String query) {
+        String name = playlist.getNom() != null ? playlist.getNom().toLowerCase(Locale.ROOT) : "";
+        String description = playlist.getDescription() != null ? playlist.getDescription().toLowerCase(Locale.ROOT) : "";
+        return name.contains(query) || description.contains(query);
+    }
+
+    private boolean matchesQuery(Musique musique, String query) {
+        String titre = musique.getTitre() != null ? musique.getTitre().toLowerCase(Locale.ROOT) : "";
+        String description = musique.getDescription() != null ? musique.getDescription().toLowerCase(Locale.ROOT) : "";
+        String genre = musique.getGenre() != null ? musique.getGenre().toLowerCase(Locale.ROOT) : "";
+        return titre.contains(query) || description.contains(query) || genre.contains(query);
+    }
+
+    private void applySortToTracks() {
+        if (sortMusicComboBox == null) {
+            return;
+        }
+        String sortOption = sortMusicComboBox.getValue();
+        if (sortOption == null) {
+            return;
+        }
+
+        switch (sortOption) {
+            case "Titre (A-Z)" -> visibleTracks.sort((a, b) -> {
+                String titleA = a.getTitre() != null ? a.getTitre() : "";
+                String titleB = b.getTitre() != null ? b.getTitre() : "";
+                return titleA.compareToIgnoreCase(titleB);
+            });
+            case "Titre (Z-A)" -> visibleTracks.sort((a, b) -> {
+                String titleA = a.getTitre() != null ? a.getTitre() : "";
+                String titleB = b.getTitre() != null ? b.getTitre() : "";
+                return titleB.compareToIgnoreCase(titleA);
+            });
+            case "Genre (A-Z)" -> visibleTracks.sort((a, b) -> {
+                String genreA = a.getGenre() != null ? a.getGenre() : "";
+                String genreB = b.getGenre() != null ? b.getGenre() : "";
+                return genreA.compareToIgnoreCase(genreB);
+            });
+            case "Récent" -> visibleTracks.sort((a, b) -> {
+                LocalDate dateA = a.getDateCreation() != null ? a.getDateCreation() : LocalDate.MIN;
+                LocalDate dateB = b.getDateCreation() != null ? b.getDateCreation() : LocalDate.MIN;
+                return dateB.compareTo(dateA);
+            });
+        }
+    }
+
+    private void applySortToPlaylists() {
+        if (sortPlaylistComboBox == null) {
+            return;
+        }
+        String sortOption = sortPlaylistComboBox.getValue();
+        if (sortOption == null) {
+            return;
+        }
+
+        switch (sortOption) {
+            case "Nom (A-Z)" -> visiblePlaylists.sort((a, b) -> {
+                String nameA = a.getNom() != null ? a.getNom() : "";
+                String nameB = b.getNom() != null ? b.getNom() : "";
+                return nameA.compareToIgnoreCase(nameB);
+            });
+            case "Nom (Z-A)" -> visiblePlaylists.sort((a, b) -> {
+                String nameA = a.getNom() != null ? a.getNom() : "";
+                String nameB = b.getNom() != null ? b.getNom() : "";
+                return nameB.compareToIgnoreCase(nameA);
+            });
+            case "Récent" -> visiblePlaylists.sort((a, b) -> {
+                LocalDate dateA = a.getDateCreation() != null ? a.getDateCreation() : LocalDate.MIN;
+                LocalDate dateB = b.getDateCreation() != null ? b.getDateCreation() : LocalDate.MIN;
+                return dateB.compareTo(dateA);
+            });
+        }
+    }
+
+    private void renderPlaylistGrid() {
+        if (playlistGrid == null) {
+            return;
+        }
+        playlistGrid.getChildren().clear();
+        for (Playlist playlist : visiblePlaylists) {
+            playlistGrid.getChildren().add(createPlaylistCard(playlist));
+        }
+    }
+
+    private VBox createPlaylistCard(Playlist playlist) {
+        VBox card = new VBox(6);
+        card.setPrefWidth(180);
+        card.setMaxWidth(180);
+        card.setStyle("-fx-background-color: #202020; -fx-background-radius: 8; -fx-padding: 8;");
+
+        Node coverNode = buildPlaylistCoverNode(playlist.getImage());
+        Label titleLabel = new Label(safePlaylistName(playlist));
+        titleLabel.setWrapText(true);
+        titleLabel.setStyle("-fx-text-fill: #ffffff; -fx-font-weight: bold;");
+
+        String description = playlist.getDescription() != null && !playlist.getDescription().isBlank()
+                ? playlist.getDescription()
+                : "Aucune description";
+        Label descLabel = new Label(description);
+        descLabel.setWrapText(true);
+        descLabel.setStyle("-fx-text-fill: #b0b0b0;");
+
+        Label countLabel = new Label((playlist.getMusiques() != null ? playlist.getMusiques().size() : 0) + " musique(s)");
+        countLabel.setStyle("-fx-text-fill: #9ca3af;");
+
+        card.getChildren().addAll(coverNode, titleLabel, descLabel, countLabel);
+        return card;
+    }
+
+    private Node buildPlaylistCoverNode(byte[] imageBytes) {
+        StackPane placeholder = new StackPane();
+        placeholder.setPrefSize(160, 110);
+        placeholder.setStyle("-fx-background-color: #2b2b2b; -fx-background-radius: 6;");
+
+        if (imageBytes == null || imageBytes.length == 0) {
+            Label noImageLabel = new Label("Playlist");
+            noImageLabel.setStyle("-fx-text-fill: #8a8a8a;");
+            placeholder.getChildren().add(noImageLabel);
+            return placeholder;
+        }
+
+        try {
+            Image image = new Image(new ByteArrayInputStream(imageBytes));
+            if (image.isError()) {
+                Label noImageLabel = new Label("Playlist");
+                noImageLabel.setStyle("-fx-text-fill: #8a8a8a;");
+                placeholder.getChildren().add(noImageLabel);
+                return placeholder;
+            }
+
+            ImageView imageView = new ImageView(image);
+            imageView.setFitWidth(160);
+            imageView.setFitHeight(110);
+            imageView.setPreserveRatio(false);
+            return imageView;
+        } catch (Exception ex) {
+            Label noImageLabel = new Label("Playlist");
+            noImageLabel.setStyle("-fx-text-fill: #8a8a8a;");
+            placeholder.getChildren().add(noImageLabel);
+            return placeholder;
+        }
+    }
+
+    private String safePlaylistName(Playlist playlist) {
+        if (playlist == null || playlist.getNom() == null || playlist.getNom().isBlank()) {
+            return "Playlist sans nom";
+        }
+        return playlist.getNom();
     }
 
     public static final class CollectionChoice {

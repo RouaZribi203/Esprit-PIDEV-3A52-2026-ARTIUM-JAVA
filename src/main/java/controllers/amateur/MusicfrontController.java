@@ -12,6 +12,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -36,6 +37,18 @@ public class MusicfrontController {
 
 	@FXML
 	private TextField searchField;
+
+	@FXML
+	private HBox musicSearchBar;
+
+	@FXML
+	private TextField playlistSearchField;
+
+	@FXML
+	private HBox playlistSearchBar;
+
+	@FXML
+	private ComboBox<String> sortMusicComboBox;
 
 	@FXML
 	private TilePane musicGrid;
@@ -69,6 +82,9 @@ public class MusicfrontController {
 
 	@FXML
 	private TextField playlistNameField;
+
+	@FXML
+	private ComboBox<String> sortPlaylistComboBox;
 
 	@FXML
 	private TextArea playlistDescriptionArea;
@@ -113,7 +129,8 @@ public class MusicfrontController {
 	private final PlaylistService playlistService = new PlaylistService();
 	private final ObservableList<Musique> allTracks = FXCollections.observableArrayList();
 	private final ObservableList<Musique> visibleTracks = FXCollections.observableArrayList();
-	private final ObservableList<Playlist> playlists = FXCollections.observableArrayList();
+	private final ObservableList<Playlist> allPlaylists = FXCollections.observableArrayList();
+	private final ObservableList<Playlist> visiblePlaylists = FXCollections.observableArrayList();
 	private Integer selectedPlaylistId;
 	private Integer editingPlaylistId;
 	private java.time.LocalDate editingPlaylistDateCreation;
@@ -128,6 +145,23 @@ public class MusicfrontController {
 	public void initialize() {
 		activeController = this;
 		searchField.textProperty().addListener((obs, oldValue, newValue) -> filterTracks(newValue));
+		if (sortMusicComboBox != null) {
+			sortMusicComboBox.setItems(FXCollections.observableArrayList(
+					"Titre (A-Z)", "Titre (Z-A)", "Genre (A-Z)", "Récent"
+			));
+			sortMusicComboBox.getSelectionModel().selectFirst();
+			sortMusicComboBox.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> filterTracks(searchField.getText()));
+		}
+		if (sortPlaylistComboBox != null) {
+			sortPlaylistComboBox.setItems(FXCollections.observableArrayList(
+					"Nom (A-Z)", "Nom (Z-A)", "Récent"
+			));
+			sortPlaylistComboBox.getSelectionModel().selectFirst();
+			sortPlaylistComboBox.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> filterPlaylists(playlistSearchField != null ? playlistSearchField.getText() : null));
+		}
+		if (playlistSearchField != null) {
+			playlistSearchField.textProperty().addListener((obs, oldValue, newValue) -> filterPlaylists(newValue));
+		}
 		if (createPlaylistButton != null) {
 			createPlaylistButton.setText("Créer la playlist");
 		}
@@ -161,9 +195,22 @@ public class MusicfrontController {
 	@FXML
 	private void handleShowPlaylistsSection() {
 		setActiveSection(false);
-		if (playlistDetailSection != null && playlists.isEmpty()) {
+		if (playlistDetailSection != null && allPlaylists.isEmpty()) {
 			hidePlaylistDetails();
 		}
+	}
+
+	@FXML
+	private void handleSearchPlaylist() {
+		filterPlaylists(playlistSearchField != null ? playlistSearchField.getText() : null);
+	}
+
+	@FXML
+	private void handleClearPlaylistSearch() {
+		if (playlistSearchField != null) {
+			playlistSearchField.clear();
+		}
+		filterPlaylists(null);
 	}
 
 	@FXML
@@ -384,8 +431,8 @@ public class MusicfrontController {
 
 	private void refreshPlaylists() {
 		try {
-			playlists.setAll(playlistService.getAll());
-			renderPlaylistGrid();
+			allPlaylists.setAll(playlistService.getAll());
+			filterPlaylists(playlistSearchField != null ? playlistSearchField.getText() : null);
 			if (playlistDetailSection != null && playlistDetailSection.isVisible()) {
 				Playlist refreshed = findPlaylistById(selectedPlaylistId);
 				if (refreshed != null) {
@@ -395,7 +442,8 @@ public class MusicfrontController {
 				}
 			}
 		} catch (SQLDataException e) {
-			playlists.clear();
+			allPlaylists.clear();
+			visiblePlaylists.clear();
 			renderPlaylistGrid();
 			hidePlaylistDetails();
 			setPlaylistFeedback("Impossible de charger les playlists: " + e.getMessage(), false);
@@ -424,6 +472,9 @@ public class MusicfrontController {
 				.filter(track -> normalizedQuery.isEmpty() || matchesQuery(track, normalizedQuery))
 				.toList());
 
+		// Apply sorting
+		applySortToTracks();
+
 		if (visibleTracks.isEmpty()) {
 			currentTrackIndex = -1;
 			stopPlayer();
@@ -449,6 +500,23 @@ public class MusicfrontController {
 		String description = musique.getDescription() != null ? musique.getDescription().toLowerCase(Locale.ROOT) : "";
 		String genre = musique.getGenre() != null ? musique.getGenre().toLowerCase(Locale.ROOT) : "";
 		return titre.contains(query) || description.contains(query) || genre.contains(query);
+	}
+
+	private void filterPlaylists(String query) {
+		String normalizedQuery = query == null ? "" : query.trim().toLowerCase(Locale.ROOT);
+
+		visiblePlaylists.setAll(allPlaylists.stream()
+				.filter(playlist -> normalizedQuery.isEmpty() || matchesPlaylistQuery(playlist, normalizedQuery))
+				.toList());
+
+		applySortToPlaylists();
+		renderPlaylistGrid();
+	}
+
+	private boolean matchesPlaylistQuery(Playlist playlist, String query) {
+		String name = playlist.getNom() != null ? playlist.getNom().toLowerCase(Locale.ROOT) : "";
+		String description = playlist.getDescription() != null ? playlist.getDescription().toLowerCase(Locale.ROOT) : "";
+		return name.contains(query) || description.contains(query);
 	}
 
 	private void playTrackAtIndex(int index) {
@@ -573,7 +641,7 @@ public class MusicfrontController {
 
 	private void renderPlaylistGrid() {
 		playlistGrid.getChildren().clear();
-		for (Playlist playlist : playlists) {
+		for (Playlist playlist : visiblePlaylists) {
 			playlistGrid.getChildren().add(createPlaylistCard(playlist));
 		}
 	}
@@ -604,6 +672,15 @@ public class MusicfrontController {
 	}
 
 	private void setActiveSection(boolean showMusique) {
+		if (musicSearchBar != null) {
+			musicSearchBar.setVisible(showMusique);
+			musicSearchBar.setManaged(showMusique);
+		}
+		if (playlistSearchBar != null) {
+			playlistSearchBar.setVisible(!showMusique);
+			playlistSearchBar.setManaged(!showMusique);
+		}
+
 		if (musiqueSection != null) {
 			musiqueSection.setVisible(showMusique);
 			musiqueSection.setManaged(showMusique);
@@ -690,7 +767,7 @@ public class MusicfrontController {
 		if (playlistId == null) {
 			return null;
 		}
-		for (Playlist playlist : playlists) {
+		for (Playlist playlist : allPlaylists) {
 			if (playlist.getId() != null && playlist.getId().equals(playlistId)) {
 				return playlist;
 			}
@@ -747,7 +824,7 @@ public class MusicfrontController {
 	}
 
 	private void addMusicToPlaylistWithChoice(Musique musique) {
-		if (playlists.isEmpty()) {
+		if (allPlaylists.isEmpty()) {
 			setPlaylistFeedback("Créez d'abord une playlist.", false);
 			return;
 		}
@@ -756,7 +833,7 @@ public class MusicfrontController {
 			return;
 		}
 
-		java.util.List<PlaylistChoice> choices = playlists.stream()
+		java.util.List<PlaylistChoice> choices = allPlaylists.stream()
 				.filter(playlist -> playlist.getId() != null)
 				.map(playlist -> new PlaylistChoice(playlist.getId(), safePlaylistName(playlist)))
 				.toList();
@@ -782,6 +859,67 @@ public class MusicfrontController {
 			setPlaylistFeedback("Musique ajoutée à \"" + selected.get().name() + "\" avec succès.", true);
 		} catch (SQLDataException e) {
 			setPlaylistFeedback("Erreur lors de l'ajout à la playlist: " + e.getMessage(), false);
+		}
+	}
+
+	private void applySortToTracks() {
+		if (sortMusicComboBox == null) {
+			return;
+		}
+		String sortOption = sortMusicComboBox.getValue();
+		if (sortOption == null) {
+			return;
+		}
+
+		switch (sortOption) {
+			case "Titre (A-Z)" -> visibleTracks.sort((a, b) -> {
+				String titleA = a.getTitre() != null ? a.getTitre() : "";
+				String titleB = b.getTitre() != null ? b.getTitre() : "";
+				return titleA.compareToIgnoreCase(titleB);
+			});
+			case "Titre (Z-A)" -> visibleTracks.sort((a, b) -> {
+				String titleA = a.getTitre() != null ? a.getTitre() : "";
+				String titleB = b.getTitre() != null ? b.getTitre() : "";
+				return titleB.compareToIgnoreCase(titleA);
+			});
+			case "Genre (A-Z)" -> visibleTracks.sort((a, b) -> {
+				String genreA = a.getGenre() != null ? a.getGenre() : "";
+				String genreB = b.getGenre() != null ? b.getGenre() : "";
+				return genreA.compareToIgnoreCase(genreB);
+			});
+			case "Récent" -> visibleTracks.sort((a, b) -> {
+				java.time.LocalDate dateA = a.getDateCreation() != null ? a.getDateCreation() : java.time.LocalDate.MIN;
+				java.time.LocalDate dateB = b.getDateCreation() != null ? b.getDateCreation() : java.time.LocalDate.MIN;
+				return dateB.compareTo(dateA);
+			});
+		}
+	}
+
+	private void applySortToPlaylists() {
+		if (sortPlaylistComboBox == null) {
+			return;
+		}
+		String sortOption = sortPlaylistComboBox.getValue();
+		if (sortOption == null) {
+			return;
+		}
+
+		switch (sortOption) {
+			case "Nom (A-Z)" -> visiblePlaylists.sort((a, b) -> {
+				String nameA = a.getNom() != null ? a.getNom() : "";
+				String nameB = b.getNom() != null ? b.getNom() : "";
+				return nameA.compareToIgnoreCase(nameB);
+			});
+			case "Nom (Z-A)" -> visiblePlaylists.sort((a, b) -> {
+				String nameA = a.getNom() != null ? a.getNom() : "";
+				String nameB = b.getNom() != null ? b.getNom() : "";
+				return nameB.compareToIgnoreCase(nameA);
+			});
+			case "Récent" -> visiblePlaylists.sort((a, b) -> {
+				java.time.LocalDate dateA = a.getDateCreation() != null ? a.getDateCreation() : java.time.LocalDate.MIN;
+				java.time.LocalDate dateB = b.getDateCreation() != null ? b.getDateCreation() : java.time.LocalDate.MIN;
+				return dateB.compareTo(dateA);
+			});
 		}
 	}
 
