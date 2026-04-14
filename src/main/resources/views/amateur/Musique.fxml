@@ -61,6 +61,8 @@
                             <Label fx:id="playlistDetailTitleLabel" style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;" text="Aucune playlist sélectionnée" />
                             <Label fx:id="playlistDetailMetaLabel" style="-fx-text-fill: #cbd5e1;" text="Cliquez sur une playlist pour voir ses musiques." wrapText="true" />
                         </VBox>
+                        <Button mnemonicParsing="false" onAction="#handleEditSelectedPlaylist" text="Modifier" />
+                        <Button mnemonicParsing="false" onAction="#handleDeleteSelectedPlaylist" text="Supprimer" />
                         <Button fx:id="closePlaylistDetailButton" mnemonicParsing="false" onAction="#handleClosePlaylistDetail" text="Fermer" />
                     </HBox>
 

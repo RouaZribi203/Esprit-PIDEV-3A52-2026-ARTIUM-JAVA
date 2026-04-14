@@ -8,8 +8,10 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceDialog;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -113,6 +115,9 @@ public class MusicfrontController {
 	private final ObservableList<Musique> visibleTracks = FXCollections.observableArrayList();
 	private final ObservableList<Playlist> playlists = FXCollections.observableArrayList();
 	private Integer selectedPlaylistId;
+	private Integer editingPlaylistId;
+	private java.time.LocalDate editingPlaylistDateCreation;
+	private byte[] editingPlaylistImageBytes;
 	private static final java.util.Set<String> IMAGE_EXTENSIONS = new java.util.HashSet<>(java.util.Arrays.asList("png", "jpg", "jpeg"));
 	private static final long MAX_IMAGE_SIZE_BYTES = 5L * 1024L * 1024L;
 
@@ -167,6 +172,74 @@ public class MusicfrontController {
 	}
 
 	@FXML
+	private void handleEditSelectedPlaylist() {
+		Playlist playlist = findPlaylistById(selectedPlaylistId);
+		if (playlist == null) {
+			setPlaylistFeedback("Sélectionnez d'abord une playlist à modifier.", false);
+			return;
+		}
+
+		editingPlaylistId = playlist.getId();
+		editingPlaylistDateCreation = playlist.getDateCreation();
+		editingPlaylistImageBytes = playlist.getImage();
+
+		if (playlistNameField != null) {
+			playlistNameField.setText(playlist.getNom() != null ? playlist.getNom() : "");
+		}
+		if (playlistDescriptionArea != null) {
+			playlistDescriptionArea.setText(playlist.getDescription() != null ? playlist.getDescription() : "");
+		}
+		if (playlistImageField != null) {
+			playlistImageField.clear();
+		}
+
+		if (createPlaylistButton != null) {
+			createPlaylistButton.setText("Enregistrer");
+		}
+		if (togglePlaylistFormButton != null) {
+			togglePlaylistFormButton.setText("Fermer le formulaire");
+		}
+		if (playlistFormSection != null) {
+			playlistFormSection.setVisible(true);
+			playlistFormSection.setManaged(true);
+		}
+		setPlaylistFeedback("Mode modification de playlist activé.", true);
+	}
+
+	@FXML
+	private void handleDeleteSelectedPlaylist() {
+		Playlist playlist = findPlaylistById(selectedPlaylistId);
+		if (playlist == null) {
+			setPlaylistFeedback("Sélectionnez d'abord une playlist à supprimer.", false);
+			return;
+		}
+
+		Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+		confirm.setTitle("Supprimer la playlist");
+		confirm.setHeaderText("Supprimer \"" + safePlaylistName(playlist) + "\" ?");
+		confirm.setContentText("Cette action est définitive.");
+
+		java.util.Optional<ButtonType> result = confirm.showAndWait();
+		if (result.isEmpty() || result.get() != ButtonType.OK) {
+			return;
+		}
+
+		try {
+			playlistService.delete(playlist);
+			editingPlaylistId = null;
+			editingPlaylistDateCreation = null;
+			editingPlaylistImageBytes = null;
+			clearPlaylistForm();
+			hidePlaylistForm();
+			hidePlaylistDetails();
+			refreshPlaylists();
+			setPlaylistFeedback("Playlist supprimée avec succès.", true);
+		} catch (SQLDataException e) {
+			setPlaylistFeedback("Erreur lors de la suppression: " + e.getMessage(), false);
+		}
+	}
+
+	@FXML
 	private void handleChoosePlaylistImage() {
 		javafx.stage.FileChooser chooser = new javafx.stage.FileChooser();
 		chooser.setTitle("Choisir une image de playlist");
@@ -208,9 +281,11 @@ public class MusicfrontController {
 		}
 
 		Playlist playlist = new Playlist();
+		boolean editMode = editingPlaylistId != null;
+		playlist.setId(editingPlaylistId);
 		playlist.setNom(nom);
 		playlist.setDescription(description.isEmpty() ? null : description);
-		playlist.setDateCreation(java.time.LocalDate.now());
+		playlist.setDateCreation(editMode && editingPlaylistDateCreation != null ? editingPlaylistDateCreation : java.time.LocalDate.now());
 
 		if (!imagePath.isEmpty()) {
 			try {
@@ -219,14 +294,24 @@ public class MusicfrontController {
 				setPlaylistFeedback("Impossible de lire l'image selectionnee.", false);
 				return;
 			}
+		} else if (editMode) {
+			playlist.setImage(editingPlaylistImageBytes);
 		}
 
 		try {
-			playlistService.add(playlist);
+			if (editMode) {
+				playlistService.update(playlist);
+				setPlaylistFeedback("Playlist modifiée avec succès.", true);
+			} else {
+				playlistService.add(playlist);
+				setPlaylistFeedback("Playlist créée avec succès.", true);
+			}
 			clearPlaylistForm();
+			editingPlaylistId = null;
+			editingPlaylistDateCreation = null;
+			editingPlaylistImageBytes = null;
 			hidePlaylistForm();
 			refreshPlaylists();
-			setPlaylistFeedback("Playlist créée avec succès.", true);
 		} catch (SQLDataException e) {
 			setPlaylistFeedback("Erreur lors de la création: " + e.getMessage(), false);
 		}
@@ -243,6 +328,14 @@ public class MusicfrontController {
 		playlistFormSection.setManaged(shouldShow);
 		if (togglePlaylistFormButton != null) {
 			togglePlaylistFormButton.setText(shouldShow ? "Fermer le formulaire" : "Nouvelle playlist");
+		}
+		if (!shouldShow) {
+			editingPlaylistId = null;
+			editingPlaylistDateCreation = null;
+			editingPlaylistImageBytes = null;
+			if (createPlaylistButton != null) {
+				createPlaylistButton.setText("Créer la playlist");
+			}
 		}
 	}
 
@@ -505,6 +598,9 @@ public class MusicfrontController {
 		if (togglePlaylistFormButton != null) {
 			togglePlaylistFormButton.setText("Nouvelle playlist");
 		}
+		if (createPlaylistButton != null) {
+			createPlaylistButton.setText(editingPlaylistId != null ? "Enregistrer" : "Créer la playlist");
+		}
 	}
 
 	private void setActiveSection(boolean showMusique) {
@@ -604,6 +700,9 @@ public class MusicfrontController {
 
 	private void hidePlaylistDetails() {
 		selectedPlaylistId = null;
+		editingPlaylistId = null;
+		editingPlaylistDateCreation = null;
+		editingPlaylistImageBytes = null;
 		if (playlistDetailSection != null) {
 			playlistDetailSection.setVisible(false);
 			playlistDetailSection.setManaged(false);
