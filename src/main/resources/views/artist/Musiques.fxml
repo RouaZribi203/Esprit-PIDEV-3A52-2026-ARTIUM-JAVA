@@ -44,7 +44,7 @@
     </VBox>
 
     <VBox fx:id="formSection" spacing="14.0" visible="false" managed="false">
-        <Label text="Ajouter une nouvelle musique" />
+        <Label fx:id="formTitleLabel" text="Ajouter une nouvelle musique" />
 
         <VBox spacing="6.0">
             <Label text="Titre *" />
@@ -86,7 +86,7 @@
             <Label text="Formats acceptes: MP3, M4A, WAV" style="-fx-text-fill: #a0a0a0;" />
         </VBox>
 
-        <Button mnemonicParsing="false" onAction="#handleCreateMusique" text="Créer" />
+        <Button fx:id="submitMusiqueButton" mnemonicParsing="false" onAction="#handleCreateMusique" text="Creer" />
         <Label fx:id="feedbackLabel" wrapText="true" />
     </VBox>
 </VBox>

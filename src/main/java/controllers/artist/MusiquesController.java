@@ -38,6 +38,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.SQLDataException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -92,6 +93,12 @@ public class MusiquesController {
     @FXML
     private Button playPauseButton;
 
+    @FXML
+    private Label formTitleLabel;
+
+    @FXML
+    private Button submitMusiqueButton;
+
     private final MusiqueService musiqueService = new MusiqueService();
     private final ObservableList<Musique> tracks = FXCollections.observableArrayList();
     private final ObservableList<String> genres = FXCollections.observableArrayList(
@@ -107,12 +114,17 @@ public class MusiquesController {
     private MediaPlayer mediaPlayer;
     private int currentTrackIndex = -1;
     private static final Set<String> PLAYABLE_EXTENSIONS = new HashSet<>(Arrays.asList("mp3", "m4a", "wav"));
+    private Integer editingMusiqueId;
+    private LocalDate editingDateCreation;
+    private byte[] editingImageBytes;
+    private String editingAudioPath;
 
     @FXML
     public void initialize() {
         genreComboBox.setItems(genres);
         loadCollections();
         feedbackLabel.setText("");
+        resetEditMode();
         showListView();
         refreshMusiquesList();
     }
@@ -120,8 +132,12 @@ public class MusiquesController {
     @FXML
     private void handleToggleForm() {
         if (formSection.isVisible()) {
+            clearForm();
+            resetEditMode();
             showListView();
         } else {
+            clearForm();
+            resetEditMode();
             showFormView();
         }
     }
@@ -205,6 +221,8 @@ public class MusiquesController {
         CollectionChoice collectionChoice = collectionComboBox.getValue();
         String imagePath = imagePathField.getText() != null ? imagePathField.getText().trim() : "";
         String audioPath = audioPathField.getText() != null ? audioPathField.getText().trim() : "";
+        boolean editMode = editingMusiqueId != null;
+        String resolvedAudioPath = !audioPath.isEmpty() ? audioPath : (editingAudioPath != null ? editingAudioPath : "");
 
         if (titre.length() < 3 || titre.length() > 255) {
             setFeedback("Le titre doit contenir entre 3 et 255 caracteres.", false);
@@ -216,12 +234,12 @@ public class MusiquesController {
             return;
         }
 
-        if (genre.isEmpty() || audioPath.isEmpty()) {
+        if (genre.isEmpty() || resolvedAudioPath.isEmpty()) {
             setFeedback("Veuillez renseigner le genre et le fichier audio.", false);
             return;
         }
 
-        if (!isPlayableAudioPath(audioPath)) {
+        if (!isPlayableAudioPath(resolvedAudioPath)) {
             setFeedback("Format audio non supporte. Utilisez: MP3, M4A ou WAV.", false);
             return;
         }
@@ -229,28 +247,39 @@ public class MusiquesController {
         Musique musique = new Musique();
         musique.setTitre(titre);
         musique.setDescription(description);
-        musique.setDateCreation(LocalDate.now());
+        musique.setId(editingMusiqueId);
+        musique.setDateCreation(editingDateCreation != null ? editingDateCreation : LocalDate.now());
         musique.setGenre(genre);
         musique.setCollectionId(collectionChoice != null && collectionChoice.getId() > 0 ? collectionChoice.getId() : null);
-        musique.setAudio(audioPath);
+        musique.setAudio(resolvedAudioPath);
+
+        byte[] imageBytes = editingImageBytes;
 
         if (!imagePath.isEmpty()) {
             try {
-                musique.setImage(Files.readAllBytes(new File(imagePath).toPath()));
+                imageBytes = Files.readAllBytes(new File(imagePath).toPath());
             } catch (IOException e) {
                 setFeedback("Impossible de lire l'image selectionnee.", false);
                 return;
             }
         }
+        musique.setImage(imageBytes);
 
         try {
-            musiqueService.add(musique);
+            if (editMode) {
+                musique.setUpdatedAt(LocalDateTime.now());
+                musiqueService.update(musique);
+                setFeedback("Musique modifiee avec succes.", true);
+            } else {
+                musiqueService.add(musique);
+                setFeedback("Musique ajoutee avec succes.", true);
+            }
             clearForm();
-            setFeedback("Musique ajoutee avec succes.", true);
+            resetEditMode();
             refreshMusiquesList();
             showListView();
         } catch (SQLDataException e) {
-            setFeedback("Erreur lors de l'ajout: " + e.getMessage(), false);
+            setFeedback("Erreur lors de l'enregistrement: " + e.getMessage(), false);
         }
     }
 
@@ -261,6 +290,63 @@ public class MusiquesController {
         collectionComboBox.getSelectionModel().clearSelection();
         imagePathField.clear();
         audioPathField.clear();
+    }
+
+    private void resetEditMode() {
+        editingMusiqueId = null;
+        editingDateCreation = null;
+        editingImageBytes = null;
+        editingAudioPath = null;
+        updateFormTexts();
+    }
+
+    private void startEditMusique(Musique musique) {
+        if (musique == null || musique.getId() == null) {
+            setFeedback("Impossible de modifier cette musique (id manquant).", false);
+            return;
+        }
+
+        editingMusiqueId = musique.getId();
+        editingDateCreation = musique.getDateCreation();
+        editingImageBytes = musique.getImage();
+        editingAudioPath = musique.getAudio();
+
+        titreField.setText(musique.getTitre() != null ? musique.getTitre() : "");
+        descriptionArea.setText(musique.getDescription() != null ? musique.getDescription() : "");
+        genreComboBox.setValue(musique.getGenre());
+        imagePathField.clear();
+        audioPathField.setText(musique.getAudio() != null ? musique.getAudio() : "");
+
+        collectionComboBox.getSelectionModel().clearSelection();
+        if (musique.getCollectionId() != null) {
+            for (CollectionChoice choice : collectionComboBox.getItems()) {
+                if (choice.getId() == musique.getCollectionId()) {
+                    collectionComboBox.getSelectionModel().select(choice);
+                    break;
+                }
+            }
+        }
+
+        showFormView();
+        updateFormTexts();
+        setFeedback("Mode modification: mettez a jour les champs puis enregistrez.", true);
+    }
+
+    private void updateFormTexts() {
+        boolean editMode = editingMusiqueId != null;
+        if (formTitleLabel != null) {
+            formTitleLabel.setText(editMode ? "Modifier la musique" : "Ajouter une nouvelle musique");
+        }
+        if (submitMusiqueButton != null) {
+            submitMusiqueButton.setText(editMode ? "Enregistrer" : "Creer");
+        }
+        if (toggleFormButton != null) {
+            if (formSection != null && formSection.isVisible()) {
+                toggleFormButton.setText(editMode ? "Annuler la modification" : "Fermer le formulaire");
+            } else {
+                toggleFormButton.setText("Ajouter une musique");
+            }
+        }
     }
 
     private void setFeedback(String message, boolean success) {
@@ -337,13 +423,13 @@ public class MusiquesController {
     private void showListView() {
         formSection.setVisible(false);
         formSection.setManaged(false);
-        toggleFormButton.setText("Ajouter une musique");
+        updateFormTexts();
     }
 
     private void showFormView() {
         formSection.setVisible(true);
         formSection.setManaged(true);
-        toggleFormButton.setText("Fermer le formulaire");
+        updateFormTexts();
     }
 
     private void playTrackAtIndex(int index, boolean autoPlay) {
@@ -480,6 +566,13 @@ public class MusiquesController {
 
             musiqueService.delete(musique);
             setFeedback("Musique supprimee avec succes.", true);
+
+            if (editingMusiqueId != null && editingMusiqueId.equals(musique.getId())) {
+                clearForm();
+                resetEditMode();
+                showListView();
+            }
+
             refreshMusiquesList();
         } catch (SQLDataException e) {
             setFeedback("Erreur lors de la suppression: " + e.getMessage(), false);
@@ -518,7 +611,10 @@ public class MusiquesController {
         menuButton.setStyle("-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px; -fx-padding: 0 6 0 6; -fx-cursor: hand;");
 
         MenuItem editItem = new MenuItem("Modifier");
-        editItem.setDisable(true);
+        editItem.setOnAction(event -> {
+            event.consume();
+            startEditMusique(musique);
+        });
 
         MenuItem deleteItem = new MenuItem("Supprimer");
 
