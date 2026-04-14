@@ -4,8 +4,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 
-import java.util.function.Consumer;
-
 public class MiniAudioPlayerController {
 
     @FXML
@@ -14,46 +12,60 @@ public class MiniAudioPlayerController {
     @FXML
     private Button togglePlayButton;
 
-    private Consumer<String> navigationHandler;
-    private boolean playing;
+    private NavigationHandler navigationHandler;
 
     @FXML
     public void initialize() {
-        playerBar.setVisible(false);
-        playerBar.setManaged(false);
+        // Initialize mini audio player
+        if (playerBar != null) {
+            playerBar.setVisible(false);
+            playerBar.setManaged(false);
+        }
     }
 
-    public void setNavigationHandler(Consumer<String> navigationHandler) {
-        this.navigationHandler = navigationHandler;
+    @FXML
+    public void onPrevTrack() {
+        // Handle previous track
+    }
+
+    @FXML
+    public void onTogglePlay() {
+        // Handle toggle play
+        if (togglePlayButton != null) {
+            togglePlayButton.setText(togglePlayButton.getText().equals("▶") ? "⏸" : "▶");
+        }
+    }
+
+    @FXML
+    public void onNextTrack() {
+        // Handle next track
+    }
+
+    @FXML
+    public void onOpenMusic() {
+        // Open music page
+        if (navigationHandler != null) {
+            navigationHandler.navigate("musique");
+        }
+    }
+
+    public void setNavigationHandler(NavigationHandler handler) {
+        this.navigationHandler = handler;
     }
 
     public void setVisibleForRoute(String route) {
-        boolean isMusicPage = "musique".equals(route);
-        playerBar.setVisible(!isMusicPage);
-        playerBar.setManaged(!isMusicPage);
-    }
-
-    @FXML
-    private void onTogglePlay() {
-        playing = !playing;
-        togglePlayButton.setText(playing ? "||" : ">");
-    }
-
-    @FXML
-    private void onPrevTrack() {
-        // Placeholder for queue previous action.
-    }
-
-    @FXML
-    private void onNextTrack() {
-        // Placeholder for queue next action.
-    }
-
-    @FXML
-    private void onOpenMusic() {
-        if (navigationHandler != null) {
-            navigationHandler.accept("musique");
+        if (playerBar != null) {
+            boolean showPlayer = "musique".equals(route) || "feed".equals(route);
+            playerBar.setVisible(showPlayer);
+            playerBar.setManaged(showPlayer);
         }
     }
+
+    @FunctionalInterface
+    public interface NavigationHandler {
+        void navigate(String route);
+    }
 }
+
+
 

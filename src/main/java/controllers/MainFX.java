@@ -49,12 +49,10 @@ public class MainFX extends Application {
         try {
             FXMLLoader loader = new FXMLLoader(MainFX.class.getResource(fxmlPath));
             Parent root = loader.load();
-            Scene scene = new Scene(root, 1100, 650);
+            Scene scene = new Scene(root);
             URL stylesheet = Objects.requireNonNull(MainFX.class.getResource(stylesheetPath), "Missing stylesheet");
             scene.getStylesheets().add(stylesheet.toExternalForm());
             primaryStage.setTitle(title);
-            primaryStage.setMinWidth(1100);
-            primaryStage.setMinHeight(650);
             primaryStage.setScene(scene);
             primaryStage.show();
         } catch (IOException e) {
@@ -64,6 +62,9 @@ public class MainFX extends Application {
 
     public void start(Stage stage) {
         primaryStage = stage;
+        // Taille minimale globale pour garder le layout lisible, sans figer la taille des scenes.
+        primaryStage.setMinWidth(1100);
+        primaryStage.setMinHeight(650);
         switchToAuthLandingView();
     }
 

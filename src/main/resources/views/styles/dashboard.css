@@ -79,6 +79,29 @@
     -fx-padding: 0 10 0 10;
 }
 
+.table-search {
+    -fx-background-color: #f4f6fa;
+    -fx-border-color: #cad2df;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 10 12 10 12;
+    -fx-font-size: 14px;
+    -fx-margin: 0 0 8 0;
+}
+
+.primary-action-button {
+    -fx-background-color: #3d3bc2;
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-background-radius: 10;
+    -fx-padding: 10 18 10 18;
+    -fx-cursor: hand;
+}
+
+.primary-action-button:hover {
+    -fx-background-color: #3432a8;
+}
+
 .icon-button {
     -fx-background-color: #eef1f5;
     -fx-border-color: #d4d9e1;
@@ -111,6 +134,71 @@
 
 .page-root {
     -fx-background-color: #d2d7df;
+}
+
+.users-shell {
+    -fx-spacing: 18;
+}
+
+.users-panel {
+    -fx-background-color: white;
+    -fx-background-radius: 28;
+    -fx-border-color: rgba(225, 232, 241, 0.95);
+    -fx-border-radius: 28;
+    -fx-effect: dropshadow(gaussian, rgba(34, 47, 63, 0.10), 22, 0.15, 0, 7);
+}
+
+.users-title {
+    -fx-font-size: 32px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #1c2b3f;
+}
+
+.users-toolbar {
+    -fx-alignment: center_left;
+}
+
+.users-header {
+    -fx-alignment: center_left;
+}
+
+.users-header-actions {
+    -fx-alignment: center_right;
+}
+
+.users-header-chips {
+    -fx-alignment: center_right;
+}
+
+.panel-chip {
+    -fx-background-color: #eef2ff;
+    -fx-text-fill: #4252b8;
+    -fx-background-radius: 999;
+    -fx-padding: 8 14 8 14;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+}
+
+.users-scroll {
+    -fx-background: transparent;
+    -fx-background-color: transparent;
+}
+
+.users-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.users-cards-container {
+    -fx-background-color: linear-gradient(to bottom right, rgba(255,255,255,0.95), rgba(248,250,254,0.95));
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(210, 219, 231, 0.8);
+    -fx-border-radius: 16;
+    -fx-padding: 16;
+    -fx-effect: dropshadow(gaussian, rgba(34, 47, 63, 0.08), 14, 0, 0, 3);
+}
+
+.users-cards-grid {
+    -fx-padding: 2 2 4 2;
 }
 
 .page-title {
@@ -208,6 +296,187 @@
     -fx-border-color: #e8ecf2;
     -fx-border-radius: 12;
     -fx-effect: dropshadow(gaussian, rgba(60,60,60,0.07), 10, 0, 0, 2);
+}
+
+.users-panel.list-card {
+    -fx-background-color: white;
+    -fx-background-radius: 28;
+    -fx-border-color: rgba(225, 232, 241, 0.95);
+    -fx-border-radius: 28;
+    -fx-border-width: 1.2;
+    -fx-effect: dropshadow(gaussian, rgba(34, 47, 63, 0.10), 22, 0.15, 0, 7);
+}
+
+.user-card {
+    -fx-background-color: linear-gradient(to bottom, rgba(255,255,255,0.99), rgba(247,250,255,0.97));
+    -fx-background-radius: 18;
+    -fx-border-color: #dfe7f2;
+    -fx-border-radius: 18;
+    -fx-padding: 16;
+    -fx-effect: dropshadow(gaussian, rgba(42, 58, 78, 0.10), 16, 0, 0, 5);
+    -fx-pref-width: 356;
+    -fx-min-height: 248;
+}
+
+.user-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(42, 58, 78, 0.16), 22, 0, 0, 7);
+    -fx-border-color: #cfd9e8;
+}
+
+.user-card-title {
+    -fx-font-size: 19px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #182536;
+}
+
+.user-card-subtitle {
+    -fx-font-size: 13px;
+    -fx-text-fill: #5a6f89;
+}
+
+.user-card-text {
+    -fx-font-size: 13px;
+    -fx-text-fill: #4b627b;
+}
+
+.user-card-actions {
+    -fx-padding: 10 0 0 0;
+}
+
+.user-card-top {
+    -fx-alignment: center_left;
+}
+
+.user-card-badges {
+    -fx-alignment: center_left;
+}
+
+.user-card-body {
+    -fx-background-color: rgba(240, 245, 252, 0.7);
+    -fx-background-radius: 12;
+    -fx-padding: 10;
+}
+
+.user-avatar {
+    -fx-background-color: linear-gradient(to bottom right, #4b6bff, #9b5cff);
+    -fx-background-radius: 16;
+    -fx-text-fill: white;
+    -fx-font-weight: 800;
+    -fx-font-size: 14px;
+    -fx-alignment: center;
+    -fx-min-width: 42;
+    -fx-min-height: 42;
+    -fx-pref-width: 42;
+    -fx-pref-height: 42;
+}
+
+.badge-role {
+    -fx-background-color: #e9ecff;
+    -fx-background-radius: 999;
+    -fx-text-fill: #3d3bc2;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-padding: 6 10 6 10;
+}
+
+.badge-role-secondary {
+    -fx-background-color: #eef3ff;
+    -fx-background-radius: 999;
+    -fx-text-fill: #45608a;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-padding: 6 10 6 10;
+}
+
+.badge-status {
+    -fx-background-color: #edf2fb;
+    -fx-background-radius: 999;
+    -fx-text-fill: #32445f;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-padding: 6 10 6 10;
+}
+
+.badge-status.status-active {
+    -fx-background-color: #e8faf1;
+    -fx-text-fill: #177245;
+}
+
+.badge-status.status-pending {
+    -fx-background-color: #fff5e6;
+    -fx-text-fill: #8d5a19;
+}
+
+.badge-status.status-blocked {
+    -fx-background-color: #ffeef0;
+    -fx-text-fill: #9d3044;
+}
+
+.badge-status.status-neutral {
+    -fx-background-color: #edf2fb;
+    -fx-text-fill: #32445f;
+}
+
+.user-info-row {
+    -fx-alignment: center_left;
+}
+
+.user-info-key {
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #4f6581;
+}
+
+.user-info-value {
+    -fx-font-size: 12px;
+    -fx-text-fill: #21344d;
+}
+
+.card-action-button {
+    -fx-background-color: #f0f4fb;
+    -fx-border-color: #d8e0eb;
+    -fx-background-radius: 11;
+    -fx-border-radius: 11;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #334760;
+    -fx-cursor: hand;
+}
+
+.card-soft-button:hover {
+    -fx-background-color: #e7eef9;
+    -fx-border-color: #c7d2e2;
+}
+
+.card-danger-button {
+    -fx-background-color: #fff5f5;
+    -fx-border-color: #f2c5cb;
+    -fx-text-fill: #b03545;
+}
+
+.page-message {
+    -fx-font-size: 13px;
+    -fx-text-fill: #51657d;
+}
+
+.users-empty-state {
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #5b6f89;
+    -fx-padding: 24 0 10 4;
+}
+
+.page-message.success {
+    -fx-text-fill: #258150;
+}
+
+.page-message.error {
+    -fx-text-fill: #b23a48;
+}
+
+.dialog-error {
+    -fx-text-fill: #b23a48;
+    -fx-font-size: 12px;
 }
 
 .section-title {

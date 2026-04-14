@@ -37,7 +37,7 @@
 
 	<center>
 		<StackPane styleClass="auth-landing-shell auth-landing-shell-fluid">
-			<HBox spacing="0" alignment="CENTER" maxWidth="1130" styleClass="auth-landing-card auth-landing-card-fluid">
+			<HBox spacing="0" alignment="CENTER" styleClass="auth-landing-card auth-landing-card-fluid">
 				<VBox spacing="20" alignment="CENTER_LEFT" prefWidth="565" maxWidth="Infinity" styleClass="auth-landing-hero auth-landing-hero-fluid" HBox.hgrow="ALWAYS">
 					<padding>
 						<Insets top="48" right="48" bottom="48" left="48"/>

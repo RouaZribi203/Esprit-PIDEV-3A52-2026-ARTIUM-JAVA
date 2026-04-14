@@ -98,9 +98,6 @@
 }
 
 /* Landing hero */
-.auth-landing-card {
-	-fx-max-width: 1100;
-}
 
 .auth-landing-shell-fluid {
 	-fx-padding: 30;

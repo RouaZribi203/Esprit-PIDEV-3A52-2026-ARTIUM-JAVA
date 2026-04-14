@@ -27,16 +27,19 @@ public class UserService implements Iservice<User> {
     private static final int HASH_ITERATIONS = 65536;
     private static final int HASH_LENGTH = 256;
     private static final int SALT_LENGTH = 16;
+    private static final String[] ID_COLUMNS = {"id", "id_user"};
     private static final String[] SPECIALITE_COLUMNS = {"specialite", "specailite"};
     private static final String[] CENTRE_INTERET_COLUMNS = {"centre_interet", "centre_iteret"};
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
     private final Connection connection;
+    private final String idColumn;
     private final String specialiteColumn;
     private final String centreInteretColumn;
 
     public UserService() {
         this.connection = MyDatabase.getInstance().getConnection();
+        this.idColumn = resolveExistingColumn(ID_COLUMNS);
         this.specialiteColumn = resolveExistingColumn(SPECIALITE_COLUMNS);
         this.centreInteretColumn = resolveExistingColumn(CENTRE_INTERET_COLUMNS);
     }
@@ -46,9 +49,7 @@ public class UserService implements Iservice<User> {
         if (user == null) {
             throw new SQLDataException("Utilisateur invalide.");
         }
-        if (connection == null) {
-            throw new SQLDataException("Connexion base de donnees indisponible.");
-        }
+        ensureConnection();
 
         String normalizedRole = normalizeRole(user.getRole());
         user.setRole(normalizedRole);
@@ -85,9 +86,7 @@ public class UserService implements Iservice<User> {
         if (isBlank(email) || isBlank(rawPassword)) {
             throw new SQLDataException("Veuillez saisir votre e-mail et votre mot de passe.");
         }
-        if (connection == null) {
-            throw new SQLDataException("Connexion base de donnees indisponible.");
-        }
+        ensureConnection();
 
         String sql = "SELECT * FROM `user` WHERE LOWER(TRIM(`email`)) = LOWER(TRIM(?)) LIMIT 1";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -118,9 +117,7 @@ public class UserService implements Iservice<User> {
         if (isBlank(newPassword) || newPassword.length() < 8) {
             throw new SQLDataException("Le mot de passe doit contenir au moins 8 caractères.");
         }
-        if (connection == null) {
-            throw new SQLDataException("Connexion base de donnees indisponible.");
-        }
+        ensureConnection();
 
         String updateSql = "UPDATE `user` SET `mdp` = ? WHERE LOWER(TRIM(`email`)) = LOWER(TRIM(?))";
         try (PreparedStatement ps = connection.prepareStatement(updateSql)) {
@@ -146,6 +143,12 @@ public class UserService implements Iservice<User> {
 
     private User mapUser(ResultSet rs) throws SQLException {
         User user = new User();
+        if (idColumn != null) {
+            int rawId = rs.getInt(idColumn);
+            if (!rs.wasNull()) {
+                user.setId(rawId);
+            }
+        }
         user.setNom(rs.getString("nom"));
         user.setPrenom(rs.getString("prenom"));
         user.setDateNaissance(rs.getDate("date_naissance") == null ? null : rs.getDate("date_naissance").toLocalDate());
@@ -310,35 +313,152 @@ public class UserService implements Iservice<User> {
 
     @Override
     public void delete(User user) throws SQLDataException {
-        throw new SQLDataException("Delete non implemente.");
+        if (user == null || user.getId() == null) {
+            throw new SQLDataException("Suppression impossible: identifiant utilisateur manquant.");
+        }
+        ensureConnection();
+        ensureIdColumn();
+
+        String sql = "DELETE FROM `user` WHERE `" + idColumn + "` = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, user.getId());
+            int affectedRows = ps.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLDataException("Aucun utilisateur supprime (id introuvable).");
+            }
+        } catch (SQLDataException e) {
+            throw e;
+        } catch (SQLException e) {
+            throw new SQLDataException("Suppression utilisateur impossible: " + e.getMessage());
+        }
     }
 
     @Override
     public void update(User user) throws SQLDataException {
-        throw new SQLDataException("Update non implemente.");
+        if (user == null || user.getId() == null) {
+            throw new SQLDataException("Mise a jour impossible: identifiant utilisateur manquant.");
+        }
+
+        ensureConnection();
+        ensureIdColumn();
+
+        String normalizedRole = normalizeRole(user.getRole());
+        user.setRole(normalizedRole);
+        applyRoleRules(user, normalizedRole);
+        validateSchemaColumns();
+        validateRequiredFieldsForUpdate(user);
+
+        String sql = buildUpdateSql(!isBlank(user.getMdp()));
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            int idx = 1;
+            ps.setString(idx++, user.getNom());
+            ps.setString(idx++, user.getPrenom());
+            ps.setDate(idx++, user.getDateNaissance() == null ? null : Date.valueOf(user.getDateNaissance()));
+            ps.setString(idx++, user.getEmail());
+            ps.setString(idx++, user.getRole());
+            ps.setString(idx++, user.getStatut());
+            ps.setDate(idx++, user.getDateInscription() == null ? null : Date.valueOf(user.getDateInscription()));
+            ps.setString(idx++, user.getNumTel());
+            ps.setString(idx++, user.getVille());
+            ps.setString(idx++, user.getBiographie());
+            ps.setString(idx++, user.getSpecialite());
+            ps.setString(idx++, user.getCentreInteret());
+            ps.setString(idx++, user.getPhotoReferencePath());
+            ps.setString(idx++, user.getPhotoProfil());
+
+            if (!isBlank(user.getMdp())) {
+                ps.setString(idx++, hashPassword(user.getMdp()));
+            }
+            ps.setInt(idx, user.getId());
+
+            int affectedRows = ps.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLDataException("Aucun utilisateur mis a jour (id introuvable).");
+            }
+        } catch (SQLDataException e) {
+            throw e;
+        } catch (SQLException e) {
+            throw new SQLDataException("Mise a jour utilisateur impossible: " + e.getMessage());
+        }
+    }
+
+    public List<User> getByRole(String role) throws SQLDataException {
+        ensureConnection();
+        String normalizedRole = normalizeRole(role);
+
+        String orderBy = idColumn != null ? ("`" + idColumn + "`") : "`date_inscription`";
+        String sql = "SELECT * FROM `user` WHERE LOWER(TRIM(`role`)) = LOWER(TRIM(?)) ORDER BY " + orderBy + " DESC";
+        List<User> users = new ArrayList<>();
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, normalizedRole);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    users.add(mapUser(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new SQLDataException("Lecture utilisateurs par role impossible: " + e.getMessage());
+        }
+        return users;
     }
 
     @Override
     public List<User> getAll() throws SQLDataException {
-        if (connection == null) {
-            throw new SQLDataException("Connexion base de donnees indisponible.");
-        }
+        ensureConnection();
 
         List<User> users = new ArrayList<>();
-        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM `user`");
+        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM `user` ORDER BY `date_inscription` DESC");
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                User user = new User();
-                user.setNom(rs.getString("nom"));
-                user.setPrenom(rs.getString("prenom"));
-                user.setEmail(rs.getString("email"));
-                user.setRole(rs.getString("role"));
-                users.add(user);
+                users.add(mapUser(rs));
             }
         } catch (SQLException e) {
             throw new SQLDataException("Lecture utilisateurs impossible: " + e.getMessage());
         }
         return users;
+    }
+
+    private String buildUpdateSql(boolean withPasswordUpdate) {
+        String sql = "UPDATE `user` SET " +
+                "`nom` = ?, `prenom` = ?, `date_naissance` = ?, `email` = ?, `role` = ?, `statut` = ?, " +
+                "`date_inscription` = ?, `num_tel` = ?, `ville` = ?, `biographie` = ?, " +
+                "`" + specialiteColumn + "` = ?, `" + centreInteretColumn + "` = ?, " +
+                "`photo_reference_path` = ?, `photo_profil` = ?";
+        if (withPasswordUpdate) {
+            sql += ", `mdp` = ?";
+        }
+        sql += " WHERE `" + idColumn + "` = ?";
+        return sql;
+    }
+
+    private void validateRequiredFieldsForUpdate(User user) throws SQLDataException {
+        List<String> missingFields = new ArrayList<>();
+        if (isBlank(user.getNom())) missingFields.add("nom");
+        if (isBlank(user.getPrenom())) missingFields.add("prenom");
+        if (user.getDateNaissance() == null) missingFields.add("date_naissance");
+        if (isBlank(user.getEmail())) missingFields.add("email");
+        if (isBlank(user.getRole())) missingFields.add("role");
+        if (isBlank(user.getStatut())) missingFields.add("statut");
+        if (user.getDateInscription() == null) missingFields.add("date_inscription");
+        if (isBlank(user.getNumTel())) missingFields.add("num_tel");
+        if (isBlank(user.getVille())) missingFields.add("ville");
+
+        if (!missingFields.isEmpty()) {
+            throw new SQLDataException("Champs obligatoires manquants: " + String.join(", ", missingFields));
+        }
+    }
+
+    private void ensureConnection() throws SQLDataException {
+        if (connection == null) {
+            throw new SQLDataException("Connexion base de donnees indisponible.");
+        }
+    }
+
+    private void ensureIdColumn() throws SQLDataException {
+        if (idColumn == null) {
+            throw new SQLDataException("Colonne identifiant utilisateur introuvable (id/id_user).");
+        }
     }
 }
 
