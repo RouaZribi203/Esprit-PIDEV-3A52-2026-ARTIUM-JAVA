@@ -1,20 +1,77 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox spacing="12.0" styleClass="artist-card page-root" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.artist.ReclamationsArtisteController">
-    <padding><Insets bottom="16.0" left="16.0" right="16.0" top="16.0" /></padding>
-    <Label styleClass="page-title-small" text="Reclamations" />
-    <TabPane>
-        <tabs>
-            <Tab closable="false" text="Envoyer Reclamation" />
-            <Tab closable="false" text="Mes Reclamations" />
-        </tabs>
-    </TabPane>
-    <Label styleClass="page-subtitle-small" text="Structure prete: formulaire d'envoi + liste filtree + details/reponses." wrapText="true" />
+<VBox spacing="14.0" styleClass="page-root" stylesheets="@/views/styles/artist-reclamations.css"
+      xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="controllers.artist.ReclamationsArtisteController">
+
+    <padding>
+        <Insets bottom="18.0" left="18.0" right="18.0" top="16.0" />
+    </padding>
+
+    <!-- Titre page -->
+    <Label styleClass="page-title-small" text="Réclamations" />
+
+    <!-- Card wrapper (comme la maquette) -->
+    <VBox spacing="14.0" styleClass="artist-card reclamations-card" VBox.vgrow="ALWAYS">
+        <padding>
+            <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
+        </padding>
+
+        <TabPane fx:id="tabs" styleClass="reclamations-tabs" tabClosingPolicy="UNAVAILABLE">
+            <tabs>
+                <Tab text="Envoyer Réclamation">
+                    <content>
+                        <VBox spacing="12.0">
+                            <Label styleClass="form-title" text="Soumettre une Réclamation" />
+
+                            <VBox spacing="6.0">
+                                <Label styleClass="form-label" text="Type" />
+                                <ComboBox fx:id="typeCombo" promptText="Sélectionner une catégorie" maxWidth="1.7976931348623157E308" styleClass="input-control" />
+                            </VBox>
+
+                            <VBox spacing="6.0" VBox.vgrow="ALWAYS">
+                                <Label styleClass="form-label" text="Description" />
+                                <TextArea fx:id="descriptionArea" promptText="Décrivez votre problème en détail..." prefRowCount="8" wrapText="true" maxWidth="1.7976931348623157E308" styleClass="input-control" VBox.vgrow="ALWAYS" />
+                            </VBox>
+
+                            <HBox spacing="10.0" alignment="CENTER_RIGHT">
+                                <Button fx:id="resetButton" text="Réinitialiser" onAction="#onReset" styleClass="btn-secondary" />
+                                <Button fx:id="sendButton" text="Envoyer la réclamation" onAction="#onSend" styleClass="btn-primary" />
+                            </HBox>
+                        </VBox>
+                    </content>
+                </Tab>
+
+                <Tab text="Mes Réclamations">
+                    <content>
+                        <VBox spacing="10.0" VBox.vgrow="ALWAYS">
+                            <Label styleClass="form-title" text="Mes Réclamations" />
+
+                            <!-- Placeholder: structure prête pour une liste filtrée + détails/réponses -->
+                            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS" styleClass="artist-scroll">
+                                <content>
+                                    <VBox fx:id="myReclamationsContainer" spacing="10.0" />
+                                </content>
+                            </ScrollPane>
+
+                            <Label fx:id="emptyMyReclamationsLabel" text="Aucune réclamation à afficher." visible="false" managed="false" styleClass="empty-hint" />
+                        </VBox>
+                    </content>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </VBox>
 </VBox>
 
