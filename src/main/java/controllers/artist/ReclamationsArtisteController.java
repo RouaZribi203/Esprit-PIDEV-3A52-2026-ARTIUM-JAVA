@@ -62,6 +62,7 @@ public class ReclamationsArtisteController implements Initializable {
 	private void onSend(ActionEvent event) {
 		String type = typeCombo.getValue();
 		String description = descriptionArea.getText() == null ? "" : descriptionArea.getText().trim();
+		String descriptionNoSpaces = description.replaceAll("\\s+", "");
 
 		if (type == null || type.isBlank()) {
 			showWarning("Champs obligatoire", "Veuillez sélectionner un type.");
@@ -69,6 +70,10 @@ public class ReclamationsArtisteController implements Initializable {
 		}
 		if (description.isBlank()) {
 			showWarning("Champs obligatoire", "Veuillez saisir une description.");
+			return;
+		}
+		if (descriptionNoSpaces.length() < 10) {
+			showWarning("Description trop courte", "La réclamation doit contenir au moins 10 caractères.");
 			return;
 		}
 

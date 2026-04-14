@@ -1,0 +1,131 @@
+/* Styles spécifiques à la page Réclamations (Espace Artiste)
+   Objectif: reproduire le rendu “card + onglets + formulaire” de la maquette.
+   Cette feuille est volontairement locale pour ne pas impacter les autres pages.
+*/
+
+.page-root {
+    -fx-background-color: transparent;
+}
+
+.reclamations-card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-color: #dee2e6;
+    -fx-border-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2);
+}
+
+/* -------- TabPane (onglets comme la maquette) -------- */
+.reclamations-tabs {
+    -fx-background-color: transparent;
+}
+
+.reclamations-tabs > .tab-header-area {
+    -fx-padding: 0 0 10 0;
+}
+
+.reclamations-tabs > .tab-header-area > .headers-region {
+    -fx-background-color: transparent;
+}
+
+.reclamations-tabs > .tab-header-area > .tab-header-background {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent #e5e7eb transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.reclamations-tabs .tab {
+    -fx-background-color: transparent;
+    -fx-padding: 10 14;
+}
+
+.reclamations-tabs .tab .tab-label {
+    -fx-text-fill: #6c757d;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+
+.reclamations-tabs .tab:selected .tab-label {
+    -fx-text-fill: #0d6efd;
+}
+
+.reclamations-tabs .tab:selected {
+    -fx-border-color: transparent transparent #0d6efd transparent;
+    -fx-border-width: 0 0 3 0;
+}
+
+.reclamations-tabs > .tab-content-area {
+    -fx-background-color: transparent;
+    -fx-padding: 12 0 0 0;
+}
+
+/* -------- Formulaire -------- */
+.form-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #111827;
+}
+
+.form-label {
+    -fx-text-fill: #6c757d;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+}
+
+.input-control {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #d6deea;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 8 10;
+}
+
+.input-control:focused {
+    -fx-border-color: #0d6efd;
+    -fx-effect: dropshadow(gaussian, rgba(13,110,253,0.18), 10, 0.2, 0, 0);
+}
+
+/* TextArea: forcer le fond/bordure sur le contenu interne */
+.text-area.input-control {
+    -fx-padding: 6 10;
+}
+
+.text-area.input-control .content {
+    -fx-background-color: #ffffff;
+}
+
+/* -------- Boutons -------- */
+.btn-secondary {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #111827;
+    -fx-border-color: #d1d5db;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-font-weight: 600;
+    -fx-padding: 8 14;
+    -fx-cursor: hand;
+}
+
+.btn-primary {
+    -fx-background-color: #2f2ccf; /* bleu/violet proche de la maquette */
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+    -fx-font-weight: 700;
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+}
+
+.btn-primary:hover {
+    -fx-background-color: #2623b9;
+}
+
+.btn-secondary:hover {
+    -fx-background-color: #f3f4f6;
+}
+
+/* -------- Etat vide / infos -------- */
+.empty-hint {
+    -fx-text-fill: #6c757d;
+    -fx-font-size: 13px;
+}
+
