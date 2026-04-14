@@ -111,13 +111,7 @@ public abstract class BaseUsersBackofficeController {
     }
 
     protected void onDeleteUser(User user) {
-        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmation.setTitle("Confirmation");
-        confirmation.setHeaderText("Supprimer " + managedRoleLabel().toLowerCase(Locale.ROOT));
-        confirmation.setContentText("Confirmer la suppression de " + user.getNom() + " " + user.getPrenom() + " ?");
-
-        Optional<ButtonType> choice = confirmation.showAndWait();
-        if (choice.isEmpty() || choice.get() != ButtonType.OK) {
+        if (!showDeleteConfirmationDialog(user)) {
             return;
         }
 
@@ -128,6 +122,57 @@ public abstract class BaseUsersBackofficeController {
         } catch (SQLDataException e) {
             setMessage("Erreur suppression: " + e.getMessage(), true);
         }
+    }
+
+    private boolean showDeleteConfirmationDialog(User user) {
+        ButtonType deleteButtonType = new ButtonType("Supprimer", ButtonBar.ButtonData.OK_DONE);
+
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmation.setTitle("Suppression " + managedRoleLabel().toLowerCase(Locale.ROOT));
+        confirmation.setHeaderText(null);
+        confirmation.getDialogPane().getStyleClass().addAll("users-dialog-pane", "users-delete-dialog");
+        if (searchField != null && searchField.getScene() != null) {
+            confirmation.getDialogPane().getStylesheets().addAll(searchField.getScene().getStylesheets());
+        }
+        confirmation.getDialogPane().getButtonTypes().setAll(deleteButtonType, ButtonType.CANCEL);
+        confirmation.getDialogPane().setPrefSize(520, 330);
+
+        Label modeChip = new Label("Action sensible");
+        modeChip.getStyleClass().add("users-dialog-status-chip");
+        Label roleChip = new Label(managedRoleLabel());
+        roleChip.getStyleClass().add("users-dialog-role-chip");
+        HBox chipRow = new HBox(8, modeChip, roleChip);
+        chipRow.getStyleClass().add("users-dialog-chip-row");
+
+        Label title = new Label("Supprimer définitivement ce profil ?");
+        title.getStyleClass().addAll("users-dialog-title", "users-delete-title");
+        Label subtitle = new Label("Cette action est irreversible et retire l'utilisateur du backoffice.");
+        subtitle.getStyleClass().addAll("users-dialog-subtitle", "users-delete-subtitle");
+
+        VBox hero = new VBox(6, chipRow, title, subtitle);
+        hero.getStyleClass().addAll("users-dialog-hero", "users-delete-hero");
+
+        Label identityTitle = new Label(safe(user.getNom()) + " " + safe(user.getPrenom()));
+        identityTitle.getStyleClass().add("users-dialog-section-title");
+        Label identityEmail = new Label(safe(user.getEmail()));
+        identityEmail.getStyleClass().add("users-dialog-section-subtitle");
+        Label identityHint = new Label("Role: " + managedRoleLabel() + "  |  Statut: " + formatStatusLabel(user.getStatut()));
+        identityHint.getStyleClass().add("users-dialog-label");
+
+        VBox identityCard = new VBox(6, identityTitle, identityEmail, identityHint);
+        identityCard.getStyleClass().addAll("users-dialog-section-card", "users-delete-identity-card");
+
+        VBox content = new VBox(12, hero, identityCard);
+        content.getStyleClass().add("users-dialog-content");
+        confirmation.getDialogPane().setContent(content);
+
+        Button deleteButton = (Button) confirmation.getDialogPane().lookupButton(deleteButtonType);
+        deleteButton.getStyleClass().addAll("card-action-button", "card-danger-button", "users-delete-confirm-button");
+        Button cancelButton = (Button) confirmation.getDialogPane().lookupButton(ButtonType.CANCEL);
+        cancelButton.getStyleClass().addAll("card-action-button", "card-soft-button");
+
+        Optional<ButtonType> choice = confirmation.showAndWait();
+        return choice.isPresent() && choice.get() == deleteButtonType;
     }
 
     private void loadUsers() {
@@ -375,9 +420,9 @@ public abstract class BaseUsersBackofficeController {
             emailField.setText(existingUser.getEmail());
             telField.setText(existingUser.getNumTel());
             villeField.setText(existingUser.getVille());
-            statutCombo.setValue(normalizeStatutValue(existingUser.getStatut()));
+            selectComboValue(statutCombo, normalizeStatutValue(existingUser.getStatut()));
             bioArea.setText(existingUser.getBiographie());
-            String existingRoleSpecific = artistRole ? safe(existingUser.getSpecialite()) : safe(existingUser.getCentreInteret());
+            String existingRoleSpecific = artistRole ? clean(existingUser.getSpecialite()) : clean(existingUser.getCentreInteret());
             selectComboValue(roleSpecificCombo, existingRoleSpecific);
         }
 
@@ -427,6 +472,7 @@ public abstract class BaseUsersBackofficeController {
         passwordLabel.getStyleClass().add("users-dialog-label");
         Label confirmationLabel = new Label("Confirmation");
         confirmationLabel.getStyleClass().add("users-dialog-label");
+        confirmPasswordField.setPromptText(creation ? "Confirmez le mot de passe" : "Laisser vide pour conserver");
         Label telephoneLabel = new Label("Telephone");
         telephoneLabel.getStyleClass().add("users-dialog-label");
         Label villeLabel = new Label("Ville");
@@ -556,7 +602,8 @@ public abstract class BaseUsersBackofficeController {
             user.setPrenom(clean(prenomField.getText()));
             user.setDateNaissance(dateNaissancePicker.getValue());
             user.setEmail(clean(emailField.getText()));
-            user.setMdp(clean(passwordField.getText()));
+            String cleanedPassword = clean(passwordField.getText());
+            user.setMdp(creation || !isBlank(cleanedPassword) ? cleanedPassword : null);
             user.setRole(managedRole());
             user.setStatut(clean(statutCombo.getValue()));
             user.setNumTel(clean(telField.getText()));
@@ -615,7 +662,7 @@ public abstract class BaseUsersBackofficeController {
         return switch (normalized) {
             case "activé", "active" -> STATUT_ACTIVE;
             case "bloqué", "blocked" -> STATUT_BLOQUE;
-            default -> STATUT_ACTIVE;
+            default -> clean(status);
         };
     }
 
