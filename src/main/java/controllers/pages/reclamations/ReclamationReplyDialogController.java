@@ -38,6 +38,14 @@ public class ReclamationReplyDialogController {
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final int MIN_REPONSE_LEN = 10;
 
+    private static boolean isBlankOrTooShort(String value) {
+        String v = value == null ? "" : value.trim();
+        if (v.isEmpty()) return true;
+        // on compte les caractères hors espaces pour éviter "          "
+        String noSpaces = v.replaceAll("\\s+", "");
+        return noSpaces.length() < MIN_REPONSE_LEN;
+    }
+
     @FXML
     public void initialize() {
         reclamationTexteArea.setEditable(false);
@@ -188,24 +196,24 @@ public class ReclamationReplyDialogController {
             if (node instanceof VBox v) {
                 for (var child : v.getChildren()) {
                     if (child instanceof TextArea ta) {
-                        String txt = ta.getText() != null ? ta.getText().trim() : "";
-                        if (!txt.isEmpty()) contenus.add(txt);
+                        String txt = ta.getText() == null ? "" : ta.getText();
+                        // Ne pas ajouter les réponses vides (espaces) dans la liste
+                        if (!txt.trim().isEmpty()) contenus.add(txt.trim());
                     }
                 }
             }
         }
 
         for (String c : contenus) {
-            if (c.length() < MIN_REPONSE_LEN) {
-                showError("Validation", "La reponse doit contenir au moins " + MIN_REPONSE_LEN + " caracteres.");
+            if (isBlankOrTooShort(c)) {
+                showError("Validation", "La reponse ne peut pas etre vide et doit contenir au moins " + MIN_REPONSE_LEN + " caracteres.");
                 return;
             }
         }
 
 
         if (contenus.isEmpty()) {
-            syncStatutWithReponses();
-            close();
+            showError("Validation", "Veuillez saisir une réponse avant d'enregistrer.");
             return;
         }
 
@@ -251,19 +259,14 @@ public class ReclamationReplyDialogController {
             return;
         }
 
-        String newText = ta.getText() == null ? "" : ta.getText().trim();
-        if (newText.isEmpty()) {
-            showError("Validation", "La reponse ne peut pas etre vide.");
-            return;
-        }
-
-        if (newText.length() < MIN_REPONSE_LEN) {
-            showError("Validation", "La reponse doit contenir au moins " + MIN_REPONSE_LEN + " caracteres.");
+        String newText = ta.getText() == null ? "" : ta.getText();
+        if (isBlankOrTooShort(newText)) {
+            showError("Validation", "La reponse ne peut pas etre vide et doit contenir au moins " + MIN_REPONSE_LEN + " caracteres.");
             return;
         }
 
         try {
-            selectedForEdit.setContenu(newText);
+            selectedForEdit.setContenu(newText.trim());
             selectedForEdit.setDateReponse(LocalDate.now());
             reponseService.update(selectedForEdit);
             loadHistory();
