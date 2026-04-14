@@ -1,0 +1,194 @@
+/* Styles spécifiques à la page Réclamations (Espace Amateur)
+   Basé sur artist-reclamations.css pour garder exactement le même rendu.
+*/
+
+.page-root {
+    -fx-background-color: transparent;
+}
+
+.page-title {
+    /* Reuse the amateur theme title look */
+    -fx-font-size: 36px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1c2b3f;
+}
+
+.page-subtitle {
+    -fx-font-size: 16px;
+    -fx-text-fill: #63758d;
+}
+
+.reclamations-card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-color: #dee2e6;
+    -fx-border-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2);
+}
+
+/* -------- TabPane -------- */
+.reclamations-tabs {
+    -fx-background-color: transparent;
+}
+
+.reclamations-tabs > .tab-header-area {
+    -fx-padding: 0 0 10 0;
+}
+
+.reclamations-tabs > .tab-header-area > .headers-region {
+    -fx-background-color: transparent;
+}
+
+.reclamations-tabs > .tab-header-area > .tab-header-background {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent #e5e7eb transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.reclamations-tabs .tab {
+    -fx-background-color: transparent;
+    -fx-padding: 10 14;
+}
+
+.reclamations-tabs .tab .tab-label {
+    -fx-text-fill: #6c757d;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+
+.reclamations-tabs .tab:selected .tab-label {
+    -fx-text-fill: #0d6efd;
+}
+
+.reclamations-tabs .tab:selected {
+    -fx-border-color: transparent transparent #0d6efd transparent;
+    -fx-border-width: 0 0 3 0;
+}
+
+.reclamations-tabs > .tab-content-area {
+    -fx-background-color: transparent;
+    -fx-padding: 12 0 0 0;
+}
+
+/* -------- Formulaire -------- */
+.form-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #111827;
+}
+
+.form-label {
+    -fx-text-fill: #6c757d;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+}
+
+.input-control {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #d6deea;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 8 10;
+}
+
+.input-control:focused {
+    -fx-border-color: #0d6efd;
+    -fx-effect: dropshadow(gaussian, rgba(13,110,253,0.18), 10, 0.2, 0, 0);
+}
+
+.text-area.input-control {
+    -fx-padding: 6 10;
+}
+
+.text-area.input-control .content {
+    -fx-background-color: #ffffff;
+}
+
+/* -------- Boutons -------- */
+.btn-secondary {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #111827;
+    -fx-border-color: #d1d5db;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-font-weight: 600;
+    -fx-padding: 8 14;
+    -fx-cursor: hand;
+}
+
+.btn-primary {
+    -fx-background-color: #2f2ccf;
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+    -fx-font-weight: 700;
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+}
+
+.btn-primary:hover {
+    -fx-background-color: #2623b9;
+}
+
+.btn-secondary:hover {
+    -fx-background-color: #f3f4f6;
+}
+
+/* -------- Etat vide -------- */
+.empty-hint {
+    -fx-text-fill: #6c757d;
+    -fx-font-size: 13px;
+}
+
+/* -------- Cards -------- */
+.my-reclamation-card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-color: #e6ebf3;
+    -fx-border-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(60,60,60,0.06), 10, 0, 0, 2);
+    -fx-padding: 14;
+}
+
+.my-reclamation-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #111827;
+}
+
+.my-reclamation-meta {
+    -fx-text-fill: #6b7280;
+    -fx-font-size: 12px;
+}
+
+.status-badge {
+    -fx-padding: 4 10;
+    -fx-background-radius: 999;
+    -fx-font-weight: 700;
+    -fx-font-size: 12px;
+}
+
+.status-badge.nontraite {
+    -fx-background-color: #ffe69c;
+    -fx-text-fill: #664d03;
+}
+
+.status-badge.traite {
+    -fx-background-color: #d1e7dd;
+    -fx-text-fill: #0f5132;
+}
+
+.dots-button {
+    -fx-background-color: transparent;
+    -fx-border-color: #d1d5db;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-font-weight: 700;
+    -fx-padding: 4 10;
+    -fx-cursor: hand;
+}
+
+.dots-button:hover {
+    -fx-background-color: #f3f4f6;
+}
+
+
