@@ -21,11 +21,6 @@
         <Button fx:id="toggleFormButton" mnemonicParsing="false" onAction="#handleToggleForm" text="Ajouter une musique" />
     </HBox>
 
-    <HBox spacing="10.0">
-        <Button fx:id="musiqueSectionButton" mnemonicParsing="false" onAction="#handleShowMusiqueSection" text="Musiques" />
-        <Button fx:id="playlistsSectionButton" mnemonicParsing="false" onAction="#handleShowPlaylistsSection" text="Playlists" />
-    </HBox>
-
     <VBox fx:id="musiqueSection" spacing="8.0">
         <HBox spacing="8.0">
             <TextField fx:id="searchField" HBox.hgrow="ALWAYS" promptText="Rechercher: titre, description, genre" />
@@ -38,22 +33,6 @@
             </content>
         </ScrollPane>
         <Label fx:id="emptyListLabel" style="-fx-text-fill: #a0a0a0;" text="Aucune musique disponible pour le moment." wrapText="true" />
-    </VBox>
-
-    <VBox fx:id="playlistsSection" spacing="8.0" visible="false" managed="false">
-        <HBox spacing="8.0">
-            <TextField fx:id="playlistSearchField" HBox.hgrow="ALWAYS" onAction="#handleSearchPlaylist" promptText="Rechercher une playlist" />
-            <Button mnemonicParsing="false" onAction="#handleSearchPlaylist" text="Rechercher" />
-            <Button mnemonicParsing="false" onAction="#handleClearPlaylistSearch" text="Effacer" />
-            <ComboBox fx:id="sortPlaylistComboBox" prefWidth="170.0" promptText="Tri" />
-        </HBox>
-        <Label text="Playlists disponibles" />
-        <ScrollPane fitToWidth="true" prefHeight="360.0">
-            <content>
-                <TilePane fx:id="playlistGrid" hgap="10.0" prefColumns="3" vgap="10.0" />
-            </content>
-        </ScrollPane>
-        <Label fx:id="playlistEmptyListLabel" style="-fx-text-fill: #a0a0a0;" text="Aucune playlist disponible pour le moment." wrapText="true" />
     </VBox>
 
     <VBox spacing="6.0" style="-fx-background-color: #171717; -fx-background-radius: 8; -fx-padding: 12;">
