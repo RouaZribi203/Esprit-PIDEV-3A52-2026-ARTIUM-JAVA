@@ -5,10 +5,12 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 
 import java.io.ByteArrayInputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.function.Consumer;
 
 public class EventCardController {
 
@@ -38,7 +40,11 @@ public class EventCardController {
     @FXML
     private Label descriptionLabel;
 
+    private Evenement evenement;
+    private Consumer<Evenement> detailHandler;
+
     public void setData(Evenement evenement) {
+        this.evenement = evenement;
         categoryBadgeLabel.setText(textOrDefault(evenement.getType(), "Evenement"));
         titleLabel.setText(textOrDefault(evenement.getTitre(), "Evenement sans titre"));
         dateLabel.setText(formatDateTime(evenement.getDateDebut()));
@@ -47,6 +53,17 @@ public class EventCardController {
         priceLabel.setText(formatPrice(evenement.getPrixTicket()));
         descriptionLabel.setText(textOrDefault(evenement.getDescription(), ""));
         applyImage(evenement.getImageCouverture());
+    }
+
+    public void setDetailHandler(Consumer<Evenement> detailHandler) {
+        this.detailHandler = detailHandler;
+    }
+
+    @FXML
+    private void onCardClick(MouseEvent event) {
+        if (detailHandler != null && evenement != null) {
+            detailHandler.accept(evenement);
+        }
     }
 
     private void applyImage(byte[] imageBytes) {

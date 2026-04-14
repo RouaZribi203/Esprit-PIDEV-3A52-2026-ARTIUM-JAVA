@@ -40,7 +40,7 @@ public class SidebarAmateurController {
             feedButton.getStyleClass().add("active");
         } else if ("favoris".equals(route)) {
             favorisButton.getStyleClass().add("active");
-        } else if ("evenements".equals(route) || "event-detail".equals(route) || "payment-success".equals(route)) {
+        } else if ("evenements".equals(route) || "event-detail".equals(route)) {
             evenementsButton.getStyleClass().add("active");
         } else if ("bibliotheque".equals(route) || "book-reader".equals(route)) {
             bibliothequeButton.getStyleClass().add("active");

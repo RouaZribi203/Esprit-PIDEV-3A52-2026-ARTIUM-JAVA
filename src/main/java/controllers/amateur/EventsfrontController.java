@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import controllers.amateur.EventCardController;
@@ -49,11 +50,16 @@ public class EventsfrontController {
 	private final EvenementService evenementService = new EvenementService();
 	private final List<Evenement> allEvents = new ArrayList<>();
 	private String selectedCategory = "Tous";
+	private Consumer<Evenement> detailNavigationHandler;
 
 	@FXML
 	public void initialize() {
 		refreshEvents();
 		onAllTabClick();
+	}
+
+	public void setDetailNavigationHandler(Consumer<Evenement> detailNavigationHandler) {
+		this.detailNavigationHandler = detailNavigationHandler;
 	}
 
 	@FXML
@@ -147,6 +153,7 @@ public class EventsfrontController {
 				Parent card = loader.load();
 				controllers.amateur.EventCardController controller = loader.getController();
 				controller.setData(event);
+				controller.setDetailHandler(detailNavigationHandler);
 				eventsFlowPane.getChildren().add(card);
 			} catch (IOException e) {
 				emptyStateLabel.setText("Erreur lors de l'affichage des evenements.");
