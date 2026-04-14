@@ -45,12 +45,15 @@ public class ReclamationService implements Iservice<Reclamation> {
 
         try (PreparedStatement statement = connection.prepareStatement(UPDATE_SQL)) {
             statement.setString(1, reclamation.getTexte());
-            statement.setTimestamp(2,java.sql.Timestamp.valueOf(reclamation.getDateCreation().toString()));
+            // LocalDateTime.toString() produit un format ISO (ex: 2026-04-14T12:34:56)
+            // Timestamp.valueOf attend "yyyy-[m]m-[d]d hh:mm:ss[.f...]".
+            statement.setTimestamp(2, java.sql.Timestamp.valueOf(reclamation.getDateCreation()));
             statement.setString(3, reclamation.getStatut());
             statement.setString(4, reclamation.getType());
             statement.setString(5, reclamation.getFileName());
             statement.setTimestamp(6, java.sql.Timestamp.valueOf(reclamation.getUpdatedAt()));
             statement.setInt(7, reclamation.getUserId());
+            statement.setInt(8, reclamation.getId());
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new SQLDataException("Erreur lors de la modification de la reclamation: " + e.getMessage());

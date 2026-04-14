@@ -7,9 +7,9 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.VBox?>
 
 <VBox spacing="14.0" styleClass="page-root" stylesheets="@/views/styles/artist-reclamations.css"
@@ -58,6 +58,11 @@
                     <content>
                         <VBox spacing="10.0" VBox.vgrow="ALWAYS">
                             <Label styleClass="form-title" text="Mes Réclamations" />
+
+                            <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                <TextField fx:id="mySearchField" promptText="Rechercher une reclamation..." HBox.hgrow="ALWAYS" styleClass="input-control" />
+                                <ComboBox fx:id="myStatutFilter" promptText="Filtrer par statut" prefWidth="230" styleClass="input-control" />
+                            </HBox>
 
                             <!-- Placeholder: structure prête pour une liste filtrée + détails/réponses -->
                             <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS" styleClass="artist-scroll">

@@ -33,6 +33,8 @@ public class ReclamationReplyDialogController {
     private Reclamation reclamation;
     private Reponse selectedForEdit;
 
+    private boolean readOnly = false;
+
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final int MIN_REPONSE_LEN = 10;
 
@@ -55,6 +57,7 @@ public class ReclamationReplyDialogController {
         });
 
         historyList.setOnMouseClicked(e -> {
+            if (readOnly) return;
             if (e.getClickCount() == 2 && historyList.getSelectionModel().getSelectedItem() != null) {
                 selectedForEdit = historyList.getSelectionModel().getSelectedItem();
                 fillEditField(selectedForEdit);
@@ -71,6 +74,32 @@ public class ReclamationReplyDialogController {
         reclamationIdLabel.setText(reclamation.getId() != null ? String.valueOf(reclamation.getId()) : "-");
         reclamationTexteArea.setText(reclamation.getTexte() != null ? reclamation.getTexte() : "");
         loadHistory();
+    }
+
+    /**
+     * Mode lecture seule: l'utilisateur voit uniquement les réponses existantes.
+     * - cache la zone de saisie
+     * - désactive les actions d'édition
+     */
+    public void setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
+
+        if (replyFieldsBox != null) {
+            replyFieldsBox.setManaged(!readOnly);
+            replyFieldsBox.setVisible(!readOnly);
+        }
+        if (saveBtn != null) saveBtn.setManaged(!readOnly);
+        if (saveBtn != null) saveBtn.setVisible(!readOnly);
+
+        if (updateBtn != null) updateBtn.setManaged(!readOnly);
+        if (updateBtn != null) updateBtn.setVisible(!readOnly);
+        if (updateBtn != null) updateBtn.setDisable(true);
+
+        if (deleteBtn != null) deleteBtn.setManaged(!readOnly);
+        if (deleteBtn != null) deleteBtn.setVisible(!readOnly);
+        if (deleteBtn != null) deleteBtn.setDisable(true);
+
+        if (reclamationTexteArea != null) reclamationTexteArea.setEditable(false);
     }
 
     @FXML
