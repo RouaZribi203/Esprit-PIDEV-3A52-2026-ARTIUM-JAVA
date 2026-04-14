@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.sql.SQLDataException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -175,7 +176,11 @@ public class EvenementService implements Iservice<Evenement> {
 
         evenement.setType(resultSet.getString("type"));
         evenement.setImageCouverture(resultSet.getBytes("image_couverture"));
-        evenement.setStatut(resultSet.getString("statut"));
+        evenement.setStatut(computeDynamicStatut(
+                dateDebut == null ? null : dateDebut.toLocalDateTime(),
+                dateFin == null ? null : dateFin.toLocalDateTime(),
+                resultSet.getString("statut")
+        ));
 
         Number capaciteMax = (Number) resultSet.getObject("capacite_max");
         evenement.setCapaciteMax(capaciteMax == null ? null : capaciteMax.intValue());
@@ -252,6 +257,21 @@ public class EvenementService implements Iservice<Evenement> {
         if (evenement.getStatut() == null || evenement.getStatut().isBlank()) {
             evenement.setStatut("À venir");
         }
+    }
+
+    private String computeDynamicStatut(LocalDateTime dateDebut, LocalDateTime dateFin, String fallback) {
+        if (dateDebut == null || dateFin == null) {
+            return fallback == null || fallback.isBlank() ? "À venir" : fallback;
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isBefore(dateDebut)) {
+            return "À venir";
+        }
+        if (now.isAfter(dateFin)) {
+            return "Terminé";
+        }
+        return "En cours";
     }
 }
 

@@ -4,6 +4,7 @@ import entities.Evenement;
 import entities.Galerie;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -17,14 +18,14 @@ import java.nio.file.Files;
 import java.sql.SQLDataException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class EvenementArtisteFormController {
 
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
     @FXML
     private Label formTitleLabel;
@@ -36,10 +37,16 @@ public class EvenementArtisteFormController {
     private ComboBox<String> typeComboBox;
 
     @FXML
-    private TextField dateDebutField;
+    private DatePicker dateDebutPicker;
 
     @FXML
-    private TextField dateFinField;
+    private TextField heureDebutField;
+
+    @FXML
+    private DatePicker dateFinPicker;
+
+    @FXML
+    private TextField heureFinField;
 
     @FXML
     private TextField capaciteField;
@@ -69,7 +76,7 @@ public class EvenementArtisteFormController {
 
     @FXML
     public void initialize() {
-        typeComboBox.getItems().addAll("Exposition", "Concert", "Spectacle", "Conference", "Atelier", "Autre");
+        typeComboBox.getItems().addAll("Exposition", "Concert", "Spectacle", "Conférence");
         typeComboBox.setValue("Exposition");
 
         clearValidationError();
@@ -89,8 +96,10 @@ public class EvenementArtisteFormController {
             formTitleLabel.setText("Ajouter un evenement");
             titreField.clear();
             typeComboBox.setValue("Exposition");
-            dateDebutField.clear();
-            dateFinField.clear();
+            dateDebutPicker.setValue(null);
+            heureDebutField.clear();
+            dateFinPicker.setValue(null);
+            heureFinField.clear();
             capaciteField.clear();
             prixField.clear();
             if (!galerieOptions.isEmpty()) {
@@ -105,8 +114,10 @@ public class EvenementArtisteFormController {
         formTitleLabel.setText("Modifier un evenement");
         titreField.setText(evenement.getTitre());
         typeComboBox.setValue(evenement.getType() == null || evenement.getType().isBlank() ? "Exposition" : evenement.getType());
-        dateDebutField.setText(formatDateTime(evenement.getDateDebut()));
-        dateFinField.setText(formatDateTime(evenement.getDateFin()));
+        dateDebutPicker.setValue(evenement.getDateDebut() == null ? null : evenement.getDateDebut().toLocalDate());
+        heureDebutField.setText(formatTime(evenement.getDateDebut()));
+        dateFinPicker.setValue(evenement.getDateFin() == null ? null : evenement.getDateFin().toLocalDate());
+        heureFinField.setText(formatTime(evenement.getDateFin()));
         capaciteField.setText(evenement.getCapaciteMax() == null ? "" : String.valueOf(evenement.getCapaciteMax()));
         prixField.setText(evenement.getPrixTicket() == null ? "" : String.valueOf(evenement.getPrixTicket()));
         descriptionArea.setText(evenement.getDescription());
@@ -153,29 +164,34 @@ public class EvenementArtisteFormController {
 
         String titre = safeTrim(titreField.getText());
         String type = safeTrim(typeComboBox.getValue());
-        String dateDebutText = safeTrim(dateDebutField.getText());
-        String dateFinText = safeTrim(dateFinField.getText());
+        LocalDate dateDebut = dateDebutPicker.getValue();
+        String heureDebutText = safeTrim(heureDebutField.getText());
+        LocalDate dateFin = dateFinPicker.getValue();
+        String heureFinText = safeTrim(heureFinField.getText());
         String capaciteText = safeTrim(capaciteField.getText());
         String prixText = safeTrim(prixField.getText());
         String description = safeTrim(descriptionArea.getText());
         GalerieOption selectedGalerie = galerieComboBox.getValue();
 
-        if (titre.isEmpty() || type.isEmpty() || dateDebutText.isEmpty() || dateFinText.isEmpty() || selectedGalerie == null) {
+        if (titre.isEmpty() || type.isEmpty() || dateDebut == null || heureDebutText.isEmpty() || dateFin == null || heureFinText.isEmpty() || selectedGalerie == null) {
             showValidationError("Veuillez remplir les champs obligatoires.");
             return;
         }
 
-        LocalDateTime dateDebut = parseDateTime(dateDebutText, "Date debut invalide. Format attendu: dd/MM/yyyy HH:mm");
-        if (dateDebut == null) {
+        LocalTime heureDebut = parseTime(heureDebutText, "Heure debut invalide. Format attendu: HH:mm");
+        if (heureDebut == null) {
             return;
         }
 
-        LocalDateTime dateFin = parseDateTime(dateFinText, "Date fin invalide. Format attendu: dd/MM/yyyy HH:mm");
-        if (dateFin == null) {
+        LocalTime heureFin = parseTime(heureFinText, "Heure fin invalide. Format attendu: HH:mm");
+        if (heureFin == null) {
             return;
         }
 
-        if (dateFin.isBefore(dateDebut)) {
+        LocalDateTime dateDebutDateTime = LocalDateTime.of(dateDebut, heureDebut);
+        LocalDateTime dateFinDateTime = LocalDateTime.of(dateFin, heureFin);
+
+        if (dateFinDateTime.isBefore(dateDebutDateTime)) {
             showValidationError("La date fin doit etre apres la date debut.");
             return;
         }
@@ -216,8 +232,8 @@ public class EvenementArtisteFormController {
 
         evenement.setTitre(titre);
         evenement.setType(type);
-        evenement.setDateDebut(dateDebut);
-        evenement.setDateFin(dateFin);
+        evenement.setDateDebut(dateDebutDateTime);
+        evenement.setDateFin(dateFinDateTime);
         evenement.setDateCreation(originalEvenement != null && originalEvenement.getDateCreation() != null
                 ? originalEvenement.getDateCreation()
                 : LocalDate.now());
@@ -226,7 +242,7 @@ public class EvenementArtisteFormController {
         evenement.setPrixTicket(prixTicket);
         evenement.setGalerieId(selectedGalerie.id());
         evenement.setImageCouverture(selectedImageBytes);
-        evenement.setStatut(computeStatut(dateDebut, dateFin));
+        evenement.setStatut(computeStatut(dateDebutDateTime, dateFinDateTime));
 
         resultEvenement = evenement;
         closeDialog();
@@ -267,8 +283,10 @@ public class EvenementArtisteFormController {
 
     private void wireFieldListeners() {
         titreField.textProperty().addListener((obs, oldValue, newValue) -> clearValidationError());
-        dateDebutField.textProperty().addListener((obs, oldValue, newValue) -> clearValidationError());
-        dateFinField.textProperty().addListener((obs, oldValue, newValue) -> clearValidationError());
+        dateDebutPicker.valueProperty().addListener((obs, oldValue, newValue) -> clearValidationError());
+        heureDebutField.textProperty().addListener((obs, oldValue, newValue) -> clearValidationError());
+        dateFinPicker.valueProperty().addListener((obs, oldValue, newValue) -> clearValidationError());
+        heureFinField.textProperty().addListener((obs, oldValue, newValue) -> clearValidationError());
         capaciteField.textProperty().addListener((obs, oldValue, newValue) -> clearValidationError());
         prixField.textProperty().addListener((obs, oldValue, newValue) -> clearValidationError());
         descriptionArea.textProperty().addListener((obs, oldValue, newValue) -> clearValidationError());
@@ -276,10 +294,10 @@ public class EvenementArtisteFormController {
         galerieComboBox.valueProperty().addListener((obs, oldValue, newValue) -> clearValidationError());
     }
 
-    private LocalDateTime parseDateTime(String text, String errorMessage) {
+    private LocalTime parseTime(String text, String errorMessage) {
         try {
-            return LocalDateTime.parse(text, DATE_TIME_FORMATTER);
-        } catch (DateTimeParseException e) {
+            return LocalTime.parse(text, TIME_FORMATTER);
+        } catch (Exception e) {
             showValidationError(errorMessage);
             return null;
         }
@@ -288,7 +306,7 @@ public class EvenementArtisteFormController {
     private String computeStatut(LocalDateTime debut, LocalDateTime fin) {
         LocalDateTime now = LocalDateTime.now();
         if (now.isBefore(debut)) {
-            return "A venir";
+            return "À venir";
         }
         if (now.isAfter(fin)) {
             return "Termine";
@@ -296,8 +314,8 @@ public class EvenementArtisteFormController {
         return "En cours";
     }
 
-    private String formatDateTime(LocalDateTime dateTime) {
-        return dateTime == null ? "" : DATE_TIME_FORMATTER.format(dateTime);
+    private String formatTime(LocalDateTime dateTime) {
+        return dateTime == null ? "" : TIME_FORMATTER.format(dateTime.toLocalTime());
     }
 
     private String safeTrim(String value) {
