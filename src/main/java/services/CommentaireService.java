@@ -1,4 +1,4 @@
-package Services;
+package services;
 
 import entities.Commentaire;
 import utils.MyDatabase;
@@ -136,6 +136,11 @@ public class CommentaireService implements services.Iservice<Commentaire> {
     public java.util.List<entities.Commentaire> getAll() throws java.sql.SQLDataException {
         // TODO: implement
         return new ArrayList<>();
+    }
+
+    @Override
+    public Commentaire getById(int id) throws SQLDataException {
+        return null;
     }
 
     /**

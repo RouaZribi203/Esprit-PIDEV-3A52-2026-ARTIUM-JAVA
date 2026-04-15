@@ -1,7 +1,7 @@
 package controllers.artist;
 
-import Services.OeuvreCollectionService;
-import Services.OeuvreService;
+import services.OeuvreCollectionService;
+import services.OeuvreService;
 import entities.CollectionOeuvre;
 import entities.Oeuvre;
 import javafx.fxml.FXML;

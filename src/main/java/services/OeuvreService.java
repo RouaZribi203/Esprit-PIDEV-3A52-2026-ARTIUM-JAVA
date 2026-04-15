@@ -1,4 +1,4 @@
-package Services;
+package services;
 
 import entities.User;
 import entities.Oeuvre;
@@ -177,6 +177,11 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
         } catch (SQLException e) {
             throw new SQLDataException(e.getMessage());
         }
+    }
+
+    @Override
+    public Oeuvre getById(int id) throws SQLDataException {
+        return null;
     }
 
     /**

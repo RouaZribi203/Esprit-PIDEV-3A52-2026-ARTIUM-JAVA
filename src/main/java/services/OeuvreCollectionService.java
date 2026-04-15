@@ -1,4 +1,4 @@
-package Services;
+package services;
 
 import entities.CollectionOeuvre;
 import utils.MyDatabase;
@@ -116,6 +116,11 @@ public class OeuvreCollectionService implements services.Iservice<CollectionOeuv
         } catch (SQLException e) {
             throw new SQLDataException(e.getMessage());
         }
+    }
+
+    @Override
+    public CollectionOeuvre getById(int id) throws SQLDataException {
+        return null;
     }
 
     public List<CollectionOeuvre> getCollectionsByArtisteId(int artisteId) throws SQLException {

@@ -1,8 +1,8 @@
 package controllers.artist;
 
-import Services.CommentaireService;
-import Services.OeuvreCollectionService;
-import Services.OeuvreService;
+import services.CommentaireService;
+import services.OeuvreCollectionService;
+import services.OeuvreService;
 import entities.CollectionOeuvre;
 import entities.Commentaire;
 import entities.Oeuvre;
