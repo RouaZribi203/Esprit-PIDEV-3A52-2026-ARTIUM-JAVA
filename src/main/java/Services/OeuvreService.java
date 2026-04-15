@@ -203,6 +203,43 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
         }
     }
 
+    public List<Oeuvre> getOeuvresByCollectionId(int collectionId) throws SQLDataException {
+        String sql = "SELECT id, titre, description, date_creation, image, type, collection_id "
+                + "FROM oeuvre "
+                + "WHERE collection_id = ? "
+                + "ORDER BY id DESC";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, collectionId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                List<Oeuvre> oeuvres = new ArrayList<>();
+                while (resultSet.next()) {
+                    oeuvres.add(mapOeuvre(resultSet));
+                }
+                return oeuvres;
+            }
+        } catch (SQLException e) {
+            throw new SQLDataException(e.getMessage());
+        }
+    }
+
+    public Oeuvre getOeuvreById(int oeuvreId) throws SQLDataException {
+        String sql = "SELECT id, titre, description, date_creation, image, type, collection_id "
+                + "FROM oeuvre WHERE id = ? LIMIT 1";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, oeuvreId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return mapOeuvre(resultSet);
+                }
+                return null;
+            }
+        } catch (SQLException e) {
+            throw new SQLDataException(e.getMessage());
+        }
+    }
+
 
     /**
      * Retourne un user par son ID (pour affichage auteur commentaire, etc.).

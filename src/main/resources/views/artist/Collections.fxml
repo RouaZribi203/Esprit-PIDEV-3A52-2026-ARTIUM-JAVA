@@ -25,6 +25,6 @@
         </HBox>
 
         <Label fx:id="emptyStateLabel" styleClass="page-subtitle-small" text="Chargement des collections..." wrapText="true" />
-        <VBox fx:id="collectionsContainer" spacing="14.0" VBox.vgrow="ALWAYS" />
+        <VBox fx:id="collectionsContainer" spacing="18.0" VBox.vgrow="ALWAYS" />
     </VBox>
 </VBox>

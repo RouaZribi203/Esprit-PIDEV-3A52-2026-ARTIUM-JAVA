@@ -300,6 +300,11 @@
     -fx-padding: 12;
 }
 
+.collection-item-box-drop-over {
+    -fx-border-color: #3f44d4;
+    -fx-background-color: #eef1ff;
+}
+
 .collection-content-divider {
     -fx-padding: 4 0 4 0;
 }
@@ -367,6 +372,7 @@
     -fx-border-width: 1;
     -fx-border-radius: 8;
     -fx-background-radius: 8;
+    -fx-cursor: hand;
 }
 
 .collection-preview-empty {
@@ -748,6 +754,11 @@
 .artist-root.dark-mode .collection-item-box {
     -fx-background-color: #1f2a40;
     -fx-border-color: #2f3b57;
+}
+
+.artist-root.dark-mode .collection-item-box-drop-over {
+    -fx-border-color: #8ea8ff;
+    -fx-background-color: #24314a;
 }
 
 .artist-root.dark-mode .collection-content-divider .line {

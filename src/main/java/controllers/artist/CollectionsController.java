@@ -1,7 +1,9 @@
 package controllers.artist;
 
 import Services.OeuvreCollectionService;
+import Services.OeuvreService;
 import entities.CollectionOeuvre;
+import entities.Oeuvre;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -18,6 +20,9 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -40,7 +45,6 @@ public class CollectionsController {
     private static final int DESCRIPTION_MIN_LENGTH = 10;
     private static final int DESCRIPTION_MAX_LENGTH = 500;
     private static final int THUMBNAIL_SIZE = 74;
-    private static final int THUMBNAIL_LIMIT = 8;
     private static final String CHEVRON_UP = "M7.41 14.59 12 10l4.59 4.59L18 13.17l-6-6-6 6z";
     private static final String CHEVRON_DOWN = "M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6z";
 
@@ -58,9 +62,10 @@ public class CollectionsController {
     private Label emptyStateLabel;
 
     private final OeuvreCollectionService oeuvreCollectionService = new OeuvreCollectionService();
+    private final OeuvreService oeuvreService = new OeuvreService();
     private final List<CollectionOeuvre> allCollections = new ArrayList<>();
     private final Map<Integer, Boolean> expandedByCollectionId = new HashMap<>();
-    private final Map<Integer, List<byte[]>> thumbnailsByCollectionId = new HashMap<>();
+    private final Map<Integer, List<Oeuvre>> oeuvresByCollectionId = new HashMap<>();
 
     // TODO: brancher l'ID depuis la session utilisateur quand elle sera disponible.
     private final int artisteId = 3;
@@ -354,8 +359,7 @@ public class CollectionsController {
         try {
             allCollections.clear();
             allCollections.addAll(oeuvreCollectionService.getCollectionsByArtisteId(artisteId));
-            expandedByCollectionId.clear();
-            thumbnailsByCollectionId.clear();
+            oeuvresByCollectionId.clear();
             renderCollections(allCollections);
         } catch (SQLException e) {
             emptyStateLabel.setText("Erreur lors du chargement des collections: " + e.getMessage());
@@ -408,35 +412,33 @@ public class CollectionsController {
             return;
         }
 
-        List<byte[]> images = thumbnailsByCollectionId.get(collectionId);
-        if (images == null) {
+        List<Oeuvre> oeuvres = oeuvresByCollectionId.get(collectionId);
+        if (oeuvres == null) {
             try {
-                images = oeuvreCollectionService.getOeuvreImagesByCollectionId(collectionId, THUMBNAIL_LIMIT);
-                thumbnailsByCollectionId.put(collectionId, images);
+                oeuvres = oeuvreService.getOeuvresByCollectionId(collectionId);
+                oeuvresByCollectionId.put(collectionId, oeuvres);
             } catch (SQLException e) {
-                Label errorLabel = new Label("Impossible de charger les miniatures.");
+                Label errorLabel = new Label("Impossible de charger les images.");
                 errorLabel.getStyleClass().add("collection-preview-empty");
                 previewBox.getChildren().add(errorLabel);
                 return;
             }
         }
 
-        if (images.isEmpty()) {
+        if (oeuvres.isEmpty()) {
             Label emptyLabel = new Label("Aucune oeuvre avec image.");
             emptyLabel.getStyleClass().add("collection-preview-empty");
             previewBox.getChildren().add(emptyLabel);
             return;
         }
 
-        HBox thumbnailsRow = new HBox(8);
+        HBox thumbnailsRow = new HBox(10);
         thumbnailsRow.getStyleClass().add("collection-preview-row");
-        for (byte[] imageBytes : images) {
-            ImageView thumbnail = createThumbnailImageView(imageBytes);
-            if (thumbnail == null) {
+        for (Oeuvre oeuvre : oeuvres) {
+            StackPane thumbWrapper = createDraggableThumbnail(oeuvre, collectionId);
+            if (thumbWrapper == null) {
                 continue;
             }
-            StackPane thumbWrapper = new StackPane(thumbnail);
-            thumbWrapper.getStyleClass().add("collection-thumbnail-wrapper");
             thumbnailsRow.getChildren().add(thumbWrapper);
         }
 
@@ -448,6 +450,93 @@ public class CollectionsController {
         }
 
         previewBox.getChildren().add(thumbnailsRow);
+    }
+
+    private StackPane createDraggableThumbnail(Oeuvre oeuvre, Integer sourceCollectionId) {
+        ImageView thumbnail = createThumbnailImageView(oeuvre == null ? null : oeuvre.getImage());
+        if (thumbnail == null || oeuvre.getId() == null) {
+            return null;
+        }
+
+        StackPane thumbWrapper = new StackPane(thumbnail);
+        thumbWrapper.getStyleClass().add("collection-thumbnail-wrapper");
+        thumbWrapper.setOnDragDetected(event -> {
+            Dragboard dragboard = thumbWrapper.startDragAndDrop(TransferMode.MOVE);
+            ClipboardContent content = new ClipboardContent();
+            content.putString(oeuvre.getId() + ":" + sourceCollectionId);
+            dragboard.setContent(content);
+            event.consume();
+        });
+        return thumbWrapper;
+    }
+
+    private void configureCollectionDropTarget(VBox collectionItem, CollectionOeuvre targetCollection) {
+        Integer targetCollectionId = targetCollection == null ? null : targetCollection.getId();
+        collectionItem.setOnDragOver(event -> {
+            if (canAcceptMove(event.getDragboard(), targetCollectionId)) {
+                event.acceptTransferModes(TransferMode.MOVE);
+            }
+            event.consume();
+        });
+
+        collectionItem.setOnDragEntered(event -> setCollectionDropState(collectionItem, true));
+        collectionItem.setOnDragExited(event -> setCollectionDropState(collectionItem, false));
+        collectionItem.setOnDragDropped(event -> {
+            boolean success = false;
+            if (canAcceptMove(event.getDragboard(), targetCollectionId)) {
+                success = moveDraggedOeuvre(event.getDragboard().getString(), targetCollectionId);
+            }
+            event.setDropCompleted(success);
+            event.consume();
+        });
+    }
+
+    private boolean canAcceptMove(Dragboard dragboard, Integer targetCollectionId) {
+        return targetCollectionId != null && dragboard != null && dragboard.hasString();
+    }
+
+    private void setCollectionDropState(VBox collectionItem, boolean active) {
+        collectionItem.getStyleClass().remove("collection-item-box-drop-over");
+        if (active && !collectionItem.getStyleClass().contains("collection-item-box-drop-over")) {
+            collectionItem.getStyleClass().add("collection-item-box-drop-over");
+        }
+    }
+
+    private boolean moveDraggedOeuvre(String payload, Integer targetCollectionId) {
+        if (payload == null || targetCollectionId == null) {
+            return false;
+        }
+
+        String[] parts = payload.split(":");
+        if (parts.length != 2) {
+            return false;
+        }
+
+        try {
+            int oeuvreId = Integer.parseInt(parts[0]);
+            int sourceCollectionId = Integer.parseInt(parts[1]);
+            if (sourceCollectionId == targetCollectionId) {
+                return false;
+            }
+
+            Oeuvre oeuvre = oeuvreService.getOeuvreById(oeuvreId);
+            if (oeuvre == null || oeuvre.getId() == null) {
+                return false;
+            }
+
+            oeuvre.setCollectionId(targetCollectionId);
+            oeuvreService.update(oeuvre);
+            loadCollections();
+            return true;
+        } catch (Exception e) {
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.initOwner(addCollectionButton.getScene().getWindow());
+            errorAlert.setTitle("Erreur");
+            errorAlert.setHeaderText("Déplacement impossible");
+            errorAlert.setContentText(e.getMessage() == null ? "Une erreur est survenue." : e.getMessage());
+            errorAlert.showAndWait();
+            return false;
+        }
     }
 
     private void updateExpandButtonIcon(Button button, boolean expanded) {
@@ -542,6 +631,7 @@ public class CollectionsController {
             refreshCollectionPreview(collectionId, previewBox, contentDivider, expanded);
 
             expandButton.setOnAction(event -> toggleCollectionPreview(collection, previewBox, expandButton));
+            configureCollectionDropTarget(collectionItem, collection);
 
             actions.getChildren().addAll(expandButton, menuButton);
             row.getChildren().addAll(textBox, spacer, actions);
