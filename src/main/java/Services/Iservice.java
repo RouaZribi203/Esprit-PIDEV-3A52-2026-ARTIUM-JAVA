@@ -8,4 +8,5 @@ public interface Iservice <T> {
     void delete (T t) throws SQLDataException;
     void update (T t) throws SQLDataException;
     List<T> getAll () throws SQLDataException;
+    T getById (int id) throws SQLDataException;
 }

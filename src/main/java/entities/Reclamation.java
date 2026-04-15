@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 public class Reclamation {
     private Integer id;
     private String texte;
-    private LocalDate dateCreation;
+    private LocalDateTime dateCreation;
     private String statut;
     private String type;
     private String fileName;
@@ -16,9 +16,32 @@ public class Reclamation {
     public Reclamation() {
     }
 
+    public Reclamation(String texte, LocalDateTime dateCreation, String statut, String type, String fileName, LocalDateTime updatedAt, Integer userId) {
+        this.texte = texte;
+        this.dateCreation = dateCreation;
+        this.statut = statut;
+        this.type = type;
+        this.fileName = fileName;
+        this.updatedAt = updatedAt;
+        this.userId = userId;
+    }
+
+    public Reclamation(Integer id, String texte, LocalDateTime dateCreation, String statut, String type, String fileName, LocalDateTime updatedAt, Integer userId) {
+        this.id = id;
+        this.texte = texte;
+        this.dateCreation = dateCreation;
+        this.statut = statut;
+        this.type = type;
+        this.fileName = fileName;
+        this.updatedAt = updatedAt;
+        this.userId = userId;
+    }
+
     public Integer getId() {
         return id;
     }
+
+    public void setId(Integer id) { this.id = id; }
 
     public String getTexte() {
         return texte;
@@ -28,11 +51,11 @@ public class Reclamation {
         this.texte = texte;
     }
 
-    public LocalDate getDateCreation() {
+    public LocalDateTime getDateCreation() {
         return dateCreation;
     }
 
-    public void setDateCreation(LocalDate dateCreation) {
+    public void setDateCreation(LocalDateTime dateCreation) {
         this.dateCreation = dateCreation;
     }
 
