@@ -5,13 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="feat(reclamation): interface envoyer reclamation">
-      <change beforePath="$PROJECT_DIR$/.idea/copilotDiffState.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/copilotDiffState.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationCardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationCardController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationReplyDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationReplyDialogController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/pages/reclamation_reply_dialog.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/pages/reclamation_reply_dialog.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/dashboard.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/dashboard.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/reclamation-reply-dialog.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/reclamation-reply-dialog.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/LivreFormController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/LivreFormController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/LivresController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/LivresController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/BibliothequArtisteController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/BibliothequArtisteController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/artist/Bibliotheque.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/artist/Bibliotheque.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/pages/livres.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/pages/livres.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

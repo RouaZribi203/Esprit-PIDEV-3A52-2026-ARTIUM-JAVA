@@ -1,5 +1,6 @@
 package controllers.artist;
 
+import controllers.LivreFormController;
 import controllers.amateur.BookReaderController;
 import entities.CollectionOeuvre;
 import entities.Livre;
@@ -47,6 +48,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.sql.SQLDataException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -142,6 +144,10 @@ public class BibliothequArtisteController {
         loadCollections(); // Load collections FIRST
         refresh();         // Then refresh books (now has fallback filtering)
         clearForm();
+
+        if (searchField != null) {
+            searchField.textProperty().addListener((observable, oldValue, newValue) -> applySearchFilter());
+        }
     }
 
     private void loadCollections() {
@@ -174,7 +180,7 @@ public class BibliothequArtisteController {
             }
             
             livres.setAll(allBooks);
-            updateCardsView(livres);
+            applySearchFilter();
         } catch (SQLDataException e) {
             showError("Chargement impossible", e.getMessage());
         }
@@ -200,12 +206,18 @@ public class BibliothequArtisteController {
 
         Label title = new Label(livre.getTitre() == null ? "" : livre.getTitre());
         title.setStyle("-fx-font-weight: 700; -fx-font-size: 14px;");
+        title.setAlignment(javafx.geometry.Pos.CENTER);
+        title.setMaxWidth(Double.MAX_VALUE);
 
         Label categorie = new Label(livre.getCategorie() == null ? "" : livre.getCategorie());
         categorie.setStyle("-fx-text-fill: #6b7280; -fx-font-size: 12px;");
+        categorie.setAlignment(javafx.geometry.Pos.CENTER);
+        categorie.setMaxWidth(Double.MAX_VALUE);
 
         Label prix = new Label(livre.getPrixLocation() == null ? "0" : String.valueOf(livre.getPrixLocation()) + " TND");
         prix.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #3b82f6;");
+        prix.setAlignment(javafx.geometry.Pos.CENTER);
+        prix.setMaxWidth(Double.MAX_VALUE);
 
         Button detailsBtn = new Button("Détails");
         detailsBtn.setStyle("-fx-background-color: #6b7280; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 5 10; -fx-font-size: 11px;");
@@ -213,15 +225,17 @@ public class BibliothequArtisteController {
 
         Button modifyBtn = new Button("Modifier");
         modifyBtn.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 5 10; -fx-font-size: 11px;");
-        modifyBtn.setOnAction(e -> selectBookForEdit(livre));
+        modifyBtn.setOnAction(e -> showFormDialog(livre));
 
         Button deleteBtn = new Button("Supprimer");
         deleteBtn.setStyle("-fx-background-color: #ef4444; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 5 10; -fx-font-size: 11px;");
         deleteBtn.setOnAction(e -> deleteBook(livre));
 
         HBox buttons = new HBox(5, detailsBtn, modifyBtn, deleteBtn);
+        buttons.setAlignment(javafx.geometry.Pos.CENTER);
 
         VBox card = new VBox(10, imageView, title, categorie, prix, buttons);
+        card.setAlignment(javafx.geometry.Pos.TOP_CENTER);
         card.setStyle("-fx-padding: 12; -fx-background-color: white; -fx-border-color: #e5e7eb; -fx-border-radius: 10; -fx-background-radius: 10; -fx-pref-width: 240;");
         VBox.setVgrow(imageView, Priority.NEVER);
 
@@ -304,7 +318,7 @@ public class BibliothequArtisteController {
         descArea.setPrefRowCount(4);
         descArea.setStyle("-fx-background-color: #f9fafb; -fx-border-color: #e5e7eb; -fx-font-size: 13px;");
 
-        ButtonType closeButton = new ButtonType("Fermer", ButtonBar.ButtonData.OK_DONE);
+        ButtonType closeButton = new ButtonType("Fermer", ButtonBar.ButtonData.CANCEL_CLOSE);
         dialog.getDialogPane().getButtonTypes().add(closeButton);
 
         VBox pdfSection = new VBox(8);
@@ -402,19 +416,64 @@ public class BibliothequArtisteController {
         });
     }
 
+    private void showFormDialog(Livre livre) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/pages/LivreForm.fxml"));
+            Parent formContent = loader.load();
+            LivreFormController formController = loader.getController();
+
+            formController.setCollections(new ArrayList<>(collections));
+            formController.setLivre(livre);
+
+            Dialog<Void> dialog = new Dialog<>();
+            dialog.setTitle(livre == null ? "Ajouter un livre" : "Modifier le livre");
+            dialog.getDialogPane().setContent(formContent);
+            dialog.getDialogPane().getButtonTypes().clear();
+            dialog.getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
+            Button hiddenCancelButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.CANCEL);
+            if (hiddenCancelButton != null) {
+                hiddenCancelButton.setManaged(false);
+                hiddenCancelButton.setVisible(false);
+            }
+            dialog.getDialogPane().getStyleClass().add("custom-dialog");
+            dialog.getDialogPane().getStyleClass().add("book-form-dialog");
+            if (cardsTile != null && cardsTile.getScene() != null) {
+                dialog.getDialogPane().getStylesheets().setAll(cardsTile.getScene().getStylesheets());
+            }
+            dialog.getDialogPane().setPrefSize(760, 680);
+            dialog.showAndWait();
+
+            Livre livreResultat = formController.getResultLivre();
+            if (livreResultat != null) {
+                persistLivre(livreResultat, livre == null);
+            }
+        } catch (IOException e) {
+            showError("Erreur", "Impossible d'ouvrir le formulaire livre: " + e.getMessage());
+        }
+    }
+
+    private void persistLivre(Livre livre, boolean isCreate) {
+        try {
+            if (livre.getAuteur() == null || livre.getAuteur().isBlank()) {
+                livre.setAuteur(getCurrentArtistName());
+            }
+
+            if (isCreate) {
+                livreService.add(livre);
+                showInfo("Livre ajouté", "Le livre a ete publie avec succes.");
+            } else {
+                livreService.update(livre);
+                showInfo("Livre modifie", "Le livre a ete modifie avec succes.");
+            }
+            refresh();
+        } catch (SQLDataException e) {
+            showError("Enregistrement impossible", e.getMessage());
+        }
+    }
+
     @FXML
     private void onShowForm() {
-        clearForm();
-        formTitleLabel.setText("Nouveau livre");
-        saveButton.setText("✓ Publier");
-
-        formStack.setVisible(true);
-        formPanel.setVisible(true);
-        formStack.setOpacity(0);
-        FadeTransition ft = new FadeTransition(Duration.millis(300), formStack);
-        ft.setFromValue(0);
-        ft.setToValue(1);
-        ft.play();
+        showFormDialog(null);
     }
 
     @FXML
@@ -432,20 +491,22 @@ public class BibliothequArtisteController {
 
     @FXML
     private void onSearch() {
-        try {
-            List<Livre> result = livreService.search(searchField.getText(), null);
-            List<Livre> artistBooks = result.stream()
-                    .filter(l -> {
-                        for (CollectionOeuvre c : collections) {
-                            if (c.getId().equals(l.getCollectionId())) return true;
-                        }
-                        return false;
-                    })
-                    .toList();
-            updateCardsView(artistBooks);
-        } catch (SQLDataException e) {
-            showError("Recherche impossible", e.getMessage());
+        applySearchFilter();
+    }
+
+    private void applySearchFilter() {
+        String query = searchField.getText() == null ? "" : searchField.getText().trim().toLowerCase();
+        if (query.isEmpty()) {
+            updateCardsView(livres);
+            return;
         }
+
+        List<Livre> filtered = livres.stream()
+                .filter(l -> containsIgnoreCase(l.getTitre(), query)
+                        || containsIgnoreCase(l.getCategorie(), query)
+                        || containsIgnoreCase(l.getAuteur(), query))
+                .toList();
+        updateCardsView(filtered);
     }
 
     @FXML
@@ -653,6 +714,10 @@ public class BibliothequArtisteController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private static boolean containsIgnoreCase(String value, String queryLower) {
+        return value != null && value.toLowerCase().contains(queryLower);
     }
 
     private void showInfo(String title, String message) {

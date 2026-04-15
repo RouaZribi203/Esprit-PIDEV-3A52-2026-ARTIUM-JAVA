@@ -24,17 +24,17 @@
     <HBox alignment="CENTER_LEFT" spacing="16.0">
         <Label styleClass="page-title-small" text="Ma Bibliothèque" />
         <Region HBox.hgrow="ALWAYS" />
-        <TextField fx:id="searchField" prefWidth="220.0" promptText="Rechercher un livre..." styleClass="search-field" />
+        <TextField fx:id="searchField" prefWidth="220.0" promptText="Rechercher un livre..." styleClass="search-field" onAction="#onSearch" />
         <Button mnemonicParsing="false" onAction="#onSearch" text="🔍" styleClass="icon-btn" />
         <Button fx:id="addBookButton" mnemonicParsing="false" onAction="#onShowForm" styleClass="primary-button" text="+ Ajouter un livre" />
     </HBox>
 
     <HBox spacing="20.0" VBox.vgrow="ALWAYS" alignment="TOP_LEFT">
         <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS" styleClass="cards-scroll">
-            <TilePane fx:id="cardsTile" hgap="18.0" vgap="18.0" prefColumns="0" />
+            <TilePane fx:id="cardsTile" hgap="18.0" vgap="18.0" orientation="HORIZONTAL" alignment="TOP_LEFT" prefTileWidth="240.0" />
         </ScrollPane>
 
-        <StackPane fx:id="formStack" visible="false">
+        <StackPane fx:id="formStack" visible="false" managed="false">
             <VBox fx:id="formPanel" spacing="0.0" styleClass="form-panel" prefWidth="420.0">
                 <padding><Insets top="0.0" right="24.0" bottom="24.0" left="24.0" /></padding>
 
