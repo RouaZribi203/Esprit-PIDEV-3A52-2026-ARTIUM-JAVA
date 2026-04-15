@@ -2,17 +2,21 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="CENTER" spacing="14.0" styleClass="amateur-page-card" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1">
-    <padding>
-        <Insets bottom="28.0" left="28.0" right="28.0" top="28.0" />
-    </padding>
-    <Label styleClass="page-title" text="Fil d'actualités" />
-    <Label styleClass="page-subtitle" text="Structure de la page feed amateur." wrapText="true" />
-    <StackPane minHeight="220.0" prefHeight="260.0" styleClass="empty-state-card" VBox.vgrow="ALWAYS">
-        <Label styleClass="empty-state-title" text="Aucune oeuvre pour le moment" />
-    </StackPane>
+<VBox alignment="CENTER" spacing="12.0" styleClass="amateur-page-card collections-page" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.amateur.FeedController">
+    <padding><Insets bottom="12.0" left="12.0" right="12.0" top="12.0" /></padding>
+
+    <VBox alignment="CENTER" maxWidth="860.0" spacing="10.0" styleClass="collections-body-card" VBox.vgrow="ALWAYS">
+        <padding><Insets bottom="12.0" left="12.0" right="12.0" top="12.0" /></padding>
+
+
+        <Label fx:id="emptyStateLabel" styleClass="page-subtitle-small" text="Chargement des oeuvres..." wrapText="true" />
+
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="NEVER" styleClass="oeuvres-feed-scroll" VBox.vgrow="ALWAYS">
+            <VBox fx:id="oeuvresContainer" alignment="CENTER" fillWidth="false" spacing="12.0" styleClass="oeuvres-feed-list" />
+        </ScrollPane>
+    </VBox>
 </VBox>
 

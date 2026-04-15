@@ -69,12 +69,17 @@ public class AmateurMainController {
     public void onTicketPurchased(Ticket ticket) {
     // Handle post-purchase actions, e.g. show confirmation, update UI, etc.}
         onNavigate("payment-success");
+        loadAmateurView(route, resolveRoute(route));
     }
 
     private String resolveRoute(String route) {
         switch (route) {
+            case "feed":
+            case "feed-peintures":
+            case "feed-sculptures":
+            case "feed-photos":
             case "feed-recommandations":
-                return "/views/amateur/FeedReco.fxml";
+                return "/views/amateur/Feed.fxml";
             case "favoris":
                 return "/views/amateur/Favoris.fxml";
             case "evenements":
@@ -118,9 +123,18 @@ public class AmateurMainController {
         }
     }
 
+    private void loadAmateurView(String route, String fxmlPath) {
     private Object loadAmateurView(String fxmlPath) {
         try {
             URL resource = Objects.requireNonNull(getClass().getResource(fxmlPath), "FXML not found: " + fxmlPath);
+            FXMLLoader loader = new FXMLLoader(resource);
+            Node page = loader.load();
+
+            Object controller = loader.getController();
+            if (controller instanceof FeedController feedController) {
+                feedController.setRouteFilter(route);
+            }
+
             FXMLLoader loader = new FXMLLoader(resource);
             Node page = loader.load();
             Object controller = loader.getController();
