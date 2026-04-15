@@ -39,7 +39,7 @@ public class ReclamationsController {
 
     @FXML
     public void initialize() {
-        statutFilter.getItems().setAll("Tous", "Traite", "Non traite");
+        statutFilter.getItems().setAll("Tous", "Traitée", "Non traitée");
         statutFilter.getSelectionModel().selectFirst();
 
         searchField.textProperty().addListener((obs, o, n) -> applySearchAndFilter());

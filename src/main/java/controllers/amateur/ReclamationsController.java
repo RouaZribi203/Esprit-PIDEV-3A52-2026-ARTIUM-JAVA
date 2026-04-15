@@ -177,10 +177,8 @@ public class ReclamationsController implements Initializable {
 		String statutSelNorm = normalize(statutSel);
 
 		List<Reclamation> filtered = myAll.stream()
-				.filter(r -> q.isEmpty()
-						|| contains(r.getTexte(), q)
-						|| contains(r.getType(), q)
-						|| contains(r.getStatut(), q))
+				// Recherche appliquée uniquement sur le texte/description
+				.filter(r -> q.isEmpty() || contains(r.getTexte(), q))
 				.filter(r -> {
 					if (statutSelNorm.isEmpty() || statutSelNorm.equals("tous")) return true;
 					String s = normalize(r.getStatut());
