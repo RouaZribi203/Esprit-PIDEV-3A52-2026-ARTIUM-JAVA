@@ -5,6 +5,8 @@
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 
@@ -16,22 +18,18 @@
     <Button fx:id="sidebarToggleButton" mnemonicParsing="false" onAction="#onSidebarToggle" prefHeight="34.0" prefWidth="34.0" styleClass="icon-button" text="=" />
     <Region HBox.hgrow="ALWAYS" />
 
-    <MenuButton fx:id="themeMenuButton" mnemonicParsing="false" prefHeight="34.0" styleClass="menu-icon-button" text="Theme">
+    <MenuButton fx:id="userMenuButton" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" prefHeight="34.0" prefWidth="34.0" styleClass="avatar-menu" text="">
+        <graphic>
+            <ImageView fitHeight="20.0" fitWidth="20.0" preserveRatio="true" styleClass="navbar-avatar-image">
+                <image>
+                    <Image url="@images/logo2.png" />
+                </image>
+            </ImageView>
+        </graphic>
         <items>
-            <MenuItem fx:id="lightThemeItem" mnemonicParsing="false" onAction="#onThemeLight" text="Clair" />
-            <MenuItem fx:id="darkThemeItem" mnemonicParsing="false" onAction="#onThemeDark" text="Sombre" />
-        </items>
-    </MenuButton>
-
-    <Button fx:id="notificationsButton" mnemonicParsing="false" onAction="#onNotificationsClick" prefHeight="34.0" prefWidth="34.0" styleClass="icon-button" text="!" />
-
-    <MenuButton fx:id="userMenuButton" mnemonicParsing="false" prefHeight="34.0" styleClass="avatar-menu" text="Admin">
-        <items>
-            <MenuItem mnemonicParsing="false" onAction="#onSwitchToAdminView" text="Mode admin" />
-            <MenuItem mnemonicParsing="false" onAction="#onSwitchToArtistView" text="Mode artiste" />
-            <MenuItem mnemonicParsing="false" onAction="#onSwitchToAmateurView" text="Mode amateur" />
-            <MenuItem mnemonicParsing="false" onAction="#onProfileClick" text="Profil" />
-            <MenuItem mnemonicParsing="false" onAction="#onLogoutClick" text="Se deconnecter" />
+            <MenuItem mnemonicParsing="false" onAction="#onProfileClick" styleClass="avatar-dropdown-item" text="Profil" />
+            <SeparatorMenuItem styleClass="avatar-dropdown-separator" />
+            <MenuItem id="logoutMenuItem" mnemonicParsing="false" onAction="#onLogoutClick" styleClass="avatar-dropdown-item" text="Se deconnecter" />
         </items>
     </MenuButton>
 </HBox>

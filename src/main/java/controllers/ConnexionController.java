@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import utils.InputValidator;
 
 import java.sql.SQLDataException;
 
@@ -23,19 +24,31 @@ public class ConnexionController {
     private final UserService userService = new UserService();
 
     @FXML
+    public void initialize() {
+        emailField.textProperty().addListener((obs, oldV, newV) -> validateLiveInput());
+        passwordField.textProperty().addListener((obs, oldV, newV) -> validateLiveInput());
+    }
+
+    @FXML
     private void onLogin() {
         clearMessage();
 
         String email = emailField.getText() == null ? "" : emailField.getText().trim();
         String password = passwordField.getText() == null ? "" : passwordField.getText();
 
-        if (email.isEmpty() || password.isEmpty()) {
-            setMessage("Veuillez saisir votre e-mail et votre mot de passe.");
+        String localError = validateCredentials(email, password);
+        if (localError != null) {
+            setMessage(localError);
             return;
         }
 
         try {
             User user = userService.authenticate(email, password);
+            String statut = user.getStatut() == null ? "" : user.getStatut().trim().toLowerCase();
+            if ("bloqué".equals(statut) || "blocked".equals(statut)) {
+                setMessage("Compte bloqué. Contactez l'administrateur.");
+                return;
+            }
             routeByRole(user);
         } catch (SQLDataException e) {
             setMessage(e.getMessage());
@@ -73,6 +86,32 @@ public class ConnexionController {
             default:
                 setMessage("Rôle utilisateur non supporté : " + user.getRole());
         }
+    }
+
+    private void validateLiveInput() {
+        String email = emailField.getText() == null ? "" : emailField.getText().trim();
+
+        if (InputValidator.isBlank(email)) {
+            clearMessage();
+            return;
+        }
+
+        if (!InputValidator.isValidEmail(email)) {
+            setMessage("Format d'e-mail invalide.");
+            return;
+        }
+
+        clearMessage();
+    }
+
+    private String validateCredentials(String email, String password) {
+        if (InputValidator.isBlank(email) || InputValidator.isBlank(password)) {
+            return "Veuillez saisir votre e-mail et votre mot de passe.";
+        }
+        if (!InputValidator.isValidEmail(email)) {
+            return "Format d'e-mail invalide.";
+        }
+        return null;
     }
 
     private void setMessage(String message) {

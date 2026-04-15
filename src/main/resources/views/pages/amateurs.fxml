@@ -20,7 +20,7 @@
         </padding>
 
         <HBox alignment="CENTER_LEFT" spacing="16.0" styleClass="users-header">
-            <Label styleClass="page-title users-title" text="Gestion des amateurs" />
+            <Label styleClass="page-title" text="Gestion des amateurs" />
             <Region HBox.hgrow="ALWAYS" />
             <Button mnemonicParsing="false" onAction="#onAddUser" styleClass="primary-action-button" text="Ajouter amateur" />
         </HBox>

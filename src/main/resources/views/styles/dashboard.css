@@ -120,12 +120,74 @@
 }
 
 .avatar-menu {
-    -fx-background-color: #ebeff5;
-    -fx-border-color: #cfd5e0;
-    -fx-background-radius: 16;
-    -fx-border-radius: 16;
+    -fx-background-color: #eef1f5;
+    -fx-border-color: #d4d9e1;
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+}
+
+.avatar-menu:hover {
+    -fx-background-color: #e5e9f1;
+}
+
+.avatar-menu:showing {
+    -fx-background-color: #e1e7f3;
+    -fx-border-color: #bcc6d8;
+}
+
+.avatar-menu > .arrow-button,
+.avatar-menu > .arrow-button > .arrow {
+    -fx-padding: 0;
+    -fx-background-insets: 0;
+    -fx-background-color: transparent;
+}
+
+.navbar-avatar-image {
+    -fx-opacity: 0.95;
+    -fx-effect: dropshadow(gaussian, rgba(31, 45, 70, 0.15), 4, 0.2, 0, 1);
+}
+
+.context-menu {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12;
+    -fx-border-color: #dde4ef;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-padding: 6;
+    -fx-effect: dropshadow(gaussian, rgba(31, 45, 70, 0.16), 18, 0.16, 0, 5);
+}
+
+.context-menu .menu-item.avatar-dropdown-item {
+    -fx-background-color: transparent;
+    -fx-background-radius: 8;
+    -fx-padding: 9 14 9 14;
+}
+
+.context-menu .menu-item.avatar-dropdown-item > .label {
     -fx-text-fill: #243146;
+    -fx-font-size: 13px;
     -fx-font-weight: 700;
+}
+
+.context-menu .menu-item.avatar-dropdown-item:focused,
+.context-menu .menu-item.avatar-dropdown-item:hover {
+    -fx-background-color: #eef2ff;
+}
+
+.context-menu .menu-item#logoutMenuItem > .label {
+    -fx-text-fill: #a6324a;
+}
+
+.context-menu .menu-item#logoutMenuItem:focused,
+.context-menu .menu-item#logoutMenuItem:hover {
+    -fx-background-color: #fff0f3;
+}
+
+.context-menu .separator.avatar-dropdown-separator:horizontal .line {
+    -fx-border-color: #e2e8f2;
+    -fx-border-width: 1 0 0 0;
 }
 
 .content-area {
@@ -152,6 +214,12 @@
     -fx-font-size: 32px;
     -fx-font-weight: 800;
     -fx-text-fill: #1c2b3f;
+}
+
+/* Titres principaux des pages gestion amateurs/artistes */
+.users-shell .users-header .users-title {
+    -fx-font-size: 46px;
+    -fx-font-weight: 800;
 }
 
 .users-toolbar {
@@ -907,6 +975,29 @@
 .app-root.dark-mode .calendar-day,
 .app-root.dark-mode .calendar-day-header {
     -fx-text-fill: #b7c4dc;
+}
+
+.app-root.dark-mode .context-menu {
+    -fx-background-color: #27354c;
+    -fx-border-color: #3a4b6b;
+}
+
+.app-root.dark-mode .context-menu .menu-item.avatar-dropdown-item > .label {
+    -fx-text-fill: #dce6fb;
+}
+
+.app-root.dark-mode .context-menu .menu-item.avatar-dropdown-item:focused,
+.app-root.dark-mode .context-menu .menu-item.avatar-dropdown-item:hover {
+    -fx-background-color: #334562;
+}
+
+.app-root.dark-mode .context-menu .menu-item#logoutMenuItem > .label {
+    -fx-text-fill: #ff9fb2;
+}
+
+.app-root.dark-mode .context-menu .menu-item#logoutMenuItem:focused,
+.app-root.dark-mode .context-menu .menu-item#logoutMenuItem:hover {
+    -fx-background-color: #553343;
 }
 
 

@@ -9,7 +9,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
-import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextArea;
@@ -20,15 +19,15 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
+import utils.InputValidator;
 
 import java.io.File;
 import java.sql.SQLDataException;
 import java.time.LocalDate;
-import java.util.regex.Pattern;
 
 public class InscriptionController {
 
-	private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
+	private static final int MINIMUM_AGE = 13;
 	private static final String ROLE_AMATEUR = "Amateur";
 	private static final String ROLE_ARTISTE = "Artiste";
 	private static final String ROLE_ADMIN = "Admin";
@@ -78,6 +77,18 @@ public class InscriptionController {
 	private final UserService userService = new UserService();
 	private int currentStep = 1;
 	private String selectedPhotoPath;
+	private boolean nomTouched;
+	private boolean prenomTouched;
+	private boolean dateNaissanceTouched;
+	private boolean phoneTouched;
+	private boolean villeTouched;
+	private boolean emailTouched;
+	private boolean passwordTouched;
+	private boolean confirmPasswordTouched;
+	private boolean biographieTouched;
+	private boolean specialiteTouched;
+	private boolean centreInteretTouched;
+	private boolean roleTouched;
 
 	@FXML
 	public void initialize() {
@@ -86,7 +97,12 @@ public class InscriptionController {
 		if (roleToggleGroup.getSelectedToggle() == null && !roleToggleGroup.getToggles().isEmpty()) {
 			roleToggleGroup.selectToggle(roleToggleGroup.getToggles().get(0));
 		}
-		roleToggleGroup.selectedToggleProperty().addListener((obs, oldV, newV) -> updateRoleHints());
+		roleToggleGroup.selectedToggleProperty().addListener((obs, oldV, newV) -> {
+			roleTouched = true;
+			updateRoleHints();
+			updateLiveValidationMessage();
+		});
+		setupLiveValidation();
 		updateRoleHints();
 		showStep(1, false);
 	}
@@ -166,20 +182,36 @@ public class InscriptionController {
 	}
 
 	private boolean validateStepOne() {
-		if (isBlank(nomField.getText())) return failValidation("Veuillez renseigner le nom.", nomField);
-		if (isBlank(prenomField.getText())) return failValidation("Veuillez renseigner le prénom.", prenomField);
-		if (dateNaissancePicker.getValue() == null) return failValidation("Veuillez sélectionner une date de naissance.", dateNaissancePicker);
-		if (isBlank(phoneField.getText())) return failValidation("Veuillez renseigner le numéro de téléphone.", phoneField);
-		if (isBlank(villeField.getText())) return failValidation("Veuillez renseigner la ville.", villeField);
+		if (!InputValidator.isValidName(nomField.getText())) {
+			return failValidation("Nom invalide (2-50 lettres).", nomField);
+		}
+		if (!InputValidator.isValidName(prenomField.getText())) {
+			return failValidation("Prénom invalide (2-50 lettres).", prenomField);
+		}
+		if (dateNaissancePicker.getValue() == null) {
+			return failValidation("Veuillez sélectionner une date de naissance.", dateNaissancePicker);
+		}
+		if (!InputValidator.isAdult(dateNaissancePicker.getValue(), MINIMUM_AGE)) {
+			return failValidation("Date de naissance invalide (âge minimum " + MINIMUM_AGE + " ans).", dateNaissancePicker);
+		}
+		if (!InputValidator.isValidPhone(phoneField.getText())) {
+			return failValidation("Téléphone invalide (8 à 15 chiffres, + optionnel).", phoneField);
+		}
+		if (!InputValidator.isValidCity(villeField.getText())) {
+			return failValidation("Ville invalide (2-60 lettres).", villeField);
+		}
 		return true;
 	}
 
 	private boolean validateStepTwo() {
-		if (isBlank(emailField.getText()) || !EMAIL_PATTERN.matcher(emailField.getText().trim()).matches()) {
+		if (!InputValidator.isValidEmail(emailField.getText())) {
 			return failValidation("Veuillez saisir une adresse e-mail valide.", emailField);
 		}
-		if (isBlank(passwordField.getText()) || passwordField.getText().length() < 8) {
-			return failValidation("Le mot de passe doit contenir au moins 8 caractères.", passwordField);
+		if (!InputValidator.isValidPassword(passwordField.getText())) {
+			return failValidation("Mot de passe faible: 8+ caractères avec majuscule, minuscule et chiffre.", passwordField);
+		}
+		if (InputValidator.isBlank(confirmPasswordField.getText())) {
+			return failValidation("Veuillez confirmer le mot de passe.", confirmPasswordField);
 		}
 		if (!passwordField.getText().equals(confirmPasswordField.getText())) {
 			return failValidation("La confirmation du mot de passe est incorrecte.", confirmPasswordField);
@@ -189,7 +221,9 @@ public class InscriptionController {
 
 	private boolean validateStepThree() {
 		if (roleToggleGroup.getSelectedToggle() == null) return failValidation("Veuillez sélectionner un rôle.", null);
-		if (isBlank(biographieArea.getText())) return failValidation("Veuillez ajouter une biographie.", biographieArea);
+		if (InputValidator.isBlank(biographieArea.getText()) || biographieArea.getText().trim().length() < 10) {
+			return failValidation("Veuillez ajouter une biographie (minimum 10 caractères).", biographieArea);
+		}
 
 		String role = getSelectedRole();
 		if (ROLE_AMATEUR.equalsIgnoreCase(role) && centreInteretComboBox.getValue() == null) {
@@ -220,6 +254,101 @@ public class InscriptionController {
 		submitButton.setVisible(step == 3); submitButton.setManaged(step == 3);
 		updateStepper();
 		updateRoleHints();
+		updateLiveValidationMessage();
+	}
+
+	private void setupLiveValidation() {
+		nomField.textProperty().addListener((obs, oldV, newV) -> { nomTouched = true; updateLiveValidationMessage(); });
+		prenomField.textProperty().addListener((obs, oldV, newV) -> { prenomTouched = true; updateLiveValidationMessage(); });
+		dateNaissancePicker.valueProperty().addListener((obs, oldV, newV) -> { dateNaissanceTouched = true; updateLiveValidationMessage(); });
+		phoneField.textProperty().addListener((obs, oldV, newV) -> { phoneTouched = true; updateLiveValidationMessage(); });
+		villeField.textProperty().addListener((obs, oldV, newV) -> { villeTouched = true; updateLiveValidationMessage(); });
+		emailField.textProperty().addListener((obs, oldV, newV) -> { emailTouched = true; updateLiveValidationMessage(); });
+		passwordField.textProperty().addListener((obs, oldV, newV) -> { passwordTouched = true; updateLiveValidationMessage(); });
+		confirmPasswordField.textProperty().addListener((obs, oldV, newV) -> { confirmPasswordTouched = true; updateLiveValidationMessage(); });
+		biographieArea.textProperty().addListener((obs, oldV, newV) -> { biographieTouched = true; updateLiveValidationMessage(); });
+		specialiteComboBox.valueProperty().addListener((obs, oldV, newV) -> { specialiteTouched = true; updateLiveValidationMessage(); });
+		centreInteretComboBox.valueProperty().addListener((obs, oldV, newV) -> { centreInteretTouched = true; updateLiveValidationMessage(); });
+	}
+
+	private void updateLiveValidationMessage() {
+		if (!hasTouchedInCurrentStep()) {
+			clearMessage();
+			return;
+		}
+
+		String validationError = getCurrentStepLiveValidationError();
+		if (validationError == null) {
+			clearMessage();
+			return;
+		}
+		setMessage(validationError, true);
+	}
+
+	private boolean hasTouchedInCurrentStep() {
+		switch (currentStep) {
+			case 1:
+				return nomTouched || prenomTouched || dateNaissanceTouched || phoneTouched || villeTouched;
+			case 2:
+				return emailTouched || passwordTouched || confirmPasswordTouched;
+			case 3:
+				return biographieTouched || specialiteTouched || centreInteretTouched || roleTouched;
+			default:
+				return false;
+		}
+	}
+
+	private String getCurrentStepLiveValidationError() {
+		switch (currentStep) {
+			case 1:
+				return getStepOneLiveValidationError();
+			case 2:
+				return getStepTwoLiveValidationError();
+			case 3:
+				return getStepThreeLiveValidationError();
+			default:
+				return null;
+		}
+	}
+
+	private String getStepOneLiveValidationError() {
+		if (nomTouched && !InputValidator.isValidName(nomField.getText())) return "Nom invalide (2-50 lettres).";
+		if (prenomTouched && !InputValidator.isValidName(prenomField.getText())) return "Prénom invalide (2-50 lettres).";
+		if (dateNaissanceTouched) {
+			if (dateNaissancePicker.getValue() == null) return "Veuillez sélectionner une date de naissance.";
+			if (!InputValidator.isAdult(dateNaissancePicker.getValue(), MINIMUM_AGE)) return "Date de naissance invalide (âge minimum " + MINIMUM_AGE + " ans).";
+		}
+		if (phoneTouched && !InputValidator.isValidPhone(phoneField.getText())) return "Téléphone invalide (8 à 15 chiffres, + optionnel).";
+		if (villeTouched && !InputValidator.isValidCity(villeField.getText())) return "Ville invalide (2-60 lettres).";
+		return null;
+	}
+
+	private String getStepTwoLiveValidationError() {
+		if (emailTouched && !InputValidator.isValidEmail(emailField.getText())) return "Veuillez saisir une adresse e-mail valide.";
+		if (passwordTouched && !InputValidator.isValidPassword(passwordField.getText())) return "Mot de passe faible: 8+ caractères avec majuscule, minuscule et chiffre.";
+		if (confirmPasswordTouched) {
+			if (InputValidator.isBlank(confirmPasswordField.getText())) return "Veuillez confirmer le mot de passe.";
+			if (!InputValidator.isBlank(passwordField.getText()) && !passwordField.getText().equals(confirmPasswordField.getText())) {
+				return "La confirmation du mot de passe est incorrecte.";
+			}
+		}
+		return null;
+	}
+
+	private String getStepThreeLiveValidationError() {
+		if (roleTouched && roleToggleGroup.getSelectedToggle() == null) return "Veuillez sélectionner un rôle.";
+		if (biographieTouched && (InputValidator.isBlank(biographieArea.getText()) || biographieArea.getText().trim().length() < 10)) {
+			return "Veuillez ajouter une biographie (minimum 10 caractères).";
+		}
+		String role = getSelectedRole();
+		if (ROLE_AMATEUR.equalsIgnoreCase(role) && centreInteretTouched && centreInteretComboBox.getValue() == null) return "Veuillez choisir un centre d'intérêt.";
+		if (ROLE_ARTISTE.equalsIgnoreCase(role) && specialiteTouched && specialiteComboBox.getValue() == null) return "Veuillez choisir une spécialité.";
+		return null;
+	}
+
+	private void clearMessage() {
+		messageLabel.setText("");
+		messageLabel.getStyleClass().removeAll("error", "success");
 	}
 
 	private void updateStepper() {
@@ -263,17 +392,17 @@ public class InscriptionController {
 	}
 
 	private User buildUser() {
-		draftUser.setNom(trim(nomField.getText()));
-		draftUser.setPrenom(trim(prenomField.getText()));
+		draftUser.setNom(InputValidator.clean(nomField.getText()));
+		draftUser.setPrenom(InputValidator.clean(prenomField.getText()));
 		draftUser.setDateNaissance(dateNaissancePicker.getValue());
-		draftUser.setNumTel(trim(phoneField.getText()));
-		draftUser.setVille(trim(villeField.getText()));
-		draftUser.setEmail(trim(emailField.getText()));
+		draftUser.setNumTel(InputValidator.clean(phoneField.getText()));
+		draftUser.setVille(InputValidator.clean(villeField.getText()));
+		draftUser.setEmail(InputValidator.clean(emailField.getText()));
 		draftUser.setMdp(passwordField.getText());
 		draftUser.setRole(getSelectedRole());
-		draftUser.setSpecialite(ROLE_ARTISTE.equalsIgnoreCase(getSelectedRole()) ? trim(specialiteComboBox.getValue()) : null);
-		draftUser.setCentreInteret(ROLE_AMATEUR.equalsIgnoreCase(getSelectedRole()) ? trim(centreInteretComboBox.getValue()) : null);
-		draftUser.setBiographie(trim(biographieArea.getText()));
+		draftUser.setSpecialite(ROLE_ARTISTE.equalsIgnoreCase(getSelectedRole()) ? InputValidator.clean(specialiteComboBox.getValue()) : null);
+		draftUser.setCentreInteret(ROLE_AMATEUR.equalsIgnoreCase(getSelectedRole()) ? InputValidator.clean(centreInteretComboBox.getValue()) : null);
+		draftUser.setBiographie(InputValidator.clean(biographieArea.getText()));
 		draftUser.setPhotoReferencePath(selectedPhotoPath);
 		draftUser.setPhotoProfil(selectedPhotoPath);
 		draftUser.setDateInscription(LocalDate.now());
@@ -285,6 +414,9 @@ public class InscriptionController {
 		nomField.clear(); prenomField.clear(); dateNaissancePicker.setValue(null); phoneField.clear(); villeField.clear();
 		emailField.clear(); passwordField.clear(); confirmPasswordField.clear(); specialiteComboBox.setValue(null); centreInteretComboBox.setValue(null);
 		biographieArea.clear(); selectedPhotoPath = null; photoPathLabel.setText("Sélectionnez une image pour votre profil.");
+		nomTouched = false; prenomTouched = false; dateNaissanceTouched = false; phoneTouched = false; villeTouched = false;
+		emailTouched = false; passwordTouched = false; confirmPasswordTouched = false;
+		biographieTouched = false; specialiteTouched = false; centreInteretTouched = false; roleTouched = false;
 		photoPlaceholderLabel.setVisible(true); photoPlaceholderLabel.setManaged(true);
 		if (!roleToggleGroup.getToggles().isEmpty()) roleToggleGroup.selectToggle(roleToggleGroup.getToggles().get(0));
 		showStep(1, false);
@@ -304,8 +436,6 @@ public class InscriptionController {
 		messageLabel.getStyleClass().add(error ? "error" : "success");
 	}
 
-	private boolean isBlank(String value) { return value == null || value.trim().isEmpty(); }
-	private String trim(String value) { return value == null ? null : value.trim(); }
 }
 
 

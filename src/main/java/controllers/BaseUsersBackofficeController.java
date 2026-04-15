@@ -26,17 +26,17 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import utils.InputValidator;
 
 import java.sql.SQLDataException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 public abstract class BaseUsersBackofficeController {
 
-    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
+    private static final int MINIMUM_AGE = 13;
     private static final String STATUT_ACTIVE = "Activé";
     private static final String STATUT_BLOQUE = "Bloqué";
     private static final String[] CENTRES_INTERET = {
@@ -617,6 +617,68 @@ public abstract class BaseUsersBackofficeController {
         Button cancelButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.CANCEL);
         cancelButton.getStyleClass().addAll("card-action-button", "card-soft-button");
 
+        final boolean[] nomTouched = {false};
+        final boolean[] prenomTouched = {false};
+        final boolean[] dateNaissanceTouched = {false};
+        final boolean[] emailTouched = {false};
+        final boolean[] passwordTouched = {false};
+        final boolean[] confirmPasswordTouched = {false};
+        final boolean[] telephoneTouched = {false};
+        final boolean[] villeTouched = {false};
+        final boolean[] statutTouched = {false};
+        final boolean[] roleSpecificTouched = {false};
+
+        Runnable liveValidation = () -> {
+            if (!hasAnyTouched(
+                    nomTouched[0],
+                    prenomTouched[0],
+                    dateNaissanceTouched[0],
+                    emailTouched[0],
+                    passwordTouched[0],
+                    confirmPasswordTouched[0],
+                    telephoneTouched[0],
+                    villeTouched[0],
+                    statutTouched[0],
+                    roleSpecificTouched[0])) {
+                formErrorLabel.setText("");
+                return;
+            }
+            String validationError = validateFormLive(
+                    creation,
+                    nomField.getText(),
+                    prenomField.getText(),
+                    dateNaissancePicker.getValue(),
+                    emailField.getText(),
+                    passwordField.getText(),
+                    confirmPasswordField.getText(),
+                    telField.getText(),
+                    villeField.getText(),
+                    statutCombo.getValue(),
+                    roleSpecificCombo.getValue(),
+                    nomTouched[0],
+                    prenomTouched[0],
+                    dateNaissanceTouched[0],
+                    emailTouched[0],
+                    passwordTouched[0],
+                    confirmPasswordTouched[0],
+                    telephoneTouched[0],
+                    villeTouched[0],
+                    statutTouched[0],
+                    roleSpecificTouched[0]);
+            formErrorLabel.setText(validationError == null ? "" : validationError);
+        };
+
+        nomField.textProperty().addListener((obs, oldV, newV) -> { nomTouched[0] = true; liveValidation.run(); });
+        prenomField.textProperty().addListener((obs, oldV, newV) -> { prenomTouched[0] = true; liveValidation.run(); });
+        dateNaissancePicker.valueProperty().addListener((obs, oldV, newV) -> { dateNaissanceTouched[0] = true; liveValidation.run(); });
+        emailField.textProperty().addListener((obs, oldV, newV) -> { emailTouched[0] = true; liveValidation.run(); });
+        passwordField.textProperty().addListener((obs, oldV, newV) -> { passwordTouched[0] = true; liveValidation.run(); });
+        confirmPasswordField.textProperty().addListener((obs, oldV, newV) -> { confirmPasswordTouched[0] = true; liveValidation.run(); });
+        telField.textProperty().addListener((obs, oldV, newV) -> { telephoneTouched[0] = true; liveValidation.run(); });
+        villeField.textProperty().addListener((obs, oldV, newV) -> { villeTouched[0] = true; liveValidation.run(); });
+        statutCombo.valueProperty().addListener((obs, oldV, newV) -> { statutTouched[0] = true; liveValidation.run(); });
+        roleSpecificCombo.valueProperty().addListener((obs, oldV, newV) -> { roleSpecificTouched[0] = true; liveValidation.run(); });
+
         saveButton.addEventFilter(ActionEvent.ACTION, event -> {
             String validationError = validateForm(
                     creation,
@@ -686,20 +748,24 @@ public abstract class BaseUsersBackofficeController {
                                 String ville,
                                 String statut,
                                 String roleSpecificValue) {
-        if (isBlank(nom)) return "Le nom est obligatoire.";
-        if (isBlank(prenom)) return "Le prenom est obligatoire.";
+        if (!InputValidator.isValidName(nom)) return "Nom invalide (2-50 lettres).";
+        if (!InputValidator.isValidName(prenom)) return "Prenom invalide (2-50 lettres).";
         if (dateNaissance == null) return "La date de naissance est obligatoire.";
-        if (isBlank(email) || !EMAIL_PATTERN.matcher(email.trim()).matches()) return "Email invalide.";
+        if (!InputValidator.isAdult(dateNaissance, MINIMUM_AGE)) return "Date de naissance invalide (age minimum " + MINIMUM_AGE + " ans).";
+        if (!InputValidator.isValidEmail(email)) return "Email invalide.";
 
         if (creation) {
-            if (isBlank(password) || password.trim().length() < 8) return "Mot de passe minimum 8 caracteres.";
-        } else if (!isBlank(password) && password.trim().length() < 8) {
-            return "Mot de passe minimum 8 caracteres.";
+            if (!InputValidator.isValidPassword(password)) {
+                return "Mot de passe faible: 8+ caracteres avec majuscule, minuscule et chiffre.";
+            }
+        } else if (!isBlank(password) && !InputValidator.isValidPassword(password)) {
+            return "Mot de passe faible: 8+ caracteres avec majuscule, minuscule et chiffre.";
         }
 
+        if (!isBlank(password) && isBlank(confirmPassword)) return "Veuillez confirmer le mot de passe.";
         if (!isBlank(password) && !password.equals(confirmPassword)) return "Confirmation du mot de passe invalide.";
-        if (isBlank(telephone)) return "Le telephone est obligatoire.";
-        if (isBlank(ville)) return "La ville est obligatoire.";
+        if (!InputValidator.isValidPhone(telephone)) return "Telephone invalide (8 a 15 chiffres, + optionnel).";
+        if (!InputValidator.isValidCity(ville)) return "Ville invalide (2-60 lettres).";
         if (isBlank(statut)) return "Le statut est obligatoire.";
         if (isBlank(roleSpecificValue)) {
             return "Artiste".equalsIgnoreCase(managedRole())
@@ -707,6 +773,71 @@ public abstract class BaseUsersBackofficeController {
                     : "Le centre interet est obligatoire.";
         }
         return null;
+    }
+
+    private String validateFormLive(boolean creation,
+                                    String nom,
+                                    String prenom,
+                                    LocalDate dateNaissance,
+                                    String email,
+                                    String password,
+                                    String confirmPassword,
+                                    String telephone,
+                                    String ville,
+                                    String statut,
+                                    String roleSpecificValue,
+                                    boolean nomTouched,
+                                    boolean prenomTouched,
+                                    boolean dateNaissanceTouched,
+                                    boolean emailTouched,
+                                    boolean passwordTouched,
+                                    boolean confirmPasswordTouched,
+                                    boolean telephoneTouched,
+                                    boolean villeTouched,
+                                    boolean statutTouched,
+                                    boolean roleSpecificTouched) {
+        if (nomTouched && !InputValidator.isValidName(nom)) return "Nom invalide (2-50 lettres).";
+        if (prenomTouched && !InputValidator.isValidName(prenom)) return "Prenom invalide (2-50 lettres).";
+
+        if (dateNaissanceTouched) {
+            if (dateNaissance == null) return "La date de naissance est obligatoire.";
+            if (!InputValidator.isAdult(dateNaissance, MINIMUM_AGE)) return "Date de naissance invalide (age minimum " + MINIMUM_AGE + " ans).";
+        }
+
+        if (emailTouched && !InputValidator.isValidEmail(email)) return "Email invalide.";
+
+        if (passwordTouched) {
+            if (creation && !InputValidator.isValidPassword(password)) {
+                return "Mot de passe faible: 8+ caracteres avec majuscule, minuscule et chiffre.";
+            }
+            if (!creation && !isBlank(password) && !InputValidator.isValidPassword(password)) {
+                return "Mot de passe faible: 8+ caracteres avec majuscule, minuscule et chiffre.";
+            }
+        }
+
+        if (confirmPasswordTouched) {
+            if (!isBlank(password) && isBlank(confirmPassword)) return "Veuillez confirmer le mot de passe.";
+            if (!isBlank(password) && !password.equals(confirmPassword)) return "Confirmation du mot de passe invalide.";
+        }
+
+        if (telephoneTouched && !InputValidator.isValidPhone(telephone)) return "Telephone invalide (8 a 15 chiffres, + optionnel).";
+        if (villeTouched && !InputValidator.isValidCity(ville)) return "Ville invalide (2-60 lettres).";
+        if (statutTouched && isBlank(statut)) return "Le statut est obligatoire.";
+        if (roleSpecificTouched && isBlank(roleSpecificValue)) {
+            return "Artiste".equalsIgnoreCase(managedRole())
+                    ? "La specialite est obligatoire."
+                    : "Le centre interet est obligatoire.";
+        }
+        return null;
+    }
+
+    private boolean hasAnyTouched(boolean... touchedValues) {
+        for (boolean touched : touchedValues) {
+            if (touched) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private String normalizeStatutValue(String status) {
@@ -756,11 +887,11 @@ public abstract class BaseUsersBackofficeController {
     }
 
     private String clean(String value) {
-        return value == null ? null : value.trim();
+        return InputValidator.clean(value);
     }
 
     private boolean isBlank(String value) {
-        return value == null || value.trim().isEmpty();
+        return InputValidator.isBlank(value);
     }
 }
 
