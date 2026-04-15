@@ -19,6 +19,9 @@ public class Oeuvre {
     // Relation many-to-many via oeuvre_user (loaded by service layer).
     private List<User> favusers = new ArrayList<>();
 
+    // Relation one-to-many avec les commentaires (loaded by service layer).
+    private List<Commentaire> comments = new ArrayList<>();
+
     public Oeuvre() {
     }
 
@@ -108,5 +111,13 @@ public class Oeuvre {
 
     public void setUsers(List<User> users) {
         this.favusers = users != null ? users : new ArrayList<>();
+    }
+
+    public List<Commentaire> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Commentaire> comments) {
+        this.comments = comments != null ? comments : new ArrayList<>();
     }
 }

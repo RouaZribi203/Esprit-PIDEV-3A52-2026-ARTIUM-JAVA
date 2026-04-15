@@ -44,14 +44,6 @@
             </PendingDiffInfo>
           </value>
         </entry>
-        <entry key="$PROJECT_DIR$/src/main/java/controllers/amateur/FavorisController.java">
-          <value>
-            <PendingDiffInfo>
-              <option name="filePath" value="$PROJECT_DIR$/src/main/java/controllers/amateur/FavorisController.java" />
-              <option name="updatedContent" value="package controllers.amateur;&#10;&#10;public class FavorisController {&#10;}&#10;" />
-            </PendingDiffInfo>
-          </value>
-        </entry>
         <entry key="$PROJECT_DIR$/src/main/java/controllers/amateur/MiniAudioPlayerController.java">
           <value>
             <PendingDiffInfo>

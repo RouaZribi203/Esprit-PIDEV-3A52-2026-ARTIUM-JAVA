@@ -163,7 +163,9 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
     @Override
     public List<Oeuvre> getAll() throws SQLDataException {
         String sql = "SELECT id, titre, description, date_creation, image, type, collection_id "
-                + "FROM oeuvre ORDER BY date_creation DESC, id DESC";
+                + "FROM oeuvre "
+                + "WHERE classe NOT IN ('livre', 'musique') "
+                + "ORDER BY date_creation DESC, id DESC";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql);
              ResultSet resultSet = preparedStatement.executeQuery()) {
