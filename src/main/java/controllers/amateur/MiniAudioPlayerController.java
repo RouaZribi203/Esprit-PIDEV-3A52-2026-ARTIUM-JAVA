@@ -4,6 +4,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 
+import java.util.function.Consumer;
+
 public class MiniAudioPlayerController {
 
     @FXML
@@ -12,60 +14,62 @@ public class MiniAudioPlayerController {
     @FXML
     private Button togglePlayButton;
 
-    private NavigationHandler navigationHandler;
+    private Consumer<String> navigationHandler;
+    private boolean playing;
 
     @FXML
     public void initialize() {
-        // Initialize mini audio player
-        if (playerBar != null) {
-            playerBar.setVisible(false);
-            playerBar.setManaged(false);
-        }
+        playerBar.setVisible(false);
+        playerBar.setManaged(false);
     }
 
-    @FXML
-    public void onPrevTrack() {
-        // Handle previous track
-    }
-
-    @FXML
-    public void onTogglePlay() {
-        // Handle toggle play
-        if (togglePlayButton != null) {
-            togglePlayButton.setText(togglePlayButton.getText().equals("▶") ? "⏸" : "▶");
-        }
-    }
-
-    @FXML
-    public void onNextTrack() {
-        // Handle next track
-    }
-
-    @FXML
-    public void onOpenMusic() {
-        // Open music page
-        if (navigationHandler != null) {
-            navigationHandler.navigate("musique");
-        }
-    }
-
-    public void setNavigationHandler(NavigationHandler handler) {
-        this.navigationHandler = handler;
+    public void setNavigationHandler(Consumer<String> navigationHandler) {
+        this.navigationHandler = navigationHandler;
     }
 
     public void setVisibleForRoute(String route) {
-        if (playerBar != null) {
-            boolean showPlayer = "musique".equals(route) || "feed".equals(route);
-            playerBar.setVisible(showPlayer);
-            playerBar.setManaged(showPlayer);
+        playerBar.setVisible(true);
+        playerBar.setManaged(true);
+    }
+
+    @FXML
+    private void onTogglePlay() {
+        MusicfrontController activeMusicController = MusicfrontController.getActiveController();
+        if (activeMusicController != null) {
+            activeMusicController.togglePlayPauseFromMini();
+            playing = activeMusicController.isCurrentlyPlaying();
+        } else {
+            playing = !playing;
+        }
+        togglePlayButton.setText(playing ? "||" : ">");
+    }
+
+    @FXML
+    private void onPrevTrack() {
+        MusicfrontController activeMusicController = MusicfrontController.getActiveController();
+        if (activeMusicController != null) {
+            activeMusicController.playPreviousFromMini();
+            playing = activeMusicController.isCurrentlyPlaying();
+            togglePlayButton.setText(playing ? "||" : ">");
         }
     }
 
-    @FunctionalInterface
-    public interface NavigationHandler {
-        void navigate(String route);
+    @FXML
+    private void onNextTrack() {
+        MusicfrontController activeMusicController = MusicfrontController.getActiveController();
+        if (activeMusicController != null) {
+            activeMusicController.playNextFromMini();
+            playing = activeMusicController.isCurrentlyPlaying();
+            togglePlayButton.setText(playing ? "||" : ">");
+        }
+    }
+
+    @FXML
+    private void onOpenMusic() {
+        if (navigationHandler != null) {
+            navigationHandler.accept("musique");
+        }
     }
 }
-
 
 

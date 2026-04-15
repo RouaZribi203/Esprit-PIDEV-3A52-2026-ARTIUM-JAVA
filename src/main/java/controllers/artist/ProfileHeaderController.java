@@ -41,6 +41,9 @@ public class ProfileHeaderController {
     private Button contentTabButton;
 
     @FXML
+    private Button musiquesTabButton;
+
+    @FXML
     private Button evenementsTabButton;
 
     @FXML
@@ -159,6 +162,7 @@ public class ProfileHeaderController {
         List<Button> tabs = Arrays.asList(
                 collectionsTabButton,
                 contentTabButton,
+                musiquesTabButton,
                 evenementsTabButton,
                 reclamationsTabButton,
                 statistiquesTabButton
@@ -169,6 +173,8 @@ public class ProfileHeaderController {
 
         if ("collections".equals(route)) {
             collectionsTabButton.getStyleClass().add("active");
+        } else if ("musiques".equals(route)) {
+            musiquesTabButton.getStyleClass().add("active");
         } else if (dynamicRoute.equals(route)) {
             contentTabButton.getStyleClass().add("active");
         } else if ("evenements".equals(route)) {
@@ -188,6 +194,11 @@ public class ProfileHeaderController {
     @FXML
     private void onDynamicContentClick() {
         navigate(dynamicRoute);
+    }
+
+    @FXML
+    private void onMusiquesClick() {
+        navigate("musiques");
     }
 
     @FXML

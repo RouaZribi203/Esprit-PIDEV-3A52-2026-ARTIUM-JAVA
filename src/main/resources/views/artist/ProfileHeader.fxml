@@ -41,6 +41,7 @@
 
         <Button fx:id="collectionsTabButton" mnemonicParsing="false" onAction="#onCollectionsClick" styleClass="tab-nav-item" text="Collections" />
         <Button fx:id="contentTabButton" mnemonicParsing="false" onAction="#onDynamicContentClick" styleClass="tab-nav-item" text="Mes Oeuvres" />
+        <Button fx:id="musiquesTabButton" mnemonicParsing="false" onAction="#onMusiquesClick" styleClass="tab-nav-item" text="Musiques" />
         <Button fx:id="evenementsTabButton" mnemonicParsing="false" onAction="#onEvenementsClick" styleClass="tab-nav-item" text="Evenements" />
         <Button fx:id="reclamationsTabButton" mnemonicParsing="false" onAction="#onReclamationsClick" styleClass="tab-nav-item" text="Reclamations" />
         <Button fx:id="statistiquesTabButton" mnemonicParsing="false" onAction="#onStatistiquesClick" styleClass="tab-nav-item" text="Statistiques" />
