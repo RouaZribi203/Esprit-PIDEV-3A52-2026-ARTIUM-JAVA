@@ -49,9 +49,6 @@ public class CollectionsController {
     private TextField searchField;
 
     @FXML
-    private Button searchButton;
-
-    @FXML
     private Button addCollectionButton;
 
     @FXML
@@ -76,12 +73,8 @@ public class CollectionsController {
     }
 
     private void applyIcons() {
-        if (searchButton != null) {
-            searchButton.setGraphic(createIcon("M15.5 14h-.79l-.28-.27A6.5 6.5 0 1 0 14 15.5l.27.28v.79L20 21.49 21.49 20 15.5 14z", 0.6, "#ffffff"));
-            searchButton.setGraphicTextGap(6);
-        }
         if (addCollectionButton != null) {
-            addCollectionButton.setGraphic(createIcon("M19 11H13V5h-2v6H5v2h6v6h2v-6h6z", 0.72, "#3f44d4"));
+            addCollectionButton.setGraphic(createIcon("M19 11H13V5h-2v6H5v2h6v6h2v-6h6z", 0.72, "#ffffff"));
             addCollectionButton.setGraphicTextGap(6);
         }
     }
@@ -93,11 +86,6 @@ public class CollectionsController {
         icon.setScaleY(scale);
         icon.setStyle("-fx-fill: " + fillColor + ";");
         return icon;
-    }
-
-    @FXML
-    private void onSearchClick() {
-        applyFilter(searchField.getText());
     }
 
     @FXML
@@ -150,6 +138,8 @@ public class CollectionsController {
         Label descriptionCounterLabel = new Label("0/" + DESCRIPTION_MAX_LENGTH);
         descriptionCounterLabel.getStyleClass().add("popup-counter");
 
+        descriptionCounterLabel.setText((descriptionArea.getText() == null ? 0 : descriptionArea.getText().length()) + "/" + DESCRIPTION_MAX_LENGTH);
+
         HBox descriptionMetaRow = new HBox(8);
         descriptionMetaRow.setAlignment(Pos.CENTER_LEFT);
         Region descriptionMetaSpacer = new Region();
@@ -157,7 +147,9 @@ public class CollectionsController {
         descriptionMetaRow.getChildren().addAll(descriptionErrorLabel, descriptionMetaSpacer, descriptionCounterLabel);
 
         titreField.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.trim().isEmpty()) {
+            if (normalizeText(newValue).isEmpty()) {
+                showFieldError(titreErrorLabel, titreField, "Le titre est obligatoire.");
+            } else {
                 clearFieldError(titreErrorLabel, titreField);
             }
         });
@@ -173,9 +165,7 @@ public class CollectionsController {
             if (length >= DESCRIPTION_MAX_LENGTH) {
                 descriptionCounterLabel.getStyleClass().add("popup-counter-limit");
             }
-            if (!descriptionErrorLabel.getText().isEmpty()) {
-                validateDescriptionField(descriptionArea, descriptionErrorLabel);
-            }
+            validateDescriptionField(descriptionArea, descriptionErrorLabel);
         });
 
         Button closeButton = new Button("Fermer");
@@ -197,10 +187,7 @@ public class CollectionsController {
 
             boolean hasErrors = false;
 
-            if (titre.isEmpty()) {
-                showFieldError(titreErrorLabel, titreField, "Le titre est obligatoire.");
-                hasErrors = true;
-            }
+            hasErrors |= !validateTitreField(titreField, titreErrorLabel);
 
             if (!validateDescriptionField(descriptionArea, descriptionErrorLabel)) {
                 hasErrors = true;
@@ -333,6 +320,16 @@ public class CollectionsController {
         return true;
     }
 
+    private boolean validateTitreField(TextField titreField, Label titreErrorLabel) {
+        String titre = titreField.getText() == null ? "" : titreField.getText().trim();
+        if (titre.isEmpty()) {
+            showFieldError(titreErrorLabel, titreField, "Le titre est obligatoire.");
+            return false;
+        }
+        clearFieldError(titreErrorLabel, titreField);
+        return true;
+    }
+
     private void showFieldError(Label errorLabel, Control field, String message) {
         errorLabel.setText(message);
         errorLabel.setManaged(true);
@@ -394,10 +391,15 @@ public class CollectionsController {
         boolean nextExpanded = !expandedByCollectionId.getOrDefault(collectionId, false);
         expandedByCollectionId.put(collectionId, nextExpanded);
         updateExpandButtonIcon(expandButton, nextExpanded);
-        refreshCollectionPreview(collectionId, previewBox, nextExpanded);
+        Separator divider = (Separator) previewBox.getProperties().get("collectionContentDivider");
+        refreshCollectionPreview(collectionId, previewBox, divider, nextExpanded);
     }
 
-    private void refreshCollectionPreview(Integer collectionId, VBox previewBox, boolean expanded) {
+    private void refreshCollectionPreview(Integer collectionId, VBox previewBox, Separator divider, boolean expanded) {
+        if (divider != null) {
+            divider.setManaged(expanded);
+            divider.setVisible(expanded);
+        }
         previewBox.getChildren().clear();
         previewBox.setManaged(expanded);
         previewBox.setVisible(expanded);
@@ -485,10 +487,9 @@ public class CollectionsController {
 
         emptyStateLabel.setVisible(false);
 
-        for (int i = 0; i < collections.size(); i++) {
-            CollectionOeuvre collection = collections.get(i);
+        for (CollectionOeuvre collection : collections) {
 
-            VBox collectionItem = new VBox(8);
+            VBox collectionItem = new VBox(10);
             collectionItem.getStyleClass().add("collection-item-box");
 
             HBox row = new HBox(10);
@@ -532,22 +533,20 @@ public class CollectionsController {
                 }
             });
 
+            Separator contentDivider = new Separator();
+            contentDivider.getStyleClass().add("collection-content-divider");
+
             VBox previewBox = new VBox();
             previewBox.getStyleClass().add("collection-preview-box");
-            refreshCollectionPreview(collectionId, previewBox, expanded);
+            previewBox.getProperties().put("collectionContentDivider", contentDivider);
+            refreshCollectionPreview(collectionId, previewBox, contentDivider, expanded);
 
             expandButton.setOnAction(event -> toggleCollectionPreview(collection, previewBox, expandButton));
 
             actions.getChildren().addAll(expandButton, menuButton);
             row.getChildren().addAll(textBox, spacer, actions);
-            collectionItem.getChildren().addAll(row, previewBox);
+            collectionItem.getChildren().addAll(row, contentDivider, previewBox);
             collectionsContainer.getChildren().add(collectionItem);
-
-            if (i < collections.size() - 1) {
-                Separator separator = new Separator();
-                separator.getStyleClass().add("collection-separator");
-                collectionsContainer.getChildren().add(separator);
-            }
         }
     }
 }

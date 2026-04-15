@@ -291,6 +291,24 @@
     -fx-alignment: center-left;
 }
 
+.collection-item-box {
+    -fx-background-color: #f8f9fc;
+    -fx-border-color: #dfe4ea;
+    -fx-border-width: 1;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-padding: 12;
+}
+
+.collection-content-divider {
+    -fx-padding: 4 0 4 0;
+}
+
+.collection-content-divider .line {
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1 0 0 0;
+}
+
 .collection-title {
     -fx-text-fill: #111827;
     -fx-font-size: 17px;
@@ -335,12 +353,9 @@
 }
 
 .collection-preview-box {
-    -fx-background-color: #f8f9fc;
-    -fx-border-color: #e5e7eb;
-    -fx-border-width: 1;
-    -fx-border-radius: 8;
-    -fx-background-radius: 8;
-    -fx-padding: 8;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 8 0 0 0;
 }
 
 .collection-preview-row {
@@ -384,11 +399,6 @@
 
 .collection-menu .menu-item.collection-menu-delete .label {
     -fx-text-fill: #dc3545;
-}
-
-.collection-separator .line {
-    -fx-border-color: #dfe4ea;
-    -fx-border-width: 1 0 0 0;
 }
 
 .collections-list-card {
@@ -734,7 +744,13 @@
     -fx-text-fill: #b7c4dc;
 }
 
-.artist-root.dark-mode .collection-separator .line {
+
+.artist-root.dark-mode .collection-item-box {
+    -fx-background-color: #1f2a40;
+    -fx-border-color: #2f3b57;
+}
+
+.artist-root.dark-mode .collection-content-divider .line {
     -fx-border-color: #2f3b57;
 }
 
@@ -829,8 +845,8 @@
 }
 
 .artist-root.dark-mode .collection-preview-box {
-    -fx-background-color: #24314a;
-    -fx-border-color: #3f4b6c;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
 }
 
 .artist-root.dark-mode .collection-thumbnail-wrapper {
