@@ -30,6 +30,11 @@ public class ReclamationsController {
 
     @FXML private GridPane cardsContainer;
 
+    // Layout grid: nombre de colonnes dépend de la largeur disponible
+    private static final double CARD_MIN_WIDTH = 340; // approx. largeur d'une card
+    private static final double GRID_GAP = 10;
+    private int currentColumns = 1;
+
     private final ReclamationService reclamationService = new ReclamationService();
     private final Services.ReponseService reponseService = new Services.ReponseService();
 
@@ -46,7 +51,30 @@ public class ReclamationsController {
         statutFilter.valueProperty().addListener((obs, o, n) -> applySearchAndFilter());
         typeTabsGroup.selectedToggleProperty().addListener((obs, o, n) -> applySearchAndFilter());
 
+        // Grille responsive: 2 ou 3 cartes par ligne selon l'espace
+        if (cardsContainer != null) {
+            cardsContainer.setHgap(GRID_GAP);
+            cardsContainer.setVgap(GRID_GAP);
+            cardsContainer.widthProperty().addListener((obs, o, n) -> updateGridColumns());
+            updateGridColumns();
+        }
+
         refresh();
+    }
+
+    private void updateGridColumns() {
+        if (cardsContainer == null) return;
+        double w = cardsContainer.getWidth();
+        if (w <= 0) return;
+
+        // Calcule le max de colonnes en fonction d'une largeur minimale de card
+        int cols = (int) Math.floor((w + GRID_GAP) / (CARD_MIN_WIDTH + GRID_GAP));
+        cols = Math.max(1, Math.min(3, cols)); // on limite à 3 (comme demandé)
+
+        if (cols != currentColumns) {
+            currentColumns = cols;
+            applySearchAndFilter();
+        }
     }
 
     private void refresh() {
@@ -77,6 +105,7 @@ public class ReclamationsController {
     private void renderCards(List<Reclamation> list) {
         cardsContainer.getChildren().clear();
 
+        int cols = Math.max(1, currentColumns);
         for (int index = 0; index < list.size(); index++) {
             Reclamation r = list.get(index);
             try {
@@ -100,7 +129,10 @@ public class ReclamationsController {
                 if (card instanceof Region region) {
                     region.setMaxWidth(Double.MAX_VALUE);
                 }
-                cardsContainer.add(card, 0, index);
+
+                int col = index % cols;
+                int row = index / cols;
+                cardsContainer.add(card, col, row);
             } catch (Exception e) {
                 showError("Affichage impossible", "Erreur pendant le rendu d'une carte reclamation: " + e.getMessage());
                 return;
