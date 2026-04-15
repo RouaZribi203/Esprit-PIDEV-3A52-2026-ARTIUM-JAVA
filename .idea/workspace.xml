@@ -4,45 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/Services/EvenementService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/Services/GalerieService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/Services/TicketService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/controllers/EvenementCardController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/controllers/EvenementsController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/controllers/GalerieCardController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/controllers/GalerieFormController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/controllers/GaleriesController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/EventCardController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/PaymentSuccessController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/EvenementArtisteCardController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/EvenementArtisteFormController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/components/event-card.fxml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/views/artist/EvenementForm.fxml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/views/artist/components/evenement-artiste-card.fxml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/views/assets/PNG Porcelain Icon.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/views/components/evenement-card.fxml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/views/components/galerie-card.fxml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/views/pages/galerie-form.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/copilotDiffState.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/copilotDiffState.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/AmateurMainController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/AmateurMainController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/EventDetailController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/EventDetailController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/EventsfrontController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/EventsfrontController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/PaymentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/PaymentController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/SidebarAmateurController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/SidebarAmateurController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/EvenementsArtisteController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/EvenementsArtisteController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/entities/Evenement.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/entities/Evenement.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/entities/Galerie.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/entities/Galerie.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/entities/Ticket.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/entities/Ticket.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/Sidebar.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/Sidebar.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/Evenements.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/Evenements.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/EventDetail.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/EventDetail.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/PaymentSuccess.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/PaymentSuccess.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/artist/Evenements.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/artist/Evenements.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/pages/evenements.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/pages/evenements.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/pages/galeries.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/pages/galeries.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/artist-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/artist-theme.css" afterDir="false" />
+    <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="feat(reclamation): interface envoyer reclamation">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/dashboard.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/dashboard.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -52,6 +17,7 @@
   </component>
   <component name="CopilotPersistence">
     <persistenceIdMap>
+      <entry key="_C:/Users/Myriam Bouziri/Desktop/All/semestre2/PI Java/Esprit-PIDEV-3A52-2026-ARTIUM-JAVA" value="3COM5DKEj1OAJb1Ker1lytjy5ej" />
       <entry key="_C:/Users/lenovo/IdeaProjects/ProjetArtJava" value="3CBOsOPT2jv5fiXn9rY3ITlYjez" />
     </persistenceIdMap>
   </component>
@@ -150,6 +116,7 @@
       <workItem from="1775924948743" duration="4296000" />
       <workItem from="1775999335268" duration="27460000" />
       <workItem from="1776184271508" duration="31648000" />
+      <workItem from="1776251969239" duration="340000" />
     </task>
     <servers />
   </component>
