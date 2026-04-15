@@ -419,6 +419,11 @@ public class UserService implements Iservice<User> {
         return users;
     }
 
+    @Override
+    public User getById(int id) throws SQLDataException {
+        return null;
+    }
+
     private String buildUpdateSql(boolean withPasswordUpdate) {
         String sql = "UPDATE `user` SET " +
                 "`nom` = ?, `prenom` = ?, `date_naissance` = ?, `email` = ?, `role` = ?, `statut` = ?, " +

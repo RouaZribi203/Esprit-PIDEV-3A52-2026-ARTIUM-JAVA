@@ -1,7 +1,7 @@
 package controllers.pages.reclamations;
 
-import Services.ReclamationService;
-import Services.ReponseService;
+import services.ReclamationService;
+import services.ReponseService;
 import entities.Reclamation;
 import entities.Reponse;
 import javafx.fxml.FXML;

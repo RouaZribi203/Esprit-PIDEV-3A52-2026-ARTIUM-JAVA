@@ -1,6 +1,6 @@
 package controllers.pages.reclamations;
 
-import Services.ReclamationService;
+import services.ReclamationService;
 import entities.Reclamation;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -36,7 +36,7 @@ public class ReclamationsController {
     private int currentColumns = 1;
 
     private final ReclamationService reclamationService = new ReclamationService();
-    private final Services.ReponseService reponseService = new Services.ReponseService();
+    private final services.ReponseService reponseService = new services.ReponseService();
 
     private final List<Reclamation> all = new ArrayList<>();
 

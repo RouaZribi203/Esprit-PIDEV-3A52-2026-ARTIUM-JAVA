@@ -1,4 +1,4 @@
-package Services;
+package services;
 
 import entities.Reclamation;
 import utils.MyDatabase;

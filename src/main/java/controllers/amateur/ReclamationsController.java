@@ -1,6 +1,6 @@
 package controllers.amateur;
 
-import Services.ReclamationService;
+import services.ReclamationService;
 import entities.Reclamation;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;

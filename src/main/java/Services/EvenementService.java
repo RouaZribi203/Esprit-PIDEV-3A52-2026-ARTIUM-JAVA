@@ -79,6 +79,11 @@ public class EvenementService implements Iservice<Evenement> {
         return evenements;
     }
 
+    @Override
+    public Evenement getById(int id) throws SQLDataException {
+        return null;
+    }
+
     public List<Evenement> getByArtisteId(int artisteId) throws SQLDataException {
         List<Evenement> evenements = new ArrayList<>();
 

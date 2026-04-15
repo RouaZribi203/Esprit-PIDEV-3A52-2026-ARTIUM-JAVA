@@ -1,6 +1,6 @@
 package controllers.artist;
 
-import Services.ReclamationService;
+import services.ReclamationService;
 import entities.Reclamation;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
