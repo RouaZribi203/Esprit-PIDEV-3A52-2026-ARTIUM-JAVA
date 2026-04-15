@@ -15,6 +15,10 @@ import java.util.function.Consumer;
 public class EventCardController {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm");
+    private static final String BADGE_EXPOSITION_CLASS = "amateur-event-badge-exposition";
+    private static final String BADGE_CONCERT_CLASS = "amateur-event-badge-concert";
+    private static final String BADGE_SPECTACLE_CLASS = "amateur-event-badge-spectacle";
+    private static final String BADGE_CONFERENCE_CLASS = "amateur-event-badge-conference";
 
     @FXML
     private ImageView coverImageView;
@@ -45,7 +49,9 @@ public class EventCardController {
 
     public void setData(Evenement evenement) {
         this.evenement = evenement;
-        categoryBadgeLabel.setText(textOrDefault(evenement.getType(), "Evenement"));
+        String category = textOrDefault(evenement.getType(), "Evenement");
+        categoryBadgeLabel.setText(category);
+        applyCategoryBadgeStyle(category);
         titleLabel.setText(textOrDefault(evenement.getTitre(), "Evenement sans titre"));
         dateLabel.setText(formatDateTime(evenement.getDateDebut()));
         placeLabel.setText(formatCapacity(evenement.getCapaciteMax()));
@@ -93,6 +99,34 @@ public class EventCardController {
 
     private String textOrDefault(String value, String fallback) {
         return value == null || value.isBlank() ? fallback : value;
+    }
+
+    private void applyCategoryBadgeStyle(String category) {
+        categoryBadgeLabel.getStyleClass().removeAll(
+                BADGE_EXPOSITION_CLASS,
+                BADGE_CONCERT_CLASS,
+                BADGE_SPECTACLE_CLASS,
+                BADGE_CONFERENCE_CLASS
+        );
+
+        String normalized = category == null ? "" : category.trim().toLowerCase();
+        switch (normalized) {
+            case "exposition":
+                categoryBadgeLabel.getStyleClass().add(BADGE_EXPOSITION_CLASS);
+                break;
+            case "concert":
+                categoryBadgeLabel.getStyleClass().add(BADGE_CONCERT_CLASS);
+                break;
+            case "spectacle":
+                categoryBadgeLabel.getStyleClass().add(BADGE_SPECTACLE_CLASS);
+                break;
+            case "conference":
+            case "conférence":
+                categoryBadgeLabel.getStyleClass().add(BADGE_CONFERENCE_CLASS);
+                break;
+            default:
+                break;
+        }
     }
 }
 

@@ -60,6 +60,11 @@ public class EventsfrontController {
 
 	public void setDetailNavigationHandler(Consumer<Evenement> detailNavigationHandler) {
 		this.detailNavigationHandler = detailNavigationHandler;
+		// Cards are first rendered during initialize(), before parent injects navigation handler.
+		// Re-apply filters so every visible card receives the click callback.
+		if (!allEvents.isEmpty()) {
+			applyFilters();
+		}
 	}
 
 	@FXML

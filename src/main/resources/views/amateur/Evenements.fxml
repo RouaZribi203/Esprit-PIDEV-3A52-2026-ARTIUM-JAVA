@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane styleClass="amateur-events-page" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.amateur.EventsfrontController">
+<BorderPane styleClass="amateur-events-page" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.amateur.EventsfrontController">
     <top>
         <VBox spacing="10.0" styleClass="amateur-events-hero">
             <padding>
@@ -19,19 +19,19 @@
             </padding>
             <HBox alignment="CENTER_LEFT" spacing="10.0">
                 <VBox spacing="4.0" HBox.hgrow="ALWAYS">
-                    <Label styleClass="page-title" text="Discover Events" />
+                    <Label styleClass="page-title" text="Découvrir Evènements" />
                     <Label styleClass="page-subtitle" text="Explorez les evenements disponibles et trouvez celui qui vous plait." />
                 </VBox>
                 <Button mnemonicParsing="false" styleClass="amateur-primary-pill" text="Event idea AI powered" />
             </HBox>
 
             <HBox spacing="8.0">
-                <TextField fx:id="searchField" promptText="Search event idea (AI powered)..." styleClass="amateur-search-field" HBox.hgrow="ALWAYS" />
+                <TextField fx:id="searchField" promptText="Rechercher par titre ou description" styleClass="amateur-search-field" HBox.hgrow="ALWAYS" />
                 <Button mnemonicParsing="false" onAction="#onSearchClick" styleClass="amateur-search-button" text="Search" />
             </HBox>
 
             <HBox spacing="18.0" styleClass="amateur-category-tabs">
-                <ToggleButton fx:id="allTabButton" mnemonicParsing="false" onAction="#onAllTabClick" styleClass="amateur-tab-button active" text="Tous" />
+                <ToggleButton fx:id="allTabButton" mnemonicParsing="false" onAction="#onAllTabClick" styleClass="amateur-tab-button" text="Tous" />
                 <ToggleButton fx:id="expositionTabButton" mnemonicParsing="false" onAction="#onExpositionTabClick" styleClass="amateur-tab-button" text="Exposition" />
                 <ToggleButton fx:id="concertTabButton" mnemonicParsing="false" onAction="#onConcertTabClick" styleClass="amateur-tab-button" text="Concert" />
                 <ToggleButton fx:id="spectacleTabButton" mnemonicParsing="false" onAction="#onSpectacleTabClick" styleClass="amateur-tab-button" text="Spectacle" />
@@ -57,4 +57,3 @@
         </VBox>
     </center>
 </BorderPane>
-

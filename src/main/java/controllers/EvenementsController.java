@@ -91,11 +91,7 @@ public class EvenementsController {
 
         return contains(evenement.getTitre(), search)
                 || contains(evenement.getDescription(), search)
-                || contains(evenement.getType(), search)
-                || contains(evenement.getStatut(), search)
-                || contains(evenement.getId() == null ? null : String.valueOf(evenement.getId()), search)
-                || contains(evenement.getCapaciteMax() == null ? null : String.valueOf(evenement.getCapaciteMax()), search)
-                || contains(evenement.getPrixTicket() == null ? null : String.valueOf(evenement.getPrixTicket()), search);
+                || contains(evenement.getId() == null ? null : String.valueOf(evenement.getId()), search);
     }
 
     private Comparator<Evenement> buildComparator(String selectedFilter) {
