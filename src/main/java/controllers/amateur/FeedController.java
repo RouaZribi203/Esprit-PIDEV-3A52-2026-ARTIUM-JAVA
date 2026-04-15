@@ -41,13 +41,10 @@ public class FeedController {
 
 	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.FRANCE);
 	private static final DateTimeFormatter COMMENT_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.FRANCE);
-	private static final double POST_IMAGE_MAX_WIDTH = 760;
+	private static final double POST_IMAGE_MAX_WIDTH = 700;
 	private static final double POST_IMAGE_MAX_HEIGHT = 360;
 	// TODO: remplacer par l'ID utilisateur de session.
 	private static final int CURRENT_USER_ID = 4;
-
-	@FXML
-	private TextField searchField;
 
 	@FXML
 	private VBox oeuvresContainer;
@@ -66,17 +63,11 @@ public class FeedController {
 
 	@FXML
 	public void initialize() {
-		searchField.textProperty().addListener((observable, oldValue, newValue) -> applySearch());
 		loadOeuvres();
 	}
 
 	public void setRouteFilter(String route) {
 		currentRouteFilter = route == null ? "feed" : route;
-		applySearch();
-	}
-
-	@FXML
-	private void onSearchClick() {
 		applySearch();
 	}
 
@@ -110,6 +101,8 @@ public class FeedController {
 	private VBox buildPostCard(Oeuvre oeuvre) {
 		VBox card = new VBox(10);
 		card.getStyleClass().add("oeuvre-post-card");
+		card.setMaxWidth(760);
+		card.setPrefWidth(760);
 
 		User artist = loadArtistForOeuvre(oeuvre);
 		String artistName = buildArtistName(artist);
@@ -145,13 +138,26 @@ public class FeedController {
 		descLabel.getStyleClass().add("oeuvre-post-description");
 		descLabel.setWrapText(true);
 
-		String tags = toHashtag(oeuvre.getType());
+		HBox tagsRow = new HBox(8);
+		String typeTag = toHashtag(oeuvre.getType());
+		if (!typeTag.isEmpty()) {
+			Label typeTagLabel = new Label(typeTag);
+			typeTagLabel.getStyleClass().addAll("oeuvre-post-tag", "oeuvre-post-tag-type");
+			tagsRow.getChildren().add(typeTagLabel);
+		}
+
 		String collectionTag = getCollectionHashtag(oeuvre);
 		if (!collectionTag.isEmpty()) {
-			tags = (tags + " " + collectionTag).trim();
+			Label collectionTagLabel = new Label(collectionTag);
+			collectionTagLabel.getStyleClass().addAll("oeuvre-post-tag", "oeuvre-post-tag-collection");
+			tagsRow.getChildren().add(collectionTagLabel);
 		}
-		Label tagsLabel = new Label(tags);
-		tagsLabel.getStyleClass().add("oeuvre-post-tags");
+
+		if (tagsRow.getChildren().isEmpty()) {
+			Label fallbackTag = new Label("#Oeuvre");
+			fallbackTag.getStyleClass().addAll("oeuvre-post-tag", "oeuvre-post-tag-type");
+			tagsRow.getChildren().add(fallbackTag);
+		}
 
 		StackPane imageWrapper = new StackPane();
 		imageWrapper.getStyleClass().add("oeuvre-post-image-wrapper");
@@ -178,7 +184,7 @@ public class FeedController {
 		);
 
 		VBox commentsPreviewBox = buildCommentsPreview(oeuvre, comments);
-		card.getChildren().addAll(topRow, titleLabel, descLabel, tagsLabel, imageWrapper, statsRow, commentsPreviewBox);
+		card.getChildren().addAll(topRow, titleLabel, descLabel, tagsRow, imageWrapper, statsRow, commentsPreviewBox);
 		return card;
 	}
 
@@ -410,10 +416,10 @@ public class FeedController {
 		HBox.setHgrow(editField, Priority.ALWAYS);
 
 		Button saveButton = new Button("Enregistrer");
-		saveButton.getStyleClass().add("oeuvre-post-comment-action");
+		saveButton.getStyleClass().addAll("oeuvre-post-comment-action", "oeuvre-post-comment-action-save");
 
 		Button cancelButton = new Button("Annuler");
-		cancelButton.getStyleClass().add("oeuvre-post-comment-action");
+		cancelButton.getStyleClass().addAll("oeuvre-post-comment-action", "oeuvre-post-comment-action-cancel");
 
 		HBox editRow = new HBox(8, editField, saveButton, cancelButton);
 		editRow.setAlignment(Pos.CENTER_LEFT);
@@ -663,18 +669,10 @@ public class FeedController {
 	}
 
 	private void applySearch() {
-		String keyword = safeText(searchField.getText()).toLowerCase(Locale.ROOT);
 		List<Oeuvre> filtered = new ArrayList<>();
 
 		for (Oeuvre oeuvre : allOeuvres) {
-			String title = safeText(oeuvre.getTitre()).toLowerCase(Locale.ROOT);
-			String desc = safeText(oeuvre.getDescription()).toLowerCase(Locale.ROOT);
-			String type = safeText(oeuvre.getType()).toLowerCase(Locale.ROOT);
-
-			boolean keywordOk = keyword.isEmpty()
-					|| title.contains(keyword)
-					|| desc.contains(keyword)
-					|| type.contains(keyword);
+			boolean keywordOk = true;
 			boolean routeOk = matchesRouteFilter(oeuvre);
 
 			if (keywordOk && routeOk) {
@@ -687,20 +685,14 @@ public class FeedController {
 
 	private boolean matchesRouteFilter(Oeuvre oeuvre) {
 		String type = safeText(oeuvre == null ? "" : oeuvre.getType()).toLowerCase(Locale.ROOT);
-		switch (currentRouteFilter) {
-			case "feed-peintures":
-				return type.contains("peint");
-			case "feed-sculptures":
-				return type.contains("sculpt");
-			case "feed-photos":
-				return type.contains("photo");
-			case "feed-recommandations":
-				// Recommandations simples: oeuvres ayant deja au moins 1 commentaire.
-				return !loadCommentsForOeuvre(oeuvre).isEmpty();
-			case "feed":
-			default:
-				return true;
-		}
+		return switch (currentRouteFilter) {
+			case "feed-peintures" -> type.contains("peint");
+			case "feed-sculptures" -> type.contains("sculpt");
+			case "feed-photos" -> type.contains("photo");
+			case "feed-recommandations" -> !loadCommentsForOeuvre(oeuvre).isEmpty();
+			case "feed" -> true;
+			default -> true;
+		};
 	}
 }
 

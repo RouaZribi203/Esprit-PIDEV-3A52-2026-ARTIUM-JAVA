@@ -36,27 +36,11 @@
             </PendingDiffInfo>
           </value>
         </entry>
-        <entry key="$PROJECT_DIR$/src/main/java/controllers/amateur/EventsfrontController.java">
-          <value>
-            <PendingDiffInfo>
-              <option name="filePath" value="$PROJECT_DIR$/src/main/java/controllers/amateur/EventsfrontController.java" />
-              <option name="updatedContent" value="package controllers.amateur;&#10;&#10;public class EventsfrontController {&#10;}&#10;" />
-            </PendingDiffInfo>
-          </value>
-        </entry>
         <entry key="$PROJECT_DIR$/src/main/java/controllers/amateur/MiniAudioPlayerController.java">
           <value>
             <PendingDiffInfo>
               <option name="filePath" value="$PROJECT_DIR$/src/main/java/controllers/amateur/MiniAudioPlayerController.java" />
               <option name="updatedContent" value="package controllers.amateur;&#10;&#10;import javafx.fxml.FXML;&#10;import javafx.scene.control.Button;&#10;import javafx.scene.layout.HBox;&#10;&#10;import java.util.function.Consumer;&#10;&#10;public class MiniAudioPlayerController {&#10;&#10;    @FXML&#10;    private HBox playerBar;&#10;&#10;    @FXML&#10;    private Button togglePlayButton;&#10;&#10;    private Consumer&lt;String&gt; navigationHandler;&#10;    private boolean playing;&#10;&#10;    @FXML&#10;    public void initialize() {&#10;        playerBar.setVisible(false);&#10;        playerBar.setManaged(false);&#10;    }&#10;&#10;    public void setNavigationHandler(Consumer&lt;String&gt; navigationHandler) {&#10;        this.navigationHandler = navigationHandler;&#10;    }&#10;&#10;    public void setVisibleForRoute(String route) {&#10;        boolean isMusicPage = &quot;musique&quot;.equals(route);&#10;        playerBar.setVisible(!isMusicPage);&#10;        playerBar.setManaged(!isMusicPage);&#10;    }&#10;&#10;    @FXML&#10;    private void onTogglePlay() {&#10;        playing = !playing;&#10;        togglePlayButton.setText(playing ? &quot;||&quot; : &quot;&gt;&quot;);&#10;    }&#10;&#10;    @FXML&#10;    private void onPrevTrack() {&#10;        // Placeholder for queue previous action.&#10;    }&#10;&#10;    @FXML&#10;    private void onNextTrack() {&#10;        // Placeholder for queue next action.&#10;    }&#10;&#10;    @FXML&#10;    private void onOpenMusic() {&#10;        if (navigationHandler != null) {&#10;            navigationHandler.accept(&quot;musique&quot;);&#10;        }&#10;    }&#10;}&#10;" />
-            </PendingDiffInfo>
-          </value>
-        </entry>
-        <entry key="$PROJECT_DIR$/src/main/java/controllers/amateur/PaymentController.java">
-          <value>
-            <PendingDiffInfo>
-              <option name="filePath" value="$PROJECT_DIR$/src/main/java/controllers/amateur/PaymentController.java" />
-              <option name="updatedContent" value="package controllers.amateur;&#10;&#10;public class PaymentController {&#10;}&#10;" />
             </PendingDiffInfo>
           </value>
         </entry>

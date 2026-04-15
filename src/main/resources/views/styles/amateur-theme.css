@@ -340,6 +340,7 @@
 
 .oeuvres-feed-list {
     -fx-padding: 4 2 8 2;
+    -fx-alignment: center;
 }
 
 .oeuvre-post-card {
@@ -348,7 +349,8 @@
     -fx-border-width: 1;
     -fx-background-radius: 10;
     -fx-border-radius: 10;
-    -fx-padding: 12;
+    -fx-padding: 12 14 12 14;
+    -fx-max-width: 760;
 }
 
 .oeuvre-post-author {
@@ -403,6 +405,28 @@
     -fx-text-fill: #3f44d4;
 }
 
+.oeuvre-post-tag {
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-padding: 4 10;
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+}
+
+.oeuvre-post-tag-type {
+    -fx-background-color: #eef2ff;
+    -fx-border-color: #d9deff;
+    -fx-border-width: 1;
+    -fx-text-fill: #454dbf;
+}
+
+.oeuvre-post-tag-collection {
+    -fx-background-color: #ecfeff;
+    -fx-border-color: #cbeff6;
+    -fx-border-width: 1;
+    -fx-text-fill: #0f7490;
+}
+
 .oeuvre-post-image-wrapper {
     -fx-background-color: white;
     -fx-border-color: #e5e7eb;
@@ -411,6 +435,7 @@
     -fx-border-radius: 8;
     -fx-padding: 10;
     -fx-alignment: center;
+    -fx-max-width: 720;
 }
 
 .oeuvre-post-image-placeholder {
@@ -599,6 +624,36 @@
 
 .oeuvre-post-comment-action:hover {
     -fx-text-fill: #3f44d4;
+}
+
+.oeuvre-post-comment-action-save {
+    -fx-background-color: #16a34a;
+    -fx-border-color: #15803d;
+    -fx-border-width: 1;
+    -fx-text-fill: white;
+    -fx-padding: 4 10;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+}
+
+.oeuvre-post-comment-action-save:hover {
+    -fx-background-color: #15803d;
+    -fx-text-fill: white;
+}
+
+.oeuvre-post-comment-action-cancel {
+    -fx-background-color: #f1f5f9;
+    -fx-border-color: #cbd5e1;
+    -fx-border-width: 1;
+    -fx-text-fill: #334155;
+    -fx-padding: 4 10;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+}
+
+.oeuvre-post-comment-action-cancel:hover {
+    -fx-background-color: #e2e8f0;
+    -fx-text-fill: #0f172a;
 }
 
 .oeuvre-post-comment-action.danger {

@@ -42,6 +42,7 @@ import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -55,11 +56,14 @@ public class MesOeuvresController {
     private static final int DESCRIPTION_MAX_LENGTH = 500;
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.FRANCE);
     private static final DateTimeFormatter COMMENT_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.FRANCE);
-    private static final double POST_IMAGE_MAX_WIDTH = 760;
+    private static final double POST_IMAGE_MAX_WIDTH = 700;
     private static final double POST_IMAGE_MAX_HEIGHT = 360;
 
     @FXML
     private TextField searchField;
+
+    @FXML
+    private ComboBox<String> sortCombo;
 
     @FXML
     private Button addOeuvreButton;
@@ -74,6 +78,7 @@ public class MesOeuvresController {
     private final OeuvreCollectionService oeuvreCollectionService = new OeuvreCollectionService();
     private final CommentaireService commentaireService = new CommentaireService();
     private final List<Oeuvre> allOeuvres = new ArrayList<>();
+    private final Map<Integer, List<Commentaire>> commentsByOeuvreId = new HashMap<>();
     private final Map<Integer, String> collectionHashtagById = new HashMap<>();
     private String artistDisplayName = "Artiste";
     private String artistSpecialite = "Specialite inconnue";
@@ -85,7 +90,11 @@ public class MesOeuvresController {
     public void initialize() {
         applyIcons();
         loadArtistIdentity();
-        searchField.textProperty().addListener((observable, oldValue, newValue) -> applySearch());
+        sortCombo.getItems().addAll("Commentaires decroissant", "Commentaires croissant");
+        sortCombo.setValue("Commentaires decroissant");
+
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> applyFilters());
+        sortCombo.valueProperty().addListener((observable, oldValue, newValue) -> applyFilters());
         loadOeuvres();
     }
 
@@ -118,7 +127,7 @@ public class MesOeuvresController {
 
     private void applyIcons() {
         if (addOeuvreButton != null) {
-            addOeuvreButton.setGraphic(createColoredIcon("M19 11H13V5h-2v6H5v2h6v6h2v-6h6z", 0.72, "#3f44d4"));
+            addOeuvreButton.setGraphic(createColoredIcon("M19 11H13V5h-2v6H5v2h6v6h2v-6h6z", 0.72, "#ffffff"));
             addOeuvreButton.setGraphicTextGap(6);
         }
     }
@@ -195,10 +204,16 @@ public class MesOeuvresController {
             selectedFileLabel.setText("Image actuelle conservée");
         }
         titreField.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.trim().isEmpty()) {
+            if (safeText(newValue).isEmpty()) {
+                showFieldError(titreError, titreField, "Le titre est obligatoire.");
+            } else {
                 clearFieldError(titreError, titreField);
             }
         });
+
+        if (editMode && safeText(titreField.getText()).isEmpty()) {
+            showFieldError(titreError, titreField, "Le titre est obligatoire.");
+        }
 
         descriptionArea.textProperty().addListener((observable, oldValue, newValue) -> {
             String current = newValue == null ? "" : newValue;
@@ -274,11 +289,8 @@ public class MesOeuvresController {
             CollectionOeuvre selectedCollection = collectionCombo.getValue();
 
             boolean hasError = false;
-            if (titre.isEmpty()) {
-                showFieldError(titreError, titreField, "Le titre est obligatoire.");
+            if (!validateTitreField(titreField, titreError)) {
                 hasError = true;
-            } else {
-                clearFieldError(titreError, titreField);
             }
 
             if (!validateDescriptionField(descriptionArea, descriptionError, descriptionCounter)) {
@@ -438,6 +450,16 @@ public class MesOeuvresController {
         }
     }
 
+    private boolean validateTitreField(TextField titreField, Label titreError) {
+        String titre = safeText(titreField.getText());
+        if (titre.isEmpty()) {
+            showFieldError(titreError, titreField, "Le titre est obligatoire.");
+            return false;
+        }
+        clearFieldError(titreError, titreField);
+        return true;
+    }
+
     private void clearPopupError(Label errorLabel) {
         errorLabel.setText("");
         errorLabel.setManaged(false);
@@ -448,7 +470,8 @@ public class MesOeuvresController {
         try {
             allOeuvres.clear();
             allOeuvres.addAll(oeuvreService.getOeuvresByArtisteId(artisteId));
-            renderOeuvres(allOeuvres);
+            commentsByOeuvreId.clear();
+            applyFilters();
         } catch (Exception e) {
             oeuvresContainer.getChildren().clear();
             emptyStateLabel.setText("Erreur chargement oeuvres: " + e.getMessage());
@@ -476,6 +499,8 @@ public class MesOeuvresController {
 
         VBox card = new VBox(10);
         card.getStyleClass().add("oeuvre-post-card");
+        card.setMaxWidth(760);
+        card.setPrefWidth(760);
 
         HBox topRow = new HBox(10);
         topRow.setAlignment(Pos.CENTER_LEFT);
@@ -543,7 +568,7 @@ public class MesOeuvresController {
             imageWrapper.getChildren().add(imageView);
         }
 
-        List<Commentaire> comments = loadCommentsForOeuvre(oeuvre);
+        List<Commentaire> comments = getCommentsForOeuvre(oeuvre);
 
         HBox statsRow = new HBox(14);
         statsRow.getStyleClass().add("oeuvre-post-stats");
@@ -574,15 +599,24 @@ public class MesOeuvresController {
         return statChip;
     }
 
-    private List<Commentaire> loadCommentsForOeuvre(Oeuvre oeuvre) {
+    private List<Commentaire> getCommentsForOeuvre(Oeuvre oeuvre) {
         if (oeuvre == null || oeuvre.getId() == null) {
             return new ArrayList<>();
         }
 
+        Integer oeuvreId = oeuvre.getId();
+        if (commentsByOeuvreId.containsKey(oeuvreId)) {
+            return commentsByOeuvreId.get(oeuvreId);
+        }
+
         try {
             List<Commentaire> comments = commentaireService.getCommentsByOeuvreId(oeuvre.getId());
-            return comments == null ? new ArrayList<>() : comments;
+            List<Commentaire> safeComments = comments == null ? new ArrayList<>() : comments;
+                commentsByOeuvreId.put(oeuvreId, safeComments);
+            oeuvre.setComments(safeComments);
+            return safeComments;
         } catch (Exception ignored) {
+            commentsByOeuvreId.put(oeuvreId, new ArrayList<>());
             return new ArrayList<>();
         }
     }
@@ -839,30 +873,57 @@ public class MesOeuvresController {
         };
     }
 
-    @FXML
-    private void onSearchClick() {
-        applySearch();
-    }
-
-    private void applySearch() {
-        String keyword = safeText(searchField.getText()).toLowerCase();
+    private void applyFilters() {
+        String keyword = safeText(searchField.getText()).toLowerCase(Locale.ROOT).trim();
         List<Oeuvre> filtered = new ArrayList<>();
 
         for (Oeuvre oeuvre : allOeuvres) {
-            String title = safeText(oeuvre.getTitre()).toLowerCase();
-            String desc = safeText(oeuvre.getDescription()).toLowerCase();
-            String type = safeText(oeuvre.getType()).toLowerCase();
-
-            boolean keywordOk = keyword.isEmpty()
-                    || title.contains(keyword)
-                    || desc.contains(keyword)
-                    || type.contains(keyword);
-
-            if (keywordOk) {
+            if (matchesSearch(oeuvre, keyword)) {
                 filtered.add(oeuvre);
             }
         }
 
+        applyCommentSort(filtered, sortCombo.getValue());
         renderOeuvres(filtered);
+    }
+
+    private boolean matchesSearch(Oeuvre oeuvre, String keyword) {
+        if (keyword.isEmpty()) {
+            return true;
+        }
+
+        String title = safeText(oeuvre.getTitre()).toLowerCase(Locale.ROOT);
+        if (title.contains(keyword)) {
+            return true;
+        }
+
+        String collectionTitle = getCollectionSearchTitle(oeuvre).toLowerCase(Locale.ROOT);
+        return collectionTitle.contains(keyword);
+    }
+
+    private String getCollectionSearchTitle(Oeuvre oeuvre) {
+        if (oeuvre == null || oeuvre.getCollectionId() == null) {
+            return "";
+        }
+
+        try {
+            CollectionOeuvre collection = oeuvreCollectionService.getCollectionById(oeuvre.getCollectionId());
+            return collection == null ? "" : safeText(collection.getTitre());
+        } catch (Exception ignored) {
+            return "";
+        }
+    }
+
+    private void applyCommentSort(List<Oeuvre> oeuvres, String sortValue) {
+        if (oeuvres == null || oeuvres.isEmpty()) {
+            return;
+        }
+
+        Comparator<Oeuvre> byCommentCount = Comparator.comparingInt(oeuvre -> getCommentsForOeuvre(oeuvre).size());
+        if ("Commentaires croissant".equals(sortValue)) {
+            oeuvres.sort(byCommentCount);
+        } else {
+            oeuvres.sort(byCommentCount.reversed());
+        }
     }
 }

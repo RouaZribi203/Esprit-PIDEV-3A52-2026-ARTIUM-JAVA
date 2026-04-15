@@ -9,7 +9,9 @@ import entities.Oeuvre;
 import entities.User;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Side;
+import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -276,31 +278,34 @@ public class OeuvresAdminController {
     }
 
     private void handleViewDetails(Oeuvre oeuvre) {
-        StringBuilder content = new StringBuilder();
-        content.append("ID: ").append(oeuvre.getId()).append("\n");
-        content.append("Type: ").append(safe(oeuvre.getType(), "-")).append("\n");
-        content.append("Artiste: ").append(loadArtistName(oeuvre.getCollectionId())).append("\n");
-        content.append("Collection: ").append(loadCollectionTitle(oeuvre.getCollectionId())).append("\n");
-        content.append("Date: ").append(formatDate(oeuvre.getDateCreation())).append("\n\n");
-        content.append("Description:\n").append(safe(oeuvre.getDescription(), "Aucune description.")).append("\n\n");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/components/OeuvreDetailsPopup.fxml"));
+            Parent root = loader.load();
 
-        // Ajouter les commentaires
-        List<Commentaire> comments = oeuvre.getComments();
-        content.append("Commentaires (").append(comments != null ? comments.size() : 0).append("):\n");
-        if (comments != null && !comments.isEmpty()) {
-            for (Commentaire comment : comments) {
-                content.append("- ").append(safe(comment.getTexte(), "")).append("\n");
-                content.append("  (").append(formatDate(comment.getDateCommentaire())).append(")\n");
-            }
-        } else {
-            content.append("Aucun commentaire.");
+            OeuvreDetailsPopupController popupController = loader.getController();
+            popupController.setData(
+                    oeuvre,
+                    loadArtistName(oeuvre.getCollectionId()),
+                    loadCollectionTitle(oeuvre.getCollectionId())
+            );
+
+            Stage popupStage = new Stage();
+            popupStage.initModality(Modality.APPLICATION_MODAL);
+            popupStage.initOwner(oeuvresCardsWrap.getScene().getWindow());
+            popupStage.setTitle("Détails de l'oeuvre");
+
+            Scene scene = new Scene(root, 720, 540);
+            scene.getStylesheets().addAll(oeuvresCardsWrap.getScene().getStylesheets());
+
+            popupStage.setScene(scene);
+            popupStage.showAndWait();
+        } catch (IOException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Erreur");
+            alert.setHeaderText("Impossible d'ouvrir les détails");
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
         }
-
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Détails de l'oeuvre");
-        alert.setHeaderText(safe(oeuvre.getTitre(), "Sans titre"));
-        alert.setContentText(content.toString());
-        alert.showAndWait();
     }
 
     private void handleEditOeuvre(Oeuvre oeuvre) {
