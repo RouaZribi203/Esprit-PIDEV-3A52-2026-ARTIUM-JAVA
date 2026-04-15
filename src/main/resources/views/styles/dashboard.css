@@ -437,4 +437,81 @@
     -fx-background-color: #e5e7eb;
 }
 
+/* Card View Styles */
+.cards-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+.cards-scroll .viewport {
+    -fx-background-color: transparent;
+}
+
+.book-card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);
+    -fx-transition: all 0.3s;
+}
+.book-card:hover {
+    -fx-border-color: #3d3bc2;
+    -fx-effect: dropshadow(three-pass-box, rgba(61,59,194,0.15), 15, 0, 0, 8);
+    -fx-cursor: hand;
+}
+
+.card-image-container {
+    -fx-background-color: #f3f4f6;
+    -fx-background-radius: 8;
+    -fx-padding: 0;
+    -fx-overflow: hidden;
+}
+
+.card-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #111827;
+}
+
+.card-author {
+    -fx-font-size: 13px;
+    -fx-text-fill: #6b7280;
+}
+
+.card-price {
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #3d3bc2;
+}
+
+/* Popup Form Styles */
+.custom-dialog .dialog-pane {
+    -fx-background-color: white;
+    -fx-background-radius: 16;
+}
+.custom-dialog .dialog-pane > .header-panel {
+    -fx-background-color: #3d3bc2;
+    -fx-padding: 15;
+}
+.custom-dialog .dialog-pane > .header-panel > .label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.popup-form-container {
+    -fx-background-color: white;
+}
+
+.form-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #111827;
+}
+
+.form-subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: #6b7280;
+}
+
 
