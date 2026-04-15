@@ -77,8 +77,14 @@ public class ReclamationCardController {
 
     private void initMenu() {
         ContextMenu menu = new ContextMenu();
+        menu.getStyleClass().add("reclamation-actions-menu");
+
         MenuItem reply = new MenuItem("Repondre");
+        reply.getStyleClass().add("reclamation-actions-reply");
+
         MenuItem delete = new MenuItem("Supprimer");
+        delete.getStyleClass().add("reclamation-actions-delete");
+
         menu.getItems().addAll(reply, delete);
 
         dotsButton.setOnMouseClicked(e -> {

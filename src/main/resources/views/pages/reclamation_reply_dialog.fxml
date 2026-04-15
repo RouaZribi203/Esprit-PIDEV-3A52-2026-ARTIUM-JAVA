@@ -30,6 +30,9 @@
     <!-- Champs de reponse (ajout multi) -->
     <VBox fx:id="replyFieldsBox" spacing="10" />
 
+    <!-- Controle de saisie: affiche les erreurs de validation avant les actions -->
+    <Label fx:id="validationErrorLabel" managed="false" visible="false" wrapText="true" styleClass="reply-validation-error" />
+
     <!-- Actions (Enregistrer / Fermer / +) -->
     <HBox alignment="CENTER_LEFT" spacing="12">
         <Button fx:id="saveBtn" onAction="#onSave" styleClass="reply-primary" text="Enregistrer" />
