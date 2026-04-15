@@ -11,8 +11,29 @@ public class Galerie {
     public Galerie() {
     }
 
+    public Galerie(String nom, String adresse, String localisation, String description, Integer capaciteMax) {
+        this.nom = nom;
+        this.adresse = adresse;
+        this.localisation = localisation;
+        this.description = description;
+        this.capaciteMax = capaciteMax;
+    }
+
+    public Galerie(Integer id, String nom, String adresse, String localisation, String description, Integer capaciteMax) {
+        this.id = id;
+        this.nom = nom;
+        this.adresse = adresse;
+        this.localisation = localisation;
+        this.description = description;
+        this.capaciteMax = capaciteMax;
+    }
+
     public Integer getId() {
         return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getNom() {

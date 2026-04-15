@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="CENTER" spacing="14.0" styleClass="amateur-page-card" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1">
+<VBox alignment="CENTER" spacing="14.0" styleClass="amateur-page-card" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.amateur.PaymentController">
     <padding>
         <Insets bottom="28.0" left="28.0" right="28.0" top="28.0" />
     </padding>
@@ -15,10 +15,14 @@
     </StackPane>
     <Label styleClass="page-title" text="Paiement réussi !" />
     <Label styleClass="page-subtitle" text="Votre ticket pour cet évènement a été acheté avec succès." wrapText="true" />
-    <Button mnemonicParsing="false" text="Afficher le QR Code" />
-    <Button mnemonicParsing="false" text="Télécharger le ticket PDF" />
-    <Button mnemonicParsing="false" text="Retour à l'évènement" />
-    <Button mnemonicParsing="false" text="Tous les évènements" />
-    <Label styleClass="page-caption" text="Transaction reference : session_id" />
+    <Label fx:id="ticketReferenceLabel" styleClass="page-caption" text="Référence ticket" />
+    <Label fx:id="eventIdLabel" text="Evènement" />
+    <Label fx:id="userIdLabel" text="Utilisateur" />
+    <Label fx:id="purchaseDateLabel" text="Date d'achat" />
+    <Label fx:id="qrPayloadLabel" styleClass="page-caption" text="QR" wrapText="true" />
+    <Button mnemonicParsing="false" onAction="#onShowQrCodeClick" text="Afficher le QR Code" />
+    <Button mnemonicParsing="false" onAction="#onDownloadTicketClick" text="Télécharger le ticket PDF" />
+    <Button mnemonicParsing="false" onAction="#onBackToEventClick" text="Retour à l'évènement" />
+    <Button mnemonicParsing="false" onAction="#onBackToEventsClick" text="Tous les évènements" />
 </VBox>
 

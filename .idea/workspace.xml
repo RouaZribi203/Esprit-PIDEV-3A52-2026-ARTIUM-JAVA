@@ -5,24 +5,45 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/Services/EvenementService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/Services/GalerieService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/Services/TicketService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/controllers/EvenementCardController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/controllers/EvenementsController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/controllers/GalerieCardController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/controllers/GalerieFormController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/controllers/GaleriesController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/EventCardController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/PaymentSuccessController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/EvenementArtisteCardController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/EvenementArtisteFormController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/components/event-card.fxml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/views/artist/EvenementForm.fxml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/views/artist/components/evenement-artiste-card.fxml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/views/assets/PNG Porcelain Icon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/views/components/evenement-card.fxml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/views/components/galerie-card.fxml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/views/pages/galerie-form.fxml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/copilotDiffState.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/copilotDiffState.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/ConnexionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/ConnexionController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/MainController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/MainController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/MainFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/MainFX.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/NavbarController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/NavbarController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/AmateurMainController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/AmateurMainController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/EventDetailController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/EventDetailController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/EventsfrontController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/EventsfrontController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/PaymentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/PaymentController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/SidebarAmateurController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/SidebarAmateurController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/ArtistMainController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/ArtistMainController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/ProfileHeaderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/ProfileHeaderController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/SidebarArtisteController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/SidebarArtisteController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/Navbar.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/Navbar.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/SidebarAmateur.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/SidebarAmateur.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/artist/ProfileHeader.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/artist/ProfileHeader.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/artist/SidebarArtiste.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/artist/SidebarArtiste.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/EvenementsArtisteController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/EvenementsArtisteController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/entities/Evenement.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/entities/Evenement.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/entities/Galerie.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/entities/Galerie.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/entities/Ticket.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/entities/Ticket.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/Sidebar.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/Sidebar.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/Evenements.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/Evenements.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/EventDetail.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/EventDetail.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/PaymentSuccess.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/PaymentSuccess.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/artist/Evenements.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/artist/Evenements.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/pages/evenements.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/pages/evenements.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/pages/galeries.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/pages/galeries.fxml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/artist-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/artist-theme.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/auth.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/auth.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/dashboard.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/dashboard.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -78,50 +99,37 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
-    &quot;Maven.Artium [org.openjfx:javafx-maven-plugin:0.0.8:run].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.ProjetArtJava [org.openjfx:javafx-maven-plugin:0.0.8:run].executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;gestion__user&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;onboarding.tips.debug.path&quot;: &quot;C:/Users/lenovo/IdeaProjects/ProjetArtJava/src/main/java/org/example/Main.java&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.JavaFX&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.Main.executor": "Run",
+    "Maven.Artium [org.openjfx:javafx-maven-plugin:0.0.8:run].executor": "Run",
+    "Maven.ProjetArtJava [org.openjfx:javafx-maven-plugin:0.0.8:run].executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "Merging main",
+    "junie.onboarding.icon.badge.shown": "true",
+    "kotlin-language-version-configured": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "onboarding.tips.debug.path": "C:/Users/lenovo/IdeaProjects/ProjetArtJava/src/main/java/org/example/Main.java",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "preferences.JavaFX",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;mysql&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "mysql"
     ]
   }
-}</component>
-  <component name="RunManager">
-    <configuration default="true" type="JetRunConfigurationType">
-      <module name="Artium" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
-      <module name="Artium" />
-      <option name="filePath" />
-      <method v="2" />
-    </configuration>
-  </component>
+}]]></component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -147,6 +155,17 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
