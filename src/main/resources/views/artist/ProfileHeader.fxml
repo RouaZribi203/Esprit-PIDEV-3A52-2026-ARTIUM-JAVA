@@ -40,6 +40,7 @@
         </padding>
 
         <Button fx:id="collectionsTabButton" mnemonicParsing="false" onAction="#onCollectionsClick" styleClass="tab-nav-item" text="Collections" />
+        <Button fx:id="bibliothequeTabButton" mnemonicParsing="false" onAction="#onBibliothequeClick" styleClass="tab-nav-item" text="Bibliotheque" />
         <Button fx:id="contentTabButton" mnemonicParsing="false" onAction="#onDynamicContentClick" styleClass="tab-nav-item" text="Mes Oeuvres" />
         <Button fx:id="musiquesTabButton" mnemonicParsing="false" onAction="#onMusiquesClick" styleClass="tab-nav-item" text="Musiques" />
         <Button fx:id="evenementsTabButton" mnemonicParsing="false" onAction="#onEvenementsClick" styleClass="tab-nav-item" text="Evenements" />

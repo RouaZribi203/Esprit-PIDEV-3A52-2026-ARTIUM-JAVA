@@ -38,6 +38,9 @@ public class ProfileHeaderController {
     private Button collectionsTabButton;
 
     @FXML
+    private Button bibliothequeTabButton;
+
+    @FXML
     private Button contentTabButton;
 
     @FXML
@@ -83,8 +86,8 @@ public class ProfileHeaderController {
         this.specialite = specialite;
 
         String ville = user.getVille() != null ? user.getVille().trim() : "-";
-        String dateInscription = user.getDateInscription() != null 
-            ? DATE_FORMATTER.format(user.getDateInscription()) 
+        String dateInscription = user.getDateInscription() != null
+            ? DATE_FORMATTER.format(user.getDateInscription())
             : "-";
 
         metaLabel.setText(specialite + "  -  " + ville + "  -  Inscrit le " + dateInscription);
@@ -161,8 +164,8 @@ public class ProfileHeaderController {
     public void setActiveTab(String route) {
         List<Button> tabs = Arrays.asList(
                 collectionsTabButton,
+                bibliothequeTabButton,
                 contentTabButton,
-                musiquesTabButton,
                 evenementsTabButton,
                 reclamationsTabButton,
                 statistiquesTabButton
@@ -173,6 +176,8 @@ public class ProfileHeaderController {
 
         if ("collections".equals(route)) {
             collectionsTabButton.getStyleClass().add("active");
+        } else if ("bibliotheque".equals(route)) {
+            bibliothequeTabButton.getStyleClass().add("active");
         } else if ("musiques".equals(route)) {
             musiquesTabButton.getStyleClass().add("active");
         } else if (dynamicRoute.equals(route)) {
@@ -189,6 +194,11 @@ public class ProfileHeaderController {
     @FXML
     private void onCollectionsClick() {
         navigate("collections");
+    }
+
+    @FXML
+    private void onBibliothequeClick() {
+        navigate("bibliotheque");
     }
 
     @FXML

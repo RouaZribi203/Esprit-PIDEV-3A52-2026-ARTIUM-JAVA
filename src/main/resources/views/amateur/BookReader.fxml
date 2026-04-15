@@ -3,35 +3,43 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.Region?>
 
-<BorderPane xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.amateur.BookReaderController">
+<BorderPane xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.amateur.BookReaderController" style="-fx-background-color: #1e293b;">
     <top>
-        <VBox spacing="8.0" styleClass="amateur-page-card">
+        <VBox alignment="CENTER" spacing="8.0" style="-fx-background-color: #0f172a;">
             <padding>
-                <Insets bottom="20.0" left="24.0" right="24.0" top="24.0" />
+                <Insets bottom="16.0" left="24.0" right="24.0" top="16.0" />
             </padding>
-            <Label styleClass="page-title" text="Lecteur de livre" />
-            <Label styleClass="page-subtitle" text="Structure du lecteur PDF amateur." wrapText="true" />
+            <Label fx:id="titleLabel" style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;" text="Lecteur de livre" />
+            <Label fx:id="subtitleLabel" style="-fx-text-fill: #94a3b8; -fx-font-size: 13px;" text="Lecture en cours." wrapText="true" />
         </VBox>
     </top>
     <center>
-        <VBox spacing="14.0" styleClass="amateur-page-card">
-            <padding>
-                <Insets bottom="24.0" left="24.0" right="24.0" top="0.0" />
-            </padding>
-            <StackPane minHeight="420.0" styleClass="empty-state-card">
-                <Label text="Zone de rendu PDF" />
+        <ScrollPane fitToWidth="true" fitToHeight="true" pannable="true" style="-fx-background-color: #1e293b;" BorderPane.alignment="CENTER">
+            <StackPane alignment="CENTER" style="-fx-background-color: #334155; -fx-padding: 20;">
+                <ImageView fx:id="pageImageView" smooth="true" pickOnBounds="true" preserveRatio="false" />
             </StackPane>
-            <HBox spacing="10.0">
-                <Button mnemonicParsing="false" text="Précédent" />
-                <Button mnemonicParsing="false" text="Suivant" />
-                <Label text="Page 1 / 1" />
-            </HBox>
-        </VBox>
+        </ScrollPane>
     </center>
+    <bottom>
+        <VBox alignment="CENTER" spacing="12.0" style="-fx-background-color: #0f172a;">
+            <padding>
+                <Insets bottom="20.0" left="24.0" right="24.0" top="16.0" />
+            </padding>
+            <HBox spacing="16.0" alignment="CENTER">
+                <Button fx:id="prevButton" mnemonicParsing="false" onAction="#onPrev" style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 10 24; -fx-font-size: 14px; -fx-cursor: hand;" text="◄ Précédent" />
+                <Region prefWidth="40.0" />
+                <Button fx:id="nextButton" mnemonicParsing="false" onAction="#onNext" style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 10 24; -fx-font-size: 14px; -fx-cursor: hand;" text="Suivant ►" />
+            </HBox>
+            <Label fx:id="pageLabel" alignment="CENTER" style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;" text="Page 0 / 0" />
+        </VBox>
+    </bottom>
 </BorderPane>
-
