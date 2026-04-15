@@ -79,6 +79,11 @@
     -fx-font-weight: 700;
 }
 
+.profile-avatar-image {
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+}
+
 .profile-name {
     -fx-font-size: 26px;
     -fx-font-weight: 700;
@@ -163,6 +168,30 @@
 .badge-danger {
     -fx-background-color: #f8d7da;
     -fx-text-fill: #842029;
+}
+
+.card-label {
+    -fx-text-fill: #6c757d;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+
+.sidebar-avatar {
+    -fx-background-color: #e5e9ef;
+    -fx-background-radius: 999;
+    -fx-border-color: white;
+    -fx-border-radius: 999;
+    -fx-border-width: 3;
+}
+
+.sidebar-avatar-symbol {
+    -fx-font-size: 22px;
+    -fx-text-fill: #7a8596;
+}
+
+.sidebar-avatar-image {
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
 }
 
 .artist-root.dark-mode {

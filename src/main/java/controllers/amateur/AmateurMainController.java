@@ -1,10 +1,11 @@
 package controllers.amateur;
 
+import controllers.MainFX;
+import entities.User;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 
 import java.io.IOException;
@@ -35,6 +36,11 @@ public class AmateurMainController {
         applyStylesheet();
         navbarIncludeController.setNavigationHandler(this::onNavigate);
         navbarIncludeController.setThemeHandler(this::applyTheme);
+
+        User connectedUser = MainFX.getAuthenticatedUser();
+        if (connectedUser != null) {
+            sidebarIncludeController.setUser(connectedUser);
+        }
 
         sidebarIncludeController.setNavigationHandler(this::onNavigate);
         miniAudioPlayerIncludeController.setNavigationHandler(this::onNavigate);

@@ -2,8 +2,10 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
 <VBox prefWidth="320.0" spacing="14.0" styleClass="artist-right-column" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.artist.SidebarArtisteController">
@@ -13,9 +15,22 @@
         </padding>
         <Label styleClass="card-title" text="A propos" />
         <Label fx:id="bioLabel" styleClass="card-text" text="hello" wrapText="true" />
-        <Label styleClass="card-text" text="Ne(e): 04 May 1999" />
-        <Label styleClass="card-text" text="Inscrit le: 11 Apr 2026" />
-        <Label styleClass="card-text" text="Email: zribiroua789@gmail.com" />
+        <HBox spacing="8.0" alignment="CENTER_LEFT">
+            <Label styleClass="card-label" text="Ne(e):" />
+            <Label fx:id="dateNaissanceLabel" styleClass="card-text" text="-" />
+        </HBox>
+        <HBox spacing="8.0" alignment="CENTER_LEFT">
+            <Label styleClass="card-label" text="Inscrit le:" />
+            <Label fx:id="dateInscriptionLabel" styleClass="card-text" text="-" />
+        </HBox>
+        <HBox spacing="8.0" alignment="CENTER_LEFT">
+            <Label styleClass="card-label" text="Email:" />
+            <Label fx:id="emailLabel" styleClass="card-text" text="-" />
+        </HBox>
+        <StackPane prefHeight="64.0" prefWidth="64.0" styleClass="sidebar-avatar">
+            <ImageView fx:id="profileImageView" fitHeight="58.0" fitWidth="58.0" pickOnBounds="true" preserveRatio="false" styleClass="sidebar-avatar-image" visible="false" />
+            <Label fx:id="avatarFallbackLabel" styleClass="sidebar-avatar-symbol" text="🎨" />
+        </StackPane>
     </VBox>
 
     <VBox spacing="10.0" styleClass="artist-card">

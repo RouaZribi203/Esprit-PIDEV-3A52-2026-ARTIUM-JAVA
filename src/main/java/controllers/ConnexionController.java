@@ -74,14 +74,14 @@ public class ConnexionController {
         String role = user.getRole() == null ? "" : user.getRole().trim().toLowerCase();
         switch (role) {
             case "amateur":
-                MainFX.switchToAmateurView();
+                MainFX.switchToAmateurView(user);
                 break;
             case "artiste":
             case "artist":
-                MainFX.switchToArtistView();
+                MainFX.switchToArtistView(user);
                 break;
             case "admin":
-                MainFX.switchToAdminView();
+                MainFX.switchToAdminView(user);
                 break;
             default:
                 setMessage("Rôle utilisateur non supporté : " + user.getRole());

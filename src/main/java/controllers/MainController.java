@@ -1,5 +1,6 @@
 package controllers;
 
+import entities.User;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -30,6 +31,12 @@ public class MainController {
     @FXML
     public void initialize() {
         sidebarIncludeController.setNavigationHandler(this::onNavigate);
+
+        User connectedUser = MainFX.getAuthenticatedUser();
+        if (connectedUser != null) {
+            navbarIncludeController.setUser(connectedUser);
+        }
+
         navbarIncludeController.setActionHandler(new NavbarController.ActionHandler() {
             @Override
             public void onToggleSidebar() {
