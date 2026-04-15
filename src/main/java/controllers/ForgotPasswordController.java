@@ -1,6 +1,6 @@
 package controllers;
 
-import Services.UserService;
+import services.UserService;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;

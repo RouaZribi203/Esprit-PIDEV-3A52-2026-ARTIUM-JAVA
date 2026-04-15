@@ -1,6 +1,6 @@
 package controllers;
 
-import Services.UserService;
+import services.UserService;
 import entities.User;
 import javafx.animation.FadeTransition;
 import javafx.fxml.FXML;

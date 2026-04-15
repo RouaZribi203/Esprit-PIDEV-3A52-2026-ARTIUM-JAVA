@@ -1,6 +1,6 @@
-package Test;
+package test;
 
-import Services.UserService;
+import services.UserService;
 import entities.User;
 
 import java.time.LocalDate;
