@@ -10,7 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLDataException;
 import java.sql.SQLException;
 
-public class JdbcUserService implements UserService {
+public class JdbcUserService implements UserServicee {
     private final Connection connection;
 
     public JdbcUserService() {
