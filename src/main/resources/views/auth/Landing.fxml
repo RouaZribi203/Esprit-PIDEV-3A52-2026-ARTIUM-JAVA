@@ -11,68 +11,62 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1"
-			fx:controller="controllers.AuthLandingController"
-			stylesheets="@../styles/auth.css"
-			styleClass="auth-root">
+<BorderPane styleClass="auth-root" stylesheets="@../styles/auth.css" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/20.0.2" fx:controller="controllers.AuthLandingController">
 	<top>
-		<HBox spacing="12" alignment="CENTER_LEFT" styleClass="auth-topbar auth-topbar-glass">
+		<HBox alignment="CENTER_LEFT" spacing="12" styleClass="auth-topbar auth-topbar-glass">
 			<padding>
-				<Insets top="14" right="18" bottom="14" left="18"/>
+				<Insets bottom="14" left="18" right="18" top="14" />
 			</padding>
 			<StackPane styleClass="auth-mini-logo-wrap">
-				<ImageView fitWidth="112" preserveRatio="true" smooth="true" cache="true" styleClass="auth-mini-logo">
+				<ImageView cache="true" fitWidth="112" preserveRatio="true" smooth="true" styleClass="auth-mini-logo">
 					<image>
-						<Image url="@../images/logo2.png"/>
+						<Image url="@../images/logo2.png" />
 					</image>
 				</ImageView>
 			</StackPane>
-			<Region HBox.hgrow="ALWAYS"/>
-			<Button text="Accueil" styleClass="auth-topbar-link"/>
-			<Button text="Se connecter" onAction="#onLoginClick" styleClass="auth-topbar-ghost"/>
-			<Button text="Aide" onAction="#onHelpClick" styleClass="auth-topbar-link"/>
-			<Button text="Créer un compte" onAction="#onCreateAccount" styleClass="auth-topbar-primary"/>
+			<Region HBox.hgrow="ALWAYS" />
+			<Button onAction="#onLoginClick" styleClass="auth-topbar-ghost" text="Se connecter" />
+			<Button onAction="#onCreateAccount" styleClass="auth-topbar-primary" text="Créer un compte" />
 		</HBox>
 	</top>
 
 	<center>
 		<StackPane styleClass="auth-landing-shell auth-landing-shell-fluid">
-			<HBox spacing="0" alignment="CENTER" styleClass="auth-landing-card auth-landing-card-fluid">
-				<VBox spacing="20" alignment="CENTER_LEFT" prefWidth="565" maxWidth="Infinity" styleClass="auth-landing-hero auth-landing-hero-fluid" HBox.hgrow="ALWAYS">
+			<HBox alignment="CENTER" spacing="0" styleClass="auth-landing-card auth-landing-card-fluid">
+				<VBox alignment="CENTER_LEFT" maxWidth="Infinity" prefWidth="565" spacing="20" styleClass="auth-landing-hero auth-landing-hero-fluid" HBox.hgrow="ALWAYS">
 					<padding>
-						<Insets top="48" right="48" bottom="48" left="48"/>
+						<Insets bottom="48" left="48" right="48" top="48" />
 					</padding>
 					<StackPane styleClass="auth-hero-logo-wrap">
-						<ImageView fitWidth="250" preserveRatio="true" smooth="true" cache="true" styleClass="auth-hero-logo">
+						<ImageView cache="true" fitWidth="250" preserveRatio="true" smooth="true" styleClass="auth-hero-logo">
 							<image>
-								<Image url="@../images/logo2.png"/>
+								<Image url="@../images/logo2.png" />
 							</image>
 						</ImageView>
 					</StackPane>
-					<Label text="Plateforme artistique" styleClass="auth-panel-kicker"/>
-					<Label text="Donnez vie a votre univers creatif" wrapText="true" styleClass="auth-hero-title auth-landing-title"/>
-					<Label text="Explorez un espace où la créativité s’exprime librement, où chaque œuvre reflète une vision unique et où l’art prend vie à travers des styles modernes et inspirants." wrapText="true" styleClass="auth-hero-text auth-landing-text"/>
+					<Label styleClass="auth-panel-kicker" text="Plateforme artistique" />
+					<Label styleClass="auth-hero-title auth-landing-title" text="Donnez vie a votre univers creatif" wrapText="true" />
+					<Label styleClass="auth-hero-text auth-landing-text" text="Explorez un espace où la créativité s’exprime librement, où chaque œuvre reflète une vision unique et où l’art prend vie à travers des styles modernes et inspirants." wrapText="true" />
 					<HBox spacing="10" styleClass="auth-chip-row">
-						<Label text="Rapide" styleClass="auth-chip"/>
-						<Label text="Sécurisé" styleClass="auth-chip"/>
-						<Label text="Moderne" styleClass="auth-chip"/>
+						<Label styleClass="auth-chip" text="Rapide" />
+						<Label styleClass="auth-chip" text="Sécurisé" />
+						<Label styleClass="auth-chip" text="Moderne" />
 					</HBox>
 				</VBox>
 
-				<VBox spacing="16" alignment="CENTER_LEFT" prefWidth="565" maxWidth="Infinity" styleClass="auth-landing-panel auth-landing-panel-fluid auth-panel-block" HBox.hgrow="ALWAYS">
+				<VBox alignment="CENTER_LEFT" maxWidth="Infinity" prefWidth="565" spacing="16" styleClass="auth-landing-panel auth-landing-panel-fluid auth-panel-block" HBox.hgrow="ALWAYS">
 					<padding>
-						<Insets top="48" right="44" bottom="48" left="44"/>
+						<Insets bottom="48" left="44" right="44" top="48" />
 					</padding>
-					<Label text="Bienvenue" styleClass="auth-panel-kicker"/>
-					<Label text="Commencez votre inscription" wrapText="true" styleClass="auth-panel-title auth-landing-panel-title"/>
-					<Label text="Créez votre profil et accédez à une interface intuitive, optimisée pour amateur, artiste ou admin." wrapText="true" styleClass="auth-panel-text auth-landing-panel-text"/>
+					<Label styleClass="auth-panel-kicker" text="Bienvenue" />
+					<Label styleClass="auth-panel-title auth-landing-panel-title" text="Commencez votre inscription" wrapText="true" />
+					<Label styleClass="auth-panel-text auth-landing-panel-text" text="Créez votre profil et accédez à une interface intuitive, optimisée pour amateur, artiste ou admin." wrapText="true" />
 					<VBox spacing="12" styleClass="auth-landing-actions">
-						<Button text="Créer mon compte" onAction="#onCreateAccount" styleClass="auth-primary-button" maxWidth="Infinity"/>
-						<Button text="J'ai déjà un compte" onAction="#onLoginClick" styleClass="auth-secondary-button" maxWidth="Infinity"/>
+						<Button maxWidth="Infinity" onAction="#onCreateAccount" styleClass="auth-primary-button" text="Créer mon compte" />
+						<Button maxWidth="Infinity" onAction="#onLoginClick" styleClass="auth-secondary-button" text="J'ai déjà un compte" />
 					</VBox>
 				</VBox>
 			</HBox>
 		</StackPane>
 	</center>
 </BorderPane>
-

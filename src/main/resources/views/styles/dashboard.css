@@ -916,7 +916,10 @@
 }
 
 .reclamations-scroll {
-=======
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
 .users-panel.list-card {
     -fx-background-color: white;
     -fx-background-radius: 28;
@@ -1135,12 +1138,10 @@
 }
 
 .users-dialog-scroll {
->>>>>>> 7a906edc1b9d43c364a41fe7e7a4a03854be75c4
     -fx-background-color: transparent;
     -fx-background: transparent;
 }
 
-<<<<<<< HEAD
 .reclamations-scroll > .viewport {
     -fx-background-color: transparent;
 }
@@ -1222,7 +1223,6 @@
     -fx-background-color: rgba(0,0,0,0.06);
 }
 /* ---------------- Reclamations (cards) ---------------- */
-=======
 .users-dialog-scroll > .viewport {
     -fx-background-color: transparent;
 }
@@ -1550,7 +1550,6 @@
     -fx-effect: dropshadow(gaussian, rgba(75, 107, 255, 0.20), 12, 0.14, 0, 1);
 }
 
->>>>>>> 7a906edc1b9d43c364a41fe7e7a4a03854be75c4
 .section-title {
     -fx-font-size: 15px;
     -fx-font-weight: 700;
@@ -2115,14 +2114,17 @@
 }
 
 /* Popup Form Styles */
+.dialog-pane.custom-dialog,
 .custom-dialog .dialog-pane {
     -fx-background-color: white;
     -fx-background-radius: 16;
 }
+.dialog-pane.custom-dialog > .header-panel,
 .custom-dialog .dialog-pane > .header-panel {
     -fx-background-color: #3d3bc2;
     -fx-padding: 15;
 }
+.dialog-pane.custom-dialog > .header-panel > .label,
 .custom-dialog .dialog-pane > .header-panel > .label {
     -fx-text-fill: white;
     -fx-font-weight: bold;
@@ -2130,6 +2132,114 @@
 
 .popup-form-container {
     -fx-background-color: white;
+}
+
+/* Premium books form controls */
+.dialog-pane.book-form-dialog .popup-form-container {
+    -fx-background-color: linear-gradient(to bottom, #ffffff, #f8fbff);
+    -fx-background-radius: 16;
+    -fx-border-color: #e3ebf6;
+    -fx-border-radius: 16;
+    -fx-border-width: 1;
+}
+
+.dialog-pane.book-form-dialog .field-label {
+    -fx-text-fill: #334a67;
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+}
+
+.dialog-pane.book-form-dialog .input-field,
+.dialog-pane.book-form-dialog .text-field,
+.dialog-pane.book-form-dialog .text-area,
+.dialog-pane.book-form-dialog .combo-box-base {
+    -fx-background-color: #f7faff;
+    -fx-border-color: #cfdbeb;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 10 14;
+    -fx-font-size: 13px;
+    -fx-text-fill: #1f3149;
+}
+
+.dialog-pane.book-form-dialog .text-area {
+    -fx-pref-height: 120;
+}
+
+.dialog-pane.book-form-dialog .text-area .content {
+    -fx-background-color: #f7faff;
+    -fx-background-radius: 12;
+}
+
+.dialog-pane.book-form-dialog .input-field:focused,
+.dialog-pane.book-form-dialog .text-field:focused,
+.dialog-pane.book-form-dialog .text-area:focused,
+.dialog-pane.book-form-dialog .combo-box-base:focused {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #5a74ff;
+    -fx-effect: dropshadow(gaussian, rgba(90, 116, 255, 0.25), 14, 0.15, 0, 2);
+}
+
+.dialog-pane.book-form-dialog .combo-box-base .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.dialog-pane.book-form-dialog .combo-box-base .arrow {
+    -fx-background-color: #4f6280;
+}
+
+.dialog-pane.book-form-dialog #prixField,
+.dialog-pane.book-form-dialog #collectionComboBox {
+    -fx-background-color: #f3f7ff;
+    -fx-border-color: #bccbf0;
+}
+
+.dialog-pane.book-form-dialog #prixField:focused,
+.dialog-pane.book-form-dialog #collectionComboBox:focused {
+    -fx-border-color: #4a63f0;
+}
+
+.dialog-pane.book-form-dialog .button-bar {
+    -fx-padding: 14 18 16 18;
+}
+
+.dialog-pane.book-form-dialog .button-bar .button {
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-padding: 10 18;
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+}
+
+.dialog-pane.book-form-dialog .button.book-form-save-button {
+    -fx-background-color: linear-gradient(to bottom, #5e7dff, #3d3bc2);
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(61, 59, 194, 0.35), 16, 0.16, 0, 3);
+}
+
+.dialog-pane.book-form-dialog .button.book-form-save-button:hover {
+    -fx-background-color: linear-gradient(to bottom, #7090ff, #3432a8);
+}
+
+.dialog-pane.book-form-dialog .button.book-form-cancel-button {
+    -fx-background-color: #f4f7fb;
+    -fx-border-color: #cfd9e8;
+    -fx-text-fill: #334760;
+}
+
+.dialog-pane.book-form-dialog .button.book-form-cancel-button:hover {
+    -fx-background-color: #e9eff8;
+}
+
+.dialog-pane.book-form-dialog .button.book-form-delete-button {
+    -fx-background-color: #fff1f2;
+    -fx-border-color: #f4c5ca;
+    -fx-text-fill: #d12f3f;
+}
+
+.dialog-pane.book-form-dialog .button.book-form-delete-button:hover {
+    -fx-background-color: #ffe4e6;
 }
 
 .form-title {
@@ -2525,4 +2635,4 @@
 .app-root.dark-mode .context-menu .menu-item#logoutMenuItem:focused,
 .app-root.dark-mode .context-menu .menu-item#logoutMenuItem:hover {
     -fx-background-color: #553343;
-}}
+}

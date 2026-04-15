@@ -87,6 +87,9 @@ public class LivresController {
     private Label pdfLabel;
 
     @FXML
+    private Label formErrorLabel;
+
+    @FXML
     private TextArea descriptionArea;
 
     @FXML
@@ -205,7 +208,7 @@ public class LivresController {
 
         Dialog<javafx.scene.control.ButtonType> dialog = new Dialog<>();
         dialog.setTitle(livre == null ? "Ajouter un livre" : "Modifier le livre");
-        
+
         // Setup content
         if (livre != null) {
             formTitleLabel.setText("Modifier le livre");
@@ -213,7 +216,7 @@ public class LivresController {
             categorieField.setText(livre.getCategorie());
             prixField.setText(livre.getPrixLocation() == null ? "" : String.valueOf(livre.getPrixLocation()));
             descriptionArea.setText(livre.getDescription() == null ? "" : livre.getDescription());
-            
+
             CollectionOeuvre col = collections.stream()
                     .filter(c -> c.getId().equals(livre.getCollectionId()))
                     .findFirst()
@@ -234,35 +237,40 @@ public class LivresController {
         }
 
         dialog.getDialogPane().setContent(formPanel);
+        dialog.getDialogPane().getStyleClass().add("custom-dialog");
+        dialog.getDialogPane().getStyleClass().add("book-form-dialog");
+        if (cardsTile != null && cardsTile.getScene() != null) {
+            dialog.getDialogPane().getStylesheets().setAll(cardsTile.getScene().getStylesheets());
+        }
+        dialog.getDialogPane().setPrefSize(760, 680);
 
         javafx.scene.control.ButtonType saveBtnType = new javafx.scene.control.ButtonType(livre == null ? "Ajouter" : "Enregistrer", ButtonBar.ButtonData.OK_DONE);
         javafx.scene.control.ButtonType cancelBtnType = new javafx.scene.control.ButtonType("Annuler", ButtonBar.ButtonData.CANCEL_CLOSE);
-        
+
         dialog.getDialogPane().getButtonTypes().addAll(saveBtnType, cancelBtnType);
 
-        if (livre != null) {
-            javafx.scene.control.ButtonType deleteBtnType = new javafx.scene.control.ButtonType("Supprimer", ButtonBar.ButtonData.OTHER);
-            dialog.getDialogPane().getButtonTypes().add(deleteBtnType);
-        }
-
         final Button saveBtn = (Button) dialog.getDialogPane().lookupButton(saveBtnType);
+        final Button cancelBtn = (Button) dialog.getDialogPane().lookupButton(cancelBtnType);
+        if (saveBtn != null) {
+            saveBtn.getStyleClass().add("book-form-save-button");
+        }
+        if (cancelBtn != null) {
+            cancelBtn.getStyleClass().add("book-form-cancel-button");
+        }
         saveBtn.addEventFilter(javafx.event.ActionEvent.ACTION, event -> {
             if (!validateAndSave()) {
                 event.consume();
             }
         });
 
-        dialog.showAndWait().ifPresent(result -> {
-            if (result.getButtonData() == ButtonBar.ButtonData.OTHER) {
-                onDeleteLivre(livre);
-            }
-            clearFormFields();
-        });
+        dialog.showAndWait();
+        clearFormFields();
     }
 
     private boolean validateAndSave() {
         boolean hasError = false;
         StringBuilder errorMessage = new StringBuilder("Veuillez corriger les erreurs suivantes :\n");
+        clearFormError();
 
         String titre = titreField.getText();
         if (titre == null || titre.trim().isEmpty() || titre.trim().length() < 3) {
@@ -323,7 +331,7 @@ public class LivresController {
         }
 
         if (hasError) {
-            showError("Erreur de validation", errorMessage.toString());
+            showFormError(errorMessage.toString());
             return false;
         }
 
@@ -388,6 +396,7 @@ public class LivresController {
         if (couvertureImageView != null) couvertureImageView.setImage(null);
         if (pdfLabel != null) pdfLabel.setText("Aucun PDF");
         if (descriptionArea != null) descriptionArea.clear();
+        clearFormError();
     }
 
     private void applyFilter(String query) {
@@ -410,7 +419,7 @@ public class LivresController {
     private Node createBookCard(Livre livre) {
         VBox card = new VBox(12);
         card.getStyleClass().add("book-card");
-        card.setPrefWidth(200);
+        card.setPrefWidth(250);
         card.setPadding(new Insets(15));
         card.setAlignment(javafx.geometry.Pos.TOP_CENTER);
 
@@ -421,7 +430,7 @@ public class LivresController {
         if (livre.getImage() != null && livre.getImage().length > 0) {
             imageView.setImage(new Image(new ByteArrayInputStream(livre.getImage())));
         }
-        
+
         StackPane imageContainer = new StackPane(imageView);
         imageContainer.getStyleClass().add("card-image-container");
 
@@ -438,11 +447,21 @@ public class LivresController {
 
         Button editBtn = new Button("Modifier");
         editBtn.getStyleClass().add("secondary-button");
-        editBtn.setMaxWidth(Double.MAX_VALUE);
+        editBtn.setMinWidth(105);
+        editBtn.setPrefWidth(110);
         editBtn.setOnAction(e -> showFormDialog(livre));
 
-        card.getChildren().addAll(imageContainer, title, author, price, editBtn);
-        
+        Button deleteBtn = new Button("Supprimer");
+        deleteBtn.getStyleClass().add("danger-button");
+        deleteBtn.setMinWidth(105);
+        deleteBtn.setPrefWidth(110);
+        deleteBtn.setOnAction(e -> onDeleteLivre(livre));
+
+        HBox actions = new HBox(8, editBtn, deleteBtn);
+        actions.setAlignment(javafx.geometry.Pos.CENTER);
+
+        card.getChildren().addAll(imageContainer, title, author, price, actions);
+
         // Add hover effect
         card.setOnMouseEntered(e -> card.setStyle("-fx-border-color: #3d3bc2; -fx-background-color: #f5f3ff;"));
         card.setOnMouseExited(e -> card.setStyle(""));
@@ -450,14 +469,32 @@ public class LivresController {
         return card;
     }
 
+    private void showFormError(String message) {
+        if (formErrorLabel == null) {
+            return;
+        }
+        formErrorLabel.setText(message);
+        formErrorLabel.setVisible(true);
+        formErrorLabel.setManaged(true);
+    }
+
+    private void clearFormError() {
+        if (formErrorLabel == null) {
+            return;
+        }
+        formErrorLabel.setText("");
+        formErrorLabel.setVisible(false);
+        formErrorLabel.setManaged(false);
+    }
+
     private void onDeleteLivre(Livre livre) {
         if (livre == null || livre.getId() == null) return;
-        
+
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Confirmer la suppression");
         confirm.setHeaderText("Supprimer le livre ?");
         confirm.setContentText("Êtes-vous sûr de vouloir supprimer '" + livre.getTitre() + "' ? Cette action est irréversible.");
-        
+
         confirm.showAndWait().ifPresent(type -> {
             if (type == javafx.scene.control.ButtonType.OK) {
                 try {
@@ -491,3 +528,4 @@ public class LivresController {
         alert.showAndWait();
     }
 }
+

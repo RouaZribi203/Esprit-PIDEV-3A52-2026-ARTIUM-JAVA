@@ -407,7 +407,7 @@ public class BibliothequArtisteController {
         clearForm();
         formTitleLabel.setText("Nouveau livre");
         saveButton.setText("✓ Publier");
-        
+
         formStack.setVisible(true);
         formPanel.setVisible(true);
         formStack.setOpacity(0);

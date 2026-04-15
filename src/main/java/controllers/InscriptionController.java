@@ -405,8 +405,8 @@ public class InscriptionController {
 		draftUser.setBiographie(InputValidator.clean(biographieArea.getText()));
 		draftUser.setPhotoReferencePath(selectedPhotoPath);
 		draftUser.setPhotoProfil(selectedPhotoPath);
+        draftUser.setStatut("Activé");
 		draftUser.setDateInscription(LocalDate.now());
-		draftUser.setStatut("pending");
 		return draftUser;
 	}
 

@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane styleClass="amateur-events-page" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.amateur.EventsfrontController">
+<BorderPane styleClass="amateur-events-page" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.amateur.EventsfrontController">
     <top>
         <VBox spacing="10.0" styleClass="amateur-events-hero">
             <padding>
