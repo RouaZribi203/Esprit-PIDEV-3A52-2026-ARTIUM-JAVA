@@ -23,6 +23,9 @@ public class ProfileHeaderController {
     private Button collectionsTabButton;
 
     @FXML
+    private Button bibliothequeTabButton;
+
+    @FXML
     private Button contentTabButton;
 
     @FXML
@@ -52,6 +55,7 @@ public class ProfileHeaderController {
     public void setActiveTab(String route) {
         List<Button> tabs = Arrays.asList(
                 collectionsTabButton,
+                bibliothequeTabButton,
                 contentTabButton,
                 evenementsTabButton,
                 reclamationsTabButton,
@@ -63,6 +67,8 @@ public class ProfileHeaderController {
 
         if ("collections".equals(route)) {
             collectionsTabButton.getStyleClass().add("active");
+        } else if ("bibliotheque".equals(route)) {
+            bibliothequeTabButton.getStyleClass().add("active");
         } else if (dynamicRoute.equals(route)) {
             contentTabButton.getStyleClass().add("active");
         } else if ("evenements".equals(route)) {
@@ -77,6 +83,11 @@ public class ProfileHeaderController {
     @FXML
     private void onCollectionsClick() {
         navigate("collections");
+    }
+
+    @FXML
+    private void onBibliothequeClick() {
+        navigate("bibliotheque");
     }
 
     @FXML
