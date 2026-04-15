@@ -166,6 +166,7 @@ public class ProfileHeaderController {
                 collectionsTabButton,
                 bibliothequeTabButton,
                 contentTabButton,
+                musiquesTabButton,
                 evenementsTabButton,
                 reclamationsTabButton,
                 statistiquesTabButton

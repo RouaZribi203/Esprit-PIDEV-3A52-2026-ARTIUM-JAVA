@@ -48,6 +48,9 @@ public class ReclamationsArtisteController implements Initializable {
 	@FXML
 	private ComboBox<String> myStatutFilter;
 
+	@FXML
+	private Label sendValidationLabel;
+
 	private final ReclamationService reclamationService = new ReclamationService();
 	private final List<Reclamation> myAll = new ArrayList<>();
 	private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.FRENCH);
@@ -64,6 +67,7 @@ public class ReclamationsArtisteController implements Initializable {
 		));
 
 		refreshMyReclamationsEmptyState();
+		clearSendValidation();
 
 		if (myStatutFilter != null) {
 			myStatutFilter.setItems(FXCollections.observableArrayList("Tous", "Traitée", "Non traitée"));
@@ -73,6 +77,12 @@ public class ReclamationsArtisteController implements Initializable {
 		if (mySearchField != null) {
 			mySearchField.textProperty().addListener((obs, o, n) -> applyMyFilters());
 		}
+		if (typeCombo != null) {
+			typeCombo.valueProperty().addListener((obs, o, n) -> clearSendValidation());
+		}
+		if (descriptionArea != null) {
+			descriptionArea.textProperty().addListener((obs, o, n) -> clearSendValidation());
+		}
 
 		refreshMyReclamations();
 	}
@@ -81,24 +91,26 @@ public class ReclamationsArtisteController implements Initializable {
 	private void onReset(ActionEvent event) {
 		typeCombo.getSelectionModel().clearSelection();
 		descriptionArea.clear();
+		clearSendValidation();
 	}
 
 	@FXML
 	private void onSend(ActionEvent event) {
+		clearSendValidation();
 		String type = typeCombo.getValue();
 		String description = descriptionArea.getText() == null ? "" : descriptionArea.getText().trim();
 		String descriptionNoSpaces = description.replaceAll("\\s+", "");
 
 		if (type == null || type.isBlank()) {
-			showWarning("Champs obligatoire", "Veuillez sélectionner un type.");
+			showSendValidation("Veuillez selectionner un type.");
 			return;
 		}
 		if (description.isBlank()) {
-			showWarning("Champs obligatoire", "Veuillez saisir une description.");
+			showSendValidation("Veuillez saisir une description.");
 			return;
 		}
 		if (descriptionNoSpaces.length() < 10) {
-			showWarning("Description trop courte", "La réclamation doit contenir au moins 10 caractères.");
+			showSendValidation("La reclamation doit contenir au moins 10 caracteres.");
 			return;
 		}
 
@@ -120,6 +132,7 @@ public class ReclamationsArtisteController implements Initializable {
 			reclamationService.add(r);
 			showInfo("Réclamation envoyée", "Votre réclamation a été envoyée avec succès.");
 			onReset(event);
+			clearSendValidation();
 			refreshMyReclamations();
 
 			// Passer sur l'onglet "Mes Réclamations" après envoi (optionnel mais pratique)
@@ -245,10 +258,14 @@ public class ReclamationsArtisteController implements Initializable {
 
 	private void initCardMenu(Button dotsButton, Reclamation r) {
 		ContextMenu menu = new ContextMenu();
+		menu.getStyleClass().add("reclamation-actions-menu");
 
 		MenuItem viewReplies = new MenuItem("Voir réponses");
+		viewReplies.getStyleClass().add("reclamation-actions-view");
 		MenuItem edit = new MenuItem("Modifier");
+		edit.getStyleClass().add("reclamation-actions-edit");
 		MenuItem delete = new MenuItem("Supprimer");
+		delete.getStyleClass().add("reclamation-actions-delete");
 		menu.getItems().addAll(viewReplies, edit, new SeparatorMenuItem(), delete);
 
 		viewReplies.setOnAction(e -> onViewReplies(r));
@@ -366,6 +383,24 @@ public class ReclamationsArtisteController implements Initializable {
 		boolean empty = myReclamationsContainer == null || myReclamationsContainer.getChildren().isEmpty();
 		emptyMyReclamationsLabel.setVisible(empty);
 		emptyMyReclamationsLabel.setManaged(empty);
+	}
+
+	private void showSendValidation(String message) {
+		if (sendValidationLabel == null) {
+			return;
+		}
+		sendValidationLabel.setText(message);
+		sendValidationLabel.setVisible(true);
+		sendValidationLabel.setManaged(true);
+	}
+
+	private void clearSendValidation() {
+		if (sendValidationLabel == null) {
+			return;
+		}
+		sendValidationLabel.setText("");
+		sendValidationLabel.setVisible(false);
+		sendValidationLabel.setManaged(false);
 	}
 
 	private void showInfo(String header, String message) {

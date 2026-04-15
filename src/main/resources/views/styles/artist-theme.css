@@ -9,6 +9,20 @@
     -fx-border-width: 0 0 1 0;
 }
 
+.artist-brand-row {
+    -fx-alignment: center-left;
+}
+
+.artist-brand-logo {
+    -fx-effect: dropshadow(gaussian, rgba(31, 45, 70, 0.12), 5, 0.2, 0, 1);
+}
+
+.artist-brand-text {
+    -fx-text-fill: #1f2d53;
+    -fx-font-size: 20px;
+    -fx-font-weight: 800;
+}
+
 .artist-search-field {
     -fx-background-color: #f7f9fc;
     -fx-border-color: #d6deea;
@@ -68,6 +82,14 @@
     -fx-text-fill: rgba(255, 255, 255, 0.85);
     -fx-font-size: 20px;
     -fx-font-weight: 700;
+}
+
+.cover-brand-row {
+    -fx-alignment: center;
+}
+
+.cover-brand-logo {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 6, 0.15, 0, 1);
 }
 
 .profile-avatar {

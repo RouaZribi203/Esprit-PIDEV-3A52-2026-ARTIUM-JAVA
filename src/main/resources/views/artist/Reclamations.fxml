@@ -46,6 +46,8 @@
                                 <TextArea fx:id="descriptionArea" promptText="Décrivez votre problème en détail..." prefRowCount="8" wrapText="true" maxWidth="1.7976931348623157E308" styleClass="input-control" VBox.vgrow="ALWAYS" />
                             </VBox>
 
+                            <Label fx:id="sendValidationLabel" managed="false" visible="false" wrapText="true" styleClass="form-validation-error" />
+
                             <HBox spacing="10.0" alignment="CENTER_RIGHT">
                                 <Button fx:id="resetButton" text="Réinitialiser" onAction="#onReset" styleClass="btn-secondary" />
                                 <Button fx:id="sendButton" text="Envoyer la réclamation" onAction="#onSend" styleClass="btn-primary" />
