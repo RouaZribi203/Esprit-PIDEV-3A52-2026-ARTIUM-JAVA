@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class MyDatabase {
+public class  MyDatabase {
     private   final String URl = "jdbc:mysql://localhost:3306/artium_db";
     private final String USERNAME = "root";
     private final String PASSWORD = "";

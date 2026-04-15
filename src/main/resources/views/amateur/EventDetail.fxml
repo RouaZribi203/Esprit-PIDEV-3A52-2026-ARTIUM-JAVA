@@ -3,42 +3,85 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1">
-    <top>
-        <VBox spacing="8.0" styleClass="amateur-page-card">
-            <padding>
-                <Insets bottom="20.0" left="24.0" right="24.0" top="24.0" />
-            </padding>
-            <Label styleClass="page-title" text="Détail de l'évènement" />
-            <Label styleClass="page-subtitle" text="Structure de la page détail évènement amateur." wrapText="true" />
-        </VBox>
-    </top>
+<BorderPane fx:controller="controllers.amateur.EventDetailController" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1">
     <center>
-        <VBox spacing="14.0" styleClass="amateur-page-card">
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="event-detail-scroll">
+            <content>
+                <VBox spacing="14.0" styleClass="event-detail-root">
+                    <padding>
+                        <Insets bottom="8.0" left="2.0" right="2.0" top="2.0" />
+                    </padding>
+
+                    <VBox spacing="14.0" styleClass="amateur-page-card event-detail-main-card">
+                        <padding>
+                            <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
+                        </padding>
+
+                        <StackPane minHeight="240.0" styleClass="event-cover-box">
+                            <ImageView fx:id="coverImageView" fitHeight="240.0" fitWidth="680.0" preserveRatio="true" />
+                        </StackPane>
+
+                        <HBox alignment="CENTER_LEFT" spacing="12.0">
+                            <VBox spacing="4.0">
+                                <Label fx:id="titleLabel" styleClass="event-title" text="Titre de l'évènement" />
+                                <HBox spacing="8.0">
+                                    <Label fx:id="typeLabel" styleClass="event-chip" text="Type" />
+                                    <Label fx:id="statusLabel" styleClass="event-chip event-chip-status" text="Statut" />
+                                </HBox>
+                            </VBox>
+                            <StackPane HBox.hgrow="ALWAYS" />
+                            <Button fx:id="buyTicketButton" mnemonicParsing="false" onAction="#onBuyTicketClick" styleClass="ticket-action-primary" text="Acheter ticket" />
+                        </HBox>
+
+                        <Label fx:id="descriptionLabel" styleClass="event-description" text="Description de l'évènement" wrapText="true" />
+
+                        <GridPane hgap="18.0" vgap="8.0">
+                            <Label styleClass="event-stat-label" text="Horaire début" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                            <Label styleClass="event-stat-label" text="Horaire fin" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                            <Label styleClass="event-stat-label" text="Prix d'entrée" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                            <Label styleClass="event-stat-label" text="Capacité" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+                            <Label fx:id="dateDebutLabel" styleClass="event-stat-value" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                            <Label fx:id="dateFinLabel" styleClass="event-stat-value" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                            <Label fx:id="priceLabel" styleClass="event-stat-value event-price-value" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                            <Label fx:id="capacityLabel" styleClass="event-stat-value" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                        </GridPane>
+
+                        <HBox alignment="CENTER_LEFT" spacing="8.0">
+                            <Label text="Galerie:" />
+                            <Label fx:id="galleryLabel" />
+                        </HBox>
+                        <Label fx:id="metaLabel" styleClass="page-caption" text="Métadonnées" />
+                    </VBox>
+
+                    <VBox spacing="10.0" styleClass="amateur-page-card ticket-section-card">
+                        <padding>
+                            <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
+                        </padding>
+
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                            <Label styleClass="ticket-section-title" text="Vos tickets" />
+                            <StackPane HBox.hgrow="ALWAYS" />
+                            <Label fx:id="ticketsCountLabel" styleClass="ticket-count-chip" text="0 ticket(s)" />
+                            <Button fx:id="backButton" mnemonicParsing="false" onAction="#onBackClick" styleClass="ticket-action-secondary" text="Retour" />
+                        </HBox>
+
+                        <Label fx:id="ticketsEmptyLabel" styleClass="page-caption" text="Aucun ticket achete pour cet evenement." />
+                        <VBox fx:id="ticketsContainer" spacing="8.0" />
+                    </VBox>
+                </VBox>
+            </content>
             <padding>
-                <Insets bottom="24.0" left="24.0" right="24.0" top="0.0" />
+                <Insets bottom="0.0" left="0.0" right="0.0" top="0.0" />
             </padding>
-            <StackPane minHeight="240.0" styleClass="empty-state-card">
-                <Label text="Couverture de l'évènement" />
-            </StackPane>
-            <HBox spacing="12.0">
-                <Button mnemonicParsing="false" text="Acheter ticket" />
-                <Button mnemonicParsing="false" text="Retour aux évènements" />
-            </HBox>
-            <Label text="Description de l'évènement" wrapText="true" />
-            <GridPane hgap="16.0" vgap="12.0">
-                <Label text="Horaires" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                <Label text="Prix d'entrée" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                <Label text="Capacité" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                <Label text="Galerie" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            </GridPane>
-        </VBox>
+        </ScrollPane>
     </center>
 </BorderPane>
 

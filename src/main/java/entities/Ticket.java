@@ -16,6 +16,10 @@ public class Ticket {
         return id;
     }
 
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     public byte[] getCodeQr() {
         return codeQr;
     }

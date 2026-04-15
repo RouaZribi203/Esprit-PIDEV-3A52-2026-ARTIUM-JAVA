@@ -3,6 +3,8 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
@@ -13,7 +15,9 @@
     </padding>
 
     <HBox alignment="CENTER_LEFT" spacing="8.0" styleClass="sidebar-brand">
-        <Label styleClass="brand-dot" text="*" />
+        <ImageView fitHeight="34.0" fitWidth="34.0" preserveRatio="true">
+            <Image url="@assets/PNG Porcelain Icon.png" />
+        </ImageView>
         <Label styleClass="brand-label" text="Artium" />
     </HBox>
 

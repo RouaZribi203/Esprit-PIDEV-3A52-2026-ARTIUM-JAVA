@@ -1,5 +1,6 @@
 package controllers;
 
+import entities.User;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -13,17 +14,60 @@ import java.util.Objects;
 public class MainFX extends Application {
 
     private static Stage primaryStage;
+    private static User authenticatedUser;
+
+    public static void switchToAuthLandingView() {
+        authenticatedUser = null;
+        switchScene("/views/auth/Landing.fxml", "/views/styles/auth.css", "Artium | Accueil");
+    }
+
+    public static void switchToLoginView() {
+        authenticatedUser = null;
+        switchScene("/views/auth/Connexion.fxml", "/views/styles/auth.css", "Artium | Connexion");
+    }
+
+    public static void switchToRegistrationView() {
+        authenticatedUser = null;
+        switchScene("/views/pages/inscription.fxml", "/views/styles/auth.css", "Artium | Inscription");
+    }
+
+    public static void switchToForgotPasswordView() {
+        authenticatedUser = null;
+        switchScene("/views/auth/ForgotPassword.fxml", "/views/styles/auth.css", "Artium | Mot de passe oublie");
+    }
 
     public static void switchToArtistView() {
+        authenticatedUser = null;
+        switchScene("/views/artist/ArtistMain.fxml", "/views/styles/artist-theme.css", "Artist Dashboard");
+    }
+
+    public static void switchToArtistView(User user) {
+        authenticatedUser = user;
         switchScene("/views/artist/ArtistMain.fxml", "/views/styles/artist-theme.css", "Artist Dashboard");
     }
 
     public static void switchToAdminView() {
+        authenticatedUser = null;
+        switchScene("/views/MainLayout.fxml", "/views/styles/dashboard.css", "Admin Dashboard");
+    }
+
+    public static void switchToAdminView(User user) {
+        authenticatedUser = user;
         switchScene("/views/MainLayout.fxml", "/views/styles/dashboard.css", "Admin Dashboard");
     }
 
     public static void switchToAmateurView() {
+        authenticatedUser = null;
         switchScene("/views/amateur/AmateurMain.fxml", "/views/styles/amateur-theme.css", "Amateur Dashboard");
+    }
+
+    public static void switchToAmateurView(User user) {
+        authenticatedUser = user;
+        switchScene("/views/amateur/AmateurMain.fxml", "/views/styles/amateur-theme.css", "Amateur Dashboard");
+    }
+
+    public static User getAuthenticatedUser() {
+        return authenticatedUser;
     }
 
     private static void switchScene(String fxmlPath, String stylesheetPath, String title) {
@@ -46,7 +90,10 @@ public class MainFX extends Application {
 
     public void start(Stage stage) {
         primaryStage = stage;
-        switchToAdminView();
+        // Taille minimale globale pour garder le layout lisible, sans figer la taille des scenes.
+        primaryStage.setMinWidth(1100);
+        primaryStage.setMinHeight(650);
+        switchToAuthLandingView();
     }
 
     public static void main(String[] args) {

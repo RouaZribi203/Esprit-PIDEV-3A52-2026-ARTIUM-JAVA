@@ -1,5 +1,7 @@
 package controllers.artist;
 
+import controllers.MainFX;
+import entities.User;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -24,15 +26,26 @@ public class ArtistMainController {
     @FXML
     private ProfileHeaderController profileHeaderIncludeController;
 
+    @FXML
+    private SidebarArtisteController sidebarArtisteIncludeController;
+
     private boolean darkTheme;
 
     @FXML
     public void initialize() {
         profileHeaderIncludeController.setNavigationHandler(this::onNavigate);
 
+        User connectedUser = MainFX.getAuthenticatedUser();
+        if (connectedUser != null && sidebarArtisteIncludeController != null) {
+            sidebarArtisteIncludeController.setUser(connectedUser);
+        }
+        if (connectedUser != null && profileHeaderIncludeController != null) {
+            profileHeaderIncludeController.setUser(connectedUser);
+        }
+
         navbarIncludeController.setActionHandler(this::applyTheme);
 
-        onNavigate("collections");
+        onNavigate("oeuvres");
     }
 
     private void onNavigate(String route) {

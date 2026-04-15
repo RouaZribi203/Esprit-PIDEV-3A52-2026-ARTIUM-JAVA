@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1"
+			fx:controller="controllers.AuthLandingController"
+			stylesheets="@../styles/auth.css"
+			styleClass="auth-root">
+	<top>
+		<HBox spacing="12" alignment="CENTER_LEFT" styleClass="auth-topbar auth-topbar-glass">
+			<padding>
+				<Insets top="14" right="18" bottom="14" left="18"/>
+			</padding>
+			<StackPane styleClass="auth-mini-logo-wrap">
+				<ImageView fitWidth="112" preserveRatio="true" smooth="true" cache="true" styleClass="auth-mini-logo">
+					<image>
+						<Image url="@../images/logo2.png"/>
+					</image>
+				</ImageView>
+			</StackPane>
+			<Region HBox.hgrow="ALWAYS"/>
+			<Button text="Accueil" styleClass="auth-topbar-link"/>
+			<Button text="Se connecter" onAction="#onLoginClick" styleClass="auth-topbar-ghost"/>
+			<Button text="Aide" onAction="#onHelpClick" styleClass="auth-topbar-link"/>
+			<Button text="Créer un compte" onAction="#onCreateAccount" styleClass="auth-topbar-primary"/>
+		</HBox>
+	</top>
+
+	<center>
+		<StackPane styleClass="auth-landing-shell auth-landing-shell-fluid">
+			<HBox spacing="0" alignment="CENTER" styleClass="auth-landing-card auth-landing-card-fluid">
+				<VBox spacing="20" alignment="CENTER_LEFT" prefWidth="565" maxWidth="Infinity" styleClass="auth-landing-hero auth-landing-hero-fluid" HBox.hgrow="ALWAYS">
+					<padding>
+						<Insets top="48" right="48" bottom="48" left="48"/>
+					</padding>
+					<StackPane styleClass="auth-hero-logo-wrap">
+						<ImageView fitWidth="250" preserveRatio="true" smooth="true" cache="true" styleClass="auth-hero-logo">
+							<image>
+								<Image url="@../images/logo2.png"/>
+							</image>
+						</ImageView>
+					</StackPane>
+					<Label text="Plateforme artistique" styleClass="auth-panel-kicker"/>
+					<Label text="Donnez vie a votre univers creatif" wrapText="true" styleClass="auth-hero-title auth-landing-title"/>
+					<Label text="Explorez un espace où la créativité s’exprime librement, où chaque œuvre reflète une vision unique et où l’art prend vie à travers des styles modernes et inspirants." wrapText="true" styleClass="auth-hero-text auth-landing-text"/>
+					<HBox spacing="10" styleClass="auth-chip-row">
+						<Label text="Rapide" styleClass="auth-chip"/>
+						<Label text="Sécurisé" styleClass="auth-chip"/>
+						<Label text="Moderne" styleClass="auth-chip"/>
+					</HBox>
+				</VBox>
+
+				<VBox spacing="16" alignment="CENTER_LEFT" prefWidth="565" maxWidth="Infinity" styleClass="auth-landing-panel auth-landing-panel-fluid auth-panel-block" HBox.hgrow="ALWAYS">
+					<padding>
+						<Insets top="48" right="44" bottom="48" left="44"/>
+					</padding>
+					<Label text="Bienvenue" styleClass="auth-panel-kicker"/>
+					<Label text="Commencez votre inscription" wrapText="true" styleClass="auth-panel-title auth-landing-panel-title"/>
+					<Label text="Créez votre profil et accédez à une interface intuitive, optimisée pour amateur, artiste ou admin." wrapText="true" styleClass="auth-panel-text auth-landing-panel-text"/>
+					<VBox spacing="12" styleClass="auth-landing-actions">
+						<Button text="Créer mon compte" onAction="#onCreateAccount" styleClass="auth-primary-button" maxWidth="Infinity"/>
+						<Button text="J'ai déjà un compte" onAction="#onLoginClick" styleClass="auth-secondary-button" maxWidth="Infinity"/>
+					</VBox>
+				</VBox>
+			</HBox>
+		</StackPane>
+	</center>
+</BorderPane>
+

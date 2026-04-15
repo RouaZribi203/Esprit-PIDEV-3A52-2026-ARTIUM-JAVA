@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
@@ -18,20 +19,21 @@
                 <Insets bottom="16.0" left="16.0" right="16.0" top="-20.0" />
             </padding>
             <StackPane prefHeight="64.0" prefWidth="64.0" styleClass="sidebar-avatar">
-                <Label styleClass="sidebar-avatar-symbol" text="👤" />
+                <ImageView fx:id="profileImageView" fitHeight="58.0" fitWidth="58.0" pickOnBounds="true" preserveRatio="false" styleClass="sidebar-avatar-image" visible="false" />
+                <Label fx:id="avatarFallbackLabel" styleClass="sidebar-avatar-symbol" text="👤" />
             </StackPane>
-            <Label styleClass="sidebar-name" text="Zribi roua" />
-            <Label styleClass="sidebar-role" text="Amateur d'art" />
-            <Label styleClass="sidebar-bio" text="Structure de la fiche profil amateur." wrapText="true" />
+            <Label fx:id="nameLabel" styleClass="sidebar-name" text="Utilisateur" />
+            <Label fx:id="roleLabel" styleClass="sidebar-role" text="Amateur d'art" />
+            <Label fx:id="bioLabel" styleClass="sidebar-bio" text="Aucune biographie disponible." wrapText="true" />
 
             <HBox alignment="CENTER" spacing="12.0">
                 <VBox alignment="CENTER" spacing="4.0" HBox.hgrow="ALWAYS">
-                    <Label styleClass="sidebar-stat-value" text="siliana" />
+                    <Label fx:id="villeValueLabel" styleClass="sidebar-stat-value" text="-" />
                     <Label styleClass="sidebar-stat-label" text="Ville" />
                 </VBox>
                 <Region prefWidth="1.0" styleClass="sidebar-divider" />
                 <VBox alignment="CENTER" spacing="4.0" HBox.hgrow="ALWAYS">
-                    <Label styleClass="sidebar-stat-value" text="25 Apr 2003" />
+                    <Label fx:id="dateNaissanceValueLabel" styleClass="sidebar-stat-value" text="-" />
                     <Label styleClass="sidebar-stat-label" text="Date de naissance" />
                 </VBox>
             </HBox>
