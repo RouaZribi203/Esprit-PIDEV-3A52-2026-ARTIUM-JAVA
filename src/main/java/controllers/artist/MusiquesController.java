@@ -13,6 +13,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
@@ -20,6 +21,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
@@ -152,6 +154,7 @@ public class MusiquesController {
     private LocalDate editingDateCreation;
     private byte[] editingImageBytes;
     private String editingAudioPath;
+    private Dialog<Void> formDialog;
 
     @FXML
     public void initialize() {
@@ -217,15 +220,9 @@ public class MusiquesController {
 
     @FXML
     private void handleToggleForm() {
-        if (formSection.isVisible()) {
-            clearForm();
-            resetEditMode();
-            showListView();
-        } else {
-            clearForm();
-            resetEditMode();
-            showFormView();
-        }
+        clearForm();
+        resetEditMode();
+        openFormDialog();
     }
 
     @FXML
@@ -387,7 +384,7 @@ public class MusiquesController {
             clearForm();
             resetEditMode();
             refreshMusiquesList();
-            showListView();
+            closeFormDialog();
         } catch (SQLDataException e) {
             setFeedback("Erreur lors de l'enregistrement: " + e.getMessage(), false);
         }
@@ -437,9 +434,9 @@ public class MusiquesController {
             }
         }
 
-        showFormView();
         updateFormTexts();
         setFeedback("Mode modification: mettez a jour les champs puis enregistrez.", true);
+        openFormDialog();
     }
 
     private void updateFormTexts() {
@@ -451,12 +448,50 @@ public class MusiquesController {
             submitMusiqueButton.setText(editMode ? "Enregistrer" : "Creer");
         }
         if (toggleFormButton != null) {
-            if (formSection != null && formSection.isVisible()) {
-                toggleFormButton.setText(editMode ? "Annuler la modification" : "Fermer le formulaire");
-            } else {
-                toggleFormButton.setText("Ajouter une musique");
-            }
+            toggleFormButton.setText("Ajouter une musique");
         }
+    }
+
+    private void openFormDialog() {
+        if (formSection == null) {
+            return;
+        }
+
+        if (formDialog != null && formDialog.isShowing()) {
+            return;
+        }
+
+        formDialog = new Dialog<>();
+        formDialog.setTitle(editingMusiqueId != null ? "Modifier la musique" : "Ajouter une musique");
+        formSection.setVisible(true);
+        formSection.setManaged(true);
+        formDialog.getDialogPane().setContent(formSection);
+        formDialog.getDialogPane().getButtonTypes().clear();
+        formDialog.getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
+
+        Button hiddenCancelButton = (Button) formDialog.getDialogPane().lookupButton(ButtonType.CANCEL);
+        if (hiddenCancelButton != null) {
+            hiddenCancelButton.setManaged(false);
+            hiddenCancelButton.setVisible(false);
+        }
+
+        formDialog.getDialogPane().getStyleClass().add("custom-dialog");
+        formDialog.getDialogPane().getStyleClass().add("music-form-dialog");
+        if (musiqueGrid != null && musiqueGrid.getScene() != null) {
+            formDialog.getDialogPane().getStylesheets().setAll(musiqueGrid.getScene().getStylesheets());
+        }
+        formDialog.getDialogPane().setPrefSize(760, 700);
+        formDialog.showAndWait();
+        formDialog = null;
+        showListView();
+    }
+
+    private void closeFormDialog() {
+        if (formDialog != null) {
+            formDialog.close();
+            formDialog = null;
+        }
+        showListView();
     }
 
     private void setFeedback(String message, boolean success) {
@@ -757,29 +792,33 @@ public class MusiquesController {
         VBox card = new VBox(6);
         card.setPrefWidth(170);
         card.setMaxWidth(170);
-        card.setStyle(index == currentTrackIndex
-                ? "-fx-background-color: #202020; -fx-background-radius: 8; -fx-border-color: #1DB954; -fx-border-radius: 8; -fx-padding: 8;"
-                : "-fx-background-color: #202020; -fx-background-radius: 8; -fx-padding: 8;");
+        card.getStyleClass().add("music-track-card");
+        if (index == currentTrackIndex) {
+            card.getStyleClass().add("music-track-card-active");
+        }
 
         Node coverNode = buildCoverNode(musique.getImage());
 
         String titre = musique.getTitre() != null ? musique.getTitre() : "Sans titre";
         Label titleLabel = new Label(titre);
         titleLabel.setWrapText(true);
-        titleLabel.setStyle("-fx-text-fill: #ffffff; -fx-font-weight: bold;");
+        titleLabel.getStyleClass().add("music-track-title");
 
         Button menuButton = new Button("⋮");
-        menuButton.setStyle("-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px; -fx-padding: 0 6 0 6; -fx-cursor: hand;");
+        menuButton.getStyleClass().add("music-card-menu-button");
 
         MenuItem editItem = new MenuItem("Modifier");
+        editItem.getStyleClass().add("music-actions-edit");
         editItem.setOnAction(event -> {
             event.consume();
             startEditMusique(musique);
         });
 
         MenuItem deleteItem = new MenuItem("Supprimer");
+        deleteItem.getStyleClass().add("music-actions-delete");
 
         ContextMenu actionsMenu = new ContextMenu(editItem, deleteItem);
+        actionsMenu.getStyleClass().add("music-actions-menu");
 
         menuButton.setOnMouseClicked(event -> {
             event.consume();
@@ -797,11 +836,13 @@ public class MusiquesController {
             }
         });
 
-        HBox titleRow = new HBox(8, titleLabel, menuButton);
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+        HBox titleRow = new HBox(8, titleLabel, spacer, menuButton);
 
         String genre = musique.getGenre() != null ? musique.getGenre() : "-";
         Label metaLabel = new Label("Genre: " + genre);
-        metaLabel.setStyle("-fx-text-fill: #b0b0b0;");
+        metaLabel.getStyleClass().add("music-track-meta");
 
         card.getChildren().addAll(coverNode, titleRow, metaLabel);
         card.setOnMouseClicked(event -> playTrackAtIndex(index, true));
@@ -811,11 +852,11 @@ public class MusiquesController {
     private Node buildCoverNode(byte[] imageBytes) {
         StackPane placeholder = new StackPane();
         placeholder.setPrefSize(150, 150);
-        placeholder.setStyle("-fx-background-color: #2b2b2b; -fx-background-radius: 6;");
+        placeholder.getStyleClass().add("music-cover-placeholder");
 
         if (imageBytes == null || imageBytes.length == 0) {
             Label noImageLabel = new Label("No cover");
-            noImageLabel.setStyle("-fx-text-fill: #8a8a8a;");
+            noImageLabel.getStyleClass().add("music-cover-placeholder-text");
             placeholder.getChildren().add(noImageLabel);
             return placeholder;
         }
@@ -824,7 +865,7 @@ public class MusiquesController {
             Image image = new Image(new ByteArrayInputStream(imageBytes));
             if (image.isError()) {
                 Label noImageLabel = new Label("No cover");
-                noImageLabel.setStyle("-fx-text-fill: #8a8a8a;");
+                noImageLabel.getStyleClass().add("music-cover-placeholder-text");
                 placeholder.getChildren().add(noImageLabel);
                 return placeholder;
             }
@@ -833,10 +874,14 @@ public class MusiquesController {
             imageView.setFitWidth(150);
             imageView.setFitHeight(150);
             imageView.setPreserveRatio(false);
-            return imageView;
+            imageView.getStyleClass().add("music-cover-image");
+
+            StackPane coverWrap = new StackPane(imageView);
+            coverWrap.getStyleClass().add("music-cover-placeholder");
+            return coverWrap;
         } catch (Exception ex) {
             Label noImageLabel = new Label("No cover");
-            noImageLabel.setStyle("-fx-text-fill: #8a8a8a;");
+            noImageLabel.getStyleClass().add("music-cover-placeholder-text");
             placeholder.getChildren().add(noImageLabel);
             return placeholder;
         }
@@ -976,22 +1021,22 @@ public class MusiquesController {
         VBox card = new VBox(6);
         card.setPrefWidth(180);
         card.setMaxWidth(180);
-        card.setStyle("-fx-background-color: #202020; -fx-background-radius: 8; -fx-padding: 8;");
+        card.getStyleClass().add("music-track-card");
 
         Node coverNode = buildPlaylistCoverNode(playlist.getImage());
         Label titleLabel = new Label(safePlaylistName(playlist));
         titleLabel.setWrapText(true);
-        titleLabel.setStyle("-fx-text-fill: #ffffff; -fx-font-weight: bold;");
+        titleLabel.getStyleClass().add("music-track-title");
 
         String description = playlist.getDescription() != null && !playlist.getDescription().isBlank()
                 ? playlist.getDescription()
                 : "Aucune description";
         Label descLabel = new Label(description);
         descLabel.setWrapText(true);
-        descLabel.setStyle("-fx-text-fill: #b0b0b0;");
+        descLabel.getStyleClass().add("music-track-meta");
 
         Label countLabel = new Label((playlist.getMusiques() != null ? playlist.getMusiques().size() : 0) + " musique(s)");
-        countLabel.setStyle("-fx-text-fill: #9ca3af;");
+        countLabel.getStyleClass().add("music-track-meta");
 
         card.getChildren().addAll(coverNode, titleLabel, descLabel, countLabel);
         return card;
@@ -1000,11 +1045,11 @@ public class MusiquesController {
     private Node buildPlaylistCoverNode(byte[] imageBytes) {
         StackPane placeholder = new StackPane();
         placeholder.setPrefSize(160, 110);
-        placeholder.setStyle("-fx-background-color: #2b2b2b; -fx-background-radius: 6;");
+        placeholder.getStyleClass().add("music-cover-placeholder");
 
         if (imageBytes == null || imageBytes.length == 0) {
             Label noImageLabel = new Label("Playlist");
-            noImageLabel.setStyle("-fx-text-fill: #8a8a8a;");
+            noImageLabel.getStyleClass().add("music-cover-placeholder-text");
             placeholder.getChildren().add(noImageLabel);
             return placeholder;
         }
@@ -1013,7 +1058,7 @@ public class MusiquesController {
             Image image = new Image(new ByteArrayInputStream(imageBytes));
             if (image.isError()) {
                 Label noImageLabel = new Label("Playlist");
-                noImageLabel.setStyle("-fx-text-fill: #8a8a8a;");
+                noImageLabel.getStyleClass().add("music-cover-placeholder-text");
                 placeholder.getChildren().add(noImageLabel);
                 return placeholder;
             }
@@ -1022,10 +1067,14 @@ public class MusiquesController {
             imageView.setFitWidth(160);
             imageView.setFitHeight(110);
             imageView.setPreserveRatio(false);
-            return imageView;
+            imageView.getStyleClass().add("music-cover-image");
+
+            StackPane coverWrap = new StackPane(imageView);
+            coverWrap.getStyleClass().add("music-cover-placeholder");
+            return coverWrap;
         } catch (Exception ex) {
             Label noImageLabel = new Label("Playlist");
-            noImageLabel.setStyle("-fx-text-fill: #8a8a8a;");
+            noImageLabel.getStyleClass().add("music-cover-placeholder-text");
             placeholder.getChildren().add(noImageLabel);
             return placeholder;
         }
