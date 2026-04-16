@@ -95,7 +95,7 @@ public class MainFX extends Application {
         primaryStage = stage;
 
         // Set default admin session for dev/test convenience
-        User admin = createDevUser(3, "admin", "user", "Admin");
+        User admin = createDevUser(111, "admin", "user", "Admin", "Artium123");
         SessionManager.setCurrentUser(admin);
 
         switchToAdminView();
@@ -105,7 +105,7 @@ public class MainFX extends Application {
         switchToAuthLandingView();
     }
 
-    private User createDevUser(int id, String prenom, String nom, String role) {
+    private User createDevUser(int id, String prenom, String nom, String role, String Mdp) {
         User user = new User();
         user.setId(id);
         user.setPrenom(prenom);
@@ -113,6 +113,7 @@ public class MainFX extends Application {
         user.setRole(role);
         user.setStatut("Activé");
         user.setEmail(prenom + "." + nom + "@test.com");
+        user.setMdp(Mdp);
         return user;
     }
 
