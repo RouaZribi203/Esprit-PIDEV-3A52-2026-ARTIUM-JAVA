@@ -38,12 +38,60 @@
     -fx-font-weight: 700;
 }
 
-.artist-avatar-menu {
+.artist-avatar-menu,
+.avatar-menu {
     -fx-background-color: #edf2f8;
     -fx-border-color: #d7dde7;
     -fx-background-radius: 16;
     -fx-border-radius: 16;
     -fx-font-weight: 700;
+}
+
+.avatar-menu:hover {
+    -fx-background-color: #e5e9f1;
+}
+
+.avatar-menu:showing {
+    -fx-background-color: #e1e7f3;
+    -fx-border-color: #bcc6d8;
+}
+
+.avatar-menu > .arrow-button,
+.avatar-menu > .arrow-button > .arrow {
+    -fx-padding: 0;
+    -fx-background-insets: 0;
+    -fx-background-color: transparent;
+}
+
+.context-menu .menu-item.avatar-dropdown-item {
+    -fx-background-color: transparent;
+    -fx-background-radius: 8;
+    -fx-padding: 9 14 9 14;
+}
+
+.context-menu .menu-item.avatar-dropdown-item > .label {
+    -fx-text-fill: #243146;
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+}
+
+.context-menu .menu-item.avatar-dropdown-item:focused,
+.context-menu .menu-item.avatar-dropdown-item:hover {
+    -fx-background-color: #eef2ff;
+}
+
+.context-menu .menu-item#logoutMenuItem > .label {
+    -fx-text-fill: #a6324a;
+}
+
+.context-menu .menu-item#logoutMenuItem:focused,
+.context-menu .menu-item#logoutMenuItem:hover {
+    -fx-background-color: #fff0f3;
+}
+
+.context-menu .separator.avatar-dropdown-separator:horizontal .line {
+    -fx-border-color: #e2e8f2;
+    -fx-border-width: 1 0 0 0;
 }
 
 .artist-scroll,

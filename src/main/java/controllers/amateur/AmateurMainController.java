@@ -43,7 +43,10 @@ public class AmateurMainController {
 
         User connectedUser = MainFX.getAuthenticatedUser();
         if (connectedUser != null) {
+            navbarIncludeController.setUser(connectedUser);
             sidebarIncludeController.setUser(connectedUser);
+        } else {
+            navbarIncludeController.setUser(null);
         }
 
         sidebarIncludeController.setNavigationHandler(this::onNavigate);

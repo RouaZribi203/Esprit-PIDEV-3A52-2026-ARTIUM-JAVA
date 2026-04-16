@@ -1,10 +1,14 @@
 package controllers.artist;
 
+import controllers.MainFX;
+import entities.User;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Alert;
+import javafx.scene.control.MenuButton;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -21,12 +25,27 @@ public class NavbarArtisteController {
     private Button notificationsButton;
 
     @FXML
-    private Button anchorButton;
+    private MenuButton userMenuButton;
 
     private ActionHandler actionHandler;
 
     public void setActionHandler(ActionHandler actionHandler) {
         this.actionHandler = actionHandler;
+    }
+
+    public void setUser(User user) {
+        if (userMenuButton == null) {
+            return;
+        }
+        if (user == null) {
+            userMenuButton.setText("Compte");
+            return;
+        }
+
+        String prenom = user.getPrenom() == null ? "" : user.getPrenom().trim();
+        String nom = user.getNom() == null ? "" : user.getNom().trim();
+        String fullName = (prenom + " " + nom).trim();
+        userMenuButton.setText(fullName.isEmpty() ? "Compte" : fullName);
     }
 
     @FXML
@@ -65,11 +84,19 @@ public class NavbarArtisteController {
 
     @FXML
     private void onLogoutClick() {
-        // Placeholder for authentication redirection.
+        MainFX.switchToLoginView();
     }
 
     private void switchScene(String fxmlPath, String stylesheetPath, String title) {
-        Stage stage = (Stage) anchorButton.getScene().getWindow();
+        if (notificationsButton == null || notificationsButton.getScene() == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Navigation");
+            alert.setHeaderText(null);
+            alert.setContentText("Impossible d'ouvrir la vue demandee.");
+            alert.showAndWait();
+            return;
+        }
+        Stage stage = (Stage) notificationsButton.getScene().getWindow();
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
