@@ -17,6 +17,7 @@ import javafx.scene.layout.Region;
 import javafx.geometry.Pos;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import utils.UserSession;
 
 import java.sql.SQLDataException;
 import java.net.URL;
@@ -54,9 +55,16 @@ public class ReclamationsArtisteController implements Initializable {
 	private final ReclamationService reclamationService = new ReclamationService();
 	private final List<Reclamation> myAll = new ArrayList<>();
 	private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.FRENCH);
+	private Integer currentUserId;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		currentUserId = UserSession.getCurrentUserId();
+		if (currentUserId == null) {
+			handleMissingSession();
+			return;
+		}
+
 		// Valeurs de démonstration (à remplacer par des valeurs venant de la BD)
 		typeCombo.setItems(FXCollections.observableArrayList(
 				"Paiement",
@@ -87,6 +95,23 @@ public class ReclamationsArtisteController implements Initializable {
 		refreshMyReclamations();
 	}
 
+	private void handleMissingSession() {
+		if (myReclamationsContainer != null) {
+			myReclamationsContainer.getChildren().clear();
+		}
+		if (emptyMyReclamationsLabel != null) {
+			emptyMyReclamationsLabel.setText("Session utilisateur introuvable. Veuillez vous reconnecter.");
+			emptyMyReclamationsLabel.setVisible(true);
+			emptyMyReclamationsLabel.setManaged(true);
+		}
+		if (typeCombo != null) {
+			typeCombo.setDisable(true);
+		}
+		if (descriptionArea != null) {
+			descriptionArea.setDisable(true);
+		}
+	}
+
 	@FXML
 	private void onReset(ActionEvent event) {
 		typeCombo.getSelectionModel().clearSelection();
@@ -114,9 +139,7 @@ public class ReclamationsArtisteController implements Initializable {
 			return;
 		}
 
-		// TODO: remplacer par l'utilisateur connecté.
-		// En attendant, on met 1 pour éviter un INSERT avec user_id null.
-		int userId = 1;
+		int userId = currentUserId;
 
 		LocalDateTime now = LocalDateTime.now();
 		Reclamation r = new Reclamation();
@@ -155,8 +178,7 @@ public class ReclamationsArtisteController implements Initializable {
 		try {
 			myAll.clear();
 			for (Reclamation r : reclamationService.getAll()) {
-				// TODO: remplacer 1 par l'id user connecté
-				if (r.getUserId() != null && r.getUserId() == 1) {
+				if (r.getUserId() != null && r.getUserId().equals(currentUserId)) {
 					myAll.add(r);
 				}
 			}

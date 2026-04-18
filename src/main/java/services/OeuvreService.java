@@ -38,7 +38,7 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
         if (collectionId == null) {
             throw new SQLDataException("La collection est obligatoire.");
         }
-        String imageUrl = ImageUrlUtils.normalizeForDatabase(t.getImage());
+        String imageUrl = ImageUrlUtils.persistToWebImageDirectoryAndNormalize(t.getImage());
         if (imageUrl == null || imageUrl.isBlank()) {
             throw new SQLDataException("L'image est obligatoire.");
         }
@@ -139,7 +139,7 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
         if (collectionId == null) {
             throw new SQLDataException("La collection est obligatoire.");
         }
-        String imageUrl = ImageUrlUtils.normalizeForDatabase(t.getImage());
+        String imageUrl = ImageUrlUtils.persistToWebImageDirectoryAndNormalize(t.getImage());
         if (imageUrl == null || imageUrl.isBlank()) {
             throw new SQLDataException("L'image est obligatoire.");
         }

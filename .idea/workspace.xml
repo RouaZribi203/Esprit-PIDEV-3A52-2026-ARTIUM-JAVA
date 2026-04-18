@@ -4,14 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="feat(reclamation): interface envoyer reclamation">
+    <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="corrections de blob">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/ArtistMainController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/ArtistMainController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/BibliothequArtisteController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/BibliothequArtisteController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/CollectionsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/CollectionsController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/EvenementsArtisteController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/EvenementsArtisteController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/MesOeuvresController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/MesOeuvresController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/ProfileHeaderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/ProfileHeaderController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/services/JdbcUserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/JdbcUserService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/services/MusiqueService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/MusiqueService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/ReclamationsArtisteController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/ReclamationsArtisteController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/EvenementService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/EvenementService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/JdbcLivreService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/JdbcLivreService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/services/OeuvreService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/OeuvreService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/services/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/UserService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/utils/ImageUrlUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/utils/ImageUrlUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/utils/UserSession.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/utils/UserSession.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -128,8 +133,17 @@
       <workItem from="1776324671844" duration="1640000" />
       <workItem from="1776326545513" duration="835000" />
       <workItem from="1776514744207" duration="5785000" />
-      <workItem from="1776522849192" duration="3267000" />
+      <workItem from="1776522849192" duration="6097000" />
     </task>
+    <task id="LOCAL-00001" summary="corrections de blob">
+      <option name="closed" value="true" />
+      <created>1776526478643</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1776526478643</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -145,6 +159,10 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="corrections de blob" />
+    <option name="LAST_COMMIT_MESSAGE" value="corrections de blob" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

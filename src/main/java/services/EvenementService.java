@@ -28,9 +28,10 @@ public class EvenementService implements Iservice<Evenement> {
     @Override
     public void add(Evenement evenement) throws SQLDataException {
         validateForWrite(evenement, true);
+        String imageUrl = prepareImageUrl(evenement.getImageCouverture());
 
         try (PreparedStatement statement = MyDatabase.getInstance().getConnection().prepareStatement(INSERT_SQL)) {
-            bindWriteFields(statement, evenement, false);
+            bindWriteFields(statement, evenement, imageUrl, false);
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new SQLDataException("Erreur lors de l'ajout de l'evenement: " + e.getMessage());
@@ -54,9 +55,10 @@ public class EvenementService implements Iservice<Evenement> {
     @Override
     public void update(Evenement evenement) throws SQLDataException {
         validateForWrite(evenement, false);
+        String imageUrl = prepareImageUrl(evenement.getImageCouverture());
 
         try (PreparedStatement statement = MyDatabase.getInstance().getConnection().prepareStatement(UPDATE_SQL)) {
-            bindWriteFields(statement, evenement, true);
+            bindWriteFields(statement, evenement, imageUrl, true);
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new SQLDataException("Erreur lors de la modification de l'evenement: " + e.getMessage());
@@ -114,6 +116,7 @@ public class EvenementService implements Iservice<Evenement> {
 
         evenement.setArtisteId(artisteId);
         validateForWrite(evenement, false);
+        String imageUrl = prepareImageUrl(evenement.getImageCouverture());
 
         try (PreparedStatement statement = MyDatabase.getInstance().getConnection().prepareStatement(UPDATE_BY_ARTIST_SQL)) {
             statement.setString(1, evenement.getTitre());
@@ -122,7 +125,7 @@ public class EvenementService implements Iservice<Evenement> {
             statement.setTimestamp(4, Timestamp.valueOf(evenement.getDateFin()));
             statement.setDate(5, evenement.getDateCreation() == null ? null : Date.valueOf(evenement.getDateCreation()));
             statement.setString(6, evenement.getType());
-            statement.setString(7, ImageUrlUtils.normalizeForDatabase(evenement.getImageCouverture()));
+            statement.setString(7, imageUrl);
             statement.setString(8, evenement.getStatut());
 
             if (evenement.getCapaciteMax() == null) {
@@ -202,14 +205,14 @@ public class EvenementService implements Iservice<Evenement> {
         return evenement;
     }
 
-    private void bindWriteFields(PreparedStatement statement, Evenement evenement, boolean withIdAtEnd) throws SQLException {
+    private void bindWriteFields(PreparedStatement statement, Evenement evenement, String imageUrl, boolean withIdAtEnd) throws SQLException {
         statement.setString(1, evenement.getTitre());
         statement.setString(2, evenement.getDescription());
         statement.setTimestamp(3, Timestamp.valueOf(evenement.getDateDebut()));
         statement.setTimestamp(4, Timestamp.valueOf(evenement.getDateFin()));
         statement.setDate(5, evenement.getDateCreation() == null ? null : Date.valueOf(evenement.getDateCreation()));
         statement.setString(6, evenement.getType());
-        statement.setString(7, ImageUrlUtils.normalizeForDatabase(evenement.getImageCouverture()));
+        statement.setString(7, imageUrl);
         statement.setString(8, evenement.getStatut());
 
         if (evenement.getCapaciteMax() == null) {
@@ -239,6 +242,10 @@ public class EvenementService implements Iservice<Evenement> {
         if (withIdAtEnd) {
             statement.setInt(13, evenement.getId());
         }
+    }
+
+    private String prepareImageUrl(String rawImageValue) throws SQLDataException {
+        return ImageUrlUtils.persistToWebImageDirectoryAndNormalize(rawImageValue);
     }
 
     private void validateForWrite(Evenement evenement, boolean isCreate) throws SQLDataException {

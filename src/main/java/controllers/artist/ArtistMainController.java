@@ -48,7 +48,7 @@ public class ArtistMainController {
 
         navbarIncludeController.setActionHandler(this::applyTheme);
 
-        onNavigate("oeuvres");
+        onNavigate(profileHeaderIncludeController.getDefaultRoute());
     }
 
     private void onNavigate(String route) {

@@ -40,7 +40,7 @@ import services.CollectionService;
 import services.JdbcCollectionService;
 import services.JdbcLivreService;
 import services.LivreService;
-import utils.SessionManager;
+import utils.UserSession;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -58,14 +58,16 @@ public class BibliothequArtisteController {
     private final ObservableList<Livre> livres = FXCollections.observableArrayList();
     private final ObservableList<CollectionOeuvre> collections = FXCollections.observableArrayList();
 
-    private int getCurrentArtistId() {
-        return SessionManager.isLoggedIn() ? SessionManager.getCurrentUser().getId() : 1;
+    private Integer getCurrentArtistId() {
+        return UserSession.getCurrentUserId();
     }
 
     private String getCurrentArtistName() {
-        return SessionManager.isLoggedIn() ? 
-               (SessionManager.getCurrentUser().getPrenom() + " " + SessionManager.getCurrentUser().getNom()) : 
-               "Artiste";
+        var currentUser = UserSession.getCurrentUser();
+        if (currentUser == null) {
+            return "Artiste";
+        }
+        return currentUser.getPrenom() + " " + currentUser.getNom();
     }
 
     @FXML
@@ -119,6 +121,11 @@ public class BibliothequArtisteController {
 
     @FXML
     public void initialize() {
+        if (getCurrentArtistId() == null) {
+            handleMissingSession();
+            return;
+        }
+
         // Add numeric filter to price field
         if (prixField != null) {
             prixField.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -150,19 +157,40 @@ public class BibliothequArtisteController {
         }
     }
 
+    private void handleMissingSession() {
+        if (cardsTile != null) {
+            cardsTile.getChildren().clear();
+        }
+        if (saveButton != null) {
+            saveButton.setDisable(true);
+        }
+        if (deleteButton != null) {
+            deleteButton.setDisable(true);
+        }
+        showError("Session", "Session utilisateur introuvable. Veuillez vous reconnecter.");
+    }
+
     private void loadCollections() {
+        Integer artistId = getCurrentArtistId();
+        if (artistId == null) {
+            return;
+        }
         try {
-            collections.setAll(collectionService.getByArtist(getCurrentArtistId()));
+            collections.setAll(collectionService.getByArtist(artistId));
         } catch (SQLDataException e) {
             showError("Chargement collections", e.getMessage());
         }
     }
 
     private void refresh() {
+        Integer artistId = getCurrentArtistId();
+        if (artistId == null) {
+            return;
+        }
         try {
             // First try to get by artist specifically
-            List<Livre> allBooks = livreService.getByArtist(getCurrentArtistId());
-            
+            List<Livre> allBooks = livreService.getByArtist(artistId);
+
             // If empty, it might be a link issue, try fetching all and filtering manually as fallback
             if (allBooks.isEmpty()) {
                 List<Livre> everything = livreService.getAll();

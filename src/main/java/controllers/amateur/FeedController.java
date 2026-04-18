@@ -25,6 +25,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.SVGPath;
+import utils.UserSession;
 
 import java.io.File;
 import java.time.LocalDate;
@@ -42,8 +43,7 @@ public class FeedController {
 	private static final DateTimeFormatter COMMENT_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.FRANCE);
 	private static final double POST_IMAGE_MAX_WIDTH = 700;
 	private static final double POST_IMAGE_MAX_HEIGHT = 360;
-	// TODO: remplacer par l'ID utilisateur de session.
-	private static final int CURRENT_USER_ID = 4;
+	private Integer currentUserId;
 
 	@FXML
 	private VBox oeuvresContainer;
@@ -62,6 +62,7 @@ public class FeedController {
 
 	@FXML
 	public void initialize() {
+		currentUserId = UserSession.getCurrentUserId();
 		loadOeuvres();
 	}
 
@@ -287,6 +288,12 @@ public class FeedController {
 	}
 
 	private void submitComment(Oeuvre oeuvre, TextField commentField, Label errorLabel) {
+		currentUserId = UserSession.getCurrentUserId();
+		if (currentUserId == null) {
+			showCommentError(errorLabel, "Veuillez vous connecter pour commenter.");
+			return;
+		}
+
 		String text = safeText(commentField.getText());
 		if (text.isEmpty()) {
 			showCommentError(errorLabel, "Le commentaire est vide.");
@@ -302,7 +309,7 @@ public class FeedController {
 			Commentaire commentaire = new Commentaire();
 			commentaire.setTexte(text);
 			commentaire.setOeuvreId(oeuvre.getId());
-			commentaire.setUserId(CURRENT_USER_ID);
+			commentaire.setUserId(currentUserId);
 			commentaire.setDateCommentaire(LocalDate.now());
 			commentaireService.add(commentaire);
 
@@ -371,7 +378,7 @@ public class FeedController {
 
 		header.getChildren().addAll(authorLabel, dateLabel);
 
-		if (comment.getUserId() != null && comment.getUserId() == CURRENT_USER_ID) {
+		if (comment.getUserId() != null && comment.getUserId().equals(currentUserId)) {
 			Button menuTrigger = new Button("...");
 			menuTrigger.getStyleClass().add("oeuvre-post-comment-menu-trigger");
 			menuTrigger.setFocusTraversable(false);

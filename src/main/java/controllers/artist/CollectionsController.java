@@ -32,6 +32,7 @@ import javafx.scene.layout.VBox;
 import javafx.geometry.Side;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import utils.UserSession;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -67,14 +68,27 @@ public class CollectionsController {
     private final Map<Integer, Boolean> expandedByCollectionId = new HashMap<>();
     private final Map<Integer, List<Oeuvre>> oeuvresByCollectionId = new HashMap<>();
 
-    // TODO: brancher l'ID depuis la session utilisateur quand elle sera disponible.
-    private final int artisteId = 1;
+    private Integer artisteId;
 
     @FXML
     public void initialize() {
+        artisteId = UserSession.getCurrentUserId();
+        if (artisteId == null) {
+            handleMissingSession();
+            return;
+        }
         applyIcons();
         loadCollections();
         searchField.textProperty().addListener((observable, oldValue, newValue) -> applyFilter(newValue));
+    }
+
+    private void handleMissingSession() {
+        collectionsContainer.getChildren().clear();
+        emptyStateLabel.setText("Session utilisateur introuvable. Veuillez vous reconnecter.");
+        emptyStateLabel.setVisible(true);
+        if (addCollectionButton != null) {
+            addCollectionButton.setDisable(true);
+        }
     }
 
     private void applyIcons() {

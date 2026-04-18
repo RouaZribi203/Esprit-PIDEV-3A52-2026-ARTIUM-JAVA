@@ -164,6 +164,10 @@ public class ProfileHeaderController {
         this.navigationHandler = navigationHandler;
     }
 
+    public String getDefaultRoute() {
+        return dynamicRoute;
+    }
+
     public void setActiveTab(String route) {
         List<Button> tabs = Arrays.asList(
                 collectionsTabButton,
@@ -181,7 +185,11 @@ public class ProfileHeaderController {
         if ("collections".equals(route)) {
             collectionsTabButton.getStyleClass().add("active");
         } else if ("bibliotheque".equals(route)) {
-            bibliothequeTabButton.getStyleClass().add("active");
+            if ("bibliotheque".equals(dynamicRoute)) {
+                contentTabButton.getStyleClass().add("active");
+            } else {
+                bibliothequeTabButton.getStyleClass().add("active");
+            }
         } else if ("musiques".equals(route)) {
             if ("musiques".equals(dynamicRoute)) {
                 contentTabButton.getStyleClass().add("active");
@@ -254,13 +262,22 @@ public class ProfileHeaderController {
         } else if ("Auteur".equalsIgnoreCase(specialite)) {
             dynamicRoute = "bibliotheque";
             contentTabButton.setText("Bibliotheque");
+            bibliothequeTabButton.setVisible(false);
+            bibliothequeTabButton.setManaged(false);
             musiquesTabButton.setVisible(true);
             musiquesTabButton.setManaged(true);
         } else {
             dynamicRoute = "oeuvres";
             contentTabButton.setText("Mes Oeuvres");
+            bibliothequeTabButton.setVisible(true);
+            bibliothequeTabButton.setManaged(true);
             musiquesTabButton.setVisible(true);
             musiquesTabButton.setManaged(true);
+        }
+
+        if (!"Auteur".equalsIgnoreCase(specialite)) {
+            bibliothequeTabButton.setVisible(true);
+            bibliothequeTabButton.setManaged(true);
         }
     }
 }

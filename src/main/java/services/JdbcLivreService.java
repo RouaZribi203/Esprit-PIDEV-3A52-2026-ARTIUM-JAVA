@@ -225,8 +225,8 @@ public class JdbcLivreService implements LivreService {
         return value == null ? new byte[0] : value;
     }
 
-    private static String safeImageUrl(String imageValue) {
-        return ImageUrlUtils.normalizeForDatabase(imageValue);
+    private static String safeImageUrl(String imageValue) throws SQLDataException {
+        return ImageUrlUtils.persistToWebImageDirectoryAndNormalize(imageValue);
     }
 
     private static double safePrix(Double prix) {

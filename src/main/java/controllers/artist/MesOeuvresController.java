@@ -34,6 +34,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+import utils.UserSession;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -83,11 +84,15 @@ public class MesOeuvresController {
     private String artistDisplayName = "Artiste";
     private String artistSpecialite = "Specialite inconnue";
 
-    // TODO: brancher l'ID depuis la session utilisateur quand elle sera disponible.
-    private final int artisteId = 3;
+    private Integer artisteId;
 
     @FXML
     public void initialize() {
+        artisteId = UserSession.getCurrentUserId();
+        if (artisteId == null) {
+            handleMissingSession();
+            return;
+        }
         applyIcons();
         loadArtistIdentity();
         sortCombo.getItems().addAll("Commentaires decroissant", "Commentaires croissant");
@@ -96,6 +101,15 @@ public class MesOeuvresController {
         searchField.textProperty().addListener((observable, oldValue, newValue) -> applyFilters());
         sortCombo.valueProperty().addListener((observable, oldValue, newValue) -> applyFilters());
         loadOeuvres();
+    }
+
+    private void handleMissingSession() {
+        oeuvresContainer.getChildren().clear();
+        emptyStateLabel.setText("Session utilisateur introuvable. Veuillez vous reconnecter.");
+        emptyStateLabel.setVisible(true);
+        if (addOeuvreButton != null) {
+            addOeuvreButton.setDisable(true);
+        }
     }
 
     private void loadArtistIdentity() {
