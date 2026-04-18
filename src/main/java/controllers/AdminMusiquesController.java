@@ -24,7 +24,6 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaException;
 import javafx.scene.media.MediaPlayer;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.sql.SQLDataException;
 import java.time.LocalDate;
@@ -843,12 +842,12 @@ public class AdminMusiquesController {
         }
     }
 
-    private Node buildPlaylistCoverNode(byte[] imageBytes) {
+    private Node buildPlaylistCoverNode(String imageSource) {
         StackPane placeholder = new StackPane();
         placeholder.setPrefSize(160, 110);
         placeholder.setStyle("-fx-background-color: #2d333b; -fx-background-radius: 6;");
 
-        if (imageBytes == null || imageBytes.length == 0) {
+        if (imageSource == null || imageSource.isBlank()) {
             Label noImageLabel = new Label("Playlist");
             noImageLabel.setStyle("-fx-text-fill: #9ca3af; -fx-font-weight: bold;");
             placeholder.getChildren().add(noImageLabel);
@@ -856,7 +855,12 @@ public class AdminMusiquesController {
         }
 
         try {
-            Image image = new Image(new ByteArrayInputStream(imageBytes));
+            Image image;
+            if (imageSource.startsWith("http://") || imageSource.startsWith("https://") || imageSource.startsWith("file:")) {
+                image = new Image(imageSource, true);
+            } else {
+                image = new Image(new File(imageSource).toURI().toString(), true);
+            }
             if (image.isError()) {
                 Label noImageLabel = new Label("Playlist");
                 noImageLabel.setStyle("-fx-text-fill: #9ca3af; -fx-font-weight: bold;");

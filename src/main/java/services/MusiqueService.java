@@ -54,7 +54,7 @@ public class MusiqueService implements Iservice<Musique> {
                 oeuvreStatement.setString(2, musique.getDescription());
                 oeuvreStatement.setDate(3, Date.valueOf(musique.getDateCreation()));
                 oeuvreStatement.setString(4, imageUrl);
-                oeuvreStatement.setString(5, musique.getType() != null ? musique.getType() : "musique");
+                oeuvreStatement.setString(5, musique.getType() != null ? musique.getType() : "Musique");
                 oeuvreStatement.setInt(6, effectiveCollectionId);
                 oeuvreStatement.setString(7, musique.getClasse() != null ? musique.getClasse() : "musique");
                 oeuvreStatement.executeUpdate();
@@ -181,7 +181,7 @@ public class MusiqueService implements Iservice<Musique> {
                 oeuvreStatement.setString(2, musique.getDescription());
                 oeuvreStatement.setDate(3, Date.valueOf(dateCreation));
                 oeuvreStatement.setString(4, imageUrl);
-                oeuvreStatement.setString(5, musique.getType() != null ? musique.getType() : "musique");
+                oeuvreStatement.setString(5, musique.getType() != null ? musique.getType() : "Musique");
                 oeuvreStatement.setInt(6, effectiveCollectionId);
                 oeuvreStatement.setString(7, musique.getClasse() != null ? musique.getClasse() : "musique");
                 oeuvreStatement.setInt(8, musique.getId());

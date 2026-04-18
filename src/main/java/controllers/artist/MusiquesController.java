@@ -32,7 +32,6 @@ import javafx.scene.media.MediaPlayer;
 import javafx.stage.FileChooser;
 import utils.MyDatabase;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -1037,12 +1036,12 @@ public class MusiquesController {
         return card;
     }
 
-    private Node buildPlaylistCoverNode(byte[] imageBytes) {
+    private Node buildPlaylistCoverNode(String imageSource) {
         StackPane placeholder = new StackPane();
         placeholder.setPrefSize(160, 110);
         placeholder.getStyleClass().add("music-cover-placeholder");
 
-        if (imageBytes == null || imageBytes.length == 0) {
+        if (imageSource == null || imageSource.isBlank()) {
             Label noImageLabel = new Label("Playlist");
             noImageLabel.getStyleClass().add("music-cover-placeholder-text");
             placeholder.getChildren().add(noImageLabel);
@@ -1050,7 +1049,12 @@ public class MusiquesController {
         }
 
         try {
-            Image image = new Image(new ByteArrayInputStream(imageBytes));
+            Image image;
+            if (imageSource.startsWith("http://") || imageSource.startsWith("https://") || imageSource.startsWith("file:")) {
+                image = new Image(imageSource, true);
+            } else {
+                image = new Image(new File(imageSource).toURI().toString(), true);
+            }
             if (image.isError()) {
                 Label noImageLabel = new Label("Playlist");
                 noImageLabel.getStyleClass().add("music-cover-placeholder-text");

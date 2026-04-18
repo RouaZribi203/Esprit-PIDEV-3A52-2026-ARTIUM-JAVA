@@ -4,7 +4,6 @@ import entities.Evenement;
 import entities.Ticket;
 import utils.MyDatabase;
 
-import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -32,7 +31,7 @@ public class TicketService {
         ticket.setCodeQr(generateQrCode(evenement, userId));
 
         try (PreparedStatement statement = MyDatabase.getInstance().getConnection().prepareStatement(INSERT_SQL)) {
-            statement.setBytes(1, ticket.getCodeQr());
+            statement.setString(1, ticket.getCodeQr());
             statement.setDate(2, Date.valueOf(ticket.getDateAchat()));
             statement.setInt(3, ticket.getEvenementId());
             statement.setInt(4, ticket.getUserId());
@@ -44,11 +43,10 @@ public class TicketService {
         return ticket;
     }
 
-    private byte[] generateQrCode(Evenement evenement, int userId) {
-        String raw = "TICKET|event=" + evenement.getId()
+    private String generateQrCode(Evenement evenement, int userId) {
+        return "TICKET|event=" + evenement.getId()
                 + "|user=" + userId
                 + "|ref=" + UUID.randomUUID();
-        return raw.getBytes(StandardCharsets.UTF_8);
     }
 
     public List<Ticket> getTicketsByEventAndUser(int eventId, int userId) throws SQLDataException {
@@ -61,7 +59,7 @@ public class TicketService {
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
                     Ticket ticket = new Ticket();
-                    ticket.setCodeQr(resultSet.getBytes("code_qr"));
+                    ticket.setCodeQr(resultSet.getString("code_qr"));
 
                     Date dateAchat = resultSet.getDate("date_achat");
                     ticket.setDateAchat(dateAchat == null ? null : dateAchat.toLocalDate());

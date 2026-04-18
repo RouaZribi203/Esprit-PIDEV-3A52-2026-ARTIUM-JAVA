@@ -2,6 +2,7 @@ package services;
 
 import entities.Musique;
 import entities.Playlist;
+import utils.ImageUrlUtils;
 import utils.MyDatabase;
 
 import java.sql.Connection;
@@ -54,7 +55,7 @@ public class PlaylistService implements Iservice<Playlist> {
                     statement.setDate(index++, Date.valueOf(dateCreation));
                 }
                 if (table.imageColumn != null) {
-                    statement.setBytes(index++, playlist.getImage());
+                    statement.setString(index++, normalizePlaylistImageForSave(playlist.getImage()));
                 }
                 if (table.userColumn != null) {
                     Integer effectiveUserId = resolveEffectiveUserId(playlist, table);
@@ -166,7 +167,7 @@ public class PlaylistService implements Iservice<Playlist> {
                     statement.setDate(index++, Date.valueOf(dateCreation));
                 }
                 if (table.imageColumn != null) {
-                    statement.setBytes(index++, playlist.getImage());
+                    statement.setString(index++, normalizePlaylistImageForSave(playlist.getImage()));
                 }
                 if (table.userColumn != null) {
                     Integer effectiveUserId = resolveEffectiveUserId(playlist, table);
@@ -226,7 +227,7 @@ public class PlaylistService implements Iservice<Playlist> {
                     }
                 }
                 if (table.imageColumn != null) {
-                    playlist.setImage(resultSet.getBytes(table.imageColumn));
+                    playlist.setImage(ImageUrlUtils.normalizeForDatabase(resultSet.getString(table.imageColumn)));
                 }
                 if (table.userColumn != null) {
                     int userId = resultSet.getInt(table.userColumn);
@@ -523,6 +524,13 @@ public class PlaylistService implements Iservice<Playlist> {
         } catch (SQLException ignored) {
             // best effort
         }
+    }
+
+    private String normalizePlaylistImageForSave(String imageValue) throws SQLDataException {
+        if (imageValue == null || imageValue.isBlank()) {
+            return null;
+        }
+        return ImageUrlUtils.persistToWebImageDirectoryAndNormalize(imageValue);
     }
 
     private static final class TableConfig {

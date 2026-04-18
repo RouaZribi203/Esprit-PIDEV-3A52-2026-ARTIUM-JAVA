@@ -14,7 +14,6 @@ import javafx.scene.layout.VBox;
 import services.TicketService;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
 import java.sql.SQLDataException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -261,11 +260,11 @@ public class EventDetailController {
 	}
 
 	private String resolveReference(Ticket ticket) {
-		if (ticket.getCodeQr() == null || ticket.getCodeQr().length == 0) {
+		if (ticket.getCodeQr() == null || ticket.getCodeQr().isBlank()) {
 			return "-";
 		}
 
-		String payload = new String(ticket.getCodeQr(), StandardCharsets.UTF_8);
+		String payload = ticket.getCodeQr();
 		int refIndex = payload.indexOf("|ref=");
 		if (refIndex >= 0 && refIndex + 5 < payload.length()) {
 			return payload.substring(refIndex + 5);
@@ -274,10 +273,10 @@ public class EventDetailController {
 	}
 
 	private String resolveQrPayload(Ticket ticket) {
-		if (ticket.getCodeQr() == null || ticket.getCodeQr().length == 0) {
+		if (ticket.getCodeQr() == null || ticket.getCodeQr().isBlank()) {
 			return "QR non disponible";
 		}
-		return new String(ticket.getCodeQr(), StandardCharsets.UTF_8);
+		return ticket.getCodeQr();
 	}
 
 	private String formatPurchaseDate(Ticket ticket) {

@@ -17,6 +17,7 @@ import javafx.scene.layout.VBox;
 import javafx.geometry.Pos;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import utils.UserSession;
 
 import java.net.URL;
 import java.sql.SQLDataException;
@@ -60,11 +61,18 @@ public class ReclamationsController implements Initializable {
 
 	private final ReclamationService reclamationService = new ReclamationService();
 	private final List<Reclamation> myAll = new ArrayList<>();
+	private Integer currentUserId;
 
 	private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.FRENCH);
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		currentUserId = UserSession.getCurrentUserId();
+		if (currentUserId == null) {
+			showError("Session", "Session utilisateur introuvable. Veuillez vous reconnecter.");
+			return;
+		}
+
 		// Types
 		if (typeCombo != null) {
 			typeCombo.setItems(FXCollections.observableArrayList(
@@ -119,8 +127,11 @@ public class ReclamationsController implements Initializable {
 			return;
 		}
 
-		// TODO: set connected user id
-		int userId = 1;
+		if (currentUserId == null) {
+			showError("Session", "Session utilisateur introuvable. Veuillez vous reconnecter.");
+			return;
+		}
+		int userId = currentUserId;
 
 		LocalDateTime now = LocalDateTime.now();
 		Reclamation r = new Reclamation();
@@ -156,10 +167,14 @@ public class ReclamationsController implements Initializable {
 
 	private void refreshMyReclamations() {
 		try {
+			if (currentUserId == null) {
+				myAll.clear();
+				renderMyCards(List.of());
+				return;
+			}
 			myAll.clear();
 			for (Reclamation r : reclamationService.getAll()) {
-				// TODO: replace 1 by connected user id
-				if (r.getUserId() != null && r.getUserId() == 1) {
+				if (r.getUserId() != null && r.getUserId().equals(currentUserId)) {
 					myAll.add(r);
 				}
 			}

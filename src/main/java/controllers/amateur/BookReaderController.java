@@ -11,8 +11,12 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ByteArrayInputStream;
+import java.net.URI;
+import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,13 +52,45 @@ public class BookReaderController {
     private int windowWidth = 900;
     private int windowHeight = 750;
 
+    public void setPdfSource(String pdfSource) throws IOException {
+        close();
+        this.document = loadPdfDocument(pdfSource);
+        this.renderer = new PDFRenderer(document);
+        this.pageCount = document.getNumberOfPages();
+        this.pageIndex = 0;
+        renderCurrentPage();
+    }
+
+    // Backward-compatible API for callers that still prepare PDF bytes explicitly.
     public void setPdfBytes(byte[] pdfBytes) throws IOException {
+        if (pdfBytes == null || pdfBytes.length == 0) {
+            throw new IOException("PDF vide");
+        }
         close();
         this.document = PDDocument.load(new ByteArrayInputStream(pdfBytes));
         this.renderer = new PDFRenderer(document);
         this.pageCount = document.getNumberOfPages();
         this.pageIndex = 0;
         renderCurrentPage();
+    }
+
+    private PDDocument loadPdfDocument(String pdfSource) throws IOException {
+        if (pdfSource == null || pdfSource.isBlank()) {
+            throw new IOException("Source PDF vide");
+        }
+        if (pdfSource.startsWith("http://") || pdfSource.startsWith("https://")) {
+            try (InputStream inputStream = new URL(pdfSource).openStream()) {
+                return PDDocument.load(inputStream.readAllBytes());
+            }
+        }
+        if (pdfSource.startsWith("file:")) {
+            try {
+                return PDDocument.load(new File(URI.create(pdfSource)));
+            } catch (Exception ex) {
+                return PDDocument.load(new File(new URL(pdfSource).getPath()));
+            }
+        }
+        return PDDocument.load(new File(pdfSource));
     }
 
     public void setStage(Stage stage) {

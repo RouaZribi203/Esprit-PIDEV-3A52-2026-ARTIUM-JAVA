@@ -15,8 +15,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.List;
 
 public class LivreFormController {
@@ -54,7 +52,7 @@ public class LivreFormController {
     private Livre originalLivre;
     private Livre resultLivre;
     private String selectedImagePath;
-    private byte[] selectedPdfBytes;
+    private String selectedPdfPath;
 
     @FXML
     public void initialize() {
@@ -88,7 +86,7 @@ public class LivreFormController {
         originalLivre = livre;
         resultLivre = null;
         selectedImagePath = null;
-        selectedPdfBytes = null;
+        selectedPdfPath = null;
         clearValidationError();
 
         if (livre == null) {
@@ -124,7 +122,7 @@ public class LivreFormController {
             couvertureLabel.setText("Aucune image");
         }
 
-        if (livre.getFichierPdf() != null && livre.getFichierPdf().length > 0) {
+        if (livre.getFichierPdf() != null && !livre.getFichierPdf().isBlank()) {
             pdfLabel.setText("(PDF actuel)");
         } else {
             pdfLabel.setText("Aucun PDF");
@@ -167,13 +165,9 @@ public class LivreFormController {
             return;
         }
 
-        try {
-            selectedPdfBytes = Files.readAllBytes(file.toPath());
-            pdfLabel.setText(file.getName());
-            clearValidationError();
-        } catch (IOException e) {
-            showValidationError("Impossible de lire le PDF selectionne.");
-        }
+        selectedPdfPath = file.getAbsolutePath();
+        pdfLabel.setText(file.getName());
+        clearValidationError();
     }
 
     @FXML
@@ -226,8 +220,8 @@ public class LivreFormController {
             hasError = true;
         }
 
-        boolean hasPdf = selectedPdfBytes != null
-                || (originalLivre != null && originalLivre.getFichierPdf() != null && originalLivre.getFichierPdf().length > 0);
+        boolean hasPdf = (selectedPdfPath != null && !selectedPdfPath.isBlank())
+                || (originalLivre != null && originalLivre.getFichierPdf() != null && !originalLivre.getFichierPdf().isBlank());
         if (!hasPdf) {
             errorMessage.append("- Un fichier PDF est obligatoire.\n");
             hasError = true;
@@ -248,8 +242,8 @@ public class LivreFormController {
         if (selectedImagePath != null && !selectedImagePath.isBlank()) {
             livre.setImage(selectedImagePath);
         }
-        if (selectedPdfBytes != null) {
-            livre.setFichierPdf(selectedPdfBytes);
+        if (selectedPdfPath != null && !selectedPdfPath.isBlank()) {
+            livre.setFichierPdf(selectedPdfPath);
         }
 
         resultLivre = livre;

@@ -5,7 +5,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 
-import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
 
 public class PaymentController {
@@ -98,8 +97,8 @@ public class PaymentController {
 	}
 
 	private String resolveReference(Ticket ticket) {
-		if (ticket.getCodeQr() != null && ticket.getCodeQr().length > 0) {
-			String payload = new String(ticket.getCodeQr(), StandardCharsets.UTF_8);
+		if (ticket.getCodeQr() != null && !ticket.getCodeQr().isBlank()) {
+			String payload = ticket.getCodeQr();
 			int refIndex = payload.indexOf("|ref=");
 			if (refIndex >= 0 && refIndex + 5 < payload.length()) {
 				return payload.substring(refIndex + 5);
@@ -110,10 +109,10 @@ public class PaymentController {
 	}
 
 	private String resolveQrPayload(Ticket ticket) {
-		if (ticket.getCodeQr() == null || ticket.getCodeQr().length == 0) {
+		if (ticket.getCodeQr() == null || ticket.getCodeQr().isBlank()) {
 			return "QR non disponible";
 		}
-		return new String(ticket.getCodeQr(), StandardCharsets.UTF_8);
+		return ticket.getCodeQr();
 	}
 
 	private String formatInteger(Integer value) {

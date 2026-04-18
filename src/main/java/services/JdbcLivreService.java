@@ -3,6 +3,7 @@ package services;
 import entities.Livre;
 import utils.ImageUrlUtils;
 import utils.MyDatabase;
+import utils.PdfUrlUtils;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -36,7 +37,7 @@ public class JdbcLivreService implements LivreService {
             insertOeuvre.setString(2, safeString(livre.getDescription()));
             insertOeuvre.setDate(3, java.sql.Date.valueOf(safeDate(livre.getDateCreation())));
             insertOeuvre.setString(4, safeImageUrl(livre.getImage()));
-            insertOeuvre.setString(5, "livre");
+            insertOeuvre.setString(5, "Livre");
             insertOeuvre.setNull(6, Types.LONGVARCHAR);
             insertOeuvre.setNull(7, Types.LONGVARCHAR);
             insertOeuvre.setInt(8, safeCollectionId(livre.getCollectionId()));
@@ -56,7 +57,7 @@ public class JdbcLivreService implements LivreService {
                 try (PreparedStatement insertLivre = getConnection().prepareStatement(insertLivreSql)) {
                     insertLivre.setString(1, safeString(livre.getCategorie()));
                     insertLivre.setDouble(2, safePrix(livre.getPrixLocation()));
-                    insertLivre.setBytes(3, safeBytes(livre.getFichierPdf()));
+                    insertLivre.setString(3, safePdfUrl(livre.getFichierPdf()));
                     insertLivre.setInt(4, generatedId);
                     insertLivre.executeUpdate();
                 }
@@ -87,7 +88,7 @@ public class JdbcLivreService implements LivreService {
 
             updateLivre.setString(1, safeString(livre.getCategorie()));
             updateLivre.setDouble(2, safePrix(livre.getPrixLocation()));
-            updateLivre.setBytes(3, safeBytes(livre.getFichierPdf()));
+            updateLivre.setString(3, safePdfUrl(livre.getFichierPdf()));
             updateLivre.setInt(4, livre.getId());
             updateLivre.executeUpdate();
         } catch (SQLException e) {
@@ -209,7 +210,7 @@ public class JdbcLivreService implements LivreService {
         livre.setAuteur(rs.getString("auteur"));
         livre.setDisponibilite(rs.getInt("disponible") == 1);
         livre.setImage(ImageUrlUtils.normalizeForDatabase(rs.getString("image")));
-        livre.setFichierPdf(rs.getBytes("fichier_pdf"));
+        livre.setFichierPdf(PdfUrlUtils.normalizeForDatabase(rs.getString("fichier_pdf")));
         return livre;
     }
 
@@ -221,12 +222,13 @@ public class JdbcLivreService implements LivreService {
         return value == null ? LocalDate.now() : value;
     }
 
-    private static byte[] safeBytes(byte[] value) {
-        return value == null ? new byte[0] : value;
-    }
 
     private static String safeImageUrl(String imageValue) throws SQLDataException {
         return ImageUrlUtils.persistToWebImageDirectoryAndNormalize(imageValue);
+    }
+
+    private static String safePdfUrl(String pdfValue) throws SQLDataException {
+        return PdfUrlUtils.persistToWebPdfDirectoryAndNormalize(pdfValue);
     }
 
     private static double safePrix(Double prix) {

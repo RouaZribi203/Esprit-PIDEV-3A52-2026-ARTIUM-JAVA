@@ -43,10 +43,12 @@ import services.LivreService;
 import utils.UserSession;
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.Path;
 import java.sql.SQLDataException;
 import java.util.ArrayList;
 import java.util.List;
@@ -116,7 +118,7 @@ public class BibliothequArtisteController {
     private Label formTitleLabel;
 
     private Livre selected;
-    private byte[] selectedPdfBytes;
+    private String selectedPdfPath;
     private String selectedImagePath;
 
     @FXML
@@ -272,13 +274,13 @@ public class BibliothequArtisteController {
 
     private void selectBookForEdit(Livre livre) {
         selected = livre;
-        selectedPdfBytes = null;
+        selectedPdfPath = null;
         selectedImagePath = null;
         titreField.setText(livre.getTitre());
         categorieField.setText(livre.getCategorie());
         prixField.setText(livre.getPrixLocation() == null ? "" : String.valueOf(livre.getPrixLocation()));
         descriptionArea.setText(livre.getDescription());
-        pdfLabel.setText(livre.getFichierPdf() != null && livre.getFichierPdf().length > 0 ? "PDF sélectionné" : "Aucun PDF");
+        pdfLabel.setText(livre.getFichierPdf() != null && !livre.getFichierPdf().isBlank() ? "PDF sélectionné" : "Aucun PDF");
         if (livre.getImage() != null && !livre.getImage().isBlank()) {
             bookImageView.setImage(toImage(livre.getImage()));
         } else {
@@ -350,7 +352,7 @@ public class BibliothequArtisteController {
         dialog.getDialogPane().getButtonTypes().add(closeButton);
 
         VBox pdfSection = new VBox(8);
-        if (livre.getFichierPdf() != null && livre.getFichierPdf().length > 0) {
+        if (livre.getFichierPdf() != null && !livre.getFichierPdf().isBlank()) {
             Label pdfTitle = new Label("Aperçu du PDF:");
             pdfTitle.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #374151;");
 
@@ -361,7 +363,8 @@ public class BibliothequArtisteController {
             pdfPreview.setSmooth(true);
 
             try {
-                PDDocument pdfDoc = PDDocument.load(new ByteArrayInputStream(livre.getFichierPdf()));
+                byte[] pdfBytes = loadPdfBytes(livre.getFichierPdf());
+                PDDocument pdfDoc = PDDocument.load(pdfBytes);
                 PDFRenderer renderer = new PDFRenderer(pdfDoc);
                 if (pdfDoc.getNumberOfPages() > 0) {
                     BufferedImage buffered = renderer.renderImageWithDPI(0, 100);
@@ -394,7 +397,7 @@ public class BibliothequArtisteController {
     }
 
     private void openPdfInNewWindow(Livre livre) {
-        if (livre.getFichierPdf() == null || livre.getFichierPdf().length == 0) {
+        if (livre.getFichierPdf() == null || livre.getFichierPdf().isBlank()) {
             showError("PDF", "Aucun fichier PDF pour ce livre.");
             return;
         }
@@ -407,7 +410,7 @@ public class BibliothequArtisteController {
                 BookReaderController controller = loader.getController();
                 
                 // This might take a while if PDFBox is rebuilding its font cache
-                controller.setPdfBytes(livre.getFichierPdf());
+                controller.setPdfSource(livre.getFichierPdf());
 
                 Platform.runLater(() -> {
                     Stage stage = new Stage();
@@ -630,8 +633,8 @@ public class BibliothequArtisteController {
             }
         }
 
-        boolean hasExistingPdf = selected != null && selected.getFichierPdf() != null && selected.getFichierPdf().length > 0;
-        if (selectedPdfBytes == null && !hasExistingPdf) {
+        boolean hasExistingPdf = selected != null && selected.getFichierPdf() != null && !selected.getFichierPdf().isBlank();
+        if ((selectedPdfPath == null || selectedPdfPath.isBlank()) && !hasExistingPdf) {
             errorMessage.append("- Le fichier PDF est obligatoire.\n");
             hasError = true;
             if (pdfLabel != null) {
@@ -658,8 +661,8 @@ public class BibliothequArtisteController {
         if (descriptionArea != null) {
             livre.setDescription(description.trim());
         }
-        if (selectedPdfBytes != null) {
-            livre.setFichierPdf(selectedPdfBytes);
+        if (selectedPdfPath != null && !selectedPdfPath.isBlank()) {
+            livre.setFichierPdf(selectedPdfPath);
         }
         if (selectedImagePath != null && !selectedImagePath.isBlank()) {
             livre.setImage(selectedImagePath);
@@ -704,20 +707,20 @@ public class BibliothequArtisteController {
         File file = fileChooser.showOpenDialog(saveButton.getScene().getWindow());
         if (file != null) {
             try {
-                selectedPdfBytes = Files.readAllBytes(file.toPath());
+                selectedPdfPath = file.getAbsolutePath();
                 if (pdfLabel != null) {
                     pdfLabel.setText(file.getName());
                     pdfLabel.setStyle("");
                 }
-            } catch (IOException e) {
-                showError("Erreur", "Impossible de lire le PDF.");
+            } catch (Exception e) {
+                showError("Erreur", "Impossible de selectionner le PDF.");
             }
         }
     }
 
     private void clearForm() {
         selected = null;
-        selectedPdfBytes = null;
+        selectedPdfPath = null;
         selectedImagePath = null;
         titreField.clear();
         categorieField.clear();
@@ -752,6 +755,26 @@ public class BibliothequArtisteController {
             return new Image(source, true);
         }
         return new Image(new File(source).toURI().toString(), true);
+    }
+
+    private byte[] loadPdfBytes(String pdfSource) throws IOException {
+        if (pdfSource == null || pdfSource.isBlank()) {
+            throw new IOException("Source PDF vide");
+        }
+        if (pdfSource.startsWith("http://") || pdfSource.startsWith("https://")) {
+            try (InputStream inputStream = new URL(pdfSource).openStream()) {
+                return inputStream.readAllBytes();
+            }
+        }
+        if (pdfSource.startsWith("file:")) {
+            try {
+                URI uri = URI.create(pdfSource);
+                return java.nio.file.Files.readAllBytes(Path.of(uri));
+            } catch (Exception ex) {
+                return java.nio.file.Files.readAllBytes(Path.of(new URL(pdfSource).getPath()));
+            }
+        }
+        return java.nio.file.Files.readAllBytes(Path.of(pdfSource));
     }
 
     private void showInfo(String title, String message) {

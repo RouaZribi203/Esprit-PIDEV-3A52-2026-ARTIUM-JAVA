@@ -26,7 +26,6 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaException;
 import javafx.scene.media.MediaPlayer;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.sql.SQLDataException;
 import java.util.Locale;
@@ -135,7 +134,7 @@ public class MusicfrontController {
 	private Integer selectedPlaylistId;
 	private Integer editingPlaylistId;
 	private java.time.LocalDate editingPlaylistDateCreation;
-	private byte[] editingPlaylistImageBytes;
+	private String editingPlaylistImagePath;
 	private static final java.util.Set<String> IMAGE_EXTENSIONS = new java.util.HashSet<>(java.util.Arrays.asList("png", "jpg", "jpeg"));
 	private static final long MAX_IMAGE_SIZE_BYTES = 5L * 1024L * 1024L;
 
@@ -229,7 +228,7 @@ public class MusicfrontController {
 
 		editingPlaylistId = playlist.getId();
 		editingPlaylistDateCreation = playlist.getDateCreation();
-		editingPlaylistImageBytes = playlist.getImage();
+		editingPlaylistImagePath = playlist.getImage();
 
 		if (playlistNameField != null) {
 			playlistNameField.setText(playlist.getNom() != null ? playlist.getNom() : "");
@@ -276,7 +275,7 @@ public class MusicfrontController {
 			playlistService.delete(playlist);
 			editingPlaylistId = null;
 			editingPlaylistDateCreation = null;
-			editingPlaylistImageBytes = null;
+			editingPlaylistImagePath = null;
 			clearPlaylistForm();
 			hidePlaylistForm();
 			hidePlaylistDetails();
@@ -336,14 +335,9 @@ public class MusicfrontController {
 		playlist.setDateCreation(editMode && editingPlaylistDateCreation != null ? editingPlaylistDateCreation : java.time.LocalDate.now());
 
 		if (!imagePath.isEmpty()) {
-			try {
-				playlist.setImage(java.nio.file.Files.readAllBytes(new File(imagePath).toPath()));
-			} catch (java.io.IOException e) {
-				setPlaylistFeedback("Impossible de lire l'image selectionnee.", false);
-				return;
-			}
+			playlist.setImage(imagePath);
 		} else if (editMode) {
-			playlist.setImage(editingPlaylistImageBytes);
+			playlist.setImage(editingPlaylistImagePath);
 		}
 
 		try {
@@ -357,7 +351,7 @@ public class MusicfrontController {
 			clearPlaylistForm();
 			editingPlaylistId = null;
 			editingPlaylistDateCreation = null;
-			editingPlaylistImageBytes = null;
+			editingPlaylistImagePath = null;
 			hidePlaylistForm();
 			refreshPlaylists();
 		} catch (SQLDataException e) {
@@ -380,7 +374,7 @@ public class MusicfrontController {
 		if (!shouldShow) {
 			editingPlaylistId = null;
 			editingPlaylistDateCreation = null;
-			editingPlaylistImageBytes = null;
+			editingPlaylistImagePath = null;
 			if (createPlaylistButton != null) {
 				createPlaylistButton.setText("Créer la playlist");
 			}
@@ -780,7 +774,7 @@ public class MusicfrontController {
 		selectedPlaylistId = null;
 		editingPlaylistId = null;
 		editingPlaylistDateCreation = null;
-		editingPlaylistImageBytes = null;
+		editingPlaylistImagePath = null;
 		if (playlistDetailSection != null) {
 			playlistDetailSection.setVisible(false);
 			playlistDetailSection.setManaged(false);
@@ -1000,12 +994,12 @@ public class MusicfrontController {
 		}
 	}
 
-	private Node buildPlaylistCoverNode(byte[] imageBytes) {
+	private Node buildPlaylistCoverNode(String imageSource) {
 		StackPane placeholder = new StackPane();
 		placeholder.setPrefSize(160, 110);
 		placeholder.setStyle("-fx-background-color: #2d333b; -fx-background-radius: 6;");
 
-		if (imageBytes == null || imageBytes.length == 0) {
+		if (imageSource == null || imageSource.isBlank()) {
 			Label noImageLabel = new Label("Playlist");
 			noImageLabel.setStyle("-fx-text-fill: #9ca3af; -fx-font-weight: bold;");
 			placeholder.getChildren().add(noImageLabel);
@@ -1013,7 +1007,12 @@ public class MusicfrontController {
 		}
 
 		try {
-			Image image = new Image(new ByteArrayInputStream(imageBytes));
+			Image image;
+			if (imageSource.startsWith("http://") || imageSource.startsWith("https://") || imageSource.startsWith("file:")) {
+				image = new Image(imageSource, true);
+			} else {
+				image = new Image(new File(imageSource).toURI().toString(), true);
+			}
 			if (image.isError()) {
 				Label noImageLabel = new Label("Playlist");
 				noImageLabel.setStyle("-fx-text-fill: #9ca3af; -fx-font-weight: bold;");

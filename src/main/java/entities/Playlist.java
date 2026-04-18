@@ -9,7 +9,7 @@ public class Playlist {
     private String nom;
     private String description;
     private LocalDate dateCreation;
-    private byte[] image;
+    private String image;
     private Integer userId;
 
     // Relation many-to-many via playlist_musique (loaded by service layer).
@@ -50,11 +50,11 @@ public class Playlist {
         this.dateCreation = dateCreation;
     }
 
-    public byte[] getImage() {
+    public String getImage() {
         return image;
     }
 
-    public void setImage(byte[] image) {
+    public void setImage(String image) {
         this.image = image;
     }
 

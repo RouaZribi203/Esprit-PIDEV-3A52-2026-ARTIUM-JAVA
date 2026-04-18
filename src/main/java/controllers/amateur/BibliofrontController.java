@@ -32,8 +32,11 @@ import services.LivreService;
 import javafx.application.Platform;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.Path;
 import java.sql.SQLDataException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -325,8 +328,8 @@ public class BibliofrontController {
             return;
         }
 
-        byte[] pdfBytes = livre.getFichierPdf();
-        if (pdfBytes == null || pdfBytes.length == 0) {
+        String pdfSource = livre.getFichierPdf();
+        if (pdfSource == null || pdfSource.isBlank()) {
             showError("PDF", "Aucun PDF pour ce livre.");
             return;
         }
@@ -339,7 +342,7 @@ public class BibliofrontController {
                 BookReaderController controller = loader.getController();
                 
                 // This might take a while if PDFBox is rebuilding its font cache
-                controller.setPdfBytes(pdfBytes);
+                controller.setPdfBytes(loadPdfBytes(pdfSource));
 
                 Platform.runLater(() -> {
                     Stage stage = new Stage();
@@ -365,6 +368,25 @@ public class BibliofrontController {
             return new Image(source, true);
         }
         return new Image(new File(source).toURI().toString(), true);
+    }
+
+    private byte[] loadPdfBytes(String pdfSource) throws IOException {
+        if (pdfSource == null || pdfSource.isBlank()) {
+            throw new IOException("Source PDF vide");
+        }
+        if (pdfSource.startsWith("http://") || pdfSource.startsWith("https://")) {
+            try (InputStream inputStream = new URL(pdfSource).openStream()) {
+                return inputStream.readAllBytes();
+            }
+        }
+        if (pdfSource.startsWith("file:")) {
+            try {
+                return java.nio.file.Files.readAllBytes(Path.of(URI.create(pdfSource)));
+            } catch (Exception ex) {
+                return java.nio.file.Files.readAllBytes(Path.of(new URL(pdfSource).getPath()));
+            }
+        }
+        return java.nio.file.Files.readAllBytes(Path.of(pdfSource));
     }
 
     private static void showError(String title, String message) {

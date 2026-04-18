@@ -10,6 +10,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.shape.Circle;
 
 import java.io.File;
+import java.text.Normalizer;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Arrays;
@@ -254,31 +255,44 @@ public class ProfileHeaderController {
     }
 
     private void updateDynamicTab() {
-        if ("Musicien".equalsIgnoreCase(specialite)) {
+        if (isMusicienSpecialite()) {
             dynamicRoute = "musiques";
             contentTabButton.setText("Musiques");
+            bibliothequeTabButton.setVisible(false);
+            bibliothequeTabButton.setManaged(false);
             musiquesTabButton.setVisible(false);
             musiquesTabButton.setManaged(false);
-        } else if ("Auteur".equalsIgnoreCase(specialite)) {
+        } else if (isAuteurSpecialite()) {
             dynamicRoute = "bibliotheque";
             contentTabButton.setText("Bibliotheque");
             bibliothequeTabButton.setVisible(false);
             bibliothequeTabButton.setManaged(false);
-            musiquesTabButton.setVisible(true);
-            musiquesTabButton.setManaged(true);
+            musiquesTabButton.setVisible(false);
+            musiquesTabButton.setManaged(false);
         } else {
             dynamicRoute = "oeuvres";
             contentTabButton.setText("Mes Oeuvres");
-            bibliothequeTabButton.setVisible(true);
-            bibliothequeTabButton.setManaged(true);
-            musiquesTabButton.setVisible(true);
-            musiquesTabButton.setManaged(true);
+            bibliothequeTabButton.setVisible(false);
+            bibliothequeTabButton.setManaged(false);
+            musiquesTabButton.setVisible(false);
+            musiquesTabButton.setManaged(false);
         }
+    }
 
-        if (!"Auteur".equalsIgnoreCase(specialite)) {
-            bibliothequeTabButton.setVisible(true);
-            bibliothequeTabButton.setManaged(true);
-        }
+    private boolean isMusicienSpecialite() {
+        String key = normalizedSpecialiteKey();
+        return key.equals("musicien") || key.equals("muscien") || key.equals("musicienne");
+    }
+
+    private boolean isAuteurSpecialite() {
+        String key = normalizedSpecialiteKey();
+        return key.equals("auteur") || key.equals("autheur") || key.equals("auteure");
+    }
+
+    private String normalizedSpecialiteKey() {
+        String raw = specialite == null ? "" : specialite.trim().toLowerCase(Locale.ROOT);
+        String noAccent = Normalizer.normalize(raw, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+        return noAccent.replaceAll("[^a-z]", "");
     }
 }
 
