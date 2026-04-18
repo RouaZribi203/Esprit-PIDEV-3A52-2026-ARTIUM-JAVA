@@ -261,7 +261,7 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
                     User user = new User();
                     user.setNom(trimOrEmpty(resultSet.getString("nom")));
                     user.setPrenom(trimOrEmpty(resultSet.getString("prenom")));
-                    user.setPhotoProfil(trimOrEmpty(resultSet.getString("photoProfil")));
+                    user.setPhotoProfil(ImageUrlUtils.normalizeForDatabase(resultSet.getString("photoProfil")));
                     user.setSpecialite(trimOrEmpty(resultSet.getString("specialite")));
                     return user;
                 }

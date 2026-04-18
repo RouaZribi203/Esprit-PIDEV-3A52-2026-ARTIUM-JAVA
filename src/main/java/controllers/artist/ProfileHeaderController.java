@@ -84,6 +84,7 @@ public class ProfileHeaderController {
 
         String specialite = user.getSpecialite() != null ? user.getSpecialite().trim() : "Artiste";
         this.specialite = specialite;
+        updateDynamicTab();
 
         String ville = user.getVille() != null ? user.getVille().trim() : "-";
         String dateInscription = user.getDateInscription() != null
@@ -113,6 +114,8 @@ public class ProfileHeaderController {
     private void applyDefaultProfile() {
         fullNameLabel.setText("Artiste");
         metaLabel.setText("Artiste  -  -  Inscrit le -");
+        specialite = "Artiste";
+        updateDynamicTab();
         clearProfileImage();
     }
 
@@ -180,7 +183,11 @@ public class ProfileHeaderController {
         } else if ("bibliotheque".equals(route)) {
             bibliothequeTabButton.getStyleClass().add("active");
         } else if ("musiques".equals(route)) {
-            musiquesTabButton.getStyleClass().add("active");
+            if ("musiques".equals(dynamicRoute)) {
+                contentTabButton.getStyleClass().add("active");
+            } else {
+                musiquesTabButton.getStyleClass().add("active");
+            }
         } else if (dynamicRoute.equals(route)) {
             contentTabButton.getStyleClass().add("active");
         } else if ("evenements".equals(route)) {
@@ -242,12 +249,18 @@ public class ProfileHeaderController {
         if ("Musicien".equalsIgnoreCase(specialite)) {
             dynamicRoute = "musiques";
             contentTabButton.setText("Musiques");
+            musiquesTabButton.setVisible(false);
+            musiquesTabButton.setManaged(false);
         } else if ("Auteur".equalsIgnoreCase(specialite)) {
             dynamicRoute = "bibliotheque";
             contentTabButton.setText("Bibliotheque");
+            musiquesTabButton.setVisible(true);
+            musiquesTabButton.setManaged(true);
         } else {
             dynamicRoute = "oeuvres";
             contentTabButton.setText("Mes Oeuvres");
+            musiquesTabButton.setVisible(true);
+            musiquesTabButton.setManaged(true);
         }
     }
 }

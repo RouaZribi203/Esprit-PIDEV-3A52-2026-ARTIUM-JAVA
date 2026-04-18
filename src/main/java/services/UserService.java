@@ -169,9 +169,9 @@ public class UserService implements Iservice<User> {
         return user;
     }
 
-    private void normalizeImageFields(User user) {
-        user.setPhotoReferencePath(ImageUrlUtils.normalizeForDatabase(user.getPhotoReferencePath()));
-        user.setPhotoProfil(ImageUrlUtils.normalizeForDatabase(user.getPhotoProfil()));
+    private void normalizeImageFields(User user) throws SQLDataException {
+        user.setPhotoReferencePath(ImageUrlUtils.persistToWebImageDirectoryAndNormalize(user.getPhotoReferencePath()));
+        user.setPhotoProfil(ImageUrlUtils.persistToWebImageDirectoryAndNormalize(user.getPhotoProfil()));
     }
 
     private String safeGetString(ResultSet rs, String column) throws SQLException {

@@ -2,6 +2,7 @@ package services;
 
 import entities.User;
 import org.mindrot.jbcrypt.BCrypt;
+import utils.ImageUrlUtils;
 import utils.MyDatabase;
 
 import java.sql.Connection;
@@ -63,6 +64,9 @@ public class JdbcUserService implements UserServicee {
         user.setEmail(rs.getString("email"));
         user.setRole(rs.getString("role"));
         user.setStatut(rs.getString("statut"));
+        user.setPhotoProfil(ImageUrlUtils.normalizeForDatabase(rs.getString("photo_profil")));
+        user.setPhotoReferencePath(ImageUrlUtils.normalizeForDatabase(rs.getString("photo_reference_path")));
+        user.setSpecialite(rs.getString("specialite"));
         return user;
     }
 }

@@ -4,6 +4,8 @@ import entities.Musique;
 import utils.ImageUrlUtils;
 import utils.MyDatabase;
 
+import java.io.IOException;
+import java.net.URI;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -16,8 +18,14 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 public class MusiqueService implements Iservice<Musique> {
+
+    private static final Path IMAGE_UPLOAD_DIR = Paths.get("C:\\xampp\\htdocs\\img");
 
     private final Connection connection;
 
@@ -34,10 +42,11 @@ public class MusiqueService implements Iservice<Musique> {
         String oeuvreInsert = "INSERT INTO oeuvre (titre, description, date_creation, image, type, collection_id, classe) VALUES (?, ?, ?, ?, ?, ?, ?)";
         String musiqueInsert = "INSERT INTO musique (id, genre, audio, updated_at) VALUES (?, ?, ?, ?)";
 
+        String imageUrl = prepareImageUrl(musique.getImage());
+
         try {
             connection.setAutoCommit(false);
             Integer effectiveCollectionId = resolveCollectionId(musique.getCollectionId());
-            String imageUrl = ImageUrlUtils.normalizeForDatabase(musique.getImage());
 
             int oeuvreId;
             try (PreparedStatement oeuvreStatement = connection.prepareStatement(oeuvreInsert, Statement.RETURN_GENERATED_KEYS)) {
@@ -157,10 +166,11 @@ public class MusiqueService implements Iservice<Musique> {
         String oeuvreUpdate = "UPDATE oeuvre SET titre = ?, description = ?, date_creation = ?, image = ?, type = ?, collection_id = ?, classe = ? WHERE id = ?";
         String musiqueUpdate = "UPDATE musique SET genre = ?, audio = ?, updated_at = ? WHERE id = ?";
 
+        String imageUrl = prepareImageUrl(musique.getImage());
+
         try {
             connection.setAutoCommit(false);
             Integer effectiveCollectionId = resolveCollectionIdForUpdate(musique.getCollectionId(), musique.getId());
-            String imageUrl = ImageUrlUtils.normalizeForDatabase(musique.getImage());
 
             try (PreparedStatement oeuvreStatement = connection.prepareStatement(oeuvreUpdate);
                  PreparedStatement musiqueStatement = connection.prepareStatement(musiqueUpdate)) {
@@ -225,6 +235,51 @@ public class MusiqueService implements Iservice<Musique> {
         }
 
         return resolveCollectionId(null);
+    }
+
+    private String prepareImageUrl(String rawImageValue) throws SQLDataException {
+        String copiedPathOrOriginal = copyImageToWebRootIfLocal(rawImageValue);
+        return ImageUrlUtils.normalizeForDatabase(copiedPathOrOriginal);
+    }
+
+    private String copyImageToWebRootIfLocal(String rawImageValue) throws SQLDataException {
+        if (rawImageValue == null || rawImageValue.isBlank()) {
+            return rawImageValue;
+        }
+
+        String trimmedValue = rawImageValue.trim();
+        if (trimmedValue.startsWith("http://") || trimmedValue.startsWith("https://")) {
+            return trimmedValue;
+        }
+
+        Path sourcePath = resolveLocalPath(trimmedValue);
+        if (sourcePath == null) {
+            return trimmedValue;
+        }
+
+        if (!Files.exists(sourcePath) || !Files.isRegularFile(sourcePath)) {
+            throw new SQLDataException("Image locale introuvable: " + sourcePath);
+        }
+
+        try {
+            Files.createDirectories(IMAGE_UPLOAD_DIR);
+            Path targetPath = IMAGE_UPLOAD_DIR.resolve(sourcePath.getFileName().toString());
+            Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+            return targetPath.toString();
+        } catch (IOException e) {
+            throw new SQLDataException("Impossible de copier l'image vers " + IMAGE_UPLOAD_DIR + ": " + e.getMessage());
+        }
+    }
+
+    private Path resolveLocalPath(String rawValue) {
+        try {
+            if (rawValue.startsWith("file:/")) {
+                return Paths.get(URI.create(rawValue));
+            }
+            return Paths.get(rawValue);
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 
     @Override

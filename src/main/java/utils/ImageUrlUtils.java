@@ -1,11 +1,20 @@
 package utils;
 
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.sql.SQLDataException;
+
 /**
  * Normalizes image values before persistence so DB stores a stable absolute URL.
  */
 public final class ImageUrlUtils {
 
     public static final String IMAGE_BASE_URL = "http://127.0.0.1/img/";
+    private static final Path IMAGE_UPLOAD_DIR = Paths.get("C:\\xampp\\htdocs\\img");
 
     private ImageUrlUtils() {
         // Utility class.
@@ -27,6 +36,55 @@ public final class ImageUrlUtils {
         }
 
         return IMAGE_BASE_URL + fileName;
+    }
+
+    public static String persistToWebImageDirectoryAndNormalize(String rawValue) throws SQLDataException {
+        String copiedPathOrOriginal = copyToWebImageDirectoryIfLocal(rawValue);
+        return normalizeForDatabase(copiedPathOrOriginal);
+    }
+
+    private static String copyToWebImageDirectoryIfLocal(String rawValue) throws SQLDataException {
+        if (rawValue == null) {
+            return null;
+        }
+
+        String candidate = rawValue.trim();
+        if (candidate.isEmpty()) {
+            return null;
+        }
+
+        if (candidate.startsWith("http://") || candidate.startsWith("https://")) {
+            return candidate;
+        }
+
+        Path sourcePath = resolveLocalPath(candidate);
+        if (sourcePath == null) {
+            return candidate;
+        }
+
+        if (!Files.exists(sourcePath) || !Files.isRegularFile(sourcePath)) {
+            throw new SQLDataException("Image locale introuvable: " + sourcePath);
+        }
+
+        try {
+            Files.createDirectories(IMAGE_UPLOAD_DIR);
+            Path targetPath = IMAGE_UPLOAD_DIR.resolve(sourcePath.getFileName().toString());
+            Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+            return targetPath.toString();
+        } catch (IOException e) {
+            throw new SQLDataException("Impossible de copier l'image vers " + IMAGE_UPLOAD_DIR + ": " + e.getMessage());
+        }
+    }
+
+    private static Path resolveLocalPath(String rawValue) {
+        try {
+            if (rawValue.startsWith("file:/")) {
+                return Paths.get(URI.create(rawValue));
+            }
+            return Paths.get(rawValue);
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 
     private static String extractFileName(String value) {
