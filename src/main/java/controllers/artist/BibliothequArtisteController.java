@@ -115,7 +115,7 @@ public class BibliothequArtisteController {
 
     private Livre selected;
     private byte[] selectedPdfBytes;
-    private byte[] selectedImageBytes;
+    private String selectedImagePath;
 
     @FXML
     public void initialize() {
@@ -200,8 +200,8 @@ public class BibliothequArtisteController {
         imageView.setFitHeight(100);
         imageView.setPreserveRatio(true);
         imageView.setSmooth(true);
-        if (livre.getImage() != null && livre.getImage().length > 0) {
-            imageView.setImage(new Image(new ByteArrayInputStream(livre.getImage())));
+        if (livre.getImage() != null && !livre.getImage().isBlank()) {
+            imageView.setImage(toImage(livre.getImage()));
         }
 
         Label title = new Label(livre.getTitre() == null ? "" : livre.getTitre());
@@ -245,14 +245,14 @@ public class BibliothequArtisteController {
     private void selectBookForEdit(Livre livre) {
         selected = livre;
         selectedPdfBytes = null;
-        selectedImageBytes = null;
+        selectedImagePath = null;
         titreField.setText(livre.getTitre());
         categorieField.setText(livre.getCategorie());
         prixField.setText(livre.getPrixLocation() == null ? "" : String.valueOf(livre.getPrixLocation()));
         descriptionArea.setText(livre.getDescription());
         pdfLabel.setText(livre.getFichierPdf() != null && livre.getFichierPdf().length > 0 ? "PDF sélectionné" : "Aucun PDF");
-        if (livre.getImage() != null && livre.getImage().length > 0) {
-            bookImageView.setImage(new Image(new ByteArrayInputStream(livre.getImage())));
+        if (livre.getImage() != null && !livre.getImage().isBlank()) {
+            bookImageView.setImage(toImage(livre.getImage()));
         } else {
             bookImageView.setImage(null);
         }
@@ -293,8 +293,8 @@ public class BibliothequArtisteController {
         bookImage.setFitWidth(300);
         bookImage.setFitHeight(180);
         bookImage.setPreserveRatio(true);
-        if (livre.getImage() != null && livre.getImage().length > 0) {
-            bookImage.setImage(new Image(new ByteArrayInputStream(livre.getImage())));
+        if (livre.getImage() != null && !livre.getImage().isBlank()) {
+            bookImage.setImage(toImage(livre.getImage()));
         }
 
         Label titleLabel = new Label(livre.getTitre());
@@ -523,12 +523,8 @@ public class BibliothequArtisteController {
         );
         File file = fileChooser.showOpenDialog(chooseImageButton.getScene().getWindow());
         if (file != null) {
-            try {
-                selectedImageBytes = Files.readAllBytes(file.toPath());
-                bookImageView.setImage(new Image(new ByteArrayInputStream(selectedImageBytes)));
-            } catch (IOException e) {
-                showError("Erreur", "Impossible de lire l'image.");
-            }
+            selectedImagePath = file.getAbsolutePath();
+            bookImageView.setImage(toImage(selectedImagePath));
         }
     }
 
@@ -637,8 +633,8 @@ public class BibliothequArtisteController {
         if (selectedPdfBytes != null) {
             livre.setFichierPdf(selectedPdfBytes);
         }
-        if (selectedImageBytes != null) {
-            livre.setImage(selectedImageBytes);
+        if (selectedImagePath != null && !selectedImagePath.isBlank()) {
+            livre.setImage(selectedImagePath);
         }
 
         try {
@@ -694,7 +690,7 @@ public class BibliothequArtisteController {
     private void clearForm() {
         selected = null;
         selectedPdfBytes = null;
-        selectedImageBytes = null;
+        selectedImagePath = null;
         titreField.clear();
         categorieField.clear();
         prixField.clear();
@@ -718,6 +714,16 @@ public class BibliothequArtisteController {
 
     private static boolean containsIgnoreCase(String value, String queryLower) {
         return value != null && value.toLowerCase().contains(queryLower);
+    }
+
+    private Image toImage(String source) {
+        if (source == null || source.isBlank()) {
+            return null;
+        }
+        if (source.startsWith("http://") || source.startsWith("https://") || source.startsWith("file:")) {
+            return new Image(source, true);
+        }
+        return new Image(new File(source).toURI().toString(), true);
     }
 
     private void showInfo(String title, String message) {

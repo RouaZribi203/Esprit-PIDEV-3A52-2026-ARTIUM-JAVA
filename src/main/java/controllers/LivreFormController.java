@@ -14,7 +14,6 @@ import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -54,7 +53,7 @@ public class LivreFormController {
 
     private Livre originalLivre;
     private Livre resultLivre;
-    private byte[] selectedImageBytes;
+    private String selectedImagePath;
     private byte[] selectedPdfBytes;
 
     @FXML
@@ -88,7 +87,7 @@ public class LivreFormController {
     public void setLivre(Livre livre) {
         originalLivre = livre;
         resultLivre = null;
-        selectedImageBytes = null;
+        selectedImagePath = null;
         selectedPdfBytes = null;
         clearValidationError();
 
@@ -117,8 +116,8 @@ public class LivreFormController {
                 .orElse(null);
         collectionComboBox.setValue(selectedCollection);
 
-        if (livre.getImage() != null && livre.getImage().length > 0) {
-            couvertureImageView.setImage(new Image(new ByteArrayInputStream(livre.getImage())));
+        if (livre.getImage() != null && !livre.getImage().isBlank()) {
+            couvertureImageView.setImage(toImage(livre.getImage()));
             couvertureLabel.setText("(Image actuelle)");
         } else {
             couvertureImageView.setImage(null);
@@ -148,11 +147,11 @@ public class LivreFormController {
         }
 
         try {
-            selectedImageBytes = Files.readAllBytes(file.toPath());
-            couvertureImageView.setImage(new Image(new ByteArrayInputStream(selectedImageBytes)));
+            selectedImagePath = file.getAbsolutePath();
+            couvertureImageView.setImage(toImage(selectedImagePath));
             couvertureLabel.setText(file.getName());
             clearValidationError();
-        } catch (IOException e) {
+        } catch (IllegalArgumentException e) {
             showValidationError("Impossible de lire l'image selectionnee.");
         }
     }
@@ -220,8 +219,8 @@ public class LivreFormController {
             hasError = true;
         }
 
-        boolean hasImage = selectedImageBytes != null
-                || (originalLivre != null && originalLivre.getImage() != null && originalLivre.getImage().length > 0);
+        boolean hasImage = selectedImagePath != null && !selectedImagePath.isBlank()
+                || (originalLivre != null && originalLivre.getImage() != null && !originalLivre.getImage().isBlank());
         if (!hasImage) {
             errorMessage.append("- Une image de couverture est obligatoire.\n");
             hasError = true;
@@ -246,8 +245,8 @@ public class LivreFormController {
         livre.setDescription(description);
         livre.setCollectionId(collectionComboBox.getValue().getId());
 
-        if (selectedImageBytes != null) {
-            livre.setImage(selectedImageBytes);
+        if (selectedImagePath != null && !selectedImagePath.isBlank()) {
+            livre.setImage(selectedImagePath);
         }
         if (selectedPdfBytes != null) {
             livre.setFichierPdf(selectedPdfBytes);
@@ -287,6 +286,16 @@ public class LivreFormController {
         validationErrorLabel.setText("");
         validationErrorLabel.setVisible(false);
         validationErrorLabel.setManaged(false);
+    }
+
+    private Image toImage(String source) {
+        if (source == null || source.isBlank()) {
+            return null;
+        }
+        if (source.startsWith("http://") || source.startsWith("https://") || source.startsWith("file:")) {
+            return new Image(source, true);
+        }
+        return new Image(new File(source).toURI().toString(), true);
     }
 }
 

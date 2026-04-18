@@ -13,7 +13,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import services.TicketService;
 
-import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLDataException;
 import java.time.format.DateTimeFormatter;
@@ -222,13 +222,18 @@ public class EventDetailController {
 		}
 	}
 
-	private void applyImage(byte[] imageBytes) {
-		if (imageBytes == null || imageBytes.length == 0) {
+	private void applyImage(String imageSource) {
+		if (imageSource == null || imageSource.isBlank()) {
 			coverImageView.setImage(null);
 			return;
 		}
 		try {
-			Image image = new Image(new ByteArrayInputStream(imageBytes));
+			Image image;
+			if (imageSource.startsWith("http://") || imageSource.startsWith("https://") || imageSource.startsWith("file:")) {
+				image = new Image(imageSource, true);
+			} else {
+				image = new Image(new File(imageSource).toURI().toString(), true);
+			}
 			coverImageView.setImage(image.isError() ? null : image);
 		} catch (Exception e) {
 			coverImageView.setImage(null);

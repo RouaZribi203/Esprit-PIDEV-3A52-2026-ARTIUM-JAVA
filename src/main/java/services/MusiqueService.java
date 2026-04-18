@@ -1,6 +1,7 @@
 package services;
 
 import entities.Musique;
+import utils.ImageUrlUtils;
 import utils.MyDatabase;
 
 import java.sql.Connection;
@@ -36,13 +37,14 @@ public class MusiqueService implements Iservice<Musique> {
         try {
             connection.setAutoCommit(false);
             Integer effectiveCollectionId = resolveCollectionId(musique.getCollectionId());
+            String imageUrl = ImageUrlUtils.normalizeForDatabase(musique.getImage());
 
             int oeuvreId;
             try (PreparedStatement oeuvreStatement = connection.prepareStatement(oeuvreInsert, Statement.RETURN_GENERATED_KEYS)) {
                 oeuvreStatement.setString(1, musique.getTitre());
                 oeuvreStatement.setString(2, musique.getDescription());
                 oeuvreStatement.setDate(3, Date.valueOf(musique.getDateCreation()));
-                oeuvreStatement.setBytes(4, musique.getImage());
+                oeuvreStatement.setString(4, imageUrl);
                 oeuvreStatement.setString(5, musique.getType() != null ? musique.getType() : "musique");
                 oeuvreStatement.setInt(6, effectiveCollectionId);
                 oeuvreStatement.setString(7, musique.getClasse() != null ? musique.getClasse() : "musique");
@@ -158,6 +160,7 @@ public class MusiqueService implements Iservice<Musique> {
         try {
             connection.setAutoCommit(false);
             Integer effectiveCollectionId = resolveCollectionIdForUpdate(musique.getCollectionId(), musique.getId());
+            String imageUrl = ImageUrlUtils.normalizeForDatabase(musique.getImage());
 
             try (PreparedStatement oeuvreStatement = connection.prepareStatement(oeuvreUpdate);
                  PreparedStatement musiqueStatement = connection.prepareStatement(musiqueUpdate)) {
@@ -167,7 +170,7 @@ public class MusiqueService implements Iservice<Musique> {
                 oeuvreStatement.setString(1, musique.getTitre());
                 oeuvreStatement.setString(2, musique.getDescription());
                 oeuvreStatement.setDate(3, Date.valueOf(dateCreation));
-                oeuvreStatement.setBytes(4, musique.getImage());
+                oeuvreStatement.setString(4, imageUrl);
                 oeuvreStatement.setString(5, musique.getType() != null ? musique.getType() : "musique");
                 oeuvreStatement.setInt(6, effectiveCollectionId);
                 oeuvreStatement.setString(7, musique.getClasse() != null ? musique.getClasse() : "musique");
@@ -248,7 +251,7 @@ public class MusiqueService implements Iservice<Musique> {
                 musique.setCollectionId(resultSet.getInt("collection_id"));
                 musique.setType(resultSet.getString("type"));
                 musique.setClasse(resultSet.getString("classe"));
-                musique.setImage(resultSet.getBytes("image"));
+                musique.setImage(ImageUrlUtils.normalizeForDatabase(resultSet.getString("image")));
                 musique.setGenre(resultSet.getString("genre"));
                 musique.setAudio(resultSet.getString("audio"));
                 Timestamp updatedAt = resultSet.getTimestamp("updated_at");

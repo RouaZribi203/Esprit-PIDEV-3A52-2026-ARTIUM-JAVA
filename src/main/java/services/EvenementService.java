@@ -1,6 +1,7 @@
 package services;
 
 import entities.Evenement;
+import utils.ImageUrlUtils;
 import utils.MyDatabase;
 
 import java.sql.Date;
@@ -121,7 +122,7 @@ public class EvenementService implements Iservice<Evenement> {
             statement.setTimestamp(4, Timestamp.valueOf(evenement.getDateFin()));
             statement.setDate(5, evenement.getDateCreation() == null ? null : Date.valueOf(evenement.getDateCreation()));
             statement.setString(6, evenement.getType());
-            statement.setBytes(7, evenement.getImageCouverture());
+            statement.setString(7, ImageUrlUtils.normalizeForDatabase(evenement.getImageCouverture()));
             statement.setString(8, evenement.getStatut());
 
             if (evenement.getCapaciteMax() == null) {
@@ -180,7 +181,7 @@ public class EvenementService implements Iservice<Evenement> {
         evenement.setDateCreation(dateCreation == null ? null : dateCreation.toLocalDate());
 
         evenement.setType(resultSet.getString("type"));
-        evenement.setImageCouverture(resultSet.getBytes("image_couverture"));
+        evenement.setImageCouverture(ImageUrlUtils.normalizeForDatabase(resultSet.getString("image_couverture")));
         evenement.setStatut(computeDynamicStatut(
                 dateDebut == null ? null : dateDebut.toLocalDateTime(),
                 dateFin == null ? null : dateFin.toLocalDateTime(),
@@ -208,7 +209,7 @@ public class EvenementService implements Iservice<Evenement> {
         statement.setTimestamp(4, Timestamp.valueOf(evenement.getDateFin()));
         statement.setDate(5, evenement.getDateCreation() == null ? null : Date.valueOf(evenement.getDateCreation()));
         statement.setString(6, evenement.getType());
-        statement.setBytes(7, evenement.getImageCouverture());
+        statement.setString(7, ImageUrlUtils.normalizeForDatabase(evenement.getImageCouverture()));
         statement.setString(8, evenement.getStatut());
 
         if (evenement.getCapaciteMax() == null) {

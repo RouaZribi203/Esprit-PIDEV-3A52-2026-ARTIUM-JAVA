@@ -26,7 +26,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.SVGPath;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -164,7 +163,7 @@ public class FeedController {
 		imageWrapper.setMaxWidth(POST_IMAGE_MAX_WIDTH + 20);
 		imageWrapper.setPrefHeight(POST_IMAGE_MAX_HEIGHT + 20);
 
-		ImageView imageView = createImageViewFromBlob(oeuvre.getImage());
+		ImageView imageView = createImageViewFromSource(oeuvre.getImage());
 		if (imageView == null) {
 			Label noImageLabel = new Label("Aucune image");
 			noImageLabel.getStyleClass().add("oeuvre-post-image-placeholder");
@@ -501,13 +500,19 @@ public class FeedController {
 		return icon;
 	}
 
-	private ImageView createImageViewFromBlob(byte[] imageBytes) {
-		if (imageBytes == null || imageBytes.length == 0) {
+	private ImageView createImageViewFromSource(String imageSource) {
+		String safeSource = safeText(imageSource);
+		if (safeSource.isEmpty()) {
 			return null;
 		}
 
 		try {
-			Image image = new Image(new ByteArrayInputStream(imageBytes));
+			Image image;
+			if (safeSource.startsWith("http://") || safeSource.startsWith("https://") || safeSource.startsWith("file:")) {
+				image = new Image(safeSource, true);
+			} else {
+				image = new Image(new File(safeSource).toURI().toString(), true);
+			}
 			if (image.isError()) {
 				return null;
 			}

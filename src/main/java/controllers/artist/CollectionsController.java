@@ -33,7 +33,7 @@ import javafx.geometry.Side;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,7 +68,7 @@ public class CollectionsController {
     private final Map<Integer, List<Oeuvre>> oeuvresByCollectionId = new HashMap<>();
 
     // TODO: brancher l'ID depuis la session utilisateur quand elle sera disponible.
-    private final int artisteId = 3;
+    private final int artisteId = 1;
 
     @FXML
     public void initialize() {
@@ -543,13 +543,18 @@ public class CollectionsController {
         button.setGraphic(createIcon(expanded ? CHEVRON_DOWN : CHEVRON_UP, 0.72, "#64748b"));
     }
 
-    private ImageView createThumbnailImageView(byte[] imageBytes) {
-        if (imageBytes == null || imageBytes.length == 0) {
+    private ImageView createThumbnailImageView(String imageSource) {
+        if (imageSource == null || imageSource.isBlank()) {
             return null;
         }
 
         try {
-            Image image = new Image(new ByteArrayInputStream(imageBytes));
+            Image image;
+            if (imageSource.startsWith("http://") || imageSource.startsWith("https://") || imageSource.startsWith("file:")) {
+                image = new Image(imageSource, true);
+            } else {
+                image = new Image(new File(imageSource).toURI().toString(), true);
+            }
             if (image.isError()) {
                 return null;
             }

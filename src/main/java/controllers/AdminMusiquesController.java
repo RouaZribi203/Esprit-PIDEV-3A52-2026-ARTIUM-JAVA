@@ -804,12 +804,12 @@ public class AdminMusiquesController {
         return "Impossible de lire ce fichier audio";
     }
 
-    private Node buildCoverNode(byte[] imageBytes) {
+    private Node buildCoverNode(String imageSource) {
         StackPane placeholder = new StackPane();
         placeholder.setPrefSize(150, 150);
         placeholder.setStyle("-fx-background-color: #2d333b; -fx-background-radius: 6;");
 
-        if (imageBytes == null || imageBytes.length == 0) {
+        if (imageSource == null || imageSource.isBlank()) {
             Label noImageLabel = new Label("No cover");
             noImageLabel.setStyle("-fx-text-fill: #9ca3af;");
             placeholder.getChildren().add(noImageLabel);
@@ -817,7 +817,12 @@ public class AdminMusiquesController {
         }
 
         try {
-            Image image = new Image(new ByteArrayInputStream(imageBytes));
+            Image image;
+            if (imageSource.startsWith("http://") || imageSource.startsWith("https://") || imageSource.startsWith("file:")) {
+                image = new Image(imageSource, true);
+            } else {
+                image = new Image(new File(imageSource).toURI().toString(), true);
+            }
             if (image.isError()) {
                 Label noImageLabel = new Label("No cover");
                 noImageLabel.setStyle("-fx-text-fill: #9ca3af;");

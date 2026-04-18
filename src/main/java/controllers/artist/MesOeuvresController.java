@@ -198,9 +198,9 @@ public class MesOeuvresController {
         selectedFileLabel.getStyleClass().add("page-subtitle-small");
         Label imageError = createPopupErrorLabel();
 
-        final byte[][] imageBytesHolder = new byte[1][];
-        imageBytesHolder[0] = editMode ? existingOeuvre.getImage() : null;
-        if (editMode && imageBytesHolder[0] != null && imageBytesHolder[0].length > 0) {
+        final String[] imagePathHolder = new String[1];
+        imagePathHolder[0] = editMode ? existingOeuvre.getImage() : null;
+        if (editMode && imagePathHolder[0] != null && !imagePathHolder[0].isBlank()) {
             selectedFileLabel.setText("Image actuelle conservée");
         }
         titreField.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -244,13 +244,9 @@ public class MesOeuvresController {
             if (file == null) {
                 return;
             }
-            try {
-                imageBytesHolder[0] = Files.readAllBytes(file.toPath());
-                selectedFileLabel.setText(file.getName());
-                clearPopupError(imageError);
-            } catch (IOException e) {
-                showPopupError(imageError, "Impossible de lire le fichier image.");
-            }
+            imagePathHolder[0] = file.getAbsolutePath();
+            selectedFileLabel.setText(file.getName());
+            clearPopupError(imageError);
         });
 
         try {
@@ -302,7 +298,7 @@ public class MesOeuvresController {
             } else {
                 clearFieldError(collectionError, collectionCombo);
             }
-            if (imageBytesHolder[0] == null || imageBytesHolder[0].length == 0) {
+            if (imagePathHolder[0] == null || imagePathHolder[0].isBlank()) {
                 showPopupError(imageError, "L'image est obligatoire.");
                 hasError = true;
             }
@@ -318,7 +314,7 @@ public class MesOeuvresController {
                 oeuvre.setTitre(titre);
                 oeuvre.setDescription(description);
                 oeuvre.setCollectionId(selectedCollection.getId());
-                oeuvre.setImage(imageBytesHolder[0]);
+                oeuvre.setImage(imagePathHolder[0]);
                 oeuvre.setDateCreation(editMode && existingOeuvre.getDateCreation() != null ? existingOeuvre.getDateCreation() : LocalDate.now());
                 oeuvre.setType(resolveTypeFromSpecialite(artistSpecialite));
                 if (editMode) {
@@ -559,7 +555,7 @@ public class MesOeuvresController {
         imageWrapper.setMaxWidth(POST_IMAGE_MAX_WIDTH + 20);
         imageWrapper.setPrefHeight(POST_IMAGE_MAX_HEIGHT + 20);
 
-        ImageView imageView = createImageViewFromBlob(oeuvre.getImage());
+        ImageView imageView = createImageViewFromSource(oeuvre.getImage());
         if (imageView == null) {
             Label noImageLabel = new Label("Aucune image");
             noImageLabel.getStyleClass().add("oeuvre-post-image-placeholder");
@@ -754,13 +750,18 @@ public class MesOeuvresController {
         }
     }
 
-    private ImageView createImageViewFromBlob(byte[] imageBytes) {
-        if (imageBytes == null || imageBytes.length == 0) {
+    private ImageView createImageViewFromSource(String imageSource) {
+        if (imageSource == null || imageSource.isBlank()) {
             return null;
         }
 
         try {
-            Image image = new Image(new ByteArrayInputStream(imageBytes));
+            Image image;
+            if (imageSource.startsWith("http://") || imageSource.startsWith("https://") || imageSource.startsWith("file:")) {
+                image = new Image(imageSource, true);
+            } else {
+                image = new Image(new File(imageSource).toURI().toString(), true);
+            }
             if (image.isError()) {
                 return null;
             }

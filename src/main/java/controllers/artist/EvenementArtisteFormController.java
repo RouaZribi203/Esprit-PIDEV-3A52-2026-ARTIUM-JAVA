@@ -13,8 +13,6 @@ import javafx.stage.Stage;
 import services.GalerieService;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.sql.SQLDataException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -72,7 +70,7 @@ public class EvenementArtisteFormController {
     private Stage dialogStage;
     private Evenement originalEvenement;
     private Evenement resultEvenement;
-    private byte[] selectedImageBytes;
+    private String selectedImagePath;
 
     @FXML
     public void initialize() {
@@ -107,7 +105,7 @@ public class EvenementArtisteFormController {
             }
             descriptionArea.clear();
             imageFileLabel.setText("Aucun fichier choisi");
-            selectedImageBytes = null;
+            selectedImagePath = null;
             return;
         }
 
@@ -121,10 +119,10 @@ public class EvenementArtisteFormController {
         capaciteField.setText(evenement.getCapaciteMax() == null ? "" : String.valueOf(evenement.getCapaciteMax()));
         prixField.setText(evenement.getPrixTicket() == null ? "" : String.valueOf(evenement.getPrixTicket()));
         descriptionArea.setText(evenement.getDescription());
-        imageFileLabel.setText(evenement.getImageCouverture() == null || evenement.getImageCouverture().length == 0
+        imageFileLabel.setText(evenement.getImageCouverture() == null || evenement.getImageCouverture().isBlank()
                 ? "Aucun fichier choisi"
                 : "Image existante" );
-        selectedImageBytes = evenement.getImageCouverture();
+        selectedImagePath = evenement.getImageCouverture();
 
         GalerieOption selected = findGalerieOption(evenement.getGalerieId());
         if (selected != null) {
@@ -149,13 +147,9 @@ public class EvenementArtisteFormController {
             return;
         }
 
-        try {
-            selectedImageBytes = Files.readAllBytes(selectedFile.toPath());
-            imageFileLabel.setText(selectedFile.getName());
-            clearValidationError();
-        } catch (IOException e) {
-            showValidationError("Impossible de lire le fichier image choisi.");
-        }
+        selectedImagePath = selectedFile.getAbsolutePath();
+        imageFileLabel.setText(selectedFile.getName());
+        clearValidationError();
     }
 
     @FXML
@@ -241,7 +235,7 @@ public class EvenementArtisteFormController {
         evenement.setCapaciteMax(capacite);
         evenement.setPrixTicket(prixTicket);
         evenement.setGalerieId(selectedGalerie.id());
-        evenement.setImageCouverture(selectedImageBytes);
+        evenement.setImageCouverture(selectedImagePath);
         evenement.setStatut(computeStatut(dateDebutDateTime, dateFinDateTime));
 
         resultEvenement = evenement;

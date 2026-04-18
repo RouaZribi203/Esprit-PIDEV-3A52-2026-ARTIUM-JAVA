@@ -6,7 +6,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
-import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.time.format.DateTimeFormatter;
 
 public class EvenementArtisteCardController {
@@ -74,14 +74,19 @@ public class EvenementArtisteCardController {
         return "Statut: " + statut + "  |  Places: " + capacite;
     }
 
-    private void applyImage(byte[] imageBytes) {
-        if (imageBytes == null || imageBytes.length == 0) {
+    private void applyImage(String imageSource) {
+        if (imageSource == null || imageSource.isBlank()) {
             coverImageView.setImage(null);
             return;
         }
 
         try {
-            Image image = new Image(new ByteArrayInputStream(imageBytes));
+            Image image;
+            if (imageSource.startsWith("http://") || imageSource.startsWith("https://") || imageSource.startsWith("file:")) {
+                image = new Image(imageSource, true);
+            } else {
+                image = new Image(new File(imageSource).toURI().toString(), true);
+            }
             if (image.isError()) {
                 coverImageView.setImage(null);
                 return;

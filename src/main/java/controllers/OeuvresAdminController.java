@@ -378,9 +378,9 @@ public class OeuvresAdminController {
         selectedFileLabel.getStyleClass().add("page-subtitle-small");
         Label imageError = createPopupErrorLabel();
 
-        final byte[][] imageBytesHolder = new byte[1][];
-        imageBytesHolder[0] = editMode ? existingOeuvre.getImage() : null;
-        if (editMode && imageBytesHolder[0] != null && imageBytesHolder[0].length > 0) {
+        final String[] imagePathHolder = new String[1];
+        imagePathHolder[0] = editMode ? existingOeuvre.getImage() : null;
+        if (editMode && imagePathHolder[0] != null && !imagePathHolder[0].isBlank()) {
             selectedFileLabel.setText("Image actuelle conservée");
         }
 
@@ -421,13 +421,9 @@ public class OeuvresAdminController {
             if (file == null) {
                 return;
             }
-            try {
-                imageBytesHolder[0] = Files.readAllBytes(file.toPath());
-                selectedFileLabel.setText(file.getName());
-                clearPopupError(imageError);
-            } catch (IOException e) {
-                showPopupError(imageError, "Impossible de lire le fichier image.");
-            }
+            imagePathHolder[0] = file.getAbsolutePath();
+            selectedFileLabel.setText(file.getName());
+            clearPopupError(imageError);
         });
 
         try {
@@ -504,7 +500,7 @@ public class OeuvresAdminController {
             } else {
                 clearFieldError(collectionError, collectionCombo);
             }
-            if (imageBytesHolder[0] == null || imageBytesHolder[0].length == 0) {
+            if (imagePathHolder[0] == null || imagePathHolder[0].isBlank()) {
                 showPopupError(imageError, "L'image est obligatoire.");
                 hasError = true;
             }
@@ -520,7 +516,7 @@ public class OeuvresAdminController {
                 oeuvre.setTitre(titre);
                 oeuvre.setDescription(description);
                 oeuvre.setCollectionId(selectedCollection.getId());
-                oeuvre.setImage(imageBytesHolder[0]);
+                oeuvre.setImage(imagePathHolder[0]);
                 oeuvre.setDateCreation(editMode && existingOeuvre.getDateCreation() != null ? existingOeuvre.getDateCreation() : LocalDate.now());
                 if (editMode) {
                     oeuvreService.update(oeuvre);

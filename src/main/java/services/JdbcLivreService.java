@@ -1,6 +1,7 @@
 package services;
 
 import entities.Livre;
+import utils.ImageUrlUtils;
 import utils.MyDatabase;
 
 import java.sql.Connection;
@@ -34,7 +35,7 @@ public class JdbcLivreService implements LivreService {
             insertOeuvre.setString(1, livre.getTitre());
             insertOeuvre.setString(2, safeString(livre.getDescription()));
             insertOeuvre.setDate(3, java.sql.Date.valueOf(safeDate(livre.getDateCreation())));
-            insertOeuvre.setBytes(4, safeBytes(livre.getImage()));
+            insertOeuvre.setString(4, safeImageUrl(livre.getImage()));
             insertOeuvre.setString(5, "livre");
             insertOeuvre.setNull(6, Types.LONGVARCHAR);
             insertOeuvre.setNull(7, Types.LONGVARCHAR);
@@ -80,7 +81,7 @@ public class JdbcLivreService implements LivreService {
             updateOeuvre.setString(2, safeString(livre.getDescription()));
             updateOeuvre.setDate(3, java.sql.Date.valueOf(safeDate(livre.getDateCreation())));
             updateOeuvre.setInt(4, safeCollectionId(livre.getCollectionId()));
-            updateOeuvre.setBytes(5, safeBytes(livre.getImage()));
+            updateOeuvre.setString(5, safeImageUrl(livre.getImage()));
             updateOeuvre.setInt(6, livre.getId());
             updateOeuvre.executeUpdate();
 
@@ -207,7 +208,7 @@ public class JdbcLivreService implements LivreService {
         livre.setPrixLocation(rs.getDouble("prix_location"));
         livre.setAuteur(rs.getString("auteur"));
         livre.setDisponibilite(rs.getInt("disponible") == 1);
-        livre.setImage(rs.getBytes("image"));
+        livre.setImage(ImageUrlUtils.normalizeForDatabase(rs.getString("image")));
         livre.setFichierPdf(rs.getBytes("fichier_pdf"));
         return livre;
     }
@@ -222,6 +223,10 @@ public class JdbcLivreService implements LivreService {
 
     private static byte[] safeBytes(byte[] value) {
         return value == null ? new byte[0] : value;
+    }
+
+    private static String safeImageUrl(String imageValue) {
+        return ImageUrlUtils.normalizeForDatabase(imageValue);
     }
 
     private static double safePrix(Double prix) {

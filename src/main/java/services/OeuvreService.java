@@ -2,6 +2,7 @@ package services;
 
 import entities.User;
 import entities.Oeuvre;
+import utils.ImageUrlUtils;
 import utils.MyDatabase;
 
 import java.sql.Connection;
@@ -37,7 +38,8 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
         if (collectionId == null) {
             throw new SQLDataException("La collection est obligatoire.");
         }
-        if (t.getImage() == null || t.getImage().length == 0) {
+        String imageUrl = ImageUrlUtils.normalizeForDatabase(t.getImage());
+        if (imageUrl == null || imageUrl.isBlank()) {
             throw new SQLDataException("L'image est obligatoire.");
         }
 
@@ -49,7 +51,7 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
             preparedStatement.setString(1, titre);
             preparedStatement.setString(2, description);
             preparedStatement.setDate(3, Date.valueOf(dateCreation));
-            preparedStatement.setBytes(4, t.getImage());
+            preparedStatement.setString(4, imageUrl);
             preparedStatement.setString(5, type);
             preparedStatement.setInt(6, collectionId);
             preparedStatement.setString(7, "oeuvre");
@@ -137,7 +139,8 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
         if (collectionId == null) {
             throw new SQLDataException("La collection est obligatoire.");
         }
-        if (t.getImage() == null || t.getImage().length == 0) {
+        String imageUrl = ImageUrlUtils.normalizeForDatabase(t.getImage());
+        if (imageUrl == null || imageUrl.isBlank()) {
             throw new SQLDataException("L'image est obligatoire.");
         }
 
@@ -149,7 +152,7 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
             preparedStatement.setString(1, titre);
             preparedStatement.setString(2, description);
             preparedStatement.setDate(3, Date.valueOf(dateCreation));
-            preparedStatement.setBytes(4, t.getImage());
+            preparedStatement.setString(4, imageUrl);
             preparedStatement.setString(5, type);
             preparedStatement.setInt(6, collectionId);
             preparedStatement.setString(7, "oeuvre");
@@ -285,7 +288,7 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
             oeuvre.setDateCreation(sqlDate.toLocalDate());
         }
 
-        oeuvre.setImage(resultSet.getBytes("image"));
+        oeuvre.setImage(ImageUrlUtils.normalizeForDatabase(resultSet.getString("image")));
         oeuvre.setType(resultSet.getString("type"));
 
         int collectionId = resultSet.getInt("collection_id");

@@ -150,8 +150,8 @@ public class OeuvreCollectionService implements services.Iservice<CollectionOeuv
         return null;
     }
 
-    public List<byte[]> getOeuvreImagesByCollectionId(int collectionId, int limit) throws SQLException {
-        List<byte[]> images = new ArrayList<>();
+    public List<String> getOeuvreImagesByCollectionId(int collectionId, int limit) throws SQLException {
+        List<String> images = new ArrayList<>();
         int safeLimit = limit <= 0 ? 6 : limit;
         String sql = "SELECT image FROM oeuvre WHERE collection_id = ? AND image IS NOT NULL ORDER BY id DESC LIMIT ?";
 
@@ -160,8 +160,8 @@ public class OeuvreCollectionService implements services.Iservice<CollectionOeuv
             preparedStatement.setInt(2, safeLimit);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
-                    byte[] image = resultSet.getBytes("image");
-                    if (image != null && image.length > 0) {
+                    String image = resultSet.getString("image");
+                    if (image != null && !image.isBlank()) {
                         images.add(image);
                     }
                 }

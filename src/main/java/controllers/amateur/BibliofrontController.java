@@ -30,7 +30,7 @@ import services.JdbcLocationLivreService;
 import services.LivreService;
 
 import javafx.application.Platform;
-import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLDataException;
 import java.util.ArrayList;
@@ -108,8 +108,8 @@ public class BibliofrontController {
         imageView.setFitWidth(160);
         imageView.setFitHeight(220);
         imageView.setPreserveRatio(true);
-        if (livre.getImage() != null && livre.getImage().length > 0) {
-            imageView.setImage(new Image(new ByteArrayInputStream(livre.getImage())));
+        if (livre.getImage() != null && !livre.getImage().isBlank()) {
+            imageView.setImage(toImage(livre.getImage()));
         }
 
         Label title = new Label(livre.getTitre() == null ? "" : livre.getTitre());
@@ -208,8 +208,8 @@ public class BibliofrontController {
         imageView.setFitWidth(160);
         imageView.setFitHeight(220);
         imageView.setPreserveRatio(true);
-        if (livre.getImage() != null && livre.getImage().length > 0) {
-            imageView.setImage(new Image(new ByteArrayInputStream(livre.getImage())));
+        if (livre.getImage() != null && !livre.getImage().isBlank()) {
+            imageView.setImage(toImage(livre.getImage()));
         }
 
         javafx.scene.control.Label title = new javafx.scene.control.Label(livre.getTitre() == null ? "" : livre.getTitre());
@@ -355,6 +355,16 @@ public class BibliofrontController {
                 Platform.runLater(() -> showError("PDF", "Impossible d'ouvrir le lecteur."));
             }
         });
+    }
+
+    private Image toImage(String source) {
+        if (source == null || source.isBlank()) {
+            return null;
+        }
+        if (source.startsWith("http://") || source.startsWith("https://") || source.startsWith("file:")) {
+            return new Image(source, true);
+        }
+        return new Image(new File(source).toURI().toString(), true);
     }
 
     private static void showError(String title, String message) {

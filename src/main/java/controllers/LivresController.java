@@ -27,7 +27,7 @@ import services.JdbcCollectionService;
 import services.JdbcLivreService;
 import services.LivreService;
 
-import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLDataException;
 import java.util.ArrayList;
@@ -184,8 +184,8 @@ public class LivresController {
         imageView.setFitWidth(160);
         imageView.setFitHeight(220);
         imageView.setPreserveRatio(true);
-        if (livre.getImage() != null && livre.getImage().length > 0) {
-            imageView.setImage(new Image(new ByteArrayInputStream(livre.getImage())));
+        if (livre.getImage() != null && !livre.getImage().isBlank()) {
+            imageView.setImage(toImage(livre.getImage()));
         }
 
         StackPane imageContainer = new StackPane(imageView);
@@ -246,6 +246,16 @@ public class LivresController {
                 }
             }
         });
+    }
+
+    private Image toImage(String source) {
+        if (source == null || source.isBlank()) {
+            return null;
+        }
+        if (source.startsWith("http://") || source.startsWith("https://") || source.startsWith("file:")) {
+            return new Image(source, true);
+        }
+        return new Image(new File(source).toURI().toString(), true);
     }
 
     private static boolean contains(String value, String queryLower) {

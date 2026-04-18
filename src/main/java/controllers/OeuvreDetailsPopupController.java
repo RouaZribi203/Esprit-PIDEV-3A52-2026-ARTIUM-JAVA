@@ -99,7 +99,7 @@ public class OeuvreDetailsPopupController {
         avatarLetterLabel.setText(getInitialLetter(artistName));
         tagsLabel.setText((toHashtag(oeuvre.getType()) + " " + toHashtag(collectionTitle)).trim());
 
-        ImageView postImage = createImageViewFromBlob(oeuvre.getImage());
+        ImageView postImage = createPostImageView(oeuvre.getImage());
         boolean hasImage = postImage != null;
         imageView.setVisible(hasImage);
         imageView.setManaged(hasImage);
@@ -276,13 +276,18 @@ public class OeuvreDetailsPopupController {
         return COMMENT_DATE_FORMATTER.format(dateCommentaire);
     }
 
-    private ImageView createImageViewFromBlob(byte[] imageBytes) {
-        if (imageBytes == null || imageBytes.length == 0) {
+    private ImageView createPostImageView(String imageSource) {
+        if (imageSource == null || imageSource.isBlank()) {
             return null;
         }
 
         try {
-            Image image = new Image(new ByteArrayInputStream(imageBytes));
+            Image image;
+            if (imageSource.startsWith("http://") || imageSource.startsWith("https://") || imageSource.startsWith("file:")) {
+                image = new Image(imageSource, true);
+            } else {
+                image = new Image(new File(imageSource).toURI().toString(), true);
+            }
             if (image.isError()) {
                 return null;
             }

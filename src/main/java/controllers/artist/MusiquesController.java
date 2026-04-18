@@ -152,7 +152,7 @@ public class MusiquesController {
     private static final long MAX_IMAGE_SIZE_BYTES = 5L * 1024L * 1024L;
     private Integer editingMusiqueId;
     private LocalDate editingDateCreation;
-    private byte[] editingImageBytes;
+    private String editingImagePath;
     private String editingAudioPath;
     private Dialog<Void> formDialog;
 
@@ -354,23 +354,13 @@ public class MusiquesController {
         musique.setCollectionId(collectionChoice != null && collectionChoice.getId() > 0 ? collectionChoice.getId() : null);
         musique.setAudio(resolvedAudioPath);
 
-        byte[] imageBytes = editingImageBytes;
-
-        if (!imagePath.isEmpty()) {
-            try {
-                imageBytes = Files.readAllBytes(new File(imagePath).toPath());
-            } catch (IOException e) {
-                setFeedback("Impossible de lire l'image selectionnee.", false);
-                return;
-            }
-        }
-
-        if (imageBytes == null || imageBytes.length == 0) {
+        String imageSource = !imagePath.isEmpty() ? imagePath : editingImagePath;
+        if (imageSource == null || imageSource.isBlank()) {
             setFeedback("Image de couverture obligatoire. Veuillez choisir un fichier JPEG/PNG (max 5 MB).", false);
             return;
         }
 
-        musique.setImage(imageBytes);
+        musique.setImage(imageSource);
 
         try {
             if (editMode) {
@@ -402,7 +392,7 @@ public class MusiquesController {
     private void resetEditMode() {
         editingMusiqueId = null;
         editingDateCreation = null;
-        editingImageBytes = null;
+        editingImagePath = null;
         editingAudioPath = null;
         updateFormTexts();
     }
@@ -415,7 +405,7 @@ public class MusiquesController {
 
         editingMusiqueId = musique.getId();
         editingDateCreation = musique.getDateCreation();
-        editingImageBytes = musique.getImage();
+        editingImagePath = musique.getImage();
         editingAudioPath = musique.getAudio();
 
         titreField.setText(musique.getTitre() != null ? musique.getTitre() : "");
@@ -849,12 +839,12 @@ public class MusiquesController {
         return card;
     }
 
-    private Node buildCoverNode(byte[] imageBytes) {
+    private Node buildCoverNode(String imageSource) {
         StackPane placeholder = new StackPane();
         placeholder.setPrefSize(150, 150);
         placeholder.getStyleClass().add("music-cover-placeholder");
 
-        if (imageBytes == null || imageBytes.length == 0) {
+        if (imageSource == null || imageSource.isBlank()) {
             Label noImageLabel = new Label("No cover");
             noImageLabel.getStyleClass().add("music-cover-placeholder-text");
             placeholder.getChildren().add(noImageLabel);
@@ -862,7 +852,12 @@ public class MusiquesController {
         }
 
         try {
-            Image image = new Image(new ByteArrayInputStream(imageBytes));
+            Image image;
+            if (imageSource.startsWith("http://") || imageSource.startsWith("https://") || imageSource.startsWith("file:")) {
+                image = new Image(imageSource, true);
+            } else {
+                image = new Image(new File(imageSource).toURI().toString(), true);
+            }
             if (image.isError()) {
                 Label noImageLabel = new Label("No cover");
                 noImageLabel.getStyleClass().add("music-cover-placeholder-text");

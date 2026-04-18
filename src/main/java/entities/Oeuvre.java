@@ -9,7 +9,7 @@ public class Oeuvre {
     private String titre;
     private String description;
     private LocalDate dateCreation;
-    private byte[] image;
+    private String image;
     private String type;
     private String embedding;
     private String imageEmbedding;
@@ -57,11 +57,11 @@ public class Oeuvre {
         this.dateCreation = dateCreation;
     }
 
-    public byte[] getImage() {
+    public String getImage() {
         return image;
     }
 
-    public void setImage(byte[] image) {
+    public void setImage(String image) {
         this.image = image;
     }
 
