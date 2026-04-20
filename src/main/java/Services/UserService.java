@@ -14,9 +14,13 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Base64;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import java.util.regex.Pattern;
@@ -30,18 +34,27 @@ public class UserService implements Iservice<User> {
     private static final String[] ID_COLUMNS = {"id", "id_user"};
     private static final String[] SPECIALITE_COLUMNS = {"specialite", "specailite"};
     private static final String[] CENTRE_INTERET_COLUMNS = {"centre_interet", "centre_iteret"};
+    private static final String[] RESET_TOKEN_COLUMNS = {"reset_token", "resetToken"};
+    private static final String[] RESET_TOKEN_EXPIRES_COLUMNS = {"reset_token_expires", "resetTokenExpires"};
+    private static final Duration RESET_TOKEN_TTL = Duration.ofMinutes(15);
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
     private final Connection connection;
     private final String idColumn;
     private final String specialiteColumn;
     private final String centreInteretColumn;
+    private final String resetTokenColumn;
+    private final String resetTokenExpiresColumn;
+    private final Map<String, PendingReset> pendingResetCodes = new ConcurrentHashMap<>();
+    private final SecureRandom secureRandom = new SecureRandom();
 
     public UserService() {
         this.connection = MyDatabase.getInstance().getConnection();
         this.idColumn = resolveExistingColumn(ID_COLUMNS);
         this.specialiteColumn = resolveExistingColumn(SPECIALITE_COLUMNS);
         this.centreInteretColumn = resolveExistingColumn(CENTRE_INTERET_COLUMNS);
+        this.resetTokenColumn = resolveExistingColumn(RESET_TOKEN_COLUMNS);
+        this.resetTokenExpiresColumn = resolveExistingColumn(RESET_TOKEN_EXPIRES_COLUMNS);
     }
 
     @Override
@@ -117,6 +130,72 @@ public class UserService implements Iservice<User> {
         if (isBlank(newPassword) || newPassword.length() < 8) {
             throw new SQLDataException("Le mot de passe doit contenir au moins 8 caractères.");
         }
+        updatePasswordByEmail(email, newPassword);
+    }
+
+    public void requestPasswordResetCode(String email) throws SQLDataException {
+        if (isBlank(email) || !EMAIL_PATTERN.matcher(email.trim()).matches()) {
+            throw new SQLDataException("Veuillez saisir une adresse e-mail valide.");
+        }
+
+        ensureConnection();
+        User user = findUserByEmail(email);
+        if (user == null) {
+            throw new SQLDataException("Aucun compte trouvé avec cette adresse e-mail.");
+        }
+
+        String normalizedEmail = normalizeEmail(email);
+        String resetCode = generateResetCode();
+        LocalDateTime expiresAt = LocalDateTime.now().plus(RESET_TOKEN_TTL);
+        PendingReset pendingReset = new PendingReset(resetCode, expiresAt);
+
+        storeResetCode(normalizedEmail, pendingReset);
+
+        try {
+            EmailService.sendPasswordResetCode(user.getEmail(), resetCode, expiresAt);
+        } catch (RuntimeException e) {
+            clearResetCode(normalizedEmail);
+            throw new SQLDataException(e.getMessage());
+        }
+    }
+
+    public void resetPasswordWithCode(String email, String resetCode, String newPassword) throws SQLDataException {
+        if (isBlank(email) || !EMAIL_PATTERN.matcher(email.trim()).matches()) {
+            throw new SQLDataException("Veuillez saisir une adresse e-mail valide.");
+        }
+        if (isBlank(resetCode)) {
+            throw new SQLDataException("Veuillez saisir le code reçu par e-mail.");
+        }
+        if (isBlank(newPassword) || newPassword.length() < 8) {
+            throw new SQLDataException("Le mot de passe doit contenir au moins 8 caractères.");
+        }
+
+        ensureConnection();
+        String normalizedEmail = normalizeEmail(email);
+        PendingReset pendingReset = loadResetCode(normalizedEmail);
+        if (pendingReset == null) {
+            throw new SQLDataException("Aucun code de réinitialisation valide trouvé. Demandez un nouveau code.");
+        }
+        if (pendingReset.isExpired()) {
+            clearResetCode(normalizedEmail);
+            throw new SQLDataException("Le code de réinitialisation a expiré. Demandez un nouveau code.");
+        }
+        if (!pendingReset.code.equals(resetCode.trim())) {
+            throw new SQLDataException("Le code de réinitialisation est incorrect.");
+        }
+
+        updatePasswordByEmail(email, newPassword);
+        clearResetCode(normalizedEmail);
+    }
+
+    private String getInsertUserSql() {
+        return "INSERT INTO `user` " +
+                "(`nom`, `prenom`, `date_naissance`, `email`, `mdp`, `role`, `statut`, `date_inscription`, " +
+                "`num_tel`, `ville`, `biographie`, `" + specialiteColumn + "`, `" + centreInteretColumn + "`, `photo_reference_path`, `photo_profil`) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    }
+
+    private void updatePasswordByEmail(String email, String newPassword) throws SQLDataException {
         ensureConnection();
 
         String updateSql = "UPDATE `user` SET `mdp` = ? WHERE LOWER(TRIM(`email`)) = LOWER(TRIM(?))";
@@ -134,11 +213,100 @@ public class UserService implements Iservice<User> {
         }
     }
 
-    private String getInsertUserSql() {
-        return "INSERT INTO `user` " +
-                "(`nom`, `prenom`, `date_naissance`, `email`, `mdp`, `role`, `statut`, `date_inscription`, " +
-                "`num_tel`, `ville`, `biographie`, `" + specialiteColumn + "`, `" + centreInteretColumn + "`, `photo_reference_path`, `photo_profil`) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private User findUserByEmail(String email) throws SQLDataException {
+        String sql = "SELECT * FROM `user` WHERE LOWER(TRIM(`email`)) = LOWER(TRIM(?)) LIMIT 1";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, email.trim());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapUser(rs);
+                }
+            }
+        } catch (SQLException e) {
+            throw new SQLDataException("Recherche utilisateur impossible: " + e.getMessage());
+        }
+        return null;
+    }
+
+    private void storeResetCode(String normalizedEmail, PendingReset pendingReset) throws SQLDataException {
+        if (hasResetTokenColumns()) {
+            String sql = "UPDATE `user` SET `" + resetTokenColumn + "` = ?, `" + resetTokenExpiresColumn + "` = ? " +
+                    "WHERE LOWER(TRIM(`email`)) = LOWER(TRIM(?))";
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setString(1, pendingReset.code);
+                ps.setObject(2, java.sql.Timestamp.valueOf(pendingReset.expiresAt));
+                ps.setString(3, normalizedEmail);
+                int affectedRows = ps.executeUpdate();
+                if (affectedRows == 0) {
+                    throw new SQLDataException("Aucun compte trouvé avec cette adresse e-mail.");
+                }
+                return;
+            } catch (SQLException e) {
+                throw new SQLDataException("Sauvegarde du code impossible: " + e.getMessage());
+            }
+        }
+
+        pendingResetCodes.put(normalizedEmail, pendingReset);
+    }
+
+    private PendingReset loadResetCode(String normalizedEmail) throws SQLDataException {
+        PendingReset cached = pendingResetCodes.get(normalizedEmail);
+        if (cached != null) {
+            return cached;
+        }
+
+        if (!hasResetTokenColumns()) {
+            return null;
+        }
+
+        String sql = "SELECT `" + resetTokenColumn + "`, `" + resetTokenExpiresColumn + "` FROM `user` " +
+                "WHERE LOWER(TRIM(`email`)) = LOWER(TRIM(?)) LIMIT 1";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, normalizedEmail);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    return null;
+                }
+                String storedCode = rs.getString(1);
+                java.sql.Timestamp expiresAt = rs.getTimestamp(2);
+                if (isBlank(storedCode) || expiresAt == null) {
+                    return null;
+                }
+                return new PendingReset(storedCode, expiresAt.toLocalDateTime());
+            }
+        } catch (SQLException e) {
+            throw new SQLDataException("Lecture du code impossible: " + e.getMessage());
+        }
+    }
+
+    private void clearResetCode(String normalizedEmail) throws SQLDataException {
+        pendingResetCodes.remove(normalizedEmail);
+
+        if (!hasResetTokenColumns()) {
+            return;
+        }
+
+        String sql = "UPDATE `user` SET `" + resetTokenColumn + "` = NULL, `" + resetTokenExpiresColumn + "` = NULL " +
+                "WHERE LOWER(TRIM(`email`)) = LOWER(TRIM(?))";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, normalizedEmail);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new SQLDataException("Suppression du code impossible: " + e.getMessage());
+        }
+    }
+
+    private boolean hasResetTokenColumns() {
+        return resetTokenColumn != null && resetTokenExpiresColumn != null;
+    }
+
+    private String generateResetCode() {
+        int code = secureRandom.nextInt(1_000_000);
+        return String.format("%06d", code);
+    }
+
+    private String normalizeEmail(String email) {
+        return email == null ? "" : email.trim().toLowerCase();
     }
 
     private User mapUser(ResultSet rs) throws SQLException {
@@ -458,6 +626,20 @@ public class UserService implements Iservice<User> {
     private void ensureIdColumn() throws SQLDataException {
         if (idColumn == null) {
             throw new SQLDataException("Colonne identifiant utilisateur introuvable (id/id_user).");
+        }
+    }
+
+    private static final class PendingReset {
+        private final String code;
+        private final LocalDateTime expiresAt;
+
+        private PendingReset(String code, LocalDateTime expiresAt) {
+            this.code = code;
+            this.expiresAt = expiresAt;
+        }
+
+        private boolean isExpired() {
+            return LocalDateTime.now().isAfter(expiresAt);
         }
     }
 }

@@ -69,7 +69,7 @@
 						</VBox>
 
 						<HBox spacing="10" styleClass="auth-stepper">
-							<Label fx:id="stepOneBadge" text="1" styleClass="auth-step-badge active"/>
+							<Label fx:id="stepOneBadge" text="1" styleClass="auth-step-badge"/>
 							<Label fx:id="stepTwoBadge" text="2" styleClass="auth-step-badge"/>
 							<Label fx:id="stepThreeBadge" text="3" styleClass="auth-step-badge"/>
 						</HBox>

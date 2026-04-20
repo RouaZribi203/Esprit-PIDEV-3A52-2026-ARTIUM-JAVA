@@ -17,6 +17,9 @@ public class ForgotPasswordController {
     private TextField emailField;
 
     @FXML
+    private TextField resetCodeField;
+
+    @FXML
     private PasswordField newPasswordField;
 
     @FXML
@@ -28,14 +31,37 @@ public class ForgotPasswordController {
     private final UserService userService = new UserService();
 
     @FXML
+    private void onSendResetCode() {
+        clearMessage();
+
+        String email = emailField.getText() == null ? "" : emailField.getText().trim();
+        if (email.isEmpty()) {
+            setMessage("Veuillez saisir votre adresse e-mail.", true);
+            return;
+        }
+        if (!EMAIL_PATTERN.matcher(email).matches()) {
+            setMessage("Veuillez saisir une adresse e-mail valide.", true);
+            return;
+        }
+
+        try {
+            userService.requestPasswordResetCode(email);
+            setMessage("Un code de réinitialisation a été envoyé par e-mail.", false);
+        } catch (SQLDataException e) {
+            setMessage(e.getMessage(), true);
+        }
+    }
+
+    @FXML
     private void onResetPassword() {
         clearMessage();
 
         String email = emailField.getText() == null ? "" : emailField.getText().trim();
+        String resetCode = resetCodeField.getText() == null ? "" : resetCodeField.getText().trim();
         String newPassword = newPasswordField.getText() == null ? "" : newPasswordField.getText();
         String confirmPassword = confirmPasswordField.getText() == null ? "" : confirmPasswordField.getText();
 
-        if (email.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()) {
+        if (email.isEmpty() || resetCode.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()) {
             setMessage("Veuillez remplir tous les champs.", true);
             return;
         }
@@ -53,8 +79,9 @@ public class ForgotPasswordController {
         }
 
         try {
-            userService.resetPasswordByEmail(email, newPassword);
+            userService.resetPasswordWithCode(email, resetCode, newPassword);
             setMessage("Mot de passe mis a jour. Vous pouvez maintenant vous connecter.", false);
+            resetCodeField.clear();
             newPasswordField.clear();
             confirmPasswordField.clear();
         } catch (SQLDataException e) {
