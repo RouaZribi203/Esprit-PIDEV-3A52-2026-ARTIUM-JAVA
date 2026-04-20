@@ -37,6 +37,7 @@ public class NavbarAmateurController {
 
     private Consumer<String> navigationHandler;
     private Consumer<Boolean> themeHandler;
+    private String currentRoute = "feed";
 
     public void setNavigationHandler(Consumer<String> navigationHandler) {
         this.navigationHandler = navigationHandler;
@@ -62,42 +63,43 @@ public class NavbarAmateurController {
     }
 
     public void setActiveRoute(String route) {
+        currentRoute = route == null ? "feed" : route;
         oeuvresButton.getStyleClass().remove("active");
         bibliothequeButton.getStyleClass().remove("active");
         musiqueButton.getStyleClass().remove("active");
 
-        if (route.startsWith("feed")) {
+        if (currentRoute.startsWith("feed") || currentRoute.startsWith("favoris")) {
             oeuvresButton.getStyleClass().add("active");
-        } else if ("bibliotheque".equals(route) || "book-reader".equals(route)) {
+        } else if ("bibliotheque".equals(currentRoute) || "book-reader".equals(currentRoute)) {
             bibliothequeButton.getStyleClass().add("active");
-        } else if ("musique".equals(route)) {
+        } else if ("musique".equals(currentRoute)) {
             musiqueButton.getStyleClass().add("active");
         }
     }
 
     @FXML
     private void onFeedClick() {
-        navigate("feed");
+        navigate(resolveOeuvreRoute("feed", "favoris"));
     }
 
     @FXML
     private void onFeedPeinturesClick() {
-        navigate("feed-peintures");
+        navigate(resolveOeuvreRoute("feed-peintures", "favoris-peintures"));
     }
 
     @FXML
     private void onFeedSculpturesClick() {
-        navigate("feed-sculptures");
+        navigate(resolveOeuvreRoute("feed-sculptures", "favoris-sculptures"));
     }
 
     @FXML
     private void onFeedPhotosClick() {
-        navigate("feed-photos");
+        navigate(resolveOeuvreRoute("feed-photos", "favoris-photos"));
     }
 
     @FXML
     private void onFeedRecommendationsClick() {
-        navigate("feed-recommandations");
+        navigate(resolveOeuvreRoute("feed-recommandations", "favoris-recommandations"));
     }
 
     @FXML
@@ -153,6 +155,13 @@ public class NavbarAmateurController {
         if (navigationHandler != null) {
             navigationHandler.accept(route);
         }
+    }
+
+    private String resolveOeuvreRoute(String feedRoute, String favorisRoute) {
+        if (currentRoute != null && currentRoute.startsWith("favoris")) {
+            return favorisRoute;
+        }
+        return feedRoute;
     }
 
     private void switchScene(String fxmlPath, String stylesheetPath, String title) {

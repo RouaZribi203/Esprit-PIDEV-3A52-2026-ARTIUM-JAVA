@@ -1,6 +1,7 @@
 package controllers;
 
 import services.CommentaireService;
+import services.LikeService;
 import services.OeuvreCollectionService;
 import services.OeuvreService;
 import entities.CollectionOeuvre;
@@ -71,9 +72,12 @@ public class OeuvresAdminController {
     private final OeuvreService oeuvreService = new OeuvreService();
     private final OeuvreCollectionService collectionService = new OeuvreCollectionService();
     private final CommentaireService commentaireService = new CommentaireService();
+    private final LikeService likeService = new LikeService();
     private final Map<Integer, CollectionOeuvre> collectionById = new HashMap<>();
     private final Map<Integer, User> userById = new HashMap<>();
     private final Map<Integer, Integer> commentCountByOeuvreId = new HashMap<>();
+    private final Map<Integer, Integer> likeCountByOeuvreId = new HashMap<>();
+    private final Map<Integer, Integer> favoriCountByOeuvreId = new HashMap<>();
     private List<Oeuvre> allOeuvres = new ArrayList<>();
 
     @FXML
@@ -163,6 +167,8 @@ public class OeuvresAdminController {
         try {
             allOeuvres = oeuvreService.getAll();
             commentCountByOeuvreId.clear();
+            likeCountByOeuvreId.clear();
+            favoriCountByOeuvreId.clear();
 
             if (allOeuvres == null) {
                 allOeuvres = new ArrayList<>();
@@ -233,11 +239,13 @@ public class OeuvresAdminController {
 
         // Obtenir la liste complète des commentaires (réutilisable dans le détail)
         int commentCount = getCommentCount(oeuvre);
+        int likeCount = getLikeCount(oeuvre);
+        int favoriCount = getFavoriCount(oeuvre);
 
         HBox statsRow = new HBox(8,
-                buildStatChip("M12.1 18.55 10.55 17.14C5.4 12.47 2 9.39 2 5.6 2 2.52 4.42 0 7.5 0c1.74 0 3.41.81 4.5 2.09C13.09.81 14.76 0 16.5 0 19.58 0 22 2.52 22 5.6c0 3.79-3.4 6.87-8.55 11.55z", 12),
+                buildStatChip("M12.1 18.55 10.55 17.14C5.4 12.47 2 9.39 2 5.6 2 2.52 4.42 0 7.5 0c1.74 0 3.41.81 4.5 2.09C13.09.81 14.76 0 16.5 0 19.58 0 22 2.52 22 5.6c0 3.79-3.4 6.87-8.55 11.55z", likeCount),
                 buildStatChip("M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z", commentCount),
-                buildStatChip("M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z", 4)
+                buildStatChip("M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z", favoriCount)
         );
         statsRow.getStyleClass().add("oeuvre-admin-stats-row");
 
@@ -710,6 +718,36 @@ public class OeuvresAdminController {
             commentCountByOeuvreId.put(oeuvreId, 0);
             return 0;
         }
+    }
+
+    private int getLikeCount(Oeuvre oeuvre) {
+        if (oeuvre == null || oeuvre.getId() == null) {
+            return 0;
+        }
+
+        Integer oeuvreId = oeuvre.getId();
+        if (likeCountByOeuvreId.containsKey(oeuvreId)) {
+            return likeCountByOeuvreId.get(oeuvreId);
+        }
+
+        int count = likeService.countLikesByOeuvre(oeuvreId);
+        likeCountByOeuvreId.put(oeuvreId, count);
+        return count;
+    }
+
+    private int getFavoriCount(Oeuvre oeuvre) {
+        if (oeuvre == null || oeuvre.getId() == null) {
+            return 0;
+        }
+
+        Integer oeuvreId = oeuvre.getId();
+        if (favoriCountByOeuvreId.containsKey(oeuvreId)) {
+            return favoriCountByOeuvreId.get(oeuvreId);
+        }
+
+        int count = likeService.countFavorisByOeuvre(oeuvreId);
+        favoriCountByOeuvreId.put(oeuvreId, count);
+        return count;
     }
 
     private SVGPath createIcon(String path, String color) {

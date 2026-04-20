@@ -800,6 +800,23 @@
     -fx-padding: 4 10;
 }
 
+.oeuvre-post-stat-button {
+    -fx-border-color: transparent;
+    -fx-cursor: hand;
+}
+
+.oeuvre-post-stat-button:hover {
+    -fx-background-color: #e4e9f3;
+}
+
+.oeuvre-post-like-active {
+    -fx-background-color: #ffe4e6;
+}
+
+.oeuvre-post-favori-active {
+    -fx-background-color: #fef3c7;
+}
+
 .oeuvre-post-stat-icon {
     -fx-fill: #6b7280;
 }

@@ -76,8 +76,8 @@ public class AmateurMainController {
 
     private String resolveRoute(String route) {
         return switch (route) {
-            case "feed", "feed-peintures", "feed-sculptures", "feed-photos", "feed-recommandations" -> "/views/amateur/Feed.fxml";
-            case "favoris" -> "/views/amateur/Favoris.fxml";
+            case "feed", "feed-peintures", "feed-sculptures", "feed-photos", "feed-recommandations",
+                 "favoris", "favoris-peintures", "favoris-sculptures", "favoris-photos", "favoris-recommandations" -> "/views/amateur/Feed.fxml";
             case "evenements" -> "/views/amateur/Evenements.fxml";
             case "event-detail" -> "/views/amateur/EventDetail.fxml";
             case "payment-success" -> "/views/amateur/PaymentSuccess.fxml";

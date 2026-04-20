@@ -1,6 +1,7 @@
 package controllers.amateur;
 
 import services.CommentaireService;
+import services.LikeService;
 import services.OeuvreCollectionService;
 import services.OeuvreService;
 import entities.CollectionOeuvre;
@@ -54,6 +55,7 @@ public class FeedController {
 	private final OeuvreService oeuvreService = new OeuvreService();
 	private final OeuvreCollectionService oeuvreCollectionService = new OeuvreCollectionService();
 	private final CommentaireService commentaireService = new CommentaireService();
+	private final LikeService likeService = new LikeService();
 	private final List<Oeuvre> allOeuvres = new ArrayList<>();
 	private final Map<Integer, String> collectionHashtagById = new HashMap<>();
 	private final Map<Integer, CollectionOeuvre> collectionById = new HashMap<>();
@@ -67,6 +69,7 @@ public class FeedController {
 	}
 
 	public void setRouteFilter(String route) {
+		currentUserId = UserSession.getCurrentUserId();
 		currentRouteFilter = route == null ? "feed" : route;
 		applySearch();
 	}
@@ -87,7 +90,11 @@ public class FeedController {
 		oeuvresContainer.getChildren().clear();
 
 		if (oeuvres.isEmpty()) {
-			emptyStateLabel.setText("Aucune oeuvre trouvee.");
+			if ("favoris".equals(currentRouteFilter)) {
+				emptyStateLabel.setText("Aucune oeuvre en favoris.");
+			} else {
+				emptyStateLabel.setText("Aucune oeuvre trouvee.");
+			}
 			emptyStateLabel.setVisible(true);
 			return;
 		}
@@ -174,13 +181,31 @@ public class FeedController {
 		}
 
 		List<Commentaire> comments = loadCommentsForOeuvre(oeuvre);
+		int likesCount = getLikesCount(oeuvre);
+		int favorisCount = getFavorisCount(oeuvre);
+		boolean likedByCurrentUser = isLikedByCurrentUser(oeuvre);
+		boolean favoriByCurrentUser = isFavoriByCurrentUser(oeuvre);
 
 		HBox statsRow = new HBox(14);
 		statsRow.getStyleClass().add("oeuvre-post-stats");
 		statsRow.getChildren().addAll(
-				buildStatChip("M12.1 18.55 10.55 17.14C5.4 12.47 2 9.39 2 5.6 2 2.52 4.42 0 7.5 0c1.74 0 3.41.81 4.5 2.09C13.09.81 14.76 0 16.5 0 19.58 0 22 2.52 22 5.6c0 3.79-3.4 6.87-8.55 11.55z", 0),
+				buildReactionButton(
+						"M12.1 18.55 10.55 17.14C5.4 12.47 2 9.39 2 5.6 2 2.52 4.42 0 7.5 0c1.74 0 3.41.81 4.5 2.09C13.09.81 14.76 0 16.5 0 19.58 0 22 2.52 22 5.6c0 3.79-3.4 6.87-8.55 11.55z",
+						likesCount,
+						likedByCurrentUser,
+						() -> onToggleLike(oeuvre),
+						"oeuvre-post-like-active",
+						"#dc2626"
+				),
 				buildStatChip("M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z", comments.size()),
-				buildStatChip("M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z", 0)
+				buildReactionButton(
+						"M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z",
+						favorisCount,
+						favoriByCurrentUser,
+						() -> onToggleFavori(oeuvre),
+						"oeuvre-post-favori-active",
+						"#eab308"
+				)
 		);
 
 		VBox commentsPreviewBox = buildCommentsPreview(oeuvre, comments);
@@ -201,6 +226,129 @@ public class FeedController {
 
 		statChip.getChildren().addAll(icon, countLabel);
 		return statChip;
+	}
+
+	private Button buildReactionButton(String iconPath,
+									 int count,
+									 boolean active,
+									 Runnable action,
+									 String activeStyleClass,
+									 String activeColor) {
+		Button button = new Button();
+		button.getStyleClass().addAll("oeuvre-post-stat-chip", "oeuvre-post-stat-button");
+		if (active) {
+			button.getStyleClass().add(activeStyleClass);
+		}
+
+		String iconColor = active ? activeColor : "#6b7280";
+		SVGPath icon = createColoredIcon(iconPath, 0.55, iconColor);
+		icon.getStyleClass().add("oeuvre-post-stat-icon");
+
+		Label countLabel = new Label(String.valueOf(Math.max(0, count)));
+		countLabel.getStyleClass().add("oeuvre-post-stat-count");
+		if (active) {
+			countLabel.setStyle("-fx-text-fill: " + iconColor + ";");
+		}
+
+		HBox content = new HBox(6, icon, countLabel);
+		content.setAlignment(Pos.CENTER_LEFT);
+		button.setGraphic(content);
+		button.setContentDisplay(javafx.scene.control.ContentDisplay.GRAPHIC_ONLY);
+		button.setOnAction(event -> action.run());
+
+		if (!isCurrentUserAmateur()) {
+			button.setDisable(true);
+		}
+
+		return button;
+	}
+
+	private boolean isCurrentUserAmateur() {
+		User current = UserSession.getCurrentUser();
+		if (current == null || current.getRole() == null) {
+			return false;
+		}
+		return "amateur".equalsIgnoreCase(current.getRole().trim());
+	}
+
+	private int getLikesCount(Oeuvre oeuvre) {
+		if (oeuvre == null || oeuvre.getId() == null) {
+			return 0;
+		}
+		return likeService.countLikesByOeuvre(oeuvre.getId());
+	}
+
+	private int getFavorisCount(Oeuvre oeuvre) {
+		if (oeuvre == null || oeuvre.getId() == null) {
+			return 0;
+		}
+		return likeService.countFavorisByOeuvre(oeuvre.getId());
+	}
+
+	private boolean isLikedByCurrentUser(Oeuvre oeuvre) {
+		if (oeuvre == null || oeuvre.getId() == null || currentUserId == null) {
+			return false;
+		}
+		return likeService.isLiked(currentUserId, oeuvre.getId());
+	}
+
+	private boolean isFavoriByCurrentUser(Oeuvre oeuvre) {
+		if (oeuvre == null || oeuvre.getId() == null || currentUserId == null) {
+			return false;
+		}
+		return likeService.isFavori(currentUserId, oeuvre.getId());
+	}
+
+	private void onToggleLike(Oeuvre oeuvre) {
+		if (!canReact(oeuvre)) {
+			return;
+		}
+		try {
+			likeService.toggleLike(currentUserId, oeuvre.getId());
+			applySearch();
+		} catch (Exception e) {
+			showReactionError(e);
+		}
+	}
+
+	private void onToggleFavori(Oeuvre oeuvre) {
+		if (!canReact(oeuvre)) {
+			return;
+		}
+		try {
+			likeService.toggleFavori(currentUserId, oeuvre.getId());
+			applySearch();
+		} catch (Exception e) {
+			showReactionError(e);
+		}
+	}
+
+	private boolean canReact(Oeuvre oeuvre) {
+		currentUserId = UserSession.getCurrentUserId();
+		if (currentUserId == null || oeuvre == null || oeuvre.getId() == null) {
+			showReactionMessage("Veuillez vous connecter pour interagir.");
+			return false;
+		}
+		if (!isCurrentUserAmateur()) {
+			showReactionMessage("Cette action est reservee au profil amateur.");
+			return false;
+		}
+		return true;
+	}
+
+	private void showReactionError(Exception e) {
+		String message = e == null || e.getMessage() == null || e.getMessage().isBlank()
+				? "Action impossible pour le moment."
+				: e.getMessage();
+		showReactionMessage(message);
+	}
+
+	private void showReactionMessage(String message) {
+		Alert alert = new Alert(Alert.AlertType.INFORMATION);
+		alert.setTitle("Information");
+		alert.setHeaderText(null);
+		alert.setContentText(message);
+		alert.showAndWait();
 	}
 
 	private List<Commentaire> loadCommentsForOeuvre(Oeuvre oeuvre) {
@@ -698,6 +846,11 @@ public class FeedController {
 	private boolean matchesRouteFilter(Oeuvre oeuvre) {
 		String type = safeText(oeuvre == null ? "" : oeuvre.getType()).toLowerCase(Locale.ROOT);
 		return switch (currentRouteFilter) {
+			case "favoris" -> isFavoriByCurrentUser(oeuvre);
+			case "favoris-peintures" -> isFavoriByCurrentUser(oeuvre) && type.contains("peint");
+			case "favoris-sculptures" -> isFavoriByCurrentUser(oeuvre) && type.contains("sculpt");
+			case "favoris-photos" -> isFavoriByCurrentUser(oeuvre) && type.contains("photo");
+			case "favoris-recommandations" -> isFavoriByCurrentUser(oeuvre) && !loadCommentsForOeuvre(oeuvre).isEmpty();
 			case "feed-peintures" -> type.contains("peint");
 			case "feed-sculptures" -> type.contains("sculpt");
 			case "feed-photos" -> type.contains("photo");

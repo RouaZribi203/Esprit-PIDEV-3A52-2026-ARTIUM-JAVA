@@ -68,6 +68,19 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
         }
 
         try {
+            // Supprimer d'abord les relations utilisateur -> oeuvre.
+            String deleteFavorisSql = "DELETE FROM oeuvre_user WHERE oeuvre_id = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(deleteFavorisSql)) {
+                preparedStatement.setInt(1, t.getId());
+                preparedStatement.executeUpdate();
+            }
+
+            String deleteLikesSql = "DELETE FROM `like` WHERE oeuvre_id = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(deleteLikesSql)) {
+                preparedStatement.setInt(1, t.getId());
+                preparedStatement.executeUpdate();
+            }
+
             // Cascade delete: supprimer les commentaires associés
             CommentaireService commentService = new CommentaireService();
             commentService.deleteByOeuvreId(t.getId());
@@ -90,8 +103,6 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
      */
     public void deleteByCollectionId(int collectionId) throws SQLDataException {
         try {
-            CommentaireService commentService = new CommentaireService();
-
             // Récupérer toutes les oeuvres de la collection
             String selectSql = "SELECT id FROM oeuvre WHERE collection_id = ?";
             List<Integer> oeuvreIds = new ArrayList<>();
@@ -105,15 +116,11 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
                 }
             }
 
-            // Pour chaque oeuvre, supprimer les commentaires puis l'oeuvre
+            // Pour chaque oeuvre, réutiliser la suppression standard.
             for (Integer oeuvreId : oeuvreIds) {
-                commentService.deleteByOeuvreId(oeuvreId);
-
-                String deleteSql = "DELETE FROM oeuvre WHERE id = ?";
-                try (PreparedStatement deleteStatement = connection.prepareStatement(deleteSql)) {
-                    deleteStatement.setInt(1, oeuvreId);
-                    deleteStatement.executeUpdate();
-                }
+                Oeuvre oeuvre = new Oeuvre();
+                oeuvre.setId(oeuvreId);
+                delete(oeuvre);
             }
         } catch (SQLException e) {
             throw new SQLDataException(e.getMessage());

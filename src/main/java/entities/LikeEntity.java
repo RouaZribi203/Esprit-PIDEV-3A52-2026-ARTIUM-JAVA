@@ -13,6 +13,10 @@ public class LikeEntity {
         return id;
     }
 
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     public Boolean getLiked() {
         return liked;
     }

@@ -4,6 +4,7 @@ import entities.Commentaire;
 import entities.Oeuvre;
 import entities.User;
 import services.CommentaireService;
+import services.LikeService;
 import services.OeuvreService;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -37,6 +38,7 @@ public class OeuvreDetailsPopupController {
 
     private final OeuvreService oeuvreService = new OeuvreService();
     private final CommentaireService commentaireService = new CommentaireService();
+    private final LikeService likeService = new LikeService();
     private Oeuvre currentOeuvre;
     private List<Commentaire> currentComments = new ArrayList<>();
 
@@ -109,21 +111,22 @@ public class OeuvreDetailsPopupController {
             imageView.setImage(postImage.getImage());
         }
 
-        List<Commentaire> comments = oeuvre.getComments();
-        currentComments = comments == null ? new ArrayList<>() : new ArrayList<>(comments);
+        currentComments = loadCommentsForOeuvre(oeuvre);
 
         int commentCount = currentComments.size();
+        int likeCount = getLikeCount(oeuvre);
+        int favoriCount = getFavoriCount(oeuvre);
         commentsTitleLabel.setText("Commentaires (" + commentCount + ")");
 
-        buildStatsRow(commentCount);
+        buildStatsRow(likeCount, commentCount, favoriCount);
         buildCommentsPreview(currentComments);
     }
 
-    private void buildStatsRow(int commentCount) {
+    private void buildStatsRow(int likeCount, int commentCount, int favoriCount) {
         statsRow.getChildren().setAll(
-                buildStatChip("M12.1 18.55 10.55 17.14C5.4 12.47 2 9.39 2 5.6 2 2.52 4.42 0 7.5 0c1.74 0 3.41.81 4.5 2.09C13.09.81 14.76 0 16.5 0 19.58 0 22 2.52 22 5.6c0 3.79-3.4 6.87-8.55 11.55z", 0),
+                buildStatChip("M12.1 18.55 10.55 17.14C5.4 12.47 2 9.39 2 5.6 2 2.52 4.42 0 7.5 0c1.74 0 3.41.81 4.5 2.09C13.09.81 14.76 0 16.5 0 19.58 0 22 2.52 22 5.6c0 3.79-3.4 6.87-8.55 11.55z", likeCount),
                 buildStatChip("M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z", commentCount),
-                buildStatChip("M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z", 0)
+                buildStatChip("M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z", favoriCount)
         );
     }
 
@@ -254,11 +257,42 @@ public class OeuvreDetailsPopupController {
                 currentOeuvre.setComments(new ArrayList<>(currentComments));
             }
             commentsTitleLabel.setText("Commentaires (" + currentComments.size() + ")");
-            buildStatsRow(currentComments.size());
+            int likeCount = getLikeCount(currentOeuvre);
+            int favoriCount = getFavoriCount(currentOeuvre);
+            buildStatsRow(likeCount, currentComments.size(), favoriCount);
             buildCommentsPreview(currentComments);
         } catch (Exception e) {
             showError("Erreur", e.getMessage() == null ? "Une erreur est survenue lors de la suppression." : e.getMessage());
         }
+    }
+
+    private List<Commentaire> loadCommentsForOeuvre(Oeuvre oeuvre) {
+        if (oeuvre == null || oeuvre.getId() == null) {
+            return new ArrayList<>();
+        }
+
+        try {
+            List<Commentaire> comments = commentaireService.getCommentsByOeuvreId(oeuvre.getId());
+            List<Commentaire> safeComments = comments == null ? new ArrayList<>() : new ArrayList<>(comments);
+            oeuvre.setComments(safeComments);
+            return safeComments;
+        } catch (Exception ignored) {
+            return new ArrayList<>();
+        }
+    }
+
+    private int getLikeCount(Oeuvre oeuvre) {
+        if (oeuvre == null || oeuvre.getId() == null) {
+            return 0;
+        }
+        return likeService.countLikesByOeuvre(oeuvre.getId());
+    }
+
+    private int getFavoriCount(Oeuvre oeuvre) {
+        if (oeuvre == null || oeuvre.getId() == null) {
+            return 0;
+        }
+        return likeService.countFavorisByOeuvre(oeuvre.getId());
     }
 
     private void showError(String header, String message) {
