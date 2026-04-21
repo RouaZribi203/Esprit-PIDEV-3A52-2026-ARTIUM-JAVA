@@ -63,6 +63,9 @@ public abstract class BaseUsersBackofficeController {
     @FXML
     protected Label messageLabel;
 
+    @FXML
+    protected ComboBox<String> sortComboBox;
+
     private final UserService userService = new UserService();
     private final ObservableList<User> users = FXCollections.observableArrayList();
 
@@ -76,6 +79,22 @@ public abstract class BaseUsersBackofficeController {
         cardsContainer.setVgap(18);
         cardsContainer.setPrefWrapLength(1140);
         searchField.textProperty().addListener((obs, oldValue, newValue) -> renderCards());
+        
+        // Setup sort options
+        if (sortComboBox != null) {
+            sortComboBox.setItems(FXCollections.observableArrayList(
+                    "Nom (A-Z)",
+                    "Nom (Z-A)",
+                    "Email (A-Z)",
+                    "Date inscription (Récent)",
+                    "Date inscription (Ancien)",
+                    "Statut (Activé)",
+                    "Statut (Bloqué)"
+            ));
+            sortComboBox.setValue("Nom (A-Z)");
+            sortComboBox.valueProperty().addListener((obs, oldValue, newValue) -> renderCards());
+        }
+        
         loadUsers();
     }
 
@@ -195,15 +214,52 @@ public abstract class BaseUsersBackofficeController {
                 .filter(user -> matchesQuery(user, query))
                 .toList();
 
-        for (User user : filteredUsers) {
+        // Apply sorting
+        String sortOption = sortComboBox != null ? sortComboBox.getValue() : "Nom (A-Z)";
+        List<User> sortedUsers = applySorting(filteredUsers, sortOption);
+
+        for (User user : sortedUsers) {
             cardsContainer.getChildren().add(createUserCard(user));
         }
 
-        if (filteredUsers.isEmpty()) {
+        if (sortedUsers.isEmpty()) {
             Label emptyState = new Label("Aucun " + managedRoleLabel().toLowerCase(Locale.ROOT) + " trouve.");
             emptyState.getStyleClass().add("users-empty-state");
             cardsContainer.getChildren().add(emptyState);
         }
+    }
+
+    private List<User> applySorting(List<User> users, String sortOption) {
+        return switch (sortOption) {
+            case "Nom (A-Z)" -> users.stream()
+                    .sorted((u1, u2) -> (u1.getNom() + " " + u1.getPrenom())
+                            .compareTo(u2.getNom() + " " + u2.getPrenom()))
+                    .toList();
+            case "Nom (Z-A)" -> users.stream()
+                    .sorted((u1, u2) -> (u2.getNom() + " " + u2.getPrenom())
+                            .compareTo(u1.getNom() + " " + u1.getPrenom()))
+                    .toList();
+            case "Email (A-Z)" -> users.stream()
+                    .sorted((u1, u2) -> safe(u1.getEmail()).compareTo(safe(u2.getEmail())))
+                    .toList();
+            case "Date inscription (Récent)" -> users.stream()
+                    .sorted((u1, u2) -> u2.getDateInscription().compareTo(u1.getDateInscription()))
+                    .toList();
+            case "Date inscription (Ancien)" -> users.stream()
+                    .sorted((u1, u2) -> u1.getDateInscription().compareTo(u2.getDateInscription()))
+                    .toList();
+            case "Statut (Activé)" -> users.stream()
+                    .filter(u -> u.getStatut() != null && u.getStatut().toLowerCase(Locale.ROOT).contains("activ"))
+                    .sorted((u1, u2) -> (u1.getNom() + " " + u1.getPrenom())
+                            .compareTo(u2.getNom() + " " + u2.getPrenom()))
+                    .toList();
+            case "Statut (Bloqué)" -> users.stream()
+                    .filter(u -> u.getStatut() != null && u.getStatut().toLowerCase(Locale.ROOT).contains("bloqu"))
+                    .sorted((u1, u2) -> (u1.getNom() + " " + u1.getPrenom())
+                            .compareTo(u2.getNom() + " " + u2.getPrenom()))
+                    .toList();
+            default -> users;
+        };
     }
 
     private boolean matchesQuery(User user, String query) {

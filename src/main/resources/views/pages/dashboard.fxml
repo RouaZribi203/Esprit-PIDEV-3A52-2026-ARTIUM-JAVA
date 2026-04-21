@@ -2,10 +2,8 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
@@ -25,54 +23,71 @@
 
             <HBox spacing="12.0">
                 <VBox spacing="8.0" styleClass="list-card" HBox.hgrow="ALWAYS">
-                    <padding>
-                        <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
-                    </padding>
+                    <padding><Insets bottom="12.0" left="12.0" right="12.0" top="12.0" /></padding>
                     <Label styleClass="section-title" text="Inscriptions (6 derniers mois)" />
                     <StackPane fx:id="lineChartContainer" prefHeight="250.0" />
                 </VBox>
-
                 <VBox prefWidth="320.0" spacing="8.0" styleClass="list-card">
-                    <padding>
-                        <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
-                    </padding>
+                    <padding><Insets bottom="12.0" left="12.0" right="12.0" top="12.0" /></padding>
                     <Label styleClass="section-title" text="Repartition des roles" />
                     <StackPane fx:id="rolePieContainer" prefHeight="250.0" />
                 </VBox>
             </HBox>
 
             <HBox spacing="12.0">
-                <VBox spacing="8.0" styleClass="list-card" HBox.hgrow="ALWAYS">
-                    <padding>
-                        <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
-                    </padding>
-                    <Label styleClass="section-title" text="Inscriptions recentes (24h)" />
-                    <ListView fx:id="signupsList" prefHeight="170.0" VBox.vgrow="ALWAYS" />
+                <VBox minHeight="320.0" spacing="12.0" styleClass="list-card dash-section-card dash-recent-card" HBox.hgrow="ALWAYS">
+                    <padding><Insets bottom="14.0" left="14.0" right="14.0" top="14.0" /></padding>
+                    <HBox alignment="CENTER_LEFT" spacing="8.0">
+                        <Label styleClass="section-title" text="Inscriptions recentes" />
+                        <Label styleClass="dash-section-badge" text="24h" />
+                    </HBox>
+                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="235.0"
+                                styleClass="dash-clean-scroll dash-recent-scroll" VBox.vgrow="ALWAYS">
+                        <content>
+                            <VBox fx:id="signupsList" spacing="8.0" styleClass="dash-list-inner dash-recent-list-inner">
+                                <padding><Insets bottom="4.0" left="2.0" right="4.0" top="2.0" /></padding>
+                            </VBox>
+                        </content>
+                    </ScrollPane>
                 </VBox>
 
-                <VBox spacing="8.0" styleClass="list-card" HBox.hgrow="ALWAYS">
-                    <padding>
-                        <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
-                    </padding>
-                    <Label styleClass="section-title" text="Reclamations recentes" />
-                    <ListView fx:id="reclamationsList" prefHeight="170.0" VBox.vgrow="ALWAYS" />
+                <VBox minHeight="320.0" spacing="12.0" styleClass="list-card dash-section-card dash-recent-card" HBox.hgrow="ALWAYS">
+                    <padding><Insets bottom="14.0" left="14.0" right="14.0" top="14.0" /></padding>
+                    <HBox alignment="CENTER_LEFT" spacing="8.0">
+                        <Label styleClass="section-title" text="Reclamations recentes" />
+                        <Label fx:id="reclamationsBadge" styleClass="dash-section-badge dash-section-badge-red" text="0" />
+                    </HBox>
+                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="235.0"
+                                styleClass="dash-clean-scroll dash-recent-scroll" VBox.vgrow="ALWAYS">
+                        <content>
+                            <VBox fx:id="reclamationsList" spacing="8.0" styleClass="dash-list-inner dash-recent-list-inner">
+                                <padding><Insets bottom="4.0" left="2.0" right="4.0" top="2.0" /></padding>
+                            </VBox>
+                        </content>
+                    </ScrollPane>
                 </VBox>
             </HBox>
 
             <HBox spacing="12.0">
-                <VBox spacing="8.0" styleClass="list-card" HBox.hgrow="ALWAYS">
-                    <padding>
-                        <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
-                    </padding>
-                    <Label styleClass="section-title" text="Top artistes" />
-                    <ListView fx:id="topArtistesList" prefHeight="210.0" VBox.vgrow="ALWAYS" />
+                <VBox spacing="10.0" styleClass="list-card dash-section-card" HBox.hgrow="ALWAYS">
+                    <padding><Insets bottom="14.0" left="14.0" right="14.0" top="14.0" /></padding>
+                    <HBox alignment="CENTER_LEFT" spacing="8.0">
+                        <Label styleClass="section-title" text="Top artistes" />
+                        <Label styleClass="dash-section-badge dash-section-badge-purple" text="★ Top" />
+                    </HBox>
+                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="210.0"
+                                styleClass="dash-clean-scroll" VBox.vgrow="ALWAYS">
+                        <content>
+                            <VBox fx:id="topArtistesList" spacing="6.0" styleClass="dash-list-inner">
+                                <padding><Insets bottom="4.0" left="2.0" right="4.0" top="2.0" /></padding>
+                            </VBox>
+                        </content>
+                    </ScrollPane>
                 </VBox>
 
                 <StackPane fx:id="calendarContainer" prefWidth="360.0" />
             </HBox>
+
         </VBox>
     </content>
 </ScrollPane>
-
-
-
