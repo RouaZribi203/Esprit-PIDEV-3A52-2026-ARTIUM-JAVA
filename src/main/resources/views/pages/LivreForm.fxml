@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Rectangle?>
+
+<VBox spacing="12.0" styleClass="popup-form-container" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.LivreFormController">
+    <padding>
+        <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
+    </padding>
+
+    <Label fx:id="formTitleLabel" styleClass="form-title" text="Ajouter un livre" />
+    <Label styleClass="form-subtitle" text="Renseignez les details" />
+
+    <HBox spacing="10.0">
+        <VBox spacing="6.0" HBox.hgrow="ALWAYS">
+            <Label text="Titre *" styleClass="field-label" />
+            <TextField fx:id="titreField" promptText="Titre du livre" styleClass="input-field" />
+        </VBox>
+        <VBox spacing="6.0" HBox.hgrow="ALWAYS">
+            <Label text="Categorie *" styleClass="field-label" />
+            <TextField fx:id="categorieField" promptText="Categorie" styleClass="input-field" />
+        </VBox>
+    </HBox>
+
+    <HBox spacing="10.0">
+        <VBox spacing="6.0" HBox.hgrow="ALWAYS" minWidth="220.0">
+            <Label text="Prix (TND) *" styleClass="field-label" />
+            <TextField fx:id="prixField" promptText="0.00" styleClass="input-field" minWidth="210.0" />
+        </VBox>
+        <VBox spacing="6.0" HBox.hgrow="ALWAYS" minWidth="220.0">
+            <Label text="Collection *" styleClass="field-label" />
+            <ComboBox fx:id="collectionComboBox" promptText="Selectionner une collection" styleClass="input-field" minWidth="210.0" />
+        </VBox>
+    </HBox>
+
+    <HBox alignment="CENTER_LEFT" spacing="8.0">
+        <Label text="Image de couverture" styleClass="field-label" />
+        <StackPane styleClass="image-preview-container">
+            <Rectangle width="90.0" height="60.0" styleClass="image-placeholder" />
+            <ImageView fx:id="couvertureImageView" fitWidth="90.0" fitHeight="60.0" preserveRatio="true" />
+        </StackPane>
+        <Button mnemonicParsing="false" onAction="#onChooseImageClick" styleClass="secondary-button" text="Choisir image" />
+        <Label fx:id="couvertureLabel" styleClass="file-name-label" text="Aucun fichier choisi" wrapText="true" />
+    </HBox>
+
+    <VBox spacing="6.0">
+        <Label text="Description *" styleClass="field-label" />
+        <TextArea fx:id="descriptionArea" prefRowCount="4" promptText="Description" styleClass="input-field" wrapText="true" />
+    </VBox>
+
+    <HBox alignment="CENTER_LEFT" spacing="8.0">
+        <Label text="Fichier PDF *" styleClass="field-label" />
+        <Button mnemonicParsing="false" onAction="#onChoosePdfClick" styleClass="secondary-button" text="Choisir PDF" />
+        <Label fx:id="pdfLabel" styleClass="pdf-label" text="Aucun fichier choisi" wrapText="true" />
+    </HBox>
+
+    <Label fx:id="validationErrorLabel" managed="false" styleClass="popup-error" visible="false" wrapText="true" />
+
+    <HBox alignment="CENTER_RIGHT" spacing="8.0">
+        <Button mnemonicParsing="false" onAction="#onCancelClick" styleClass="secondary-button" text="Fermer" />
+        <Button mnemonicParsing="false" onAction="#onSaveClick" styleClass="primary-button" text="Enregistrer" />
+    </HBox>
+</VBox>
+
+
+

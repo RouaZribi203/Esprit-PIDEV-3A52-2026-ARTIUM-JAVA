@@ -9,7 +9,7 @@ public class Oeuvre {
     private String titre;
     private String description;
     private LocalDate dateCreation;
-    private byte[] image;
+    private String image;
     private String type;
     private String embedding;
     private String imageEmbedding;
@@ -19,11 +19,18 @@ public class Oeuvre {
     // Relation many-to-many via oeuvre_user (loaded by service layer).
     private List<User> favusers = new ArrayList<>();
 
+    // Relation one-to-many avec les commentaires (loaded by service layer).
+    private List<Commentaire> comments = new ArrayList<>();
+
     public Oeuvre() {
     }
 
     public Integer getId() {
         return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getTitre() {
@@ -50,11 +57,11 @@ public class Oeuvre {
         this.dateCreation = dateCreation;
     }
 
-    public byte[] getImage() {
+    public String getImage() {
         return image;
     }
 
-    public void setImage(byte[] image) {
+    public void setImage(String image) {
         this.image = image;
     }
 
@@ -104,5 +111,13 @@ public class Oeuvre {
 
     public void setUsers(List<User> users) {
         this.favusers = users != null ? users : new ArrayList<>();
+    }
+
+    public List<Commentaire> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Commentaire> comments) {
+        this.comments = comments != null ? comments : new ArrayList<>();
     }
 }

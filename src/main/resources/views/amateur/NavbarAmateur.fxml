@@ -36,17 +36,11 @@
 
     <Button fx:id="notificationsButton" mnemonicParsing="false" onAction="#onNotificationsClick" prefHeight="34.0" prefWidth="34.0" styleClass="amateur-icon-button" text="🔔" />
 
-    <MenuButton mnemonicParsing="false" prefHeight="36.0" styleClass="amateur-avatar-menu" text="Amateur">
+    <MenuButton fx:id="userMenuButton" mnemonicParsing="false" prefHeight="36.0" styleClass="avatar-menu" text="Compte">
         <items>
-            <MenuItem mnemonicParsing="false" onAction="#onSwitchToAdminView" text="Mode admin" />
-            <MenuItem mnemonicParsing="false" onAction="#onSwitchToArtistView" text="Mode artiste" />
-            <MenuItem mnemonicParsing="false" onAction="#onSwitchToAmateurView" text="Mode amateur" />
-            <SeparatorMenuItem />
-            <MenuItem mnemonicParsing="false" onAction="#onThemeLight" text="Clair" />
-            <MenuItem mnemonicParsing="false" onAction="#onThemeDark" text="Sombre" />
-            <SeparatorMenuItem />
-            <MenuItem mnemonicParsing="false" onAction="#onLogoutClick" text="Se déconnecter" />
+            <MenuItem mnemonicParsing="false" onAction="#onSwitchToAmateurView" styleClass="avatar-dropdown-item" text="Voir profil" />
+            <SeparatorMenuItem styleClass="avatar-dropdown-separator" />
+            <MenuItem id="logoutMenuItem" mnemonicParsing="false" onAction="#onLogoutClick" styleClass="avatar-dropdown-item" text="Se deconnecter" />
         </items>
     </MenuButton>
 </HBox>
-

@@ -11,7 +11,7 @@ public class Evenement {
     private LocalDateTime dateFin;
     private LocalDate dateCreation;
     private String type;
-    private byte[] imageCouverture;
+    private String imageCouverture;
     private String statut;
     private Integer capaciteMax;
     private Double prixTicket;
@@ -77,11 +77,11 @@ public class Evenement {
         this.type = type;
     }
 
-    public byte[] getImageCouverture() {
+    public String getImageCouverture() {
         return imageCouverture;
     }
 
-    public void setImageCouverture(byte[] imageCouverture) {
+    public void setImageCouverture(String imageCouverture) {
         this.imageCouverture = imageCouverture;
     }
 

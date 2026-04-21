@@ -1,7 +1,7 @@
 package controllers.pages.reclamations;
 
-import Services.ReclamationService;
-import Services.ReponseService;
+import services.ReclamationService;
+import services.ReponseService;
 import entities.Reclamation;
 import entities.Reponse;
 import javafx.fxml.FXML;
@@ -21,6 +21,7 @@ public class ReclamationReplyDialogController {
     @FXML private ListView<Reponse> historyList;
 
     @FXML private VBox replyFieldsBox;
+    @FXML private Label validationErrorLabel;
 
     @FXML private Button saveBtn;
     @FXML private Button updateBtn;
@@ -50,6 +51,7 @@ public class ReclamationReplyDialogController {
     public void initialize() {
         reclamationTexteArea.setEditable(false);
         reclamationTexteArea.setWrapText(true);
+        clearValidationError();
 
         historyList.setCellFactory(lv -> new ListCell<>() {
             @Override
@@ -120,6 +122,7 @@ public class ReclamationReplyDialogController {
         ta.setPromptText("Votre reponse...");
         ta.setWrapText(true);
         ta.setPrefRowCount(3);
+        ta.textProperty().addListener((obs, ov, nv) -> clearValidationError());
 
         VBox wrapper = new VBox(6);
         wrapper.getChildren().add(ta);
@@ -128,6 +131,7 @@ public class ReclamationReplyDialogController {
 
     private void fillEditField(Reponse rep) {
         if (rep == null) return;
+        clearValidationError();
 
         if (replyFieldsBox.getChildren().isEmpty()) {
             addReplyField();
@@ -206,14 +210,14 @@ public class ReclamationReplyDialogController {
 
         for (String c : contenus) {
             if (isBlankOrTooShort(c)) {
-                showError("Validation", "La reponse ne peut pas etre vide et doit contenir au moins " + MIN_REPONSE_LEN + " caracteres.");
+                showValidationError("La reponse ne peut pas etre vide et doit contenir au moins " + MIN_REPONSE_LEN + " caracteres.");
                 return;
             }
         }
 
 
         if (contenus.isEmpty()) {
-            showError("Validation", "Veuillez saisir une réponse avant d'enregistrer.");
+            showValidationError("Veuillez saisir une reponse avant d'enregistrer.");
             return;
         }
 
@@ -227,6 +231,7 @@ public class ReclamationReplyDialogController {
             }
 
             markReclamationTraite();
+            clearValidationError();
 
             close();
         } catch (Exception e) {
@@ -261,7 +266,7 @@ public class ReclamationReplyDialogController {
 
         String newText = ta.getText() == null ? "" : ta.getText();
         if (isBlankOrTooShort(newText)) {
-            showError("Validation", "La reponse ne peut pas etre vide et doit contenir au moins " + MIN_REPONSE_LEN + " caracteres.");
+            showValidationError("La reponse ne peut pas etre vide et doit contenir au moins " + MIN_REPONSE_LEN + " caracteres.");
             return;
         }
 
@@ -276,9 +281,29 @@ public class ReclamationReplyDialogController {
             selectedForEdit = null;
             updateBtn.setDisable(true);
             ta.clear();
+            clearValidationError();
         } catch (Exception e) {
             showError("Modification impossible", e.getMessage());
         }
+    }
+
+    private void showValidationError(String message) {
+        if (validationErrorLabel == null) {
+            showError("Validation", message);
+            return;
+        }
+        validationErrorLabel.setText(message);
+        validationErrorLabel.setVisible(true);
+        validationErrorLabel.setManaged(true);
+    }
+
+    private void clearValidationError() {
+        if (validationErrorLabel == null) {
+            return;
+        }
+        validationErrorLabel.setText("");
+        validationErrorLabel.setVisible(false);
+        validationErrorLabel.setManaged(false);
     }
 
     @FXML

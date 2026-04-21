@@ -2,38 +2,104 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.TilePane?>
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.amateur.MusicfrontController">
     <top>
-        <VBox spacing="10.0" styleClass="amateur-page-card music-card">
+        <VBox spacing="12.0" styleClass="amateur-page-card music-card">
             <padding>
                 <Insets bottom="20.0" left="24.0" right="24.0" top="24.0" />
             </padding>
             <Label styleClass="page-title" text="Découvrir Musique" />
+            <Label styleClass="page-subtitle" text="Cliquez sur une carte pour écouter la musique" />
+            <HBox fx:id="musicSearchBar" spacing="10.0">
+                <TextField fx:id="searchField" HBox.hgrow="ALWAYS" onAction="#handleSearch" promptText="Titre, description, genre" />
+                <Button mnemonicParsing="false" onAction="#handleSearch" text="Rechercher" />
+                <Button mnemonicParsing="false" onAction="#handleClearSearch" text="Effacer" />
+                <ComboBox fx:id="sortMusicComboBox" prefWidth="170.0" promptText="Tri" />
+            </HBox>
+
+            <HBox fx:id="playlistSearchBar" spacing="10.0" visible="false" managed="false">
+                <TextField fx:id="playlistSearchField" HBox.hgrow="ALWAYS" onAction="#handleSearchPlaylist" promptText="Nom, description" />
+                <Button mnemonicParsing="false" onAction="#handleSearchPlaylist" text="Rechercher" />
+                <Button mnemonicParsing="false" onAction="#handleClearPlaylistSearch" text="Effacer" />
+                <ComboBox fx:id="sortPlaylistComboBox" prefWidth="170.0" promptText="Tri" />
+            </HBox>
+
             <HBox spacing="10.0">
-                <TextField HBox.hgrow="ALWAYS" promptText="Titre, description, artiste" />
-                <ComboBox prefWidth="160.0" promptText="Trier par" />
-                <Button mnemonicParsing="false" text="↑ / ↓" />
+                <Button fx:id="musiqueSectionButton" mnemonicParsing="false" onAction="#handleShowMusiqueSection" text="Musiques" />
+                <Button fx:id="playlistsSectionButton" mnemonicParsing="false" onAction="#handleShowPlaylistsSection" text="Playlists" />
             </HBox>
         </VBox>
     </top>
+
     <center>
         <VBox spacing="14.0" styleClass="amateur-page-card music-card">
             <padding>
                 <Insets bottom="24.0" left="24.0" right="24.0" top="0.0" />
             </padding>
-            <Label text="Grille des musiques" />
-            <StackPane minHeight="340.0" styleClass="empty-state-card music-empty-state">
-                <Label text="Le mini player reste caché sur cette page" />
-            </StackPane>
+
+            <VBox fx:id="musiqueSection" spacing="8.0">
+                <Label text="Musiques disponibles" />
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="430.0" styleClass="amateur-scroll">
+                    <VBox spacing="12.0">
+                        <TilePane fx:id="musicGrid" hgap="12.0" prefColumns="4" vgap="12.0" />
+                        <Label fx:id="emptyListLabel" styleClass="page-caption" text="Aucune musique disponible pour le moment." wrapText="true" />
+                    </VBox>
+                </ScrollPane>
+            </VBox>
+
+            <VBox fx:id="playlistsSection" spacing="10.0" visible="false" managed="false">
+                <Label text="Mes playlists" />
+
+
+                <HBox spacing="10.0">
+                    <Button fx:id="togglePlaylistFormButton" mnemonicParsing="false" onAction="#handleTogglePlaylistForm" text="Nouvelle playlist" />
+                </HBox>
+
+                <VBox fx:id="playlistDetailSection" spacing="8.0" visible="false" managed="false" style="-fx-background-color: rgba(255,255,255,0.04); -fx-background-radius: 8; -fx-padding: 12;">
+                    <HBox spacing="10.0">
+                        <VBox spacing="2.0" HBox.hgrow="ALWAYS">
+                            <Label fx:id="playlistDetailTitleLabel" style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;" text="Aucune playlist sélectionnée" />
+                            <Label fx:id="playlistDetailMetaLabel" style="-fx-text-fill: #cbd5e1;" text="Cliquez sur une playlist pour voir ses musiques." wrapText="true" />
+                        </VBox>
+                        <Button mnemonicParsing="false" onAction="#handleEditSelectedPlaylist" text="Modifier" />
+                        <Button mnemonicParsing="false" onAction="#handleDeleteSelectedPlaylist" text="Supprimer" />
+                        <Button fx:id="closePlaylistDetailButton" mnemonicParsing="false" onAction="#handleClosePlaylistDetail" text="Fermer" />
+                    </HBox>
+
+                    <Label fx:id="playlistSongsEmptyLabel" styleClass="page-caption" text="Aucune musique dans cette playlist." wrapText="true" />
+                    <VBox fx:id="playlistSongsBox" spacing="8.0" />
+                </VBox>
+
+                <VBox fx:id="playlistFormSection" spacing="10.0" style="-fx-background-color: rgba(255,255,255,0.04); -fx-background-radius: 8; -fx-padding: 12;" visible="false" managed="false">
+                    <Label text="Créer une playlist" />
+                    <TextField fx:id="playlistNameField" promptText="Nom de la playlist" />
+                    <TextArea fx:id="playlistDescriptionArea" prefRowCount="3" promptText="Description (facultative)" wrapText="true" />
+                    <HBox spacing="10.0">
+                        <TextField fx:id="playlistImageField" editable="false" HBox.hgrow="ALWAYS" promptText="Image de couverture" />
+                        <Button mnemonicParsing="false" onAction="#handleChoosePlaylistImage" text="Parcourir" />
+                    </HBox>
+                    <Button fx:id="createPlaylistButton" mnemonicParsing="false" onAction="#handleCreatePlaylist" text="Créer la playlist" />
+                </VBox>
+
+                <Label fx:id="playlistFeedbackLabel" wrapText="true" />
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="430.0" styleClass="amateur-scroll">
+                    <content>
+                        <TilePane fx:id="playlistGrid" hgap="12.0" prefColumns="3" vgap="12.0" />
+                    </content>
+                </ScrollPane>
+            </VBox>
         </VBox>
     </center>
+
 </BorderPane>
 

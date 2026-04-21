@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 public class Ticket {
     private Integer id;
-    private byte[] codeQr;
+    private String codeQr;
     private LocalDate dateAchat;
     private Integer evenementId;
     private Integer userId;
@@ -20,11 +20,11 @@ public class Ticket {
         this.id = id;
     }
 
-    public byte[] getCodeQr() {
+    public String getCodeQr() {
         return codeQr;
     }
 
-    public void setCodeQr(byte[] codeQr) {
+    public void setCodeQr(String codeQr) {
         this.codeQr = codeQr;
     }
 

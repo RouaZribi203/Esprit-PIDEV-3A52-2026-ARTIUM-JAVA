@@ -6,10 +6,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import utils.SessionManager;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Objects;
 
 public class MainFX extends Application {
 
@@ -78,8 +78,10 @@ public class MainFX extends Application {
             FXMLLoader loader = new FXMLLoader(MainFX.class.getResource(fxmlPath));
             Parent root = loader.load();
             Scene scene = new Scene(root);
-            URL stylesheet = Objects.requireNonNull(MainFX.class.getResource(stylesheetPath), "Missing stylesheet");
-            scene.getStylesheets().add(stylesheet.toExternalForm());
+            URL stylesheet = MainFX.class.getResource(stylesheetPath);
+            if (stylesheet != null) {
+                scene.getStylesheets().add(stylesheet.toExternalForm());
+            }
             primaryStage.setTitle(title);
             primaryStage.setScene(scene);
             primaryStage.show();
@@ -88,12 +90,31 @@ public class MainFX extends Application {
         }
     }
 
+    @Override
     public void start(Stage stage) {
         primaryStage = stage;
+
+        // Set default admin session for dev/test convenience
+        User admin = createDevUser(111, "admin", "user", "Admin", "Artium123");
+        SessionManager.setCurrentUser(admin);
+
+        switchToAdminView();
         // Taille minimale globale pour garder le layout lisible, sans figer la taille des scenes.
         primaryStage.setMinWidth(1100);
         primaryStage.setMinHeight(650);
         switchToAuthLandingView();
+    }
+
+    private User createDevUser(int id, String prenom, String nom, String role, String Mdp) {
+        User user = new User();
+        user.setId(id);
+        user.setPrenom(prenom);
+        user.setNom(nom);
+        user.setRole(role);
+        user.setStatut("Activé");
+        user.setEmail(prenom + "." + nom + "@test.com");
+        user.setMdp(Mdp);
+        return user;
     }
 
     public static void main(String[] args) {

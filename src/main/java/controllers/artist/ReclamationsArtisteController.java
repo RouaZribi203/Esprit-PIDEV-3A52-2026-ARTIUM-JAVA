@@ -1,6 +1,6 @@
 package controllers.artist;
 
-import Services.ReclamationService;
+import services.ReclamationService;
 import entities.Reclamation;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -17,6 +17,7 @@ import javafx.scene.layout.Region;
 import javafx.geometry.Pos;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import utils.UserSession;
 
 import java.sql.SQLDataException;
 import java.net.URL;
@@ -48,12 +49,22 @@ public class ReclamationsArtisteController implements Initializable {
 	@FXML
 	private ComboBox<String> myStatutFilter;
 
+	@FXML
+	private Label sendValidationLabel;
+
 	private final ReclamationService reclamationService = new ReclamationService();
 	private final List<Reclamation> myAll = new ArrayList<>();
 	private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.FRENCH);
+	private Integer currentUserId;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		currentUserId = UserSession.getCurrentUserId();
+		if (currentUserId == null) {
+			handleMissingSession();
+			return;
+		}
+
 		// Valeurs de démonstration (à remplacer par des valeurs venant de la BD)
 		typeCombo.setItems(FXCollections.observableArrayList(
 				"Paiement",
@@ -64,6 +75,7 @@ public class ReclamationsArtisteController implements Initializable {
 		));
 
 		refreshMyReclamationsEmptyState();
+		clearSendValidation();
 
 		if (myStatutFilter != null) {
 			myStatutFilter.setItems(FXCollections.observableArrayList("Tous", "Traitée", "Non traitée"));
@@ -73,38 +85,61 @@ public class ReclamationsArtisteController implements Initializable {
 		if (mySearchField != null) {
 			mySearchField.textProperty().addListener((obs, o, n) -> applyMyFilters());
 		}
+		if (typeCombo != null) {
+			typeCombo.valueProperty().addListener((obs, o, n) -> clearSendValidation());
+		}
+		if (descriptionArea != null) {
+			descriptionArea.textProperty().addListener((obs, o, n) -> clearSendValidation());
+		}
 
 		refreshMyReclamations();
+	}
+
+	private void handleMissingSession() {
+		if (myReclamationsContainer != null) {
+			myReclamationsContainer.getChildren().clear();
+		}
+		if (emptyMyReclamationsLabel != null) {
+			emptyMyReclamationsLabel.setText("Session utilisateur introuvable. Veuillez vous reconnecter.");
+			emptyMyReclamationsLabel.setVisible(true);
+			emptyMyReclamationsLabel.setManaged(true);
+		}
+		if (typeCombo != null) {
+			typeCombo.setDisable(true);
+		}
+		if (descriptionArea != null) {
+			descriptionArea.setDisable(true);
+		}
 	}
 
 	@FXML
 	private void onReset(ActionEvent event) {
 		typeCombo.getSelectionModel().clearSelection();
 		descriptionArea.clear();
+		clearSendValidation();
 	}
 
 	@FXML
 	private void onSend(ActionEvent event) {
+		clearSendValidation();
 		String type = typeCombo.getValue();
 		String description = descriptionArea.getText() == null ? "" : descriptionArea.getText().trim();
 		String descriptionNoSpaces = description.replaceAll("\\s+", "");
 
 		if (type == null || type.isBlank()) {
-			showWarning("Champs obligatoire", "Veuillez sélectionner un type.");
+			showSendValidation("Veuillez selectionner un type.");
 			return;
 		}
 		if (description.isBlank()) {
-			showWarning("Champs obligatoire", "Veuillez saisir une description.");
+			showSendValidation("Veuillez saisir une description.");
 			return;
 		}
 		if (descriptionNoSpaces.length() < 10) {
-			showWarning("Description trop courte", "La réclamation doit contenir au moins 10 caractères.");
+			showSendValidation("La reclamation doit contenir au moins 10 caracteres.");
 			return;
 		}
 
-		// TODO: remplacer par l'utilisateur connecté.
-		// En attendant, on met 1 pour éviter un INSERT avec user_id null.
-		int userId = 1;
+		int userId = currentUserId;
 
 		LocalDateTime now = LocalDateTime.now();
 		Reclamation r = new Reclamation();
@@ -120,6 +155,7 @@ public class ReclamationsArtisteController implements Initializable {
 			reclamationService.add(r);
 			showInfo("Réclamation envoyée", "Votre réclamation a été envoyée avec succès.");
 			onReset(event);
+			clearSendValidation();
 			refreshMyReclamations();
 
 			// Passer sur l'onglet "Mes Réclamations" après envoi (optionnel mais pratique)
@@ -142,8 +178,7 @@ public class ReclamationsArtisteController implements Initializable {
 		try {
 			myAll.clear();
 			for (Reclamation r : reclamationService.getAll()) {
-				// TODO: remplacer 1 par l'id user connecté
-				if (r.getUserId() != null && r.getUserId() == 1) {
+				if (r.getUserId() != null && r.getUserId().equals(currentUserId)) {
 					myAll.add(r);
 				}
 			}
@@ -245,10 +280,14 @@ public class ReclamationsArtisteController implements Initializable {
 
 	private void initCardMenu(Button dotsButton, Reclamation r) {
 		ContextMenu menu = new ContextMenu();
+		menu.getStyleClass().add("reclamation-actions-menu");
 
 		MenuItem viewReplies = new MenuItem("Voir réponses");
+		viewReplies.getStyleClass().add("reclamation-actions-view");
 		MenuItem edit = new MenuItem("Modifier");
+		edit.getStyleClass().add("reclamation-actions-edit");
 		MenuItem delete = new MenuItem("Supprimer");
+		delete.getStyleClass().add("reclamation-actions-delete");
 		menu.getItems().addAll(viewReplies, edit, new SeparatorMenuItem(), delete);
 
 		viewReplies.setOnAction(e -> onViewReplies(r));
@@ -366,6 +405,24 @@ public class ReclamationsArtisteController implements Initializable {
 		boolean empty = myReclamationsContainer == null || myReclamationsContainer.getChildren().isEmpty();
 		emptyMyReclamationsLabel.setVisible(empty);
 		emptyMyReclamationsLabel.setManaged(empty);
+	}
+
+	private void showSendValidation(String message) {
+		if (sendValidationLabel == null) {
+			return;
+		}
+		sendValidationLabel.setText(message);
+		sendValidationLabel.setVisible(true);
+		sendValidationLabel.setManaged(true);
+	}
+
+	private void clearSendValidation() {
+		if (sendValidationLabel == null) {
+			return;
+		}
+		sendValidationLabel.setText("");
+		sendValidationLabel.setVisible(false);
+		sendValidationLabel.setManaged(false);
 	}
 
 	private void showInfo(String header, String message) {

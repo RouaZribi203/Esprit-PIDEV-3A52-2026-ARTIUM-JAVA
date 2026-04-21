@@ -19,6 +19,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import services.EvenementService;
+import utils.UserSession;
 
 import java.io.IOException;
 import java.net.URL;
@@ -33,8 +34,7 @@ import java.util.stream.Collectors;
 
 public class EvenementsArtisteController {
 
-	// TODO: replace this with authenticated session user id when auth flow is connected.
-	private static final int CURRENT_ARTIST_ID = 1;
+	private Integer currentArtistId;
 
 	@FXML
 	private TextField rechercheField;
@@ -56,6 +56,12 @@ public class EvenementsArtisteController {
 
 	@FXML
 	public void initialize() {
+		currentArtistId = UserSession.getCurrentUserId();
+		if (currentArtistId == null) {
+			handleMissingSession();
+			return;
+		}
+
 		triComboBox.getItems().addAll(
 				"Date (plus recente)",
 				"Date (plus ancienne)",
@@ -71,6 +77,16 @@ public class EvenementsArtisteController {
 		refreshEvenements();
 	}
 
+	private void handleMissingSession() {
+		eventsListContainer.getChildren().clear();
+		emptyStateLabel.setText("Session utilisateur introuvable. Veuillez vous reconnecter.");
+		emptyStateLabel.setVisible(true);
+		emptyStateLabel.setManaged(true);
+		if (addEvenementButton != null) {
+			addEvenementButton.setDisable(true);
+		}
+	}
+
 	@FXML
 	private void onAddEvenementClick() {
 		Optional<Evenement> evenementResult = openFormDialog(null);
@@ -79,7 +95,7 @@ public class EvenementsArtisteController {
 		}
 
 		try {
-			evenementService.addForArtiste(evenementResult.get(), CURRENT_ARTIST_ID);
+			evenementService.addForArtiste(evenementResult.get(), currentArtistId);
 			refreshEvenements();
 		} catch (SQLDataException e) {
 			showError("Ajout impossible", e.getMessage());
@@ -89,7 +105,7 @@ public class EvenementsArtisteController {
 	private void refreshEvenements() {
 		try {
 			allEvenements.clear();
-			allEvenements.addAll(evenementService.getByArtisteId(CURRENT_ARTIST_ID));
+			allEvenements.addAll(evenementService.getByArtisteId(currentArtistId));
 			applySearchAndSort();
 		} catch (SQLDataException e) {
 			showError("Chargement impossible", e.getMessage());
@@ -171,7 +187,7 @@ public class EvenementsArtisteController {
 		}
 
 		try {
-			evenementService.updateForArtiste(evenementResult.get(), CURRENT_ARTIST_ID);
+			evenementService.updateForArtiste(evenementResult.get(), currentArtistId);
 			refreshEvenements();
 		} catch (SQLDataException e) {
 			showError("Modification impossible", e.getMessage());
@@ -197,7 +213,7 @@ public class EvenementsArtisteController {
 		}
 
 		try {
-			evenementService.deleteForArtiste(evenementToDelete, CURRENT_ARTIST_ID);
+			evenementService.deleteForArtiste(evenementToDelete, currentArtistId);
 			refreshEvenements();
 		} catch (SQLDataException e) {
 			showError("Suppression impossible", e.getMessage());

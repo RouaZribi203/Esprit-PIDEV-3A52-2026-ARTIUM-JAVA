@@ -13,6 +13,10 @@ public class CollectionOeuvre {
         return id;
     }
 
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     public String getTitre() {
         return titre;
     }
@@ -37,4 +41,3 @@ public class CollectionOeuvre {
         this.artisteId = artisteId;
     }
 }
-

@@ -3,7 +3,9 @@ package entities;
 public class Livre extends Oeuvre {
     private String categorie;
     private Double prixLocation;
-    private byte[] fichierPdf;
+    private String fichierPdf;
+    private String auteur;
+    private Boolean disponibilite;
 
     public Livre() {
         setClasse("livre");
@@ -25,11 +27,27 @@ public class Livre extends Oeuvre {
         this.prixLocation = prixLocation;
     }
 
-    public byte[] getFichierPdf() {
+    public String getFichierPdf() {
         return fichierPdf;
     }
 
-    public void setFichierPdf(byte[] fichierPdf) {
+    public void setFichierPdf(String fichierPdf) {
         this.fichierPdf = fichierPdf;
+    }
+
+    public String getAuteur() {
+        return auteur;
+    }
+
+    public void setAuteur(String auteur) {
+        this.auteur = auteur;
+    }
+
+    public Boolean getDisponibilite() {
+        return disponibilite;
+    }
+
+    public void setDisponibilite(Boolean disponibilite) {
+        this.disponibilite = disponibilite;
     }
 }

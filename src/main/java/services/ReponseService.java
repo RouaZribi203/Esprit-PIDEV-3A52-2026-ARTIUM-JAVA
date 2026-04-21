@@ -1,4 +1,4 @@
-package Services;
+package services;
 
 import entities.Reponse;
 import utils.MyDatabase;

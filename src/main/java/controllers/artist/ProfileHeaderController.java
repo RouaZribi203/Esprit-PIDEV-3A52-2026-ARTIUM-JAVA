@@ -10,6 +10,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.shape.Circle;
 
 import java.io.File;
+import java.text.Normalizer;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Arrays;
@@ -38,7 +39,13 @@ public class ProfileHeaderController {
     private Button collectionsTabButton;
 
     @FXML
+    private Button bibliothequeTabButton;
+
+    @FXML
     private Button contentTabButton;
+
+    @FXML
+    private Button musiquesTabButton;
 
     @FXML
     private Button evenementsTabButton;
@@ -78,10 +85,11 @@ public class ProfileHeaderController {
 
         String specialite = user.getSpecialite() != null ? user.getSpecialite().trim() : "Artiste";
         this.specialite = specialite;
+        updateDynamicTab();
 
         String ville = user.getVille() != null ? user.getVille().trim() : "-";
-        String dateInscription = user.getDateInscription() != null 
-            ? DATE_FORMATTER.format(user.getDateInscription()) 
+        String dateInscription = user.getDateInscription() != null
+            ? DATE_FORMATTER.format(user.getDateInscription())
             : "-";
 
         metaLabel.setText(specialite + "  -  " + ville + "  -  Inscrit le " + dateInscription);
@@ -107,6 +115,8 @@ public class ProfileHeaderController {
     private void applyDefaultProfile() {
         fullNameLabel.setText("Artiste");
         metaLabel.setText("Artiste  -  -  Inscrit le -");
+        specialite = "Artiste";
+        updateDynamicTab();
         clearProfileImage();
     }
 
@@ -155,10 +165,16 @@ public class ProfileHeaderController {
         this.navigationHandler = navigationHandler;
     }
 
+    public String getDefaultRoute() {
+        return dynamicRoute;
+    }
+
     public void setActiveTab(String route) {
         List<Button> tabs = Arrays.asList(
                 collectionsTabButton,
+                bibliothequeTabButton,
                 contentTabButton,
+                musiquesTabButton,
                 evenementsTabButton,
                 reclamationsTabButton,
                 statistiquesTabButton
@@ -169,6 +185,18 @@ public class ProfileHeaderController {
 
         if ("collections".equals(route)) {
             collectionsTabButton.getStyleClass().add("active");
+        } else if ("bibliotheque".equals(route)) {
+            if ("bibliotheque".equals(dynamicRoute)) {
+                contentTabButton.getStyleClass().add("active");
+            } else {
+                bibliothequeTabButton.getStyleClass().add("active");
+            }
+        } else if ("musiques".equals(route)) {
+            if ("musiques".equals(dynamicRoute)) {
+                contentTabButton.getStyleClass().add("active");
+            } else {
+                musiquesTabButton.getStyleClass().add("active");
+            }
         } else if (dynamicRoute.equals(route)) {
             contentTabButton.getStyleClass().add("active");
         } else if ("evenements".equals(route)) {
@@ -186,8 +214,18 @@ public class ProfileHeaderController {
     }
 
     @FXML
+    private void onBibliothequeClick() {
+        navigate("bibliotheque");
+    }
+
+    @FXML
     private void onDynamicContentClick() {
         navigate(dynamicRoute);
+    }
+
+    @FXML
+    private void onMusiquesClick() {
+        navigate("musiques");
     }
 
     @FXML
@@ -217,16 +255,44 @@ public class ProfileHeaderController {
     }
 
     private void updateDynamicTab() {
-        if ("Musicien".equalsIgnoreCase(specialite)) {
+        if (isMusicienSpecialite()) {
             dynamicRoute = "musiques";
             contentTabButton.setText("Musiques");
-        } else if ("Auteur".equalsIgnoreCase(specialite)) {
+            bibliothequeTabButton.setVisible(false);
+            bibliothequeTabButton.setManaged(false);
+            musiquesTabButton.setVisible(false);
+            musiquesTabButton.setManaged(false);
+        } else if (isAuteurSpecialite()) {
             dynamicRoute = "bibliotheque";
             contentTabButton.setText("Bibliotheque");
+            bibliothequeTabButton.setVisible(false);
+            bibliothequeTabButton.setManaged(false);
+            musiquesTabButton.setVisible(false);
+            musiquesTabButton.setManaged(false);
         } else {
             dynamicRoute = "oeuvres";
             contentTabButton.setText("Mes Oeuvres");
+            bibliothequeTabButton.setVisible(false);
+            bibliothequeTabButton.setManaged(false);
+            musiquesTabButton.setVisible(false);
+            musiquesTabButton.setManaged(false);
         }
+    }
+
+    private boolean isMusicienSpecialite() {
+        String key = normalizedSpecialiteKey();
+        return key.equals("musicien") || key.equals("muscien") || key.equals("musicienne");
+    }
+
+    private boolean isAuteurSpecialite() {
+        String key = normalizedSpecialiteKey();
+        return key.equals("auteur") || key.equals("autheur") || key.equals("auteure");
+    }
+
+    private String normalizedSpecialiteKey() {
+        String raw = specialite == null ? "" : specialite.trim().toLowerCase(Locale.ROOT);
+        String noAccent = Normalizer.normalize(raw, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+        return noAccent.replaceAll("[^a-z]", "");
     }
 }
 

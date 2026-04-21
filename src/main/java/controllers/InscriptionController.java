@@ -1,6 +1,6 @@
 package controllers;
 
-import Services.UserService;
+import services.UserService;
 import entities.User;
 import javafx.animation.FadeTransition;
 import javafx.fxml.FXML;
@@ -405,8 +405,8 @@ public class InscriptionController {
 		draftUser.setBiographie(InputValidator.clean(biographieArea.getText()));
 		draftUser.setPhotoReferencePath(selectedPhotoPath);
 		draftUser.setPhotoProfil(selectedPhotoPath);
+        draftUser.setStatut("Activé");
 		draftUser.setDateInscription(LocalDate.now());
-		draftUser.setStatut("pending");
 		return draftUser;
 	}
 

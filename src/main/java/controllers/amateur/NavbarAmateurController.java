@@ -1,5 +1,7 @@
 package controllers.amateur;
 
+import controllers.MainFX;
+import entities.User;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -30,6 +32,9 @@ public class NavbarAmateurController {
     @FXML
     private Button musiqueButton;
 
+    @FXML
+    private MenuButton userMenuButton;
+
     private Consumer<String> navigationHandler;
     private Consumer<Boolean> themeHandler;
 
@@ -39,6 +44,21 @@ public class NavbarAmateurController {
 
     public void setThemeHandler(Consumer<Boolean> themeHandler) {
         this.themeHandler = themeHandler;
+    }
+
+    public void setUser(User user) {
+        if (userMenuButton == null) {
+            return;
+        }
+        if (user == null) {
+            userMenuButton.setText("Compte");
+            return;
+        }
+
+        String prenom = user.getPrenom() == null ? "" : user.getPrenom().trim();
+        String nom = user.getNom() == null ? "" : user.getNom().trim();
+        String fullName = (prenom + " " + nom).trim();
+        userMenuButton.setText(fullName.isEmpty() ? "Compte" : fullName);
     }
 
     public void setActiveRoute(String route) {
@@ -121,12 +141,12 @@ public class NavbarAmateurController {
 
     @FXML
     private void onSwitchToAmateurView() {
-        switchScene("/views/amateur/AmateurMain.fxml", "/views/styles/amateur-theme.css", "Amateur Dashboard");
+        navigate("edit-profile");
     }
 
     @FXML
     private void onLogoutClick() {
-        // Placeholder for login redirection.
+        MainFX.switchToLoginView();
     }
 
     private void navigate(String route) {

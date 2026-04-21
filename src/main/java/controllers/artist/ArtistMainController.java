@@ -42,10 +42,13 @@ public class ArtistMainController {
         if (connectedUser != null && profileHeaderIncludeController != null) {
             profileHeaderIncludeController.setUser(connectedUser);
         }
+        if (navbarIncludeController != null) {
+            navbarIncludeController.setUser(connectedUser);
+        }
 
         navbarIncludeController.setActionHandler(this::applyTheme);
 
-        onNavigate("oeuvres");
+        onNavigate(profileHeaderIncludeController.getDefaultRoute());
     }
 
     private void onNavigate(String route) {

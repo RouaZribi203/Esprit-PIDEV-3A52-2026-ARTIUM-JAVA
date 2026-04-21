@@ -17,6 +17,10 @@ public class LocationLivre {
         return id;
     }
 
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     public LocalDateTime getDateDebut() {
         return dateDebut;
     }
@@ -55,6 +59,21 @@ public class LocationLivre {
 
     public void setLivreId(Integer livreId) {
         this.livreId = livreId;
+    }
+
+    public LocalDateTime getDateLocation() {
+        return getDateDebut();
+    }
+
+    public void setDateLocation(LocalDateTime dateLocation) {
+        setDateDebut(dateLocation);
+    }
+
+    public LocalDateTime getDateRetour() {
+        if (dateDebut == null || nombreDeJours == null) {
+            return null;
+        }
+        return dateDebut.plusDays(nombreDeJours);
     }
 }
 

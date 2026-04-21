@@ -88,5 +88,10 @@ public class GalerieService implements Iservice<Galerie> {
 
         return galeries;
     }
+
+    @Override
+    public Galerie getById(int id) throws SQLDataException {
+        return null;
+    }
 }
 

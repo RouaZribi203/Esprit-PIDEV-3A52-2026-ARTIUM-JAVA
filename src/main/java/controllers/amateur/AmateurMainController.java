@@ -43,7 +43,10 @@ public class AmateurMainController {
 
         User connectedUser = MainFX.getAuthenticatedUser();
         if (connectedUser != null) {
+            navbarIncludeController.setUser(connectedUser);
             sidebarIncludeController.setUser(connectedUser);
+        } else {
+            navbarIncludeController.setUser(null);
         }
 
         sidebarIncludeController.setNavigationHandler(this::onNavigate);
@@ -57,8 +60,8 @@ public class AmateurMainController {
         sidebarIncludeController.setActiveItem(route);
         miniAudioPlayerIncludeController.setVisibleForRoute(route);
 
-        Object controller = loadAmateurView(resolveRoute(route));
-        configureLoadedController(route, controller);
+        Object controller = loadAmateurView(route, resolveRoute(route));
+        configureLoadedController(controller);
     }
 
     public void openEventDetail(Evenement event) {
@@ -67,37 +70,25 @@ public class AmateurMainController {
     }
 
     public void onTicketPurchased(Ticket ticket) {
-    // Handle post-purchase actions, e.g. show confirmation, update UI, etc.}
+        // Handle post-purchase actions, e.g. show confirmation, update UI, etc.
         onNavigate("payment-success");
     }
 
     private String resolveRoute(String route) {
-        switch (route) {
-            case "feed-recommandations":
-                return "/views/amateur/FeedReco.fxml";
-            case "favoris":
-                return "/views/amateur/Favoris.fxml";
-            case "evenements":
-                return "/views/amateur/Evenements.fxml";
-            case "event-detail":
-                return "/views/amateur/EventDetail.fxml";
-            case "payment-success":
-                return "/views/amateur/PaymentSuccess.fxml";
-            case "bibliotheque":
-                return "/views/amateur/Bibliotheque.fxml";
-            case "book-reader":
-                return "/views/amateur/BookReader.fxml";
-            case "musique":
-                return "/views/amateur/Musique.fxml";
-            case "reclamations":
-                return "/views/amateur/Reclamations.fxml";
-            case "reclamation-detail":
-                return "/views/amateur/ReclamationDetail.fxml";
-            case "edit-profile":
-                return "/views/amateur/EditProfile.fxml";
-            default:
-                return "/views/amateur/Feed.fxml";
-        }
+        return switch (route) {
+            case "feed", "feed-peintures", "feed-sculptures", "feed-photos", "feed-recommandations" -> "/views/amateur/Feed.fxml";
+            case "favoris" -> "/views/amateur/Favoris.fxml";
+            case "evenements" -> "/views/amateur/Evenements.fxml";
+            case "event-detail" -> "/views/amateur/EventDetail.fxml";
+            case "payment-success" -> "/views/amateur/PaymentSuccess.fxml";
+            case "bibliotheque" -> "/views/amateur/Bibliotheque.fxml";
+            case "book-reader" -> "/views/amateur/BookReader.fxml";
+            case "musique" -> "/views/amateur/Musique.fxml";
+            case "reclamations" -> "/views/amateur/Reclamations.fxml";
+            case "reclamation-detail" -> "/views/amateur/ReclamationDetail.fxml";
+            case "edit-profile" -> "/views/amateur/EditProfile.fxml";
+            default -> "/views/amateur/Feed.fxml";
+        };
     }
 
     private void applyTheme(boolean darkMode) {
@@ -118,12 +109,17 @@ public class AmateurMainController {
         }
     }
 
-    private Object loadAmateurView(String fxmlPath) {
+    private Object loadAmateurView(String route, String fxmlPath) {
         try {
             URL resource = Objects.requireNonNull(getClass().getResource(fxmlPath), "FXML not found: " + fxmlPath);
             FXMLLoader loader = new FXMLLoader(resource);
             Node page = loader.load();
+
             Object controller = loader.getController();
+            if (controller instanceof FeedController feedController) {
+                feedController.setRouteFilter(route);
+            }
+
             amateurContentArea.getChildren().setAll(page);
             return controller;
         } catch (IOException e) {
@@ -131,7 +127,7 @@ public class AmateurMainController {
         }
     }
 
-    private void configureLoadedController(String route, Object controller) {
+    private void configureLoadedController(Object controller) {
         if (controller instanceof EventsfrontController eventsController) {
             eventsController.setDetailNavigationHandler(this::openEventDetail);
         } else if (controller instanceof EventDetailController detailController) {

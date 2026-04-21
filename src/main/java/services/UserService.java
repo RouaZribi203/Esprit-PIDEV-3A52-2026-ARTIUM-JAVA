@@ -1,6 +1,7 @@
-package Services;
+package services;
 
 import entities.User;
+import utils.ImageUrlUtils;
 import utils.MyDatabase;
 
 import java.sql.Connection;
@@ -53,6 +54,7 @@ public class UserService implements Iservice<User> {
 
         String normalizedRole = normalizeRole(user.getRole());
         user.setRole(normalizedRole);
+        normalizeImageFields(user);
         applyRoleRules(user, normalizedRole);
         validateRequiredFields(user);
         validateSchemaColumns();
@@ -162,9 +164,14 @@ public class UserService implements Iservice<User> {
         user.setBiographie(rs.getString("biographie"));
         user.setSpecialite(safeGetString(rs, specialiteColumn));
         user.setCentreInteret(safeGetString(rs, centreInteretColumn));
-        user.setPhotoReferencePath(rs.getString("photo_reference_path"));
-        user.setPhotoProfil(rs.getString("photo_profil"));
+        user.setPhotoReferencePath(ImageUrlUtils.normalizeForDatabase(rs.getString("photo_reference_path")));
+        user.setPhotoProfil(ImageUrlUtils.normalizeForDatabase(rs.getString("photo_profil")));
         return user;
+    }
+
+    private void normalizeImageFields(User user) throws SQLDataException {
+        user.setPhotoReferencePath(ImageUrlUtils.persistToWebImageDirectoryAndNormalize(user.getPhotoReferencePath()));
+        user.setPhotoProfil(ImageUrlUtils.persistToWebImageDirectoryAndNormalize(user.getPhotoProfil()));
     }
 
     private String safeGetString(ResultSet rs, String column) throws SQLException {
@@ -344,6 +351,7 @@ public class UserService implements Iservice<User> {
 
         String normalizedRole = normalizeRole(user.getRole());
         user.setRole(normalizedRole);
+        normalizeImageFields(user);
         applyRoleRules(user, normalizedRole);
         validateSchemaColumns();
         validateRequiredFieldsForUpdate(user);
@@ -417,6 +425,11 @@ public class UserService implements Iservice<User> {
             throw new SQLDataException("Lecture utilisateurs impossible: " + e.getMessage());
         }
         return users;
+    }
+
+    @Override
+    public User getById(int id) throws SQLDataException {
+        return null;
     }
 
     private String buildUpdateSql(boolean withPasswordUpdate) {
