@@ -4,9 +4,14 @@ import Services.UserService;
 import entities.User;
 import javafx.animation.FadeTransition;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.Image;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
@@ -156,16 +161,63 @@ public class InscriptionController {
 		User user = buildUser();
 		try {
 			userService.add(user);
-			Alert alert = new Alert(Alert.AlertType.INFORMATION);
-			alert.setTitle("Inscription confirmée");
-			alert.setHeaderText("Votre compte a été enregistré");
-			alert.setContentText("Les données ont été sauvegardées avec succès.");
-			alert.showAndWait();
+			showSuccessAlert();
 			clearForm();
 			MainFX.switchToLoginView();
 		} catch (SQLDataException e) {
 			setMessage("Erreur de sauvegarde: " + e.getMessage(), true);
 		}
+	}
+
+	private void showSuccessAlert() {
+		Alert alert = new Alert(Alert.AlertType.INFORMATION);
+		alert.setTitle("Inscription confirmée");
+		alert.setHeaderText(null);
+
+		// Créer le contenu personnalisé avec le style du thème
+		VBox contentBox = new VBox();
+		contentBox.setSpacing(12);
+		contentBox.setPadding(new Insets(20, 10, 20, 10));
+		contentBox.setStyle("-fx-background-color: rgba(255, 255, 255, 0.94); -fx-background-radius: 12;");
+
+		Label titleLabel = new Label("✓ Inscription réussie !");
+		titleLabel.setStyle("-fx-font-size: 18; -fx-font-weight: 700; -fx-text-fill: #0f172a;");
+
+		Label descriptionLabel = new Label("Votre compte a été créé avec succès.");
+		descriptionLabel.setStyle("-fx-font-size: 14; -fx-text-fill: #475569; -fx-font-weight: 600; -fx-wrap-text: true;");
+
+		Label messageLabel = new Label("Les données ont été sauvegardées. Vous pouvez maintenant vous connecter.");
+		messageLabel.setStyle("-fx-font-size: 13; -fx-text-fill: #667085; -fx-wrap-text: true;");
+
+		VBox successIndicator = new VBox();
+		successIndicator.setStyle("-fx-background-color: linear-gradient(to right, #22c55e, #16a34a); -fx-background-radius: 8; -fx-padding: 10;");
+		successIndicator.setPrefHeight(4);
+		successIndicator.setMaxHeight(4);
+
+		contentBox.getChildren().addAll(titleLabel, descriptionLabel, messageLabel, successIndicator);
+
+		alert.getDialogPane().setContent(contentBox);
+		alert.getDialogPane().setStyle(
+			"-fx-background-color: linear-gradient(to bottom right, rgba(255, 255, 255, 0.96), rgba(241, 247, 255, 0.96)); " +
+			"-fx-border-color: rgba(148, 163, 184, 0.2); " +
+			"-fx-border-width: 1; " +
+			"-fx-padding: 0; " +
+			"-fx-background-radius: 20;"
+		);
+
+		Button okButton = (Button) alert.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK);
+		okButton.setStyle(
+			"-fx-background-color: linear-gradient(to right, #1fc4d7, #4f7cff); " +
+			"-fx-text-fill: white; " +
+			"-fx-font-weight: 700; " +
+			"-fx-padding: 10 20; " +
+			"-fx-background-radius: 12; " +
+			"-fx-cursor: hand; " +
+			"-fx-font-size: 13;"
+		);
+		okButton.setText("Continuer");
+
+		alert.showAndWait();
 	}
 
 	private boolean validateCurrentStep() {
