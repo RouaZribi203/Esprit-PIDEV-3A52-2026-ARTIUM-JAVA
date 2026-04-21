@@ -406,7 +406,7 @@ public class InscriptionController {
 		draftUser.setPhotoReferencePath(selectedPhotoPath);
 		draftUser.setPhotoProfil(selectedPhotoPath);
 		draftUser.setDateInscription(LocalDate.now());
-		draftUser.setStatut("pending");
+		draftUser.setStatut("Activé");
 		return draftUser;
 	}
 
