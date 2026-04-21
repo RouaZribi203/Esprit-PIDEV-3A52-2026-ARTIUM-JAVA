@@ -2,6 +2,7 @@ package controllers.amateur;
 
 import services.CommentaireService;
 import services.LikeService;
+import services.OeuvreRecommendationService;
 import services.OeuvreCollectionService;
 import services.OeuvreService;
 import entities.CollectionOeuvre;
@@ -56,7 +57,9 @@ public class FeedController {
 	private final OeuvreCollectionService oeuvreCollectionService = new OeuvreCollectionService();
 	private final CommentaireService commentaireService = new CommentaireService();
 	private final LikeService likeService = new LikeService();
+	private final OeuvreRecommendationService oeuvreRecommendationService = new OeuvreRecommendationService();
 	private final List<Oeuvre> allOeuvres = new ArrayList<>();
+	private final List<Oeuvre> recommendedOeuvres = new ArrayList<>();
 	private final Map<Integer, String> collectionHashtagById = new HashMap<>();
 	private final Map<Integer, CollectionOeuvre> collectionById = new HashMap<>();
 	private final Map<Integer, User> artistById = new HashMap<>();
@@ -71,14 +74,19 @@ public class FeedController {
 	public void setRouteFilter(String route) {
 		currentUserId = UserSession.getCurrentUserId();
 		currentRouteFilter = route == null ? "feed" : route;
-		applySearch();
+		loadOeuvres();
 	}
 
 	private void loadOeuvres() {
 		try {
 			allOeuvres.clear();
 			allOeuvres.addAll(oeuvreService.getAll());
-			renderOeuvres(allOeuvres);
+			recommendedOeuvres.clear();
+			if (isRecommendationRoute(currentRouteFilter)) {
+				User currentUser = UserSession.getCurrentUser();
+				recommendedOeuvres.addAll(oeuvreRecommendationService.getRecommendedOeuvresByImage(currentUser, 12));
+			}
+			applySearch();
 		} catch (Exception e) {
 			oeuvresContainer.getChildren().clear();
 			emptyStateLabel.setText("Erreur chargement oeuvres: " + e.getMessage());
@@ -305,7 +313,7 @@ public class FeedController {
 		}
 		try {
 			likeService.toggleLike(currentUserId, oeuvre.getId());
-			applySearch();
+			loadOeuvres();
 		} catch (Exception e) {
 			showReactionError(e);
 		}
@@ -317,7 +325,7 @@ public class FeedController {
 		}
 		try {
 			likeService.toggleFavori(currentUserId, oeuvre.getId());
-			applySearch();
+			loadOeuvres();
 		} catch (Exception e) {
 			showReactionError(e);
 		}
@@ -829,9 +837,10 @@ public class FeedController {
 	}
 
 	private void applySearch() {
+		List<Oeuvre> source = isRecommendationRoute(currentRouteFilter) ? recommendedOeuvres : allOeuvres;
 		List<Oeuvre> filtered = new ArrayList<>();
 
-		for (Oeuvre oeuvre : allOeuvres) {
+		for (Oeuvre oeuvre : source) {
 			boolean keywordOk = true;
 			boolean routeOk = matchesRouteFilter(oeuvre);
 
@@ -850,14 +859,17 @@ public class FeedController {
 			case "favoris-peintures" -> isFavoriByCurrentUser(oeuvre) && type.contains("peint");
 			case "favoris-sculptures" -> isFavoriByCurrentUser(oeuvre) && type.contains("sculpt");
 			case "favoris-photos" -> isFavoriByCurrentUser(oeuvre) && type.contains("photo");
-			case "favoris-recommandations" -> isFavoriByCurrentUser(oeuvre) && !loadCommentsForOeuvre(oeuvre).isEmpty();
 			case "feed-peintures" -> type.contains("peint");
 			case "feed-sculptures" -> type.contains("sculpt");
 			case "feed-photos" -> type.contains("photo");
-			case "feed-recommandations" -> !loadCommentsForOeuvre(oeuvre).isEmpty();
+			case "feed-recommandations", "favoris-recommandations" -> true;
 			case "feed" -> true;
 			default -> true;
 		};
+	}
+
+	private boolean isRecommendationRoute(String route) {
+		return "feed-recommandations".equals(route) || "favoris-recommandations".equals(route);
 	}
 }
 

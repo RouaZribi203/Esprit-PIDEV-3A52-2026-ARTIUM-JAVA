@@ -124,7 +124,9 @@
 }
 
 .amateur-nav-link.active,
-.amateur-nav-menu.active {
+.amateur-nav-menu.active,
+.amateur-nav-menu.active-feed,
+.amateur-nav-menu.active-favoris {
     -fx-background-color: #ebedff;
     -fx-border-color: #bfc6ff;
     -fx-text-fill: #3d3bc2;

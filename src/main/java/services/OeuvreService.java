@@ -46,15 +46,17 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
         String type = t.getType() == null || t.getType().trim().isEmpty() ? "Oeuvre" : t.getType().trim();
         LocalDate dateCreation = t.getDateCreation() == null ? LocalDate.now() : t.getDateCreation();
 
-        String sql = "INSERT INTO oeuvre (titre, description, date_creation, image, type, collection_id, classe) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO oeuvre (titre, description, date_creation, image, type, embedding, image_embedding, collection_id, classe) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, titre);
             preparedStatement.setString(2, description);
             preparedStatement.setDate(3, Date.valueOf(dateCreation));
             preparedStatement.setString(4, imageUrl);
             preparedStatement.setString(5, type);
-            preparedStatement.setInt(6, collectionId);
-            preparedStatement.setString(7, "oeuvre");
+            preparedStatement.setString(6, t.getEmbedding());
+            preparedStatement.setString(7, t.getImageEmbedding());
+            preparedStatement.setInt(8, collectionId);
+            preparedStatement.setString(9, "oeuvre");
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new SQLDataException(e.getMessage());
@@ -172,7 +174,7 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
 
     @Override
     public List<Oeuvre> getAll() throws SQLDataException {
-        String sql = "SELECT id, titre, description, date_creation, image, type, collection_id "
+        String sql = "SELECT id, titre, description, date_creation, image, type, embedding, image_embedding, collection_id "
                 + "FROM oeuvre "
                 + "WHERE classe NOT IN ('livre', 'musique') "
                 + "ORDER BY date_creation DESC, id DESC";
@@ -198,7 +200,7 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
      * Retourne la liste des oeuvres d'un artiste (simple, sans engagement data).
      */
     public List<Oeuvre> getOeuvresByArtisteId(int artisteId) throws SQLDataException {
-        String sql = "SELECT o.id, o.titre, o.description, o.date_creation, o.image, o.type, o.collection_id "
+        String sql = "SELECT o.id, o.titre, o.description, o.date_creation, o.image, o.type, o.embedding, o.image_embedding, o.collection_id "
                 + "FROM oeuvre o "
                 + "INNER JOIN collections c ON c.id = o.collection_id "
                 + "WHERE c.artiste_id = ? "
@@ -219,7 +221,7 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
     }
 
     public List<Oeuvre> getOeuvresByCollectionId(int collectionId) throws SQLDataException {
-        String sql = "SELECT id, titre, description, date_creation, image, type, collection_id "
+        String sql = "SELECT id, titre, description, date_creation, image, type, embedding, image_embedding, collection_id "
                 + "FROM oeuvre "
                 + "WHERE collection_id = ? "
                 + "ORDER BY id DESC";
@@ -239,7 +241,7 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
     }
 
     public Oeuvre getOeuvreById(int oeuvreId) throws SQLDataException {
-        String sql = "SELECT id, titre, description, date_creation, image, type, collection_id "
+        String sql = "SELECT id, titre, description, date_creation, image, type, embedding, image_embedding, collection_id "
                 + "FROM oeuvre WHERE id = ? LIMIT 1";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
@@ -297,6 +299,8 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
 
         oeuvre.setImage(ImageUrlUtils.normalizeForDatabase(resultSet.getString("image")));
         oeuvre.setType(resultSet.getString("type"));
+        oeuvre.setEmbedding(resultSet.getString("embedding"));
+        oeuvre.setImageEmbedding(resultSet.getString("image_embedding"));
 
         int collectionId = resultSet.getInt("collection_id");
         if (!resultSet.wasNull()) {

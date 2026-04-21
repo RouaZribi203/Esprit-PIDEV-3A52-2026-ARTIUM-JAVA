@@ -4,6 +4,7 @@ import services.CommentaireService;
 import services.LikeService;
 import services.OeuvreCollectionService;
 import services.OeuvreService;
+import services.ai.PythonImageEmbeddingClient;
 import entities.CollectionOeuvre;
 import entities.Commentaire;
 import entities.Oeuvre;
@@ -37,10 +38,7 @@ import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import utils.UserSession;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -80,6 +78,7 @@ public class MesOeuvresController {
     private final OeuvreCollectionService oeuvreCollectionService = new OeuvreCollectionService();
     private final CommentaireService commentaireService = new CommentaireService();
     private final LikeService likeService = new LikeService();
+    private final PythonImageEmbeddingClient imageEmbeddingClient = new PythonImageEmbeddingClient();
     private final List<Oeuvre> allOeuvres = new ArrayList<>();
     private final Map<Integer, List<Commentaire>> commentsByOeuvreId = new HashMap<>();
     private final Map<Integer, Integer> likeCountByOeuvreId = new HashMap<>();
@@ -338,6 +337,8 @@ public class MesOeuvresController {
                 if (editMode) {
                     oeuvreService.update(oeuvre);
                 } else {
+                    // This popup exists only in the artist add flow, so always generate image embedding here.
+                    oeuvre.setImageEmbedding(imageEmbeddingClient.generateImageEmbeddingJson(imagePathHolder[0]));
                     oeuvreService.add(oeuvre);
                 }
 

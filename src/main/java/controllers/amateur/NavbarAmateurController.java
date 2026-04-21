@@ -38,6 +38,7 @@ public class NavbarAmateurController {
     private Consumer<String> navigationHandler;
     private Consumer<Boolean> themeHandler;
     private String currentRoute = "feed";
+    private String oeuvreSectionContext = "feed";
 
     public void setNavigationHandler(Consumer<String> navigationHandler) {
         this.navigationHandler = navigationHandler;
@@ -64,12 +65,16 @@ public class NavbarAmateurController {
 
     public void setActiveRoute(String route) {
         currentRoute = route == null ? "feed" : route;
+        oeuvreSectionContext = currentRoute.startsWith("favoris") ? "favoris" : "feed";
         oeuvresButton.getStyleClass().remove("active");
+        oeuvresButton.getStyleClass().remove("active-feed");
+        oeuvresButton.getStyleClass().remove("active-favoris");
         bibliothequeButton.getStyleClass().remove("active");
         musiqueButton.getStyleClass().remove("active");
 
         if (currentRoute.startsWith("feed") || currentRoute.startsWith("favoris")) {
             oeuvresButton.getStyleClass().add("active");
+            oeuvresButton.getStyleClass().add("favoris".equals(oeuvreSectionContext) ? "active-favoris" : "active-feed");
         } else if ("bibliotheque".equals(currentRoute) || "book-reader".equals(currentRoute)) {
             bibliothequeButton.getStyleClass().add("active");
         } else if ("musique".equals(currentRoute)) {
@@ -99,7 +104,8 @@ public class NavbarAmateurController {
 
     @FXML
     private void onFeedRecommendationsClick() {
-        navigate(resolveOeuvreRoute("feed-recommandations", "favoris-recommandations"));
+        // Recommendations always open the feed context so the Fil d'actualite section stays active.
+        navigate("feed-recommandations");
     }
 
     @FXML
@@ -158,7 +164,7 @@ public class NavbarAmateurController {
     }
 
     private String resolveOeuvreRoute(String feedRoute, String favorisRoute) {
-        if (currentRoute != null && currentRoute.startsWith("favoris")) {
+        if ("favoris".equals(oeuvreSectionContext)) {
             return favorisRoute;
         }
         return feedRoute;
