@@ -38,6 +38,7 @@ public class ReclamationReplyDialogController {
 
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final int MIN_REPONSE_LEN = 10;
+    private static final int MAX_REPONSE_LEN = 500;
 
     private static boolean isBlankOrTooShort(String value) {
         String v = value == null ? "" : value.trim();
@@ -45,6 +46,11 @@ public class ReclamationReplyDialogController {
         // on compte les caractères hors espaces pour éviter "          "
         String noSpaces = v.replaceAll("\\s+", "");
         return noSpaces.length() < MIN_REPONSE_LEN;
+    }
+
+    private static boolean isTooLong(String value) {
+        String v = value == null ? "" : value.trim();
+        return v.length() > MAX_REPONSE_LEN;
     }
 
     @FXML
@@ -213,6 +219,10 @@ public class ReclamationReplyDialogController {
                 showValidationError("La reponse ne peut pas etre vide et doit contenir au moins " + MIN_REPONSE_LEN + " caracteres.");
                 return;
             }
+            if (isTooLong(c)) {
+                showValidationError("La reponse ne peut pas depasser " + MAX_REPONSE_LEN + " caracteres.");
+                return;
+            }
         }
 
 
@@ -267,6 +277,10 @@ public class ReclamationReplyDialogController {
         String newText = ta.getText() == null ? "" : ta.getText();
         if (isBlankOrTooShort(newText)) {
             showValidationError("La reponse ne peut pas etre vide et doit contenir au moins " + MIN_REPONSE_LEN + " caracteres.");
+            return;
+        }
+        if (isTooLong(newText)) {
+            showValidationError("La reponse ne peut pas depasser " + MAX_REPONSE_LEN + " caracteres.");
             return;
         }
 

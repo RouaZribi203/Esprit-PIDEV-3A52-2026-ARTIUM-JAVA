@@ -46,6 +46,9 @@ public class ReclamationsController implements Initializable {
 	@FXML
 	private TextArea descriptionArea;
 
+	@FXML
+	private Label sendValidationLabel;
+
 	// My reclamations tab
 	@FXML
 	private VBox myReclamationsContainer;
@@ -58,12 +61,25 @@ public class ReclamationsController implements Initializable {
 
 	@FXML
 	private ComboBox<String> myStatutFilter;
+	@FXML
+	private Button typeFilterAll;
+	@FXML
+	private Button typeFilterPayment;
+	@FXML
+	private Button typeFilterWork;
+	@FXML
+	private Button typeFilterEvent;
+	@FXML
+	private Button typeFilterAccount;
 
 	private final ReclamationService reclamationService = new ReclamationService();
 	private final List<Reclamation> myAll = new ArrayList<>();
 	private Integer currentUserId;
 
 	private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.FRENCH);
+	private static final int MIN_DESCRIPTION_LEN = 10;
+	private static final int MAX_DESCRIPTION_LEN = 500;
+	private String selectedTypeFilter = null;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -94,6 +110,13 @@ public class ReclamationsController implements Initializable {
 		if (mySearchField != null) {
 			mySearchField.textProperty().addListener((obs, o, n) -> applyMyFilters());
 		}
+		if (typeCombo != null) {
+			typeCombo.valueProperty().addListener((obs, o, n) -> clearSendValidation());
+		}
+		if (descriptionArea != null) {
+			descriptionArea.textProperty().addListener((obs, o, n) -> clearSendValidation());
+		}
+		updateTypeFilterButtons(typeFilterAll);
 
 		refreshMyReclamations();
 	}
@@ -106,24 +129,26 @@ public class ReclamationsController implements Initializable {
 		if (descriptionArea != null) {
 			descriptionArea.clear();
 		}
+		clearSendValidation();
 	}
 
 	@FXML
 	private void onSend(ActionEvent event) {
+		clearSendValidation();
 		String type = typeCombo == null ? null : typeCombo.getValue();
-		String description = descriptionArea == null || descriptionArea.getText() == null ? "" : descriptionArea.getText().trim();
-		String descriptionNoSpaces = description.replaceAll("\\s+", "");
+		String descriptionRaw = descriptionArea == null || descriptionArea.getText() == null ? "" : descriptionArea.getText();
+		String description = descriptionRaw.trim();
 
 		if (type == null || type.isBlank()) {
-			showWarning("Champs obligatoire", "Veuillez sélectionner un type.");
+			showSendValidation("Veuillez selectionner un type.");
 			return;
 		}
-		if (description.isBlank()) {
-			showWarning("Champs obligatoire", "Veuillez saisir une description.");
+		if (isBlankOrTooShort(description)) {
+			showSendValidation("La reclamation doit contenir au moins " + MIN_DESCRIPTION_LEN + " caracteres.");
 			return;
 		}
-		if (descriptionNoSpaces.length() < 10) {
-			showWarning("Description trop courte", "La réclamation doit contenir au moins 10 caractères.");
+		if (isTooLong(descriptionRaw)) {
+			showSendValidation("La description ne peut pas depasser " + MAX_DESCRIPTION_LEN + " caracteres.");
 			return;
 		}
 
@@ -147,6 +172,7 @@ public class ReclamationsController implements Initializable {
 			reclamationService.add(r);
 			showInfo("Réclamation envoyée", "Votre réclamation a été envoyée avec succès.");
 			onReset(event);
+			clearSendValidation();
 			refreshMyReclamations();
 
 			// Switch to "Mes Réclamations" after send
@@ -202,6 +228,10 @@ public class ReclamationsController implements Initializable {
 					if (statutSelNorm.contains("traite") && !statutSelNorm.contains("non")) return isTraite;
 					if (statutSelNorm.contains("non")) return isNon;
 					return true;
+				})
+				.filter(r -> {
+					if (selectedTypeFilter == null) return true;
+					return normalize(r.getType()).equals(normalize(selectedTypeFilter));
 				})
 				.sorted((a, b) -> {
 					int ia = a.getId() == null ? 0 : a.getId();
@@ -419,6 +449,85 @@ public class ReclamationsController implements Initializable {
 		a.setHeaderText(header);
 		a.setContentText(message);
 		a.showAndWait();
+	}
+
+	private static boolean isBlankOrTooShort(String value) {
+		String v = value == null ? "" : value.trim();
+		if (v.isEmpty()) return true;
+		// on compte les caractères hors espaces pour éviter "          "
+		String noSpaces = v.replaceAll("\\s+", "");
+		return noSpaces.length() < MIN_DESCRIPTION_LEN;
+	}
+
+	private static boolean isTooLong(String value) {
+		String v = value == null ? "" : value.trim();
+		return v.length() > MAX_DESCRIPTION_LEN;
+	}
+
+	private void showSendValidation(String message) {
+		if (sendValidationLabel == null) {
+			showWarning("Attention", message);
+			return;
+		}
+		sendValidationLabel.setText(message);
+		sendValidationLabel.setVisible(true);
+		sendValidationLabel.setManaged(true);
+	}
+
+	@FXML
+	private void onTypeFilterAll(ActionEvent event) {
+		selectedTypeFilter = null;
+		updateTypeFilterButtons(typeFilterAll);
+		applyMyFilters();
+	}
+
+	@FXML
+	private void onTypeFilterPayment(ActionEvent event) {
+		selectedTypeFilter = "Paiement";
+		updateTypeFilterButtons(typeFilterPayment);
+		applyMyFilters();
+	}
+
+	@FXML
+	private void onTypeFilterWork(ActionEvent event) {
+		selectedTypeFilter = "Oeuvre";
+		updateTypeFilterButtons(typeFilterWork);
+		applyMyFilters();
+	}
+
+	@FXML
+	private void onTypeFilterEvent(ActionEvent event) {
+		selectedTypeFilter = "Evenement";
+		updateTypeFilterButtons(typeFilterEvent);
+		applyMyFilters();
+	}
+
+	@FXML
+	private void onTypeFilterAccount(ActionEvent event) {
+		selectedTypeFilter = "Compte";
+		updateTypeFilterButtons(typeFilterAccount);
+		applyMyFilters();
+	}
+
+	private void updateTypeFilterButtons(Button activeButton) {
+		if (typeFilterAll != null) typeFilterAll.getStyleClass().remove("type-filter-active");
+		if (typeFilterPayment != null) typeFilterPayment.getStyleClass().remove("type-filter-active");
+		if (typeFilterWork != null) typeFilterWork.getStyleClass().remove("type-filter-active");
+		if (typeFilterEvent != null) typeFilterEvent.getStyleClass().remove("type-filter-active");
+		if (typeFilterAccount != null) typeFilterAccount.getStyleClass().remove("type-filter-active");
+
+		if (activeButton != null && !activeButton.getStyleClass().contains("type-filter-active")) {
+			activeButton.getStyleClass().add("type-filter-active");
+		}
+	}
+
+	private void clearSendValidation() {
+		if (sendValidationLabel == null) {
+			return;
+		}
+		sendValidationLabel.setText("");
+		sendValidationLabel.setVisible(false);
+		sendValidationLabel.setManaged(false);
 	}
 }
 

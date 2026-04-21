@@ -6,24 +6,13 @@
   <component name="ChangeListManager">
     <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="correction blob oeuvre livre">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/AdminMusiquesController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/AdminMusiquesController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/LivreFormController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/LivreFormController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/BibliofrontController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/BibliofrontController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/BookReaderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/BookReaderController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/EventDetailController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/EventDetailController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/MusicfrontController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/MusicfrontController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/PaymentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/PaymentController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/ReclamationsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/ReclamationsController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/BibliothequArtisteController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/BibliothequArtisteController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/MusiquesController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/MusiquesController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/ProfileHeaderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/ProfileHeaderController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/entities/Livre.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/entities/Livre.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/entities/Playlist.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/entities/Playlist.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/entities/Ticket.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/entities/Ticket.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/services/JdbcLivreService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/JdbcLivreService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/services/MusiqueService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/MusiqueService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/services/PlaylistService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/PlaylistService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/services/TicketService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/TicketService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/ReclamationsArtisteController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/ReclamationsArtisteController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationReplyDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationReplyDialogController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/Reclamations.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/Reclamations.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/artist/Reclamations.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/artist/Reclamations.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-reclamations.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-reclamations.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/artist-reclamations.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/artist-reclamations.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -82,41 +71,41 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
-    &quot;Application.MainFX.executor&quot;: &quot;Run&quot;,
-    &quot;Maven.Artium [org.openjfx:javafx-maven-plugin:0.0.8:run].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.Esprit-PIDEV-3A52-2026-ARTIUM-JAVA [org.openjfx:javafx-maven-plugin:0.0.8:jlink].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.Esprit-PIDEV-3A52-2026-ARTIUM-JAVA [org.openjfx:javafx-maven-plugin:0.0.8:run].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.ProjetArtJava [org.openjfx:javafx-maven-plugin:0.0.8:run].executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;onboarding.tips.debug.path&quot;: &quot;C:/Users/lenovo/IdeaProjects/ProjetArtJava/src/main/java/org/example/Main.java&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.JavaFX&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.Main.executor": "Run",
+    "Application.MainFX.executor": "Run",
+    "Maven.Artium [org.openjfx:javafx-maven-plugin:0.0.8:run].executor": "Run",
+    "Maven.Esprit-PIDEV-3A52-2026-ARTIUM-JAVA [org.openjfx:javafx-maven-plugin:0.0.8:jlink].executor": "Run",
+    "Maven.Esprit-PIDEV-3A52-2026-ARTIUM-JAVA [org.openjfx:javafx-maven-plugin:0.0.8:run].executor": "Run",
+    "Maven.ProjetArtJava [org.openjfx:javafx-maven-plugin:0.0.8:run].executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "git-widget-placeholder": "Reclamation",
+    "junie.onboarding.icon.badge.shown": "true",
+    "kotlin-language-version-configured": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "onboarding.tips.debug.path": "C:/Users/lenovo/IdeaProjects/ProjetArtJava/src/main/java/org/example/Main.java",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "preferences.JavaFX",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;mysql&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "mysql"
     ]
   }
-}</component>
+}]]></component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
