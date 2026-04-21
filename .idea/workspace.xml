@@ -5,8 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/InscriptionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/InscriptionController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/InscriptionSuccessController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/copilotDiffState.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/copilotDiffState.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/ConnexionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/ConnexionController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/MainFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/MainFX.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/NavbarController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/NavbarController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/NavbarAmateurController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/NavbarAmateurController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/NavbarArtisteController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/NavbarArtisteController.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -141,7 +145,7 @@
       <workItem from="1776184271508" duration="31648000" />
       <workItem from="1776525650343" duration="14899000" />
       <workItem from="1776700304770" duration="7336000" />
-      <workItem from="1776708209636" duration="17493000" />
+      <workItem from="1776708209636" duration="18424000" />
     </task>
     <servers />
   </component>

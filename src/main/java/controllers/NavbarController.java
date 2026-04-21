@@ -1,6 +1,7 @@
 package controllers;
 
 import entities.User;
+import utils.SessionManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuButton;
@@ -112,8 +113,11 @@ public class NavbarController {
         // Profil: point d'extension pour ouvrir une page profil admin.
     }
 
-    @FXML
-    private void onLogoutClick() {
-        MainFX.switchToLoginView();
-    }
+	@FXML
+	private void onLogoutClick() {
+		// Effacer la session persistante
+		SessionManager.clearSession();
+		// Rediriger vers la page d'authentification
+		MainFX.switchToLoginView();
+	}
 }

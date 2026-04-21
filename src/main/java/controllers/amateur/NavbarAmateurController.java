@@ -1,5 +1,7 @@
 package controllers.amateur;
 
+import controllers.MainFX;
+import utils.SessionManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -124,10 +126,13 @@ public class NavbarAmateurController {
         switchScene("/views/amateur/AmateurMain.fxml", "/views/styles/amateur-theme.css", "Amateur Dashboard");
     }
 
-    @FXML
-    private void onLogoutClick() {
-        // Placeholder for login redirection.
-    }
+	@FXML
+	private void onLogoutClick() {
+		// Effacer la session persistante
+		SessionManager.clearSession();
+		// Rediriger vers la page d'authentification
+		MainFX.switchToLoginView();
+	}
 
     private void navigate(String route) {
         if (navigationHandler != null) {

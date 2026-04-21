@@ -1,5 +1,7 @@
 package controllers.artist;
 
+import controllers.MainFX;
+import utils.SessionManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -63,10 +65,13 @@ public class NavbarArtisteController {
         notificationsButton.setText("!!");
     }
 
-    @FXML
-    private void onLogoutClick() {
-        // Placeholder for authentication redirection.
-    }
+	@FXML
+	private void onLogoutClick() {
+		// Effacer la session persistante
+		SessionManager.clearSession();
+		// Rediriger vers la page d'authentification
+		MainFX.switchToLoginView();
+	}
 
     private void switchScene(String fxmlPath, String stylesheetPath, String title) {
         Stage stage = (Stage) anchorButton.getScene().getWindow();

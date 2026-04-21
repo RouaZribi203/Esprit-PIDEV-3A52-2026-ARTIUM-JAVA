@@ -1,6 +1,7 @@
 package controllers;
 
 import entities.User;
+import utils.SessionManager;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -93,7 +94,35 @@ public class MainFX extends Application {
         // Taille minimale globale pour garder le layout lisible, sans figer la taille des scenes.
         primaryStage.setMinWidth(1100);
         primaryStage.setMinHeight(650);
-        switchToAuthLandingView();
+
+        // Vérifier si une session persistante existe
+        User sessionUser = SessionManager.getCurrentUser();
+        if (sessionUser != null && sessionUser.getId() != null) {
+            // Utilisateur connecté, rediriger vers le dashboard approprié
+            authenticatedUser = sessionUser;
+            redirectToUserDashboard(sessionUser);
+        } else {
+            // Aucune session, afficher la page d'accueil
+            switchToAuthLandingView();
+        }
+    }
+
+    private void redirectToUserDashboard(User user) {
+        String role = user.getRole() == null ? "" : user.getRole().trim().toLowerCase();
+        switch (role) {
+            case "amateur":
+                switchToAmateurView(user);
+                break;
+            case "artiste":
+            case "artist":
+                switchToArtistView(user);
+                break;
+            case "admin":
+                switchToAdminView(user);
+                break;
+            default:
+                switchToAuthLandingView();
+        }
     }
 
     public static void main(String[] args) {

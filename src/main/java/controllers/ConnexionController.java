@@ -2,6 +2,7 @@ package controllers;
 
 import Services.UserService;
 import entities.User;
+import utils.SessionManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
@@ -49,6 +50,8 @@ public class ConnexionController {
                 setMessage("Compte bloqué. Contactez l'administrateur.");
                 return;
             }
+            // Sauvegarder la session persistante
+            SessionManager.setCurrentUser(user);
             routeByRole(user);
         } catch (SQLDataException e) {
             setMessage(e.getMessage());
