@@ -71,7 +71,7 @@ public class LivreFormController {
                 if (empty || item == null) {
                     setText(null);
                 } else {
-                    setText(item.getId() + " - " + item.getTitre());
+                    setText(item.getTitre());
                 }
             }
         });

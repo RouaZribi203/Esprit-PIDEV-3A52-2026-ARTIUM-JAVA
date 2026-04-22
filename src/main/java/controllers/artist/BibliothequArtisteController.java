@@ -21,6 +21,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -149,6 +150,19 @@ public class BibliothequArtisteController {
                 return null;
             }
         });
+
+        collectionComboBox.setCellFactory(param -> new ListCell<>() {
+            @Override
+            protected void updateItem(CollectionOeuvre item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item.getTitre());
+                }
+            }
+        });
+        collectionComboBox.setButtonCell(collectionComboBox.getCellFactory().call(null));
 
         loadCollections(); // Load collections FIRST
         refresh();         // Then refresh books (now has fallback filtering)
