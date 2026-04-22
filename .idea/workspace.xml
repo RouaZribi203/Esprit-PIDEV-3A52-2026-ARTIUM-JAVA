@@ -6,9 +6,14 @@
   <component name="ChangeListManager">
     <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="correction blob oeuvre livre">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/AdminMusiquesController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/AdminMusiquesController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/MusicfrontController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/MusicfrontController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/AmateurMainController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/AmateurMainController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/MusiquesController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/MusiquesController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/MainLayout.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/MainLayout.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/AmateurMain.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/AmateurMain.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/artist/ArtistMain.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/artist/ArtistMain.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/artist-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/artist-theme.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/dashboard.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/dashboard.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -20,6 +25,7 @@
       <entry key="_C:/Users/Khalil/Desktop/Studies/Semestre 2/Pi Dev/Java" value="3CQjREuTdyPll5iLI0085BcoON4" />
       <entry key="_C:/Users/MSI/Desktop/dev" value="3CXD8IQNwLgaNQCfH5Ff8PStoGT" />
       <entry key="_C:/Users/lenovo/IdeaProjects/ProjetArtJava" value="3CBOsOPT2jv5fiXn9rY3ITlYjez" />
+      <entry key="_C:/Work/3eme/Semestre2/PI_Dev/JAVA/Esprit-PIDEV-3A52-2026-ARTIUM-JAVA" value="3Cj0IdXlpDxnEwKin6ReZE4hGMp" />
       <entry key="_C:/Work/3ème année/Semestre 2/PI Dev/JAVA/Esprit-PIDEV-3A52-2026-ARTIUM-JAVA" value="3CQnF4FbS7xxx2MRkkkZgPbv0gP" />
     </persistenceIdMap>
   </component>
@@ -50,12 +56,12 @@
     &quot;assignee&quot;: &quot;RouaZribi203&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/RouaZribi203/Esprit-PIDEV-3A52-2026-ARTIUM-JAVA.git&quot;,
-    &quot;accountId&quot;: &quot;f45857b0-6c9d-49a9-931f-b16b9863e6de&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/RouaZribi203/Esprit-PIDEV-3A52-2026-ARTIUM-JAVA.git",
+    "accountId": "855bd994-20db-4043-a8c0-2da2ed70002a"
   }
-}</component>
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 7
 }</component>
@@ -81,6 +87,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "git-widget-placeholder": "Musique",
+    "ignore.virus.scanning.warn.message": "true",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
     "node.js.detected.package.eslint": "true",
@@ -127,6 +134,7 @@
       <workItem from="1776514744207" duration="5785000" />
       <workItem from="1776522849192" duration="6633000" />
       <workItem from="1776530552927" duration="6585000" />
+      <workItem from="1776883585378" duration="2209000" />
     </task>
     <task id="LOCAL-00001" summary="corrections de blob">
       <option name="closed" value="true" />

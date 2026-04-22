@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<HBox alignment="CENTER_LEFT" spacing="14.0" styleClass="global-player-bar" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.GlobalPlayerController">
+    <padding>
+        <Insets bottom="10.0" left="16.0" right="16.0" top="10.0" />
+    </padding>
+
+    <ImageView fx:id="coverImageView" fitHeight="56.0" fitWidth="56.0" preserveRatio="false" smooth="true" styleClass="global-player-cover" />
+
+    <VBox spacing="2.0" prefWidth="240.0">
+        <Label fx:id="titleLabel" styleClass="global-player-title" text="Aucune piste en lecture" wrapText="true" />
+        <Label fx:id="artistLabel" styleClass="global-player-artist" text="Artiste inconnu" wrapText="true" />
+        <Label fx:id="metaLabel" styleClass="global-player-meta" text="Genre: -" wrapText="true" />
+    </VBox>
+
+    <Region HBox.hgrow="ALWAYS" />
+
+    <HBox alignment="CENTER" spacing="8.0">
+        <Button mnemonicParsing="false" onAction="#handlePrevious" styleClass="global-player-button" text="Prev" />
+        <Button fx:id="playPauseButton" mnemonicParsing="false" onAction="#handlePlayPause" styleClass="global-player-button global-player-button-primary" text="Play" />
+        <Button mnemonicParsing="false" onAction="#handleNext" styleClass="global-player-button" text="Next" />
+    </HBox>
+
+    <Region prefWidth="14.0" />
+
+    <VBox spacing="4.0" prefWidth="280.0">
+        <Slider fx:id="progressSlider" max="1.0" min="0.0" onMousePressed="#handleSeekStart" onMouseReleased="#handleSeekEnd" value="0.0" />
+        <HBox alignment="CENTER_LEFT" spacing="8.0">
+            <Label fx:id="timeLabel" styleClass="global-player-time" text="0:00 / 0:00" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Label fx:id="statusLabel" styleClass="global-player-status" text="Pret" />
+        </HBox>
+    </VBox>
+</HBox>
+

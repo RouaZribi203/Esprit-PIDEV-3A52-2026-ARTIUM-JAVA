@@ -30,9 +30,6 @@ public class AmateurMainController {
     @FXML
     private SidebarAmateurController sidebarIncludeController;
 
-    @FXML
-    private MiniAudioPlayerController miniAudioPlayerIncludeController;
-
     private Evenement selectedEvent;
 
     @FXML
@@ -50,15 +47,12 @@ public class AmateurMainController {
         }
 
         sidebarIncludeController.setNavigationHandler(this::onNavigate);
-        miniAudioPlayerIncludeController.setNavigationHandler(this::onNavigate);
-
         onNavigate("feed");
     }
 
     private void onNavigate(String route) {
         navbarIncludeController.setActiveRoute(route);
         sidebarIncludeController.setActiveItem(route);
-        miniAudioPlayerIncludeController.setVisibleForRoute(route);
 
         Object controller = loadAmateurView(route, resolveRoute(route));
         configureLoadedController(controller);

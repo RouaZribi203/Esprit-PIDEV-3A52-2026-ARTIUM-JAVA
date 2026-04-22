@@ -27,10 +27,9 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.geometry.Side;
-import javafx.scene.media.Media;
 import javafx.scene.media.MediaException;
-import javafx.scene.media.MediaPlayer;
 import javafx.stage.FileChooser;
+import services.GlobalMediaPlayerService;
 import utils.ImageUrlUtils;
 import utils.MyDatabase;
 
@@ -143,6 +142,7 @@ public class MusiquesController {
 
     private final MusiqueService musiqueService = new MusiqueService();
     private final PlaylistService playlistService = new PlaylistService();
+    private final GlobalMediaPlayerService globalMediaPlayer = GlobalMediaPlayerService.getInstance();
     private final ObservableList<Musique> allTracks = FXCollections.observableArrayList();
     private final ObservableList<Musique> visibleTracks = FXCollections.observableArrayList();
     private final ObservableList<Playlist> allPlaylists = FXCollections.observableArrayList();
@@ -153,7 +153,6 @@ public class MusiquesController {
             "Jazz",
             "Classique"
     );
-    private MediaPlayer mediaPlayer;
     private int currentTrackIndex = -1;
     private static final Set<String> PLAYABLE_EXTENSIONS = new HashSet<>(Arrays.asList("mp3", "m4a", "wav"));
     private static final Set<String> IMAGE_EXTENSIONS = new HashSet<>(Arrays.asList("png", "jpg", "jpeg"));
@@ -248,27 +247,11 @@ public class MusiquesController {
 
     @FXML
     private void handlePlayPause() {
-        if (mediaPlayer == null) {
-            int selectedIndex = currentTrackIndex;
-            if (selectedIndex < 0 && !visibleTracks.isEmpty()) {
-                selectedIndex = 0;
-            }
-            if (selectedIndex >= 0) {
-                playTrackAtIndex(selectedIndex, true);
-            }
+        if (globalMediaPlayer.getCurrentTrack() == null && !visibleTracks.isEmpty()) {
+            playTrackAtIndex(0, true);
             return;
         }
-
-        MediaPlayer.Status status = mediaPlayer.getStatus();
-        if (status == MediaPlayer.Status.PLAYING) {
-            mediaPlayer.pause();
-            playPauseButton.setText("Play");
-            playerStatusLabel.setText("En pause");
-        } else {
-            mediaPlayer.play();
-            playPauseButton.setText("Pause");
-            playerStatusLabel.setText("Lecture en cours");
-        }
+        globalMediaPlayer.togglePlayPause();
     }
 
     @FXML
@@ -276,8 +259,7 @@ public class MusiquesController {
         if (visibleTracks.isEmpty()) {
             return;
         }
-        int targetIndex = currentTrackIndex <= 0 ? visibleTracks.size() - 1 : currentTrackIndex - 1;
-        playTrackAtIndex(targetIndex, true);
+        globalMediaPlayer.playPrevious();
     }
 
     @FXML
@@ -285,8 +267,7 @@ public class MusiquesController {
         if (visibleTracks.isEmpty()) {
             return;
         }
-        int targetIndex = currentTrackIndex >= visibleTracks.size() - 1 ? 0 : currentTrackIndex + 1;
-        playTrackAtIndex(targetIndex, true);
+        globalMediaPlayer.playNext();
     }
 
     @FXML
@@ -614,39 +595,11 @@ public class MusiquesController {
         }
 
         Musique selectedTrack = visibleTracks.get(index);
-        String source = toMediaSource(selectedTrack.getAudio());
-        if (source == null) {
-            playerStatusLabel.setText("Fichier audio introuvable");
-            return;
-        }
-
-        stopPlayer();
-        try {
-            Media media = new Media(source);
-            mediaPlayer = new MediaPlayer(media);
-            currentTrackIndex = index;
-            renderTrackGrid();
-            updateNowPlayingLabels(selectedTrack);
-
-            mediaPlayer.setOnReady(() -> {
-                if (autoPlay) {
-                    mediaPlayer.play();
-                    playPauseButton.setText("Pause");
-                    playerStatusLabel.setText("Lecture en cours");
-                } else {
-                    playPauseButton.setText("Play");
-                    playerStatusLabel.setText("Pret");
-                }
-            });
-            mediaPlayer.setOnEndOfMedia(this::handleNextTrack);
-            mediaPlayer.setOnError(() -> playerStatusLabel.setText(describeMediaError(mediaPlayer.getError())));
-        } catch (MediaException mediaException) {
-            playPauseButton.setText("Play");
-            playerStatusLabel.setText(describeMediaError(mediaException));
-        } catch (RuntimeException runtimeException) {
-            playPauseButton.setText("Play");
-            playerStatusLabel.setText("Impossible de lire ce fichier audio");
-        }
+        currentTrackIndex = index;
+        renderTrackGrid();
+        
+        // Delegate to global media player service with artist name from context
+        globalMediaPlayer.playTrack(selectedTrack, visibleTracks, index, "Artist");
     }
 
     private String describeMediaError(Throwable throwable) {
@@ -738,14 +691,6 @@ public class MusiquesController {
         return null;
     }
 
-    private void stopPlayer() {
-        if (mediaPlayer != null) {
-            mediaPlayer.stop();
-            mediaPlayer.dispose();
-            mediaPlayer = null;
-        }
-    }
-
     private void renderTrackGrid() {
         musiqueGrid.getChildren().clear();
         for (int i = 0; i < visibleTracks.size(); i++) {
@@ -764,7 +709,7 @@ public class MusiquesController {
             if (currentTrackIndex >= 0 && currentTrackIndex < visibleTracks.size()) {
                 Musique current = visibleTracks.get(currentTrackIndex);
                 if (current.getId() != null && current.getId().equals(musique.getId())) {
-                    stopPlayer();
+                    globalMediaPlayer.stop();
                     currentTrackIndex = -1;
                     playPauseButton.setText("Play");
                     playerStatusLabel.setText("Pret");
@@ -912,7 +857,7 @@ public class MusiquesController {
 
         if (visibleTracks.isEmpty()) {
             currentTrackIndex = -1;
-            stopPlayer();
+            globalMediaPlayer.stop();
             nowPlayingTitleLabel.setText("Selectionnez une musique");
             nowPlayingMetaLabel.setText("Genre: -");
             playerStatusLabel.setText("Pret");
