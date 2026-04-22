@@ -45,11 +45,6 @@ public class ConnexionController {
 
         try {
             User user = userService.authenticate(email, password);
-            String statut = user.getStatut() == null ? "" : user.getStatut().trim().toLowerCase();
-            if ("bloqué".equals(statut) || "blocked".equals(statut)) {
-                setMessage("Compte bloqué. Contactez l'administrateur.");
-                return;
-            }
             // Sauvegarder la session persistante
             SessionManager.setCurrentUser(user);
             routeByRole(user);

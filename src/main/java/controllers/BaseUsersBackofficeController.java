@@ -143,6 +143,71 @@ public abstract class BaseUsersBackofficeController {
         }
     }
 
+    protected void onActivateUser(User user) {
+        if (!showActivateConfirmationDialog(user)) {
+            return;
+        }
+
+        try {
+            userService.activateBlockedUser(user);
+            setMessage(managedRoleLabel() + " active avec succes.", false);
+            loadUsers();
+        } catch (SQLDataException e) {
+            setMessage("Erreur activation: " + e.getMessage(), true);
+        }
+    }
+
+    private boolean showActivateConfirmationDialog(User user) {
+        ButtonType activateButtonType = new ButtonType("Activer", ButtonBar.ButtonData.OK_DONE);
+
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmation.setTitle("Activation " + managedRoleLabel().toLowerCase(Locale.ROOT));
+        confirmation.setHeaderText(null);
+        confirmation.getDialogPane().getStyleClass().addAll("users-dialog-pane", "users-activate-dialog");
+        if (searchField != null && searchField.getScene() != null) {
+            confirmation.getDialogPane().getStylesheets().addAll(searchField.getScene().getStylesheets());
+        }
+        confirmation.getDialogPane().getButtonTypes().setAll(activateButtonType, ButtonType.CANCEL);
+        confirmation.getDialogPane().setPrefSize(520, 330);
+
+        Label modeChip = new Label("Action validation");
+        modeChip.getStyleClass().add("users-dialog-status-chip");
+        Label roleChip = new Label(managedRoleLabel());
+        roleChip.getStyleClass().add("users-dialog-role-chip");
+        HBox chipRow = new HBox(8, modeChip, roleChip);
+        chipRow.getStyleClass().add("users-dialog-chip-row");
+
+        Label title = new Label("Activer ce profil ?");
+        title.getStyleClass().addAll("users-dialog-title", "users-activate-title");
+        Label subtitle = new Label("Le compte passera au statut 'Activé' et pourra se connecter normalement.");
+        subtitle.getStyleClass().addAll("users-dialog-subtitle", "users-activate-subtitle");
+
+        VBox hero = new VBox(6, chipRow, title, subtitle);
+        hero.getStyleClass().addAll("users-dialog-hero", "users-activate-hero");
+
+        Label identityTitle = new Label(safe(user.getNom()) + " " + safe(user.getPrenom()));
+        identityTitle.getStyleClass().add("users-dialog-section-title");
+        Label identityEmail = new Label(safe(user.getEmail()));
+        identityEmail.getStyleClass().add("users-dialog-section-subtitle");
+        Label identityHint = new Label("Role: " + managedRoleLabel() + "  |  Statut actuel: " + formatStatusLabel(user.getStatut()));
+        identityHint.getStyleClass().add("users-dialog-label");
+
+        VBox identityCard = new VBox(6, identityTitle, identityEmail, identityHint);
+        identityCard.getStyleClass().addAll("users-dialog-section-card", "users-activate-identity-card");
+
+        VBox content = new VBox(12, hero, identityCard);
+        content.getStyleClass().add("users-dialog-content");
+        confirmation.getDialogPane().setContent(content);
+
+        Button activateButton = (Button) confirmation.getDialogPane().lookupButton(activateButtonType);
+        activateButton.getStyleClass().addAll("card-action-button", "card-success-button", "users-activate-confirm-button");
+        Button cancelButton = (Button) confirmation.getDialogPane().lookupButton(ButtonType.CANCEL);
+        cancelButton.getStyleClass().addAll("card-action-button", "card-soft-button");
+
+        Optional<ButtonType> choice = confirmation.showAndWait();
+        return choice.isPresent() && choice.get() == activateButtonType;
+    }
+
     private boolean showDeleteConfirmationDialog(User user) {
         ButtonType deleteButtonType = new ButtonType("Supprimer", ButtonBar.ButtonData.OK_DONE);
 
@@ -342,7 +407,16 @@ public abstract class BaseUsersBackofficeController {
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        actions.getChildren().addAll(detailsButton, spacer, editButton, deleteButton);
+        
+        boolean isBlocked = user.getStatut() != null && (user.getStatut().toLowerCase(Locale.ROOT).contains("bloqu") || user.getStatut().toLowerCase(Locale.ROOT).contains("blocked"));
+        if (isBlocked) {
+            Button activateButton = new Button("Activer");
+            activateButton.getStyleClass().addAll("card-action-button", "card-success-button");
+            activateButton.setOnAction(event -> onActivateUser(user));
+            actions.getChildren().addAll(detailsButton, spacer, activateButton, editButton, deleteButton);
+        } else {
+            actions.getChildren().addAll(detailsButton, spacer, editButton, deleteButton);
+        }
 
         card.getChildren().addAll(topRow, badgeRow, body, actions);
         return card;

@@ -48,6 +48,8 @@ public class UserService implements Iservice<User> {
     private static final String ADMIN_VILLE = "Tunis";
     private static final String ADMIN_BIOGRAPHIE = "Compte administrateur principal de la plateforme.";
     private static final String ADMIN_STATUT = "Activé";
+    private static final String BLOCKED_STATUT = "Bloqué";
+    private static final String BLOCKED_LOGIN_MESSAGE = "Votre compte est bloqué en attente d'activation par l'admin.";
 
     private final Connection connection;
     private final String idColumn;
@@ -128,6 +130,7 @@ public class UserService implements Iservice<User> {
         String normalizedRole = normalizeRole(user.getRole());
         user.setRole(normalizedRole);
         applyRoleRules(user, normalizedRole);
+        applyDefaultStatusOnCreation(user, normalizedRole);
         validateRequiredFields(user);
         validateSchemaColumns();
 
@@ -174,8 +177,11 @@ public class UserService implements Iservice<User> {
                 if (!matchesPassword(rawPassword, storedPassword)) {
                     throw new SQLDataException("Adresse e-mail ou mot de passe incorrect.");
                 }
-
-                return mapUser(rs);
+                User authenticatedUser = mapUser(rs);
+                if (isBlockedStatus(authenticatedUser.getStatut())) {
+                    throw new SQLDataException(BLOCKED_LOGIN_MESSAGE);
+                }
+                return authenticatedUser;
             }
         } catch (SQLDataException e) {
             throw e;
@@ -440,6 +446,26 @@ public class UserService implements Iservice<User> {
         }
     }
 
+    private void applyDefaultStatusOnCreation(User user, String role) {
+        if ("Amateur".equals(role) || "Artiste".equals(role)) {
+            user.setStatut(BLOCKED_STATUT);
+            return;
+        }
+        if (isBlank(user.getStatut())) {
+            user.setStatut(ADMIN_STATUT);
+        }
+    }
+
+    private boolean isBlockedStatus(String statut) {
+        if (isBlank(statut)) {
+            return false;
+        }
+        String normalizedStatut = statut.trim().toLowerCase();
+        return "bloque".equals(normalizedStatut)
+                || "bloqué".equals(normalizedStatut)
+                || "blocked".equals(normalizedStatut);
+    }
+
     private void validateSchemaColumns() throws SQLDataException {
         List<String> missingSchemaColumns = new ArrayList<>();
         if (specialiteColumn == null) missingSchemaColumns.add("specialite/specailite");
@@ -630,6 +656,32 @@ public class UserService implements Iservice<User> {
             throw new SQLDataException("Lecture utilisateurs par role impossible: " + e.getMessage());
         }
         return users;
+    }
+
+    public void activateBlockedUser(User user) throws SQLDataException {
+        if (user == null || user.getId() == null) {
+            throw new SQLDataException("Activation impossible: identifiant utilisateur manquant.");
+        }
+        ensureConnection();
+        ensureIdColumn();
+
+        if (!isBlockedStatus(user.getStatut())) {
+            throw new SQLDataException("Seuls les comptes bloqués peuvent être activés.");
+        }
+
+        String sql = "UPDATE `user` SET `statut` = ? WHERE `" + idColumn + "` = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, ADMIN_STATUT);
+            ps.setInt(2, user.getId());
+            int affectedRows = ps.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLDataException("Aucun utilisateur activé (id introuvable).");
+            }
+        } catch (SQLDataException e) {
+            throw e;
+        } catch (SQLException e) {
+            throw new SQLDataException("Activation utilisateur impossible: " + e.getMessage());
+        }
     }
 
     @Override

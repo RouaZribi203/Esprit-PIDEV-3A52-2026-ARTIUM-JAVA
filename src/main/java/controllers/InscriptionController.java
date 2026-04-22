@@ -186,7 +186,7 @@ public class InscriptionController {
 		Label descriptionLabel = new Label("Votre compte a été créé avec succès.");
 		descriptionLabel.setStyle("-fx-font-size: 14; -fx-text-fill: #475569; -fx-font-weight: 600; -fx-wrap-text: true;");
 
-		Label messageLabel = new Label("Les données ont été sauvegardées. Vous pouvez maintenant vous connecter.");
+		Label messageLabel = new Label("Votre compte est en attente d'activation par l'admin avant la première connexion.");
 		messageLabel.setStyle("-fx-font-size: 13; -fx-text-fill: #667085; -fx-wrap-text: true;");
 
 		VBox successIndicator = new VBox();
@@ -458,7 +458,7 @@ public class InscriptionController {
 		draftUser.setPhotoReferencePath(selectedPhotoPath);
 		draftUser.setPhotoProfil(selectedPhotoPath);
 		draftUser.setDateInscription(LocalDate.now());
-		draftUser.setStatut("Activé");
+		draftUser.setStatut(ROLE_ADMIN.equalsIgnoreCase(getSelectedRole()) ? "Activé" : "Bloqué");
 		return draftUser;
 	}
 
