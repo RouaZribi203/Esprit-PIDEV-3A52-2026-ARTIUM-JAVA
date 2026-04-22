@@ -50,14 +50,17 @@
         </VBox>
     </top>
     <center>
-        <VBox spacing="14.0" styleClass="amateur-page-card">
+        <VBox spacing="20.0" styleClass="amateur-page-card">
             <padding>
                 <Insets bottom="24.0" left="24.0" right="24.0" top="16.0" />
             </padding>
-            <Label styleClass="page-subtitle" text="Liste des livres disponibles." />
+            <VBox alignment="CENTER">
+                <Label text="📚 Liste des livres disponibles" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #1f2937; -fx-padding: 10;" />
+                <Label text="Découvrez notre collection de livres numériques" style="-fx-font-size: 12; -fx-text-fill: #6b7280; -fx-padding: 0 10 10 10;" />
+            </VBox>
             <ScrollPane fx:id="cardsScroll" VBox.vgrow="ALWAYS" fitToWidth="true" style="-fx-background-color: transparent;">
                 <content>
-                    <TilePane fx:id="cardsTile" prefTileWidth="220.0" hgap="16.0" vgap="16.0" />
+                    <TilePane fx:id="cardsTile" prefTileWidth="220.0" hgap="20.0" vgap="20.0" alignment="CENTER" />
                 </content>
             </ScrollPane>
         </VBox>
