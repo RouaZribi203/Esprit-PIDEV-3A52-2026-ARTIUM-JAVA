@@ -63,6 +63,21 @@
             <StackPane fx:id="commentsLineChartContainer" prefHeight="280.0" VBox.vgrow="ALWAYS" />
         </VBox>
 
+        <!-- Top 3 Amateurs Card -->
+        <VBox spacing="12.0" styleClass="collections-body-card">
+            <padding>
+                <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
+            </padding>
+
+            <HBox spacing="12.0" alignment="CENTER_LEFT">
+                <Label styleClass="stats-chart-title" text="🏆 Top 3 Amateurs de mes oeuvres" HBox.hgrow="ALWAYS" />
+            </HBox>
+
+            <VBox fx:id="topAmateursContainer" spacing="10.0" VBox.vgrow="ALWAYS" alignment="CENTER" minHeight="120.0">
+                <Label text="Chargement des amateurs..." styleClass="stats-attribute-prefix" />
+            </VBox>
+        </VBox>
+
     </VBox>
 
 </VBox>

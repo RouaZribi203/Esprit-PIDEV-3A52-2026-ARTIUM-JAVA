@@ -437,38 +437,88 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
             result.put(day, 0);
         }
 
-        String[] dateColumns = {"date_commentaire", "date_creation", "created_at"};
-        for (String dateColumn : dateColumns) {
-            String sql = "SELECT DAY(cm." + dateColumn + ") AS day_of_month, COUNT(*) AS total_comments " +
-                    "FROM commentaire cm " +
-                    "INNER JOIN oeuvre o ON o.id = cm.oeuvre_id " +
-                    "INNER JOIN collections c ON c.id = o.collection_id " +
-                    "WHERE c.artiste_id = ? " +
-                    "AND cm." + dateColumn + " >= ? " +
-                    "AND cm." + dateColumn + " < ? " +
-                    "GROUP BY DAY(cm." + dateColumn + ") " +
-                    "ORDER BY day_of_month ASC";
+        String sql = "SELECT DAY(cm.date_commentaire) AS day_of_month, COUNT(*) AS total_comments " +
+                "FROM commentaire cm " +
+                "INNER JOIN oeuvre o ON o.id = cm.oeuvre_id " +
+                "INNER JOIN collections c ON c.id = o.collection_id " +
+                "WHERE c.artiste_id = ? " +
+                "AND cm.date_commentaire >= ? " +
+                "AND cm.date_commentaire < ? " +
+                "GROUP BY DAY(cm.date_commentaire) " +
+                "ORDER BY day_of_month ASC";
 
-            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-                stmt.setInt(1, artisteId);
-                stmt.setDate(2, Date.valueOf(startDate));
-                stmt.setDate(3, Date.valueOf(endDateExclusive));
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, artisteId);
+            stmt.setDate(2, Date.valueOf(startDate));
+            stmt.setDate(3, Date.valueOf(endDateExclusive));
 
-                try (ResultSet rs = stmt.executeQuery()) {
-                    while (rs.next()) {
-                        int day = rs.getInt("day_of_month");
-                        int count = rs.getInt("total_comments");
-                        if (result.containsKey(day)) {
-                            result.put(day, count);
-                        }
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    int day = rs.getInt("day_of_month");
+                    int count = rs.getInt("total_comments");
+                    if (result.containsKey(day)) {
+                        result.put(day, count);
                     }
-                    return result;
                 }
-            } catch (SQLException ignored) {
-                // Try next date column variant.
             }
+        } catch (SQLException e) {
+            throw new SQLDataException(e.getMessage());
         }
+        return result;
+    }
 
-        throw new SQLDataException("Impossible de charger les commentaires par jour pour ce mois.");
+    /**
+     * Obtient les 3 utilisateurs les plus actifs (likes, commentaires, favoris) pour un artiste.
+     */
+    public List<Map<String, Object>> getTop3AmateursForArtiste(int artisteId) throws SQLDataException {
+        String sql = "SELECT " +
+                "u.id, u.nom, u.prenom, u.photo_profil, " +
+                "stats.likes_count, stats.comments_count, stats.favoris_count, " +
+                "(stats.likes_count + stats.comments_count + stats.favoris_count) as total_score " +
+                "FROM `user` u " +
+                "JOIN ( " +
+                "    SELECT " +
+                "        user_id, " +
+                "        SUM(likes) as likes_count, " +
+                "        SUM(comments) as comments_count, " +
+                "        SUM(favoris) as favoris_count " +
+                "    FROM ( " +
+                "        SELECT user_id, 1 as likes, 0 as comments, 0 as favoris FROM `like` l INNER JOIN oeuvre o ON o.id = l.oeuvre_id INNER JOIN collections c ON c.id = o.collection_id WHERE c.artiste_id = ? AND l.liked = true " +
+                "        UNION ALL " +
+                "        SELECT user_id, 0 as likes, 1 as comments, 0 as favoris FROM commentaire cm INNER JOIN oeuvre o ON o.id = cm.oeuvre_id INNER JOIN collections c ON c.id = o.collection_id WHERE c.artiste_id = ? " +
+                "        UNION ALL " +
+                "        SELECT user_id, 0 as likes, 0 as comments, 1 as favoris FROM oeuvre_user ou INNER JOIN oeuvre o ON o.id = ou.oeuvre_id INNER JOIN collections c ON c.id = o.collection_id WHERE c.artiste_id = ? " +
+                "    ) as combined " +
+                "    GROUP BY user_id " +
+                ") as stats ON u.id = stats.user_id " +
+                "WHERE u.id != ? " +
+                "ORDER BY total_score DESC " +
+                "LIMIT 3";
+
+        List<Map<String, Object>> topAmateurs = new ArrayList<>();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, artisteId);
+            stmt.setInt(2, artisteId);
+            stmt.setInt(3, artisteId);
+            stmt.setInt(4, artisteId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> amateur = new HashMap<>();
+                    amateur.put("id", rs.getInt("id"));
+                    amateur.put("nom", rs.getString("nom"));
+                    amateur.put("prenom", rs.getString("prenom"));
+                    amateur.put("photo_profil", ImageUrlUtils.normalizeForDatabase(rs.getString("photo_profil")));
+                    amateur.put("likes_count", rs.getInt("likes_count"));
+                    amateur.put("comments_count", rs.getInt("comments_count"));
+                    amateur.put("favoris_count", rs.getInt("favoris_count"));
+                    amateur.put("total_score", rs.getInt("total_score"));
+                    topAmateurs.add(amateur);
+                }
+            }
+        } catch (SQLException e) {
+            throw new SQLDataException(e.getMessage());
+        }
+        return topAmateurs;
     }
 }

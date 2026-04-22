@@ -135,4 +135,19 @@ public class ReclamationService implements Iservice<Reclamation> {
             throw new SQLDataException("Erreur lors de la modification du statut: " + e.getMessage());
         }
     }
+
+    public int getTotalReclamationsForUser(int userId) throws SQLDataException {
+        String sql = "SELECT COUNT(*) FROM reclamation WHERE user_id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, userId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            throw new SQLDataException("Erreur lors du comptage des reclamations: " + e.getMessage());
+        }
+        return 0;
+    }
 }

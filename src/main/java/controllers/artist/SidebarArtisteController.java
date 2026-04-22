@@ -6,8 +6,12 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Circle;
+import services.EvenementService;
+import services.OeuvreService;
+import services.ReclamationService;
 
 import java.io.File;
+import java.sql.SQLDataException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -40,6 +44,25 @@ public class SidebarArtisteController {
     private Label avatarFallbackLabel;
 
     @FXML
+    private Label oeuvresCountLabel;
+
+    @FXML
+    private Label reclamationsCountLabel;
+
+    @FXML
+    private Label evenementsCountLabel;
+
+    @FXML
+    private Label commentsCountLabel;
+
+    @FXML
+    private Label likesCountLabel;
+
+    private final OeuvreService oeuvreService = new OeuvreService();
+    private final ReclamationService reclamationService = new ReclamationService();
+    private final EvenementService evenementService = new EvenementService();
+
+    @FXML
     public void initialize() {
         installCircularClip();
         applyDefaultProfile();
@@ -55,6 +78,8 @@ public class SidebarArtisteController {
         dateNaissanceLabel.setText(formatDate(user.getDateNaissance()));
         dateInscriptionLabel.setText(formatDate(user.getDateInscription()));
         emailLabel.setText(nonBlank(user.getEmail(), DEFAULT_EMAIL));
+
+        loadStatistics(user.getId());
 
         String imagePath = pickProfileImage(user);
         if (imagePath == null) {
@@ -93,7 +118,38 @@ public class SidebarArtisteController {
         dateNaissanceLabel.setText(DEFAULT_DATE);
         dateInscriptionLabel.setText(DEFAULT_DATE);
         emailLabel.setText(DEFAULT_EMAIL);
+        resetStatistics();
         clearProfileImage();
+    }
+
+    private void loadStatistics(int userId) {
+        new Thread(() -> {
+            try {
+                int oeuvresCount = oeuvreService.getTotalOeuvresForArtiste(userId);
+                int reclamationsCount = reclamationService.getTotalReclamationsForUser(userId);
+                int evenementsCount = evenementService.getByArtisteId(userId).size();
+                int commentsCount = oeuvreService.getTotalCommentsForArtiste(userId);
+                int likesCount = oeuvreService.getTotalLikesForArtiste(userId);
+
+                javafx.application.Platform.runLater(() -> {
+                    oeuvresCountLabel.setText(String.valueOf(oeuvresCount));
+                    reclamationsCountLabel.setText(String.valueOf(reclamationsCount));
+                    evenementsCountLabel.setText(String.valueOf(evenementsCount));
+                    commentsCountLabel.setText(String.valueOf(commentsCount));
+                    likesCountLabel.setText(String.valueOf(likesCount));
+                });
+            } catch (SQLDataException e) {
+                System.err.println("Erreur lors du chargement des statistiques: " + e.getMessage());
+            }
+        }).start();
+    }
+
+    private void resetStatistics() {
+        oeuvresCountLabel.setText("0");
+        reclamationsCountLabel.setText("0");
+        evenementsCountLabel.setText("0");
+        commentsCountLabel.setText("0");
+        likesCountLabel.setText("0");
     }
 
     private void clearProfileImage() {
