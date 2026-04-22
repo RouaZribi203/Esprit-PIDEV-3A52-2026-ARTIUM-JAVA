@@ -19,6 +19,7 @@ public class EvenementService implements Iservice<Evenement> {
 
     private static final String INSERT_SQL = "INSERT INTO evenement (titre, description, date_debut, date_fin, date_creation, type, image_couverture, statut, capacite_max, prix_ticket, galerie_id, artiste_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String UPDATE_SQL = "UPDATE evenement SET titre = ?, description = ?, date_debut = ?, date_fin = ?, date_creation = ?, type = ?, image_couverture = ?, statut = ?, capacite_max = ?, prix_ticket = ?, galerie_id = ?, artiste_id = ? WHERE id = ?";
+    private static final String SELECT_BY_ID_SQL = "SELECT id, titre, description, date_debut, date_fin, date_creation, type, image_couverture, statut, capacite_max, prix_ticket, galerie_id, artiste_id FROM evenement WHERE id = ?";
     private static final String SELECT_ALL_SQL = "SELECT id, titre, description, date_debut, date_fin, date_creation, type, image_couverture, statut, capacite_max, prix_ticket, galerie_id, artiste_id FROM evenement ORDER BY id DESC";
     private static final String SELECT_BY_ARTIST_SQL = "SELECT id, titre, description, date_debut, date_fin, date_creation, type, image_couverture, statut, capacite_max, prix_ticket, galerie_id, artiste_id FROM evenement WHERE artiste_id = ? ORDER BY date_debut DESC, id DESC";
     private static final String DELETE_SQL = "DELETE FROM evenement WHERE id = ?";
@@ -84,6 +85,17 @@ public class EvenementService implements Iservice<Evenement> {
 
     @Override
     public Evenement getById(int id) throws SQLDataException {
+        try (PreparedStatement statement = MyDatabase.getInstance().getConnection().prepareStatement(SELECT_BY_ID_SQL)) {
+            statement.setInt(1, id);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return mapEvenement(resultSet);
+                }
+            }
+        } catch (SQLException e) {
+            throw new SQLDataException("Erreur lors de la recuperation de l'evenement: " + e.getMessage());
+        }
+
         return null;
     }
 
@@ -264,6 +276,9 @@ public class EvenementService implements Iservice<Evenement> {
         if (evenement.getDateFin().isBefore(evenement.getDateDebut())) {
             throw new SQLDataException("La date de fin doit etre apres la date de debut");
         }
+        if (isCreate && evenement.getDateDebut().toLocalDate().isBefore(java.time.LocalDate.now().plusDays(3))) {
+            throw new SQLDataException("La date de debut doit etre au moins 3 jours apres aujourd'hui");
+        }
         if (evenement.getType() == null || evenement.getType().isBlank()) {
             throw new SQLDataException("Le type de l'evenement est obligatoire");
         }
@@ -273,6 +288,10 @@ public class EvenementService implements Iservice<Evenement> {
     }
 
     private String computeDynamicStatut(LocalDateTime dateDebut, LocalDateTime dateFin, String fallback) {
+        if (fallback != null && fallback.equalsIgnoreCase("Annulé")) {
+            return "Annulé";
+        }
+
         if (dateDebut == null || dateFin == null) {
             return fallback == null || fallback.isBlank() ? "À venir" : fallback;
         }

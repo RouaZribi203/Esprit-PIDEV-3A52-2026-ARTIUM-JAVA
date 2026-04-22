@@ -1,6 +1,7 @@
 package controllers.amateur;
 
 import controllers.MainFX;
+import entities.Notification;
 import entities.User;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -8,10 +9,15 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.stage.Stage;
+import services.NotificationService;
+import utils.UserSession;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -21,7 +27,7 @@ public class NavbarAmateurController {
     private Button anchorButton;
 
     @FXML
-    private Button notificationsButton;
+    private MenuButton notificationsButton;
 
     @FXML
     private MenuButton oeuvresButton;
@@ -35,8 +41,22 @@ public class NavbarAmateurController {
     @FXML
     private MenuButton userMenuButton;
 
+    private final NotificationService notificationService = new NotificationService();
     private Consumer<String> navigationHandler;
     private Consumer<Boolean> themeHandler;
+
+    @FXML
+    public void initialize() {
+        if (notificationsButton != null) {
+            notificationsButton.setOnShowing(event -> populateNotificationsMenu());
+        }
+        if (bibliothequeButton != null) {
+            bibliothequeButton.setOnAction(event -> navigate("bibliotheque"));
+        }
+        if (musiqueButton != null) {
+            musiqueButton.setOnAction(event -> navigate("musique"));
+        }
+    }
 
     public void setNavigationHandler(Consumer<String> navigationHandler) {
         this.navigationHandler = navigationHandler;
@@ -62,6 +82,10 @@ public class NavbarAmateurController {
     }
 
     public void setActiveRoute(String route) {
+        if (oeuvresButton == null) {
+            return;
+        }
+
         oeuvresButton.getStyleClass().remove("active");
         bibliothequeButton.getStyleClass().remove("active");
         musiqueButton.getStyleClass().remove("active");
@@ -101,16 +125,6 @@ public class NavbarAmateurController {
     }
 
     @FXML
-    private void onBibliothequeClick() {
-        navigate("bibliotheque");
-    }
-
-    @FXML
-    private void onMusiqueClick() {
-        navigate("musique");
-    }
-
-    @FXML
     private void onThemeLight() {
         if (themeHandler != null) {
             themeHandler.accept(false);
@@ -126,18 +140,69 @@ public class NavbarAmateurController {
 
     @FXML
     private void onNotificationsClick() {
-        notificationsButton.setText("!!");
+        populateNotificationsMenu();
     }
 
-    @FXML
-    private void onSwitchToAdminView() {
-        switchScene("/views/MainLayout.fxml", "/views/styles/dashboard.css", "Admin Dashboard");
-    }
+     private void populateNotificationsMenu() {
+         if (notificationsButton == null) {
+             return;
+         }
 
-    @FXML
-    private void onSwitchToArtistView() {
-        switchScene("/views/artist/ArtistMain.fxml", "/views/styles/artist-theme.css", "Artist Dashboard");
-    }
+         Integer userId = UserSession.getCurrentUserId();
+         notificationsButton.getItems().clear();
+         
+         // Add header
+         MenuItem headerItem = new MenuItem("Notifications");
+         headerItem.getStyleClass().add("notifications-header");
+         headerItem.setDisable(true);
+         notificationsButton.getItems().add(headerItem);
+         notificationsButton.getItems().add(new SeparatorMenuItem());
+
+         // Apply style to context menu
+         notificationsButton.getStyleClass().add("notifications-context-menu");
+
+         if (userId == null) {
+             notificationsButton.setText("🔔");
+             notificationsButton.getItems().add(disabledItem("Aucune session utilisateur active."));
+             return;
+         }
+
+         List<Notification> notifications = notificationService.getUnreadNotifications(userId);
+         notificationsButton.setText("🔔");
+
+         if (notifications.isEmpty()) {
+             notificationsButton.getItems().add(disabledItem("Aucune notification pour le moment."));
+             return;
+         }
+
+         for (Notification notification : notifications) {
+             notificationsButton.getItems().add(createNotificationItem(notification));
+         }
+     }
+
+     private MenuItem disabledItem(String text) {
+         MenuItem item = new MenuItem(text);
+         item.setDisable(true);
+         item.getStyleClass().add("notifications-item");
+         return item;
+     }
+
+     private MenuItem createNotificationItem(Notification notification) {
+         String displayText = formatNotification(notification);
+         MenuItem item = new MenuItem(displayText);
+         item.getStyleClass().add("notifications-item");
+         item.setDisable(true);
+         return item;
+     }
+
+     private String formatNotification(Notification notification) {
+         String title = notification.getTitle() == null || notification.getTitle().isBlank() ? "Notification" : notification.getTitle();
+         String message = notification.getMessage() == null || notification.getMessage().isBlank() ? "" : notification.getMessage();
+         if (message.isEmpty()) {
+             return "📌 " + title;
+         }
+         return "📌 " + title + " - " + message;
+     }
 
     @FXML
     private void onSwitchToAmateurView() {
@@ -156,7 +221,11 @@ public class NavbarAmateurController {
     }
 
     private void switchScene(String fxmlPath, String stylesheetPath, String title) {
-        Stage stage = (Stage) anchorButton.getScene().getWindow();
+        if (notificationsButton == null || notificationsButton.getScene() == null) {
+            return;
+        }
+
+        Stage stage = (Stage) notificationsButton.getScene().getWindow();
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();

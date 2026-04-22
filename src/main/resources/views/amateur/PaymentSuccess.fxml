@@ -21,7 +21,7 @@
     <Label fx:id="purchaseDateLabel" text="Date d'achat" />
     <Label fx:id="qrPayloadLabel" styleClass="page-caption" text="QR" wrapText="true" />
     <Button mnemonicParsing="false" onAction="#onShowQrCodeClick" text="Afficher le QR Code" />
-    <Button mnemonicParsing="false" onAction="#onDownloadTicketClick" text="Télécharger le ticket PDF" />
+    <Button mnemonicParsing="false" onAction="#onShowTicketClick" text="Afficher le ticket" />
     <Button mnemonicParsing="false" onAction="#onBackToEventClick" text="Retour à l'évènement" />
     <Button mnemonicParsing="false" onAction="#onBackToEventsClick" text="Tous les évènements" />
 </VBox>

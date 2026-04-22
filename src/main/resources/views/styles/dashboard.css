@@ -2722,10 +2722,12 @@
 .events-filter-row {
     -fx-padding: 2 0 2 0;
     -fx-alignment: top-left;
+    -fx-max-width: infinity;
 }
 
 .events-filter-block {
     -fx-min-width: 0;
+    -fx-max-width: infinity;
 }
 
 .events-filter-title {

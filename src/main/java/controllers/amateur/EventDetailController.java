@@ -15,6 +15,7 @@ import services.TicketService;
 
 import java.io.File;
 import java.sql.SQLDataException;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.function.Consumer;
@@ -82,12 +83,22 @@ public class EventDetailController {
 		this.event = event;
 		if (event == null) {
 			buyTicketButton.setDisable(true);
+			if (backButton != null) {
+				backButton.setDisable(false);
+			}
 			renderPurchasedTickets(List.of());
 			return;
 		}
 
-		buyTicketButton.setDisable(false);
-		buyTicketButton.setText("Acheter ticket");
+		boolean purchasable = event.getStatut() == null || !"Annulé".equalsIgnoreCase(event.getStatut().trim());
+		if (purchasable && event.getDateDebut() != null) {
+			purchasable = LocalDateTime.now().isBefore(event.getDateDebut());
+		}
+		buyTicketButton.setDisable(!purchasable);
+		buyTicketButton.setText(purchasable ? "Acheter ticket" : "Ticket indisponible");
+		if (backButton != null) {
+			backButton.setDisable(false);
+		}
 
 		titleLabel.setText(textOrDefault(event.getTitre(), "Evenement"));
 		typeLabel.setText(textOrDefault(event.getType(), "Type non precise"));
@@ -187,9 +198,9 @@ public class EventDetailController {
 			Button qrButton = new Button("QR Code");
 			qrButton.getStyleClass().add("ticket-action-secondary");
 			qrButton.setOnAction(event -> showQrPayload(ticket));
-			Button pdfButton = new Button("Telecharger");
+			Button pdfButton = new Button("Voir ticket");
 			pdfButton.getStyleClass().add("ticket-action-primary");
-			pdfButton.setOnAction(event -> showPdfNotReady());
+			pdfButton.setOnAction(event -> showTicketPreview(ticket));
 			actions.getChildren().addAll(qrButton, pdfButton);
 
 			HBox.setHgrow(info, Priority.ALWAYS);
@@ -206,11 +217,17 @@ public class EventDetailController {
 		alert.showAndWait();
 	}
 
-	private void showPdfNotReady() {
+	private void showTicketPreview(Ticket ticket) {
 		Alert alert = new Alert(Alert.AlertType.INFORMATION);
-		alert.setTitle("Ticket PDF");
-		alert.setHeaderText("Export PDF non disponible");
-		alert.setContentText("Le ticket est achete. L'export PDF sera ajoute ensuite.");
+		alert.setTitle("Aperçu du ticket");
+		alert.setHeaderText("Ticket acheté");
+		alert.setContentText(
+				"Référence: " + resolveReference(ticket)
+						+ "\nÉvènement: " + textOrDash(ticket.getEvenementId())
+						+ "\nUtilisateur: " + textOrDash(ticket.getUserId())
+						+ "\nDate d'achat: " + formatPurchaseDate(ticket)
+						+ "\nQR: " + resolveQrPayload(ticket)
+		);
 		alert.showAndWait();
 	}
 
@@ -259,6 +276,14 @@ public class EventDetailController {
 		return value == null ? "-" : String.valueOf(value);
 	}
 
+
+	private String resolveQrPayload(Ticket ticket) {
+		if (ticket.getCodeQr() == null || ticket.getCodeQr().isBlank()) {
+			return "QR non disponible";
+		}
+		return ticket.getCodeQr();
+	}
+
 	private String resolveReference(Ticket ticket) {
 		if (ticket.getCodeQr() == null || ticket.getCodeQr().isBlank()) {
 			return "-";
@@ -270,13 +295,6 @@ public class EventDetailController {
 			return payload.substring(refIndex + 5);
 		}
 		return payload;
-	}
-
-	private String resolveQrPayload(Ticket ticket) {
-		if (ticket.getCodeQr() == null || ticket.getCodeQr().isBlank()) {
-			return "QR non disponible";
-		}
-		return ticket.getCodeQr();
 	}
 
 	private String formatPurchaseDate(Ticket ticket) {

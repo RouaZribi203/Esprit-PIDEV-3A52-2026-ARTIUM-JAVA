@@ -15,6 +15,8 @@ public class EvenementArtisteCardController {
         void onEdit(Evenement evenement);
 
         void onDelete(Evenement evenement);
+
+        void onCancel(Evenement evenement);
     }
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -52,6 +54,13 @@ public class EvenementArtisteCardController {
     private void onEditClick() {
         if (actionHandler != null && evenement != null) {
             actionHandler.onEdit(evenement);
+        }
+    }
+
+    @FXML
+    private void onCancelClick() {
+        if (actionHandler != null && evenement != null) {
+            actionHandler.onCancel(evenement);
         }
     }
 

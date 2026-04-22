@@ -66,11 +66,21 @@ public class PaymentController {
 	}
 
 	@FXML
-	private void onDownloadTicketClick() {
+	private void onShowTicketClick() {
+		if (ticket == null) {
+			return;
+		}
+
 		Alert alert = new Alert(Alert.AlertType.INFORMATION);
-		alert.setTitle("Téléchargement du ticket");
-		alert.setHeaderText("Export PDF non encore disponible");
-		alert.setContentText("Le ticket a bien été créé, mais l'export PDF n'est pas encore implémenté.");
+		alert.setTitle("Aperçu du ticket");
+		alert.setHeaderText("Ticket généré");
+		alert.setContentText(
+				"Référence: " + resolveReference(ticket)
+						+ "\nÉvènement: " + formatInteger(ticket.getEvenementId())
+						+ "\nUtilisateur: " + formatInteger(ticket.getUserId())
+						+ "\nDate d'achat: " + (ticket.getDateAchat() == null ? "-" : DATE_FORMATTER.format(ticket.getDateAchat()))
+						+ "\nQR: " + resolveQrPayload(ticket)
+		);
 		alert.showAndWait();
 	}
 
