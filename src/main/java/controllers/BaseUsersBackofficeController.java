@@ -158,51 +158,100 @@ public abstract class BaseUsersBackofficeController {
     }
 
     private boolean showActivateConfirmationDialog(User user) {
-        ButtonType activateButtonType = new ButtonType("Activer", ButtonBar.ButtonData.OK_DONE);
+        ButtonType activateButtonType = new ButtonType("Activer le compte", ButtonBar.ButtonData.OK_DONE);
 
         Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmation.setTitle("Activation " + managedRoleLabel().toLowerCase(Locale.ROOT));
+        confirmation.setTitle("✓ Activer " + managedRoleLabel().toLowerCase(Locale.ROOT));
         confirmation.setHeaderText(null);
         confirmation.getDialogPane().getStyleClass().addAll("users-dialog-pane", "users-activate-dialog");
         if (searchField != null && searchField.getScene() != null) {
             confirmation.getDialogPane().getStylesheets().addAll(searchField.getScene().getStylesheets());
         }
         confirmation.getDialogPane().getButtonTypes().setAll(activateButtonType, ButtonType.CANCEL);
-        confirmation.getDialogPane().setPrefSize(520, 330);
+        confirmation.getDialogPane().setPrefSize(560, 420);
 
-        Label modeChip = new Label("Action validation");
+        // Icon/Visual indicator
+        Label iconLabel = new Label("🔓");
+        iconLabel.setStyle("-fx-font-size: 48; -fx-text-fill: #10b981;");
+
+        // Chips/Tags
+        Label modeChip = new Label("✓ Validation");
         modeChip.getStyleClass().add("users-dialog-status-chip");
+        modeChip.setStyle("-fx-background-color: #d1fae5; -fx-text-fill: #047857; -fx-padding: 6 12;");
+        
         Label roleChip = new Label(managedRoleLabel());
         roleChip.getStyleClass().add("users-dialog-role-chip");
+        roleChip.setStyle("-fx-background-color: #f3f4f6; -fx-text-fill: #1f2937; -fx-padding: 6 12;");
+        
         HBox chipRow = new HBox(8, modeChip, roleChip);
         chipRow.getStyleClass().add("users-dialog-chip-row");
 
         Label title = new Label("Activer ce profil ?");
-        title.getStyleClass().addAll("users-dialog-title", "users-activate-title");
-        Label subtitle = new Label("Le compte passera au statut 'Activé' et pourra se connecter normalement.");
-        subtitle.getStyleClass().addAll("users-dialog-subtitle", "users-activate-subtitle");
+        title.setStyle("-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #1f2937;");
+        
+        Label subtitle = new Label("Le compte sera activé et l'utilisateur pourra se connecter immédiatement.");
+        subtitle.setStyle("-fx-font-size: 13; -fx-text-fill: #6b7280; -fx-wrap-text: true;");
+        subtitle.setWrapText(true);
 
-        VBox hero = new VBox(6, chipRow, title, subtitle);
-        hero.getStyleClass().addAll("users-dialog-hero", "users-activate-hero");
+        VBox hero = new VBox(12, iconLabel, chipRow, title, subtitle);
+        hero.setAlignment(Pos.TOP_CENTER);
+        hero.setStyle("-fx-padding: 20; -fx-background-color: linear-gradient(to bottom, #f0fdf4, #f9fafb); -fx-border-radius: 8; -fx-border-color: #dcfce7; -fx-border-width: 1;");
 
-        Label identityTitle = new Label(safe(user.getNom()) + " " + safe(user.getPrenom()));
-        identityTitle.getStyleClass().add("users-dialog-section-title");
-        Label identityEmail = new Label(safe(user.getEmail()));
-        identityEmail.getStyleClass().add("users-dialog-section-subtitle");
-        Label identityHint = new Label("Role: " + managedRoleLabel() + "  |  Statut actuel: " + formatStatusLabel(user.getStatut()));
-        identityHint.getStyleClass().add("users-dialog-label");
+        // Profile information card
+        VBox profileCard = new VBox(10);
+        profileCard.setStyle("-fx-padding: 16; -fx-background-color: #f9fafb; -fx-border-radius: 8; -fx-border-color: #e5e7eb; -fx-border-width: 1;");
+        
+        Label profileTitle = new Label("📋 Profil à activer");
+        profileTitle.setStyle("-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #374151;");
+        
+        HBox nameRow = new HBox(8);
+        nameRow.setStyle("-fx-spacing: 8;");
+        Label nameKeyLabel = new Label("Utilisateur:");
+        nameKeyLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #4b5563; -fx-min-width: 100;");
+        Label nameValueLabel = new Label(safe(user.getNom()) + " " + safe(user.getPrenom()));
+        nameValueLabel.setStyle("-fx-text-fill: #1f2937; -fx-font-weight: 600;");
+        nameRow.getChildren().addAll(nameKeyLabel, nameValueLabel);
+        
+        HBox emailRow = new HBox(8);
+        Label emailKeyLabel = new Label("Email:");
+        emailKeyLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #4b5563; -fx-min-width: 100;");
+        Label emailValueLabel = new Label(safe(user.getEmail()));
+        emailValueLabel.setStyle("-fx-text-fill: #1f2937;");
+        emailRow.getChildren().addAll(emailKeyLabel, emailValueLabel);
+        
+        HBox roleRow = new HBox(8);
+        Label roleKeyLabel = new Label("Rôle:");
+        roleKeyLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #4b5563; -fx-min-width: 100;");
+        Label roleValueLabel = new Label(managedRoleLabel());
+        roleValueLabel.setStyle("-fx-text-fill: #1f2937; -fx-background-color: #f3f4f6; -fx-padding: 2 8; -fx-border-radius: 4;");
+        roleRow.getChildren().addAll(roleKeyLabel, roleValueLabel);
+        
+        HBox statusRow = new HBox(8);
+        Label statusKeyLabel = new Label("Statut actuel:");
+        statusKeyLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #4b5563; -fx-min-width: 100;");
+        Label statusValueLabel = new Label(formatStatusLabel(user.getStatut()));
+        statusValueLabel.setStyle("-fx-text-fill: #dc2626; -fx-background-color: #fee2e2; -fx-padding: 2 8; -fx-border-radius: 4; -fx-font-weight: bold;");
+        statusRow.getChildren().addAll(statusKeyLabel, statusValueLabel);
+        
+        profileCard.getChildren().addAll(profileTitle, nameRow, emailRow, roleRow, statusRow);
 
-        VBox identityCard = new VBox(6, identityTitle, identityEmail, identityHint);
-        identityCard.getStyleClass().addAll("users-dialog-section-card", "users-activate-identity-card");
+        // Information message
+        Label infoLabel = new Label("ℹ Une fois activé, ce compte aura un accès complet à la plateforme.");
+        infoLabel.setStyle("-fx-font-size: 12; -fx-text-fill: #059669; -fx-background-color: #d1fae5; -fx-padding: 10; -fx-border-radius: 6; -fx-wrap-text: true;");
+        infoLabel.setWrapText(true);
 
-        VBox content = new VBox(12, hero, identityCard);
+        VBox content = new VBox(14, hero, profileCard, infoLabel);
+        content.setStyle("-fx-padding: 10;");
         content.getStyleClass().add("users-dialog-content");
         confirmation.getDialogPane().setContent(content);
 
         Button activateButton = (Button) confirmation.getDialogPane().lookupButton(activateButtonType);
         activateButton.getStyleClass().addAll("card-action-button", "card-success-button", "users-activate-confirm-button");
+        activateButton.setStyle("-fx-font-size: 13; -fx-padding: 10 24; -fx-font-weight: bold;");
+        
         Button cancelButton = (Button) confirmation.getDialogPane().lookupButton(ButtonType.CANCEL);
         cancelButton.getStyleClass().addAll("card-action-button", "card-soft-button");
+        cancelButton.setStyle("-fx-font-size: 13; -fx-padding: 10 24;");
 
         Optional<ButtonType> choice = confirmation.showAndWait();
         return choice.isPresent() && choice.get() == activateButtonType;
