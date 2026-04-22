@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -46,9 +47,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 public class MusiquesController {
@@ -147,6 +150,7 @@ public class MusiquesController {
     private final ObservableList<Musique> visibleTracks = FXCollections.observableArrayList();
     private final ObservableList<Playlist> allPlaylists = FXCollections.observableArrayList();
     private final ObservableList<Playlist> visiblePlaylists = FXCollections.observableArrayList();
+    private final Map<Integer, String> trackArtistNames = new HashMap<>();
     private final ObservableList<String> genres = FXCollections.observableArrayList(
             "Rock",
             "Pop",
@@ -529,10 +533,12 @@ public class MusiquesController {
         try {
             List<Musique> musiques = musiqueService.getAll();
             allTracks.setAll(musiques);
+            loadTrackArtistNames(musiques);
             filterTracks(searchField != null ? searchField.getText() : null);
         } catch (SQLDataException e) {
             allTracks.clear();
             visibleTracks.clear();
+            trackArtistNames.clear();
             renderTrackGrid();
             emptyListLabel.setText("Impossible de charger les musiques: " + e.getMessage());
             emptyListLabel.setVisible(true);
@@ -597,9 +603,60 @@ public class MusiquesController {
         Musique selectedTrack = visibleTracks.get(index);
         currentTrackIndex = index;
         renderTrackGrid();
-        
-        // Delegate to global media player service with artist name from context
-        globalMediaPlayer.playTrack(selectedTrack, visibleTracks, index, "Artist");
+
+        String artistName = resolveTrackArtistName(selectedTrack);
+        globalMediaPlayer.playTrack(selectedTrack, visibleTracks, index, artistName);
+    }
+
+    private String resolveTrackArtistName(Musique track) {
+        if (track == null || track.getId() == null) {
+            return "Artiste inconnu";
+        }
+        return trackArtistNames.getOrDefault(track.getId(), "Artiste inconnu");
+    }
+
+    private void loadTrackArtistNames(List<Musique> tracks) {
+        trackArtistNames.clear();
+        if (tracks == null || tracks.isEmpty()) {
+            return;
+        }
+
+        List<Integer> ids = tracks.stream()
+                .map(Musique::getId)
+                .filter(id -> id != null)
+                .toList();
+        if (ids.isEmpty()) {
+            return;
+        }
+
+        String placeholders = String.join(",", java.util.Collections.nCopies(ids.size(), "?"));
+        String sql = "SELECT o.id AS oeuvre_id, u.prenom, u.nom "
+                + "FROM oeuvre o "
+                + "LEFT JOIN collections c ON c.id = o.collection_id "
+                + "LEFT JOIN `user` u ON u.id = c.artiste_id "
+                + "WHERE o.id IN (" + placeholders + ")";
+
+        Connection connection = MyDatabase.getInstance().getConnection();
+        if (connection == null) {
+            return;
+        }
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            for (int i = 0; i < ids.size(); i++) {
+                statement.setInt(i + 1, ids.get(i));
+            }
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    int oeuvreId = resultSet.getInt("oeuvre_id");
+                    String prenom = resultSet.getString("prenom");
+                    String nom = resultSet.getString("nom");
+                    String fullName = ((prenom != null ? prenom : "") + " " + (nom != null ? nom : "")).trim();
+                    trackArtistNames.put(oeuvreId, fullName.isEmpty() ? "Artiste inconnu" : fullName);
+                }
+            }
+        } catch (SQLException ignored) {
+            // Keep fallback label if relation/tables are unavailable in this environment.
+        }
     }
 
     private String describeMediaError(Throwable throwable) {
