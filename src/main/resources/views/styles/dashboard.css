@@ -2673,3 +2673,119 @@
 .app-root.dark-mode .context-menu .menu-item#logoutMenuItem:hover {
     -fx-background-color: #553343;
 }
+
+/* ============================================
+   Filtres d'Événements - Styles des Sliders
+   ============================================ */
+
+.filter-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #4a5f7f;
+}
+
+.filter-value-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #4a5f7f;
+    -fx-min-width: 45;
+}
+
+.filter-slider {
+    -fx-min-width: 150;
+    -fx-pref-height: 4;
+}
+
+.filter-slider .track {
+    -fx-background-color: #d0d5dd;
+    -fx-padding: 0;
+}
+
+.filter-slider .thumb {
+    -fx-background-color: #27ae60;
+    -fx-background-radius: 10;
+    -fx-padding: 0;
+    -fx-min-height: 18;
+    -fx-min-width: 18;
+}
+
+.filter-slider .thumb:hover {
+    -fx-background-color: #229954;
+    -fx-effect: dropshadow(gaussian, rgba(39, 174, 96, 0.4), 8, 0, 0, 2);
+}
+
+.filter-slider:focused .thumb {
+    -fx-background-color: #229954;
+    -fx-effect: dropshadow(gaussian, rgba(39, 174, 96, 0.5), 10, 0, 0, 3);
+}
+
+.events-filter-row {
+    -fx-padding: 2 0 2 0;
+    -fx-alignment: top-left;
+}
+
+.events-filter-block {
+    -fx-min-width: 0;
+}
+
+.events-filter-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #24344b;
+}
+
+.events-search-field {
+    -fx-background-color: #f4f5f8;
+    -fx-border-color: #cdd6e3;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 10 14 10 14;
+    -fx-font-size: 14px;
+    -fx-text-fill: #213146;
+}
+
+.events-sort-combo {
+    -fx-background-color: #f4f5f8;
+    -fx-border-color: #cdd6e3;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-font-size: 14px;
+    -fx-padding: 4 8 4 8;
+}
+
+.events-sort-combo .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.events-sort-combo .arrow {
+    -fx-background-color: #70839f;
+}
+
+.events-sort-combo .list-cell {
+    -fx-text-fill: #324862;
+    -fx-background-color: transparent;
+}
+
+.filter-range-slider {
+    -fx-pref-height: 20;
+}
+
+.filter-range-slider .track {
+    -fx-background-color: #cfd7e3;
+    -fx-background-radius: 4;
+    -fx-pref-height: 6;
+}
+
+.filter-range-slider .range-bar {
+    -fx-background-color: #28a44d;
+    -fx-background-radius: 4;
+}
+
+.filter-range-slider .low-thumb,
+.filter-range-slider .high-thumb {
+    -fx-background-color: #28a44d;
+    -fx-background-radius: 10;
+    -fx-pref-width: 20;
+    -fx-pref-height: 20;
+}
+

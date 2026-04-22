@@ -305,7 +305,7 @@ public class EvenementArtisteFormController {
         if (now.isAfter(fin)) {
             return "Termine";
         }
-        return "En cours";
+        return "À venir";
     }
 
     private String formatTime(LocalDateTime dateTime) {

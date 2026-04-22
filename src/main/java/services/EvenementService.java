@@ -284,7 +284,7 @@ public class EvenementService implements Iservice<Evenement> {
         if (now.isAfter(dateFin)) {
             return "Terminé";
         }
-        return "En cours";
+        return "À venir";
     }
 }
 
