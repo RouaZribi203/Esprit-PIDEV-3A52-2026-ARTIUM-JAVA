@@ -4,7 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="recommandations v1" />
+    <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/StatistiquesArtisteController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/StatistiquesArtisteController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/OeuvreService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/OeuvreService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/artist/Statistiques.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/artist/Statistiques.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/artist-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/artist-theme.css" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -19,7 +25,7 @@
     </persistenceIdMap>
   </component>
   <component name="CopilotUserSelectedChatMode">
-    <option name="chatModeId" value="Ask" />
+    <option name="chatModeId" value="Agent" />
   </component>
   <component name="CopilotUserSelectedModel">
     <selectedModels>
@@ -124,7 +130,8 @@
       <workItem from="1776530552927" duration="6585000" />
       <workItem from="1776731538255" duration="74000" />
       <workItem from="1776773562120" duration="633000" />
-      <workItem from="1776803086292" duration="3911000" />
+      <workItem from="1776803086292" duration="4010000" />
+      <workItem from="1776881992405" duration="4235000" />
     </task>
     <task id="LOCAL-00001" summary="corrections de blob">
       <option name="closed" value="true" />

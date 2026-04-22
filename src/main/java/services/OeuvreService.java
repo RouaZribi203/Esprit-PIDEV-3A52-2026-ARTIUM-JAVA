@@ -12,8 +12,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLDataException;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class OeuvreService implements services.Iservice<Oeuvre> {
 
@@ -308,5 +312,163 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
         }
 
         return oeuvre;
+    }
+
+    /**
+     * Obtient les stats de chaque collection de l'artiste
+     * Retourne: collectionId, collectionTitre, oeuvresCount, likesCount, favorisCount, commentairesCount
+     */
+    public List<Map<String, Object>> getCollectionsStatsForArtiste(int artisteId) throws SQLDataException {
+        String sql = "SELECT " +
+                "c.id as collection_id, " +
+                "c.titre as collection_titre, " +
+                "COUNT(DISTINCT o.id) as oeuvres_count, " +
+                "COUNT(DISTINCT CASE WHEN l.liked = true THEN l.user_id END) as likes_count, " +
+                "COUNT(DISTINCT ou.user_id) as favoris_count, " +
+                "COUNT(DISTINCT cm.id) as commentaires_count " +
+                "FROM collections c " +
+                "LEFT JOIN oeuvre o ON o.collection_id = c.id " +
+                "LEFT JOIN `like` l ON l.oeuvre_id = o.id AND l.liked = true " +
+                "LEFT JOIN oeuvre_user ou ON ou.oeuvre_id = o.id " +
+                "LEFT JOIN commentaire cm ON cm.oeuvre_id = o.id " +
+                "WHERE c.artiste_id = ? " +
+                "GROUP BY c.id, c.titre " +
+                "ORDER BY oeuvres_count DESC";
+
+        List<Map<String, Object>> stats = new ArrayList<>();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, artisteId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> row = new HashMap<>();
+                    row.put("collectionId", rs.getInt("collection_id"));
+                    row.put("collectionTitre", rs.getString("collection_titre"));
+                    row.put("oeuvresCount", rs.getInt("oeuvres_count"));
+                    row.put("likesCount", rs.getInt("likes_count"));
+                    row.put("favorisCount", rs.getInt("favoris_count"));
+                    row.put("commentairesCount", rs.getInt("commentaires_count"));
+                    stats.add(row);
+                }
+            }
+        } catch (SQLException e) {
+            throw new SQLDataException(e.getMessage());
+        }
+        return stats;
+    }
+
+    public int getTotalOeuvresForArtiste(int artisteId) throws SQLDataException {
+        String sql = "SELECT COUNT(*) as count FROM oeuvre o " +
+                "INNER JOIN collections c ON c.id = o.collection_id " +
+                "WHERE c.artiste_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, artisteId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() ? rs.getInt("count") : 0;
+            }
+        } catch (SQLException e) {
+            throw new SQLDataException(e.getMessage());
+        }
+    }
+
+    public int getTotalLikesForArtiste(int artisteId) throws SQLDataException {
+        String sql = "SELECT COUNT(*) as count FROM `like` l " +
+                "INNER JOIN oeuvre o ON o.id = l.oeuvre_id " +
+                "INNER JOIN collections c ON c.id = o.collection_id " +
+                "WHERE c.artiste_id = ? AND l.liked = true";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, artisteId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() ? rs.getInt("count") : 0;
+            }
+        } catch (SQLException e) {
+            throw new SQLDataException(e.getMessage());
+        }
+    }
+
+    public int getTotalFavorisForArtiste(int artisteId) throws SQLDataException {
+        String sql = "SELECT COUNT(*) as count FROM oeuvre_user ou " +
+                "INNER JOIN oeuvre o ON o.id = ou.oeuvre_id " +
+                "INNER JOIN collections c ON c.id = o.collection_id " +
+                "WHERE c.artiste_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, artisteId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() ? rs.getInt("count") : 0;
+            }
+        } catch (SQLException e) {
+            throw new SQLDataException(e.getMessage());
+        }
+    }
+
+    public int getTotalCommentsForArtiste(int artisteId) throws SQLDataException {
+        String sql = "SELECT COUNT(*) as count FROM commentaire cm " +
+                "INNER JOIN oeuvre o ON o.id = cm.oeuvre_id " +
+                "INNER JOIN collections c ON c.id = o.collection_id " +
+                "WHERE c.artiste_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, artisteId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() ? rs.getInt("count") : 0;
+            }
+        } catch (SQLException e) {
+            throw new SQLDataException(e.getMessage());
+        }
+    }
+
+    public int getTotalCollectionsForArtiste(int artisteId) throws SQLDataException {
+        String sql = "SELECT COUNT(*) as count FROM collections WHERE artiste_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, artisteId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() ? rs.getInt("count") : 0;
+            }
+        } catch (SQLException e) {
+            throw new SQLDataException(e.getMessage());
+        }
+    }
+
+    public Map<Integer, Integer> getDailyCommentsForArtisteByMonth(int artisteId, YearMonth month) throws SQLDataException {
+        YearMonth safeMonth = month == null ? YearMonth.now() : month;
+        LocalDate startDate = safeMonth.atDay(1);
+        LocalDate endDateExclusive = safeMonth.plusMonths(1).atDay(1);
+
+        Map<Integer, Integer> result = new LinkedHashMap<>();
+        for (int day = 1; day <= safeMonth.lengthOfMonth(); day++) {
+            result.put(day, 0);
+        }
+
+        String[] dateColumns = {"date_commentaire", "date_creation", "created_at"};
+        for (String dateColumn : dateColumns) {
+            String sql = "SELECT DAY(cm." + dateColumn + ") AS day_of_month, COUNT(*) AS total_comments " +
+                    "FROM commentaire cm " +
+                    "INNER JOIN oeuvre o ON o.id = cm.oeuvre_id " +
+                    "INNER JOIN collections c ON c.id = o.collection_id " +
+                    "WHERE c.artiste_id = ? " +
+                    "AND cm." + dateColumn + " >= ? " +
+                    "AND cm." + dateColumn + " < ? " +
+                    "GROUP BY DAY(cm." + dateColumn + ") " +
+                    "ORDER BY day_of_month ASC";
+
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                stmt.setInt(1, artisteId);
+                stmt.setDate(2, Date.valueOf(startDate));
+                stmt.setDate(3, Date.valueOf(endDateExclusive));
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        int day = rs.getInt("day_of_month");
+                        int count = rs.getInt("total_comments");
+                        if (result.containsKey(day)) {
+                            result.put(day, count);
+                        }
+                    }
+                    return result;
+                }
+            } catch (SQLException ignored) {
+                // Try next date column variant.
+            }
+        }
+
+        throw new SQLDataException("Impossible de charger les commentaires par jour pour ce mois.");
     }
 }

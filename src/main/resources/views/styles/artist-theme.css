@@ -1059,8 +1059,8 @@
     -fx-text-fill: #edf2ff;
 }
 
-.artist-root.dark-mode .oeuvre-post-comments-empty,
-.artist-root.dark-mode .oeuvre-post-comments-more,
+.artist-root.dark-mode .oeuvre-post_comments-empty,
+.artist-root.dark-mode .oeuvre-post_comments-more,
 .artist-root.dark-mode .oeuvre-post-comment-date,
 .artist-root.dark-mode .oeuvre-post-comment-text {
     -fx-text-fill: #b7c4dc;
@@ -1541,3 +1541,129 @@
     -fx-background-color: #fff1f2;
 }
 
+.stats-main-title {
+    -fx-font-size: 26px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #111827;
+}
+
+.stats-chart-title {
+    -fx-font-size: 17px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1f4a98;
+}
+
+.stats-attribute-prefix {
+    -fx-text-fill: #9ca3af;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+}
+
+.stats-attribute-value {
+    -fx-text-fill: #4b5563;
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-min-width: 115;
+    -fx-alignment: center;
+}
+
+.stats-nav-arrow {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-padding: 0 2 0 2;
+    -fx-text-fill: #374151;
+    -fx-font-size: 18px;
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+}
+
+.stats-nav-arrow:hover {
+    -fx-text-fill: #111827;
+}
+
+.stats-nav-arrow:pressed {
+    -fx-text-fill: #1f4a98;
+}
+
+.stats-pie-chart {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.stats-pie-chart .chart-content,
+.stats-pie-chart .chart-plot-background,
+.stats-pie-chart .chart,
+.stats-pie-chart .chart-legend {
+    -fx-background-color: transparent;
+}
+
+.stats-pie-chart .chart-pie-label,
+.stats-pie-chart .chart-pie-label-line {
+    -fx-fill: transparent;
+    -fx-stroke: transparent;
+}
+
+.stats-pie-legend {
+    -fx-background-color: transparent;
+    -fx-padding: 2 0 0 2;
+}
+
+.stats-pie-legend-item {
+    -fx-background-color: transparent;
+    -fx-padding: 2 0 2 0;
+}
+
+.stats-pie-legend-label {
+    -fx-text-fill: #4b5563;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+
+.stats-comments-line-chart {
+    -fx-background-color: transparent;
+    -fx-title-side: top;
+    -fx-title-text-fill: #334155;
+    -fx-title-font-size: 13px;
+    -fx-title-font-weight: 700;
+}
+
+.stats-comments-line-chart .chart-content,
+.stats-comments-line-chart .chart-plot-background,
+.stats-comments-line-chart .chart,
+.stats-comments-line-chart .axis {
+    -fx-background-color: transparent;
+}
+
+.stats-comments-line-chart .chart-vertical-grid-lines {
+    -fx-stroke: transparent;
+}
+
+.stats-comments-line-chart .chart-horizontal-grid-lines {
+    -fx-stroke: #e2e8f0;
+    -fx-stroke-dash-array: 2 4;
+}
+
+.stats-comments-line-chart .axis-tick-mark,
+.stats-comments-line-chart .axis-minor-tick-mark {
+    -fx-stroke: transparent;
+}
+
+.stats-comments-line-chart .axis-label,
+.stats-comments-line-chart .axis {
+    -fx-tick-label-fill: #64748b;
+    -fx-font-size: 11px;
+}
+
+.stats-comments-line-chart .chart-series-line {
+    -fx-stroke: #3f44d4;
+    -fx-stroke-width: 2.4px;
+}
+
+.stats-comments-line-chart .chart-line-symbol {
+    -fx-background-color: #3f44d4, white;
+    -fx-background-insets: 0, 2;
+    -fx-background-radius: 6px;
+    -fx-padding: 5px;
+}
