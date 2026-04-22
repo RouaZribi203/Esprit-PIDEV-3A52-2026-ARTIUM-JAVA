@@ -21,7 +21,7 @@ public class MainFX extends Application {
 
     public static void switchToAuthLandingView() {
         authenticatedUser = null;
-        switchScene("/views/auth/Landing.fxml", "/views/styles/auth.css", "Artium | Accueil");
+        switchScene("/views/auth/Landing.fxml", "/views/styles/auth.css", "Artium");
     }
 
     public static void switchToLoginView() {
@@ -80,11 +80,17 @@ public class MainFX extends Application {
         try {
             FXMLLoader loader = new FXMLLoader(MainFX.class.getResource(fxmlPath));
             Parent root = loader.load();
-            Scene scene = new Scene(root);
+            Scene scene = primaryStage.getScene();
+            if (scene == null) {
+                scene = new Scene(root);
+                primaryStage.setScene(scene);
+            } else {
+                scene.setRoot(root);
+            }
             URL stylesheet = Objects.requireNonNull(MainFX.class.getResource(stylesheetPath), "Missing stylesheet");
-            scene.getStylesheets().add(stylesheet.toExternalForm());
+            scene.getStylesheets().setAll(stylesheet.toExternalForm());
             primaryStage.setTitle(title);
-            primaryStage.setScene(scene);
+            primaryStage.setMaximized(true);
             primaryStage.show();
         } catch (IOException e) {
             throw new IllegalStateException("Failed to switch scene: " + fxmlPath, e);
@@ -96,6 +102,7 @@ public class MainFX extends Application {
         // Taille minimale globale pour garder le layout lisible, sans figer la taille des scenes.
         primaryStage.setMinWidth(1100);
         primaryStage.setMinHeight(650);
+        primaryStage.setMaximized(true);
 
         try {
             new UserService().ensureDefaultAdminAccount();

@@ -13,10 +13,5 @@ public class AuthLandingController {
 	private void onLoginClick() {
 		MainFX.switchToLoginView();
 	}
-
-	@FXML
-	private void onHelpClick() {
-		MainFX.switchToAuthLandingView();
-	}
 }
 

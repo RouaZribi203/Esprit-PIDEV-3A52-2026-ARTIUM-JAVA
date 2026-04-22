@@ -2,17 +2,10 @@ package controllers.amateur;
 
 import controllers.MainFX;
 import utils.SessionManager;
+import entities.User;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuButton;
-import javafx.stage.Stage;
-
-import java.io.IOException;
-import java.net.URL;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 public class NavbarAmateurController {
@@ -113,17 +106,17 @@ public class NavbarAmateurController {
 
     @FXML
     private void onSwitchToAdminView() {
-        switchScene("/views/MainLayout.fxml", "/views/styles/dashboard.css", "Admin Dashboard");
+        MainFX.switchToAdminView(resolveCurrentUser());
     }
 
     @FXML
     private void onSwitchToArtistView() {
-        switchScene("/views/artist/ArtistMain.fxml", "/views/styles/artist-theme.css", "Artist Dashboard");
+        MainFX.switchToArtistView(resolveCurrentUser());
     }
 
     @FXML
     private void onSwitchToAmateurView() {
-        switchScene("/views/amateur/AmateurMain.fxml", "/views/styles/amateur-theme.css", "Amateur Dashboard");
+        MainFX.switchToAmateurView(resolveCurrentUser());
     }
 
 	@FXML
@@ -140,20 +133,12 @@ public class NavbarAmateurController {
         }
     }
 
-    private void switchScene(String fxmlPath, String stylesheetPath, String title) {
-        Stage stage = (Stage) anchorButton.getScene().getWindow();
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent root = loader.load();
-            Scene scene = new Scene(root);
-            URL stylesheet = Objects.requireNonNull(getClass().getResource(stylesheetPath), "Missing stylesheet");
-            scene.getStylesheets().add(stylesheet.toExternalForm());
-            stage.setTitle(title);
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            throw new IllegalStateException("Failed to switch scene: " + fxmlPath, e);
+    private User resolveCurrentUser() {
+        User user = MainFX.getAuthenticatedUser();
+        if (user == null) {
+            user = SessionManager.getCurrentUser();
         }
+        return user;
     }
 }
 

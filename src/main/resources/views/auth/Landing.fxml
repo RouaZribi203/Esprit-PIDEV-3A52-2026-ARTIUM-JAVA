@@ -28,9 +28,7 @@
 				</ImageView>
 			</StackPane>
 			<Region HBox.hgrow="ALWAYS"/>
-			<Button text="Accueil" styleClass="auth-topbar-link"/>
 			<Button text="Se connecter" onAction="#onLoginClick" styleClass="auth-topbar-ghost"/>
-			<Button text="Aide" onAction="#onHelpClick" styleClass="auth-topbar-link"/>
 			<Button text="Créer un compte" onAction="#onCreateAccount" styleClass="auth-topbar-primary"/>
 		</HBox>
 	</top>
