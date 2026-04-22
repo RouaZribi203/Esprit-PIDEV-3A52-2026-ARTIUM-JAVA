@@ -15,6 +15,7 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ComboBox;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -37,16 +38,21 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.sql.SQLDataException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import javafx.scene.control.Tooltip;
 
 public class BibliofrontController {
     private final LivreService livreService = new JdbcLivreService();
     private final JdbcLocationLivreService locationLivreService = new JdbcLocationLivreService();
     private final int currentUserId = 1;
+    private List<Livre> livres = new ArrayList<>();
 
     @FXML
     private TextField searchField;
@@ -61,10 +67,53 @@ public class BibliofrontController {
     private ToggleButton filterRentedToggle;
 
     @FXML
+    private ComboBox<String> authorCombo;
+
+    @FXML
+    private ComboBox<String> priceSortCombo;
+
+    @FXML
+    private Label badge1Icon;
+
+    @FXML
+    private Label badge1Text;
+
+    @FXML
+    private Label badge2Icon;
+
+    @FXML
+    private Label badge2Text;
+
+    @FXML
+    private Label badge3Icon;
+
+    @FXML
+    private Label badge3Text;
+
+    @FXML
     public void initialize() {
         if (filterRentedToggle != null) {
             filterRentedToggle.selectedProperty().addListener((obs, oldVal, newVal) -> applyFilter());
         }
+        if (searchField != null) {
+            searchField.textProperty().addListener((obs, old, newV) -> applyFilter());
+        }
+        if (authorCombo != null) {
+            authorCombo.valueProperty().addListener((obs, old, newV) -> applyFilter());
+        }
+        if (priceSortCombo != null) {
+            priceSortCombo.valueProperty().addListener((obs, old, newV) -> applyFilter());
+        }
+        if (searchField != null) {
+            searchField.setTooltip(new Tooltip("Rechercher dans le titre, la catégorie ou l'auteur."));
+        }
+        if (authorCombo != null) {
+            authorCombo.setTooltip(new Tooltip("Filtrer les livres par auteur spécifique."));
+        }
+        if (priceSortCombo != null) {
+            priceSortCombo.setTooltip(new Tooltip("Trier les livres par prix de location : décroissant ou croissant."));
+        }
+        setupBadgeHoverEffects();
         refresh();
     }
 
@@ -78,21 +127,102 @@ public class BibliofrontController {
         refresh();
     }
 
-    private void applyFilter() {
-        try {
-            List<Livre> result = livreService.search(searchField.getText(), null);
-            if (filterRentedToggle != null && filterRentedToggle.isSelected()) {
-                List<Integer> rentedIds = locationLivreService.getRentedLivreIds(currentUserId);
-                result = result.stream().filter(l -> rentedIds.contains(l.getId())).toList();
-            }
-            updateView(result);
-        } catch (SQLDataException e) {
-            showError("Erreur de filtrage", e.getMessage());
+    private void setupBadgeHoverEffects() {
+        // Badge 1 (Green - Livres numériques)
+        if (badge1Icon != null) {
+            badge1Icon.setOnMouseEntered(e -> {
+                badge1Icon.setStyle("-fx-font-size: 16; -fx-padding: 6 12; -fx-background-color: #10b981; -fx-border-color: #10b981; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 3);");
+            });
+            badge1Icon.setOnMouseExited(e -> {
+                badge1Icon.setStyle("-fx-font-size: 16; -fx-padding: 6 12; -fx-background-color: #eff6ff; -fx-border-color: #10b981; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: #10b981; -fx-font-weight: bold; -fx-cursor: hand;");
+            });
+        }
+        if (badge1Text != null) {
+            badge1Text.setOnMouseEntered(e -> {
+                badge1Text.setStyle("-fx-font-size: 13; -fx-padding: 6 12; -fx-background-color: #10b981; -fx-border-color: #10b981; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 3);");
+            });
+            badge1Text.setOnMouseExited(e -> {
+                badge1Text.setStyle("-fx-font-size: 13; -fx-padding: 6 12; -fx-background-color: #eff6ff; -fx-border-color: #10b981; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: #10b981; -fx-font-weight: bold; -fx-cursor: hand;");
+            });
+        }
+        // Badge 2 (Yellow - Accès immédiat)
+        if (badge2Icon != null) {
+            badge2Icon.setOnMouseEntered(e -> {
+                badge2Icon.setStyle("-fx-font-size: 16; -fx-padding: 6 12; -fx-background-color: #f59e0b; -fx-border-color: #f59e0b; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 3);");
+            });
+            badge2Icon.setOnMouseExited(e -> {
+                badge2Icon.setStyle("-fx-font-size: 16; -fx-padding: 6 12; -fx-background-color: #fef3c7; -fx-border-color: #f59e0b; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: #f59e0b; -fx-font-weight: bold; -fx-cursor: hand;");
+            });
+        }
+        if (badge2Text != null) {
+            badge2Text.setOnMouseEntered(e -> {
+                badge2Text.setStyle("-fx-font-size: 13; -fx-padding: 6 12; -fx-background-color: #f59e0b; -fx-border-color: #f59e0b; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 3);");
+            });
+            badge2Text.setOnMouseExited(e -> {
+                badge2Text.setStyle("-fx-font-size: 13; -fx-padding: 6 12; -fx-background-color: #fef3c7; -fx-border-color: #f59e0b; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: #f59e0b; -fx-font-weight: bold; -fx-cursor: hand;");
+            });
+        }
+        // Badge 3 (Blue - Louer & Lire)
+        if (badge3Icon != null) {
+            badge3Icon.setOnMouseEntered(e -> {
+                badge3Icon.setStyle("-fx-font-size: 16; -fx-padding: 6 12; -fx-background-color: #3b82f6; -fx-border-color: #3b82f6; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 3);");
+            });
+            badge3Icon.setOnMouseExited(e -> {
+                badge3Icon.setStyle("-fx-font-size: 16; -fx-padding: 6 12; -fx-background-color: #dbeafe; -fx-border-color: #3b82f6; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: #3b82f6; -fx-font-weight: bold; -fx-cursor: hand;");
+            });
+        }
+        if (badge3Text != null) {
+            badge3Text.setOnMouseEntered(e -> {
+                badge3Text.setStyle("-fx-font-size: 13; -fx-padding: 6 12; -fx-background-color: #3b82f6; -fx-border-color: #3b82f6; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 3);");
+            });
+            badge3Text.setOnMouseExited(e -> {
+                badge3Text.setStyle("-fx-font-size: 13; -fx-padding: 6 12; -fx-background-color: #dbeafe; -fx-border-color: #3b82f6; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: #3b82f6; -fx-font-weight: bold; -fx-cursor: hand;");
+            });
         }
     }
 
+    private void applyFilter() {
+        List<Livre> result = new ArrayList<>(livres);
+        String query = searchField.getText();
+        if (query != null && !query.trim().isEmpty()) {
+            String q = query.trim().toLowerCase();
+            result = result.stream().filter(l -> containsIgnoreCase(l.getTitre(), q) || containsIgnoreCase(l.getCategorie(), q) || containsIgnoreCase(l.getAuteur(), q)).collect(Collectors.toList());
+        }
+        String author = authorCombo.getValue();
+        if (author != null && !author.isEmpty()) {
+            result = result.stream().filter(l -> author.equals(l.getAuteur())).collect(Collectors.toList());
+        }
+        String priceSort = priceSortCombo.getValue();
+        if ("💰 Prix décroissant".equals(priceSort)) {
+            result.sort((a, b) -> Double.compare(b.getPrixLocation() != null ? b.getPrixLocation() : 0, a.getPrixLocation() != null ? a.getPrixLocation() : 0));
+        } else if ("💰 Prix croissant".equals(priceSort)) {
+            result.sort((a, b) -> Double.compare(a.getPrixLocation() != null ? a.getPrixLocation() : 0, b.getPrixLocation() != null ? a.getPrixLocation() : 0));
+        }
+        if (filterRentedToggle != null && filterRentedToggle.isSelected()) {
+            try {
+                List<Integer> rentedIds = locationLivreService.getRentedLivreIds(currentUserId);
+                result = result.stream().filter(l -> rentedIds.contains(l.getId())).collect(Collectors.toList());
+            } catch (SQLDataException e) {
+                showError("Filtrage locations", e.getMessage());
+            }
+        }
+        updateView(result);
+    }
+
     private void refresh() {
-        applyFilter();
+        try {
+            livres = livreService.getAll();
+            if (authorCombo != null) {
+                authorCombo.getItems().clear();
+                livres.stream().map(Livre::getAuteur).filter(Objects::nonNull).filter(a -> !a.isBlank()).distinct().forEach(authorCombo.getItems()::add);
+            }
+            if (priceSortCombo != null) {
+                priceSortCombo.getItems().setAll("💰 Prix décroissant", "💰 Prix croissant");
+            }
+            applyFilter();
+        } catch (SQLDataException e) {
+            showError("Chargement", e.getMessage());
+        }
     }
 
     private void updateView(List<Livre> items) {
@@ -403,5 +533,9 @@ public class BibliofrontController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private static boolean containsIgnoreCase(String value, String query) {
+        return value != null && value.toLowerCase().contains(query);
     }
 }
