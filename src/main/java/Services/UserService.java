@@ -15,6 +15,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,15 @@ public class UserService implements Iservice<User> {
     private static final String[] RESET_TOKEN_EXPIRES_COLUMNS = {"reset_token_expires", "resetTokenExpires"};
     private static final Duration RESET_TOKEN_TTL = Duration.ofMinutes(15);
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
+    private static final String ADMIN_EMAIL = "admin@artium.local";
+    private static final String ADMIN_PASSWORD = "Admin@1234";
+    private static final String ADMIN_NOM = "Administrateur";
+    private static final String ADMIN_PRENOM = "Système";
+    private static final LocalDate ADMIN_DATE_NAISSANCE = LocalDate.of(1990, 1, 1);
+    private static final String ADMIN_NUM_TEL = "00000000";
+    private static final String ADMIN_VILLE = "Tunis";
+    private static final String ADMIN_BIOGRAPHIE = "Compte administrateur principal de la plateforme.";
+    private static final String ADMIN_STATUT = "Activé";
 
     private final Connection connection;
     private final String idColumn;
@@ -55,6 +65,57 @@ public class UserService implements Iservice<User> {
         this.centreInteretColumn = resolveExistingColumn(CENTRE_INTERET_COLUMNS);
         this.resetTokenColumn = resolveExistingColumn(RESET_TOKEN_COLUMNS);
         this.resetTokenExpiresColumn = resolveExistingColumn(RESET_TOKEN_EXPIRES_COLUMNS);
+    }
+
+    public void ensureDefaultAdminAccount() throws SQLDataException {
+        ensureConnection();
+        validateSchemaColumns();
+
+        User existingAdmin = findUserByEmail(ADMIN_EMAIL);
+        if (existingAdmin != null) {
+            return;
+        }
+
+        User admin = new User();
+        admin.setNom(ADMIN_NOM);
+        admin.setPrenom(ADMIN_PRENOM);
+        admin.setDateNaissance(ADMIN_DATE_NAISSANCE);
+        admin.setEmail(ADMIN_EMAIL);
+        admin.setMdp(ADMIN_PASSWORD);
+        admin.setRole("Admin");
+        admin.setStatut(ADMIN_STATUT);
+        admin.setDateInscription(LocalDate.now());
+        admin.setNumTel(ADMIN_NUM_TEL);
+        admin.setVille(ADMIN_VILLE);
+        admin.setBiographie(ADMIN_BIOGRAPHIE);
+        admin.setSpecialite(null);
+        admin.setCentreInteret(null);
+        admin.setPhotoReferencePath(null);
+        admin.setPhotoProfil(null);
+
+        admin.setMdp(hashPassword(admin.getMdp()));
+
+        String insertUserSql = getInsertUserSql();
+        try (PreparedStatement ps = connection.prepareStatement(insertUserSql)) {
+            ps.setString(1, admin.getNom());
+            ps.setString(2, admin.getPrenom());
+            ps.setDate(3, Date.valueOf(admin.getDateNaissance()));
+            ps.setString(4, admin.getEmail());
+            ps.setString(5, admin.getMdp());
+            ps.setString(6, admin.getRole());
+            ps.setString(7, admin.getStatut());
+            ps.setDate(8, Date.valueOf(admin.getDateInscription()));
+            ps.setString(9, admin.getNumTel());
+            ps.setString(10, admin.getVille());
+            ps.setString(11, admin.getBiographie());
+            ps.setString(12, admin.getSpecialite());
+            ps.setString(13, admin.getCentreInteret());
+            ps.setString(14, admin.getPhotoReferencePath());
+            ps.setString(15, admin.getPhotoProfil());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new SQLDataException("Initialisation du compte admin impossible: " + e.getMessage());
+        }
     }
 
     @Override

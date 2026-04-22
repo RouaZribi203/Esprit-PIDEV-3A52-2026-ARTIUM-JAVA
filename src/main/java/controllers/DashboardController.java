@@ -15,6 +15,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
@@ -35,6 +36,7 @@ public class DashboardController {
     @FXML private StackPane calendarContainer;
 
     private final DashboardService dashboardService = new DashboardService();
+    private static final int MAX_RECENT_ITEMS = 5;
 
     @FXML
     public void initialize() {
@@ -93,12 +95,12 @@ public class DashboardController {
 
     private void buildStatCards(DashboardService.DashboardData data) {
         statsContainer.getChildren().setAll(
-                new StatCard("U", "icon-users",     data.getTotalUsers(),        "Utilisateurs"),
-                new StatCard("A", "icon-artistes",  data.getTotalArtistes(),     "Artistes"),
-                new StatCard("M", "icon-amateurs",  data.getTotalAmateurs(),     "Amateurs"),
-                new StatCard("O", "icon-oeuvres",   data.getTotalOeuvres(),      "Oeuvres"),
-                new StatCard("R", "icon-reclam",    data.getTotalReclamations(), "Reclamations"),
-                new StatCard("E", "icon-events",    data.getTotalEvenements(),   "Evenements")
+                new StatCard("U", "icon-users",    data.getTotalUsers(),        "Utilisateurs"),
+                new StatCard("A", "icon-artistes", data.getTotalArtistes(),     "Artistes"),
+                new StatCard("M", "icon-amateurs", data.getTotalAmateurs(),     "Amateurs"),
+                new StatCard("O", "icon-oeuvres",  data.getTotalOeuvres(),      "Oeuvres"),
+                new StatCard("R", "icon-reclam",   data.getTotalReclamations(), "Reclamations"),
+                new StatCard("E", "icon-events",   data.getTotalEvenements(),   "Evenements")
         );
     }
 
@@ -148,55 +150,108 @@ public class DashboardController {
     private void fillSignups(List<String> items) {
         signupsList.getChildren().clear();
         if (items == null || items.isEmpty()) {
-            signupsList.getChildren().add(makeEmptyLabel("Aucune inscription récente."));
+            signupsList.getChildren().add(
+                    makeEmptyState("👤", "Aucune inscription récente", "Les nouveaux membres apparaîtront ici", null)
+            );
             return;
         }
-        for (String item : items) {
-            String[] parts   = splitItem(item);
+        items.stream().limit(MAX_RECENT_ITEMS).forEach(item -> {
+            String[] parts    = splitItem(item);
             String   initiale = parts[0].isBlank() ? "?" : parts[0].substring(0, 1).toUpperCase();
-            Label    avatar  = makeAvatar(initiale, "dash-item-avatar");
+            Label    avatar   = makeAvatar(initiale, "dash-item-avatar");
             signupsList.getChildren().add(makeItemRow(avatar, parts[0], parts[1], null));
-        }
+        });
     }
 
     private void fillReclamations(List<String> items) {
         reclamationsList.getChildren().clear();
         int count = (items == null) ? 0 : items.size();
         if (reclamationsBadge != null) reclamationsBadge.setText(String.valueOf(count));
+
         if (items == null || items.isEmpty()) {
-            reclamationsList.getChildren().add(makeEmptyLabel("Aucune réclamation récente."));
+            reclamationsList.getChildren().add(
+                    makeEmptyState("✅", "Aucune réclamation", "Tout est en ordre pour le moment", "red")
+            );
             return;
         }
-        for (String item : items) {
-            String[] parts   = splitItem(item);
+        items.stream().limit(MAX_RECENT_ITEMS).forEach(item -> {
+            String[] parts    = splitItem(item);
             String   initiale = parts[0].isBlank() ? "!" : parts[0].substring(0, 1).toUpperCase();
-            Label    avatar  = makeAvatar(initiale, "dash-item-avatar", "dash-item-avatar-red");
+            Label    avatar   = makeAvatar(initiale, "dash-item-avatar", "dash-item-avatar-red");
             reclamationsList.getChildren().add(makeItemRow(avatar, parts[0], parts[1], null));
-        }
+        });
     }
 
     private void fillTopArtistes(List<String> items) {
         topArtistesList.getChildren().clear();
         if (items == null || items.isEmpty()) {
-            topArtistesList.getChildren().add(makeEmptyLabel("Aucun artiste disponible."));
+            topArtistesList.getChildren().add(
+                    makeEmptyState("🎨", "Aucun artiste classé", "Les artistes les plus actifs apparaîtront ici", "purple")
+            );
             return;
         }
-        int rank = 1;
         for (String item : items) {
-            String[] parts   = splitItem(item);
+            String[] parts    = splitItem(item);
             String   initiale = parts[0].isBlank() ? "A" : parts[0].substring(0, 1).toUpperCase();
-            Label    avatar  = makeAvatar(initiale, "dash-item-avatar", "dash-item-avatar-purple");
-            Label    badge   = null;
+            Label    avatar   = makeAvatar(initiale, "dash-item-avatar", "dash-item-avatar-purple");
+            Label    badge    = null;
             if (!parts[1].isBlank()) {
                 badge = new Label(parts[1]);
                 badge.getStyleClass().add("dash-item-badge");
             }
             topArtistesList.getChildren().add(makeItemRow(avatar, parts[0], null, badge));
-            rank++;
         }
     }
 
-    // ── Helpers ──────────────────────────────────────────────────────────────
+    /**
+     * Crée un état vide visuel avec icône, titre et sous-texte.
+     *
+     * @param icon       Emoji ou caractère représentant l'état
+     * @param title      Titre principal du message vide
+     * @param hint       Sous-texte descriptif
+     * @param colorVariant "red", "purple" ou null pour la couleur du cercle
+     */
+    private Node makeEmptyState(String icon, String title, String hint, String colorVariant) {
+        VBox container = new VBox(10);
+        container.getStyleClass().add("dash-empty-state");
+        container.setAlignment(Pos.CENTER);
+        container.setMaxWidth(Double.MAX_VALUE);
+
+        // Ligne décorative supérieure
+        Region topLine = new Region();
+        topLine.getStyleClass().add("dash-empty-divider");
+        topLine.setMaxWidth(Double.MAX_VALUE);
+
+        // Cercle icône
+        Label iconLabel = new Label(icon);
+        iconLabel.getStyleClass().add("dash-empty-icon");
+
+        StackPane iconCircle = new StackPane(iconLabel);
+        iconCircle.getStyleClass().add("dash-empty-icon-circle");
+        if (colorVariant != null && !colorVariant.isBlank()) {
+            iconCircle.getStyleClass().add(colorVariant);
+        }
+
+        // Textes
+        Label titleLabel = new Label(title);
+        titleLabel.getStyleClass().add("dash-empty-title");
+        titleLabel.setMaxWidth(Double.MAX_VALUE);
+        titleLabel.setAlignment(Pos.CENTER);
+
+        Label hintLabel = new Label(hint);
+        hintLabel.getStyleClass().add("dash-empty-hint");
+        hintLabel.setMaxWidth(Double.MAX_VALUE);
+        hintLabel.setAlignment(Pos.CENTER);
+        hintLabel.setWrapText(true);
+
+        // Ligne décorative inférieure
+        Region bottomLine = new Region();
+        bottomLine.getStyleClass().add("dash-empty-divider");
+        bottomLine.setMaxWidth(Double.MAX_VALUE);
+
+        container.getChildren().addAll(topLine, iconCircle, titleLabel, hintLabel, bottomLine);
+        return container;
+    }
 
     private Node makeItemRow(Label avatar, String title, String subtitle, Node rightNode) {
         HBox row = new HBox(10);
@@ -229,12 +284,6 @@ public class DashboardController {
         Label avatar = new Label(text);
         avatar.getStyleClass().addAll(styleClasses);
         return avatar;
-    }
-
-    private Label makeEmptyLabel(String message) {
-        Label lbl = new Label(message);
-        lbl.getStyleClass().add("dash-empty-label");
-        return lbl;
     }
 
     private String[] splitItem(String value) {

@@ -6,11 +6,14 @@
   <component name="ChangeListManager">
     <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/copilotDiffState.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/copilotDiffState.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/ConnexionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/ConnexionController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Services/DashboardService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Services/DashboardService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Services/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Services/UserService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/DashboardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/DashboardController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/controllers/MainFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/MainFX.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/NavbarController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/NavbarController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/NavbarAmateurController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/NavbarAmateurController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/NavbarArtisteController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/NavbarArtisteController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/pages/dashboard.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/pages/dashboard.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/pages/inscription.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/pages/inscription.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/dashboard.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/dashboard.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -28,8 +31,8 @@
   </component>
   <component name="CopilotUserSelectedModel">
     <selectedModels>
-      <entry key="chat-panel" value="Claude Haiku 4.5" />
-      <entry key="agent-panel" value="Claude Haiku 4.5" />
+      <entry key="chat-panel" value="Auto" />
+      <entry key="agent-panel" value="Auto" />
     </selectedModels>
   </component>
   <component name="FileTemplateManagerImpl">
@@ -89,7 +92,7 @@
     &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
     &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
     &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.JavaFX&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.github.copilot.settings.customization.CustomizationConfigurable&quot;,
     &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
@@ -145,7 +148,13 @@
       <workItem from="1776184271508" duration="31648000" />
       <workItem from="1776525650343" duration="14899000" />
       <workItem from="1776700304770" duration="7336000" />
-      <workItem from="1776708209636" duration="18424000" />
+      <workItem from="1776708209636" duration="21434000" />
+      <workItem from="1776809456334" duration="863000" />
+      <workItem from="1776810608455" duration="5235000" />
+      <workItem from="1776850130652" duration="120000" />
+      <workItem from="1776850732396" duration="456000" />
+      <workItem from="1776852380540" duration="1035000" />
+      <workItem from="1776856369116" duration="5251000" />
     </task>
     <servers />
   </component>

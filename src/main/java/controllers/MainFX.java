@@ -1,5 +1,6 @@
 package controllers;
 
+import Services.UserService;
 import entities.User;
 import utils.SessionManager;
 import javafx.application.Application;
@@ -11,6 +12,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Objects;
+import java.sql.SQLDataException;
 
 public class MainFX extends Application {
 
@@ -94,6 +96,12 @@ public class MainFX extends Application {
         // Taille minimale globale pour garder le layout lisible, sans figer la taille des scenes.
         primaryStage.setMinWidth(1100);
         primaryStage.setMinHeight(650);
+
+        try {
+            new UserService().ensureDefaultAdminAccount();
+        } catch (SQLDataException e) {
+            System.err.println("Impossible d'initialiser le compte admin par défaut: " + e.getMessage());
+        }
 
         // Vérifier si une session persistante existe
         User sessionUser = SessionManager.getCurrentUser();
