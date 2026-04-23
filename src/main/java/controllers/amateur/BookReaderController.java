@@ -9,6 +9,8 @@ import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
+import entities.Livre;
+import javafx.application.Platform;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -17,6 +19,7 @@ import java.io.InputStream;
 import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.net.URL;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -49,8 +52,68 @@ public class BookReaderController {
     private int pageIndex;
     private int pageCount;
     private Stage currentStage;
-    private int windowWidth = 900;
-    private int windowHeight = 750;
+    private Runnable backHandler;
+    private double windowWidth = 900;
+    private double windowHeight = 750;
+
+    public void setLivre(Livre livre) {
+        if (livre == null) return;
+        
+        titleLabel.setText(livre.getTitre());
+        subtitleLabel.setText("Chargement du document...");
+        
+        String pdfSource = livre.getFichierPdf();
+        if (pdfSource == null || pdfSource.isBlank()) {
+            subtitleLabel.setText("Erreur : Aucun fichier PDF trouvé.");
+            return;
+        }
+
+        CompletableFuture.runAsync(() -> {
+            try {
+                byte[] bytes = loadPdfBytes(pdfSource);
+                Platform.runLater(() -> {
+                    try {
+                        setPdfBytes(bytes);
+                        subtitleLabel.setText(livre.getCategorie() + " • " + livre.getAuteur());
+                    } catch (IOException e) {
+                        subtitleLabel.setText("Erreur lors du rendu du PDF.");
+                    }
+                });
+            } catch (IOException e) {
+                Platform.runLater(() -> subtitleLabel.setText("Erreur lors du téléchargement du PDF."));
+            }
+        });
+    }
+
+    private byte[] loadPdfBytes(String pdfSource) throws IOException {
+        if (pdfSource.startsWith("http://") || pdfSource.startsWith("https://")) {
+            try (InputStream inputStream = new URL(pdfSource).openStream()) {
+                return inputStream.readAllBytes();
+            }
+        }
+        if (pdfSource.startsWith("file:")) {
+            try {
+                return java.nio.file.Files.readAllBytes(java.nio.file.Path.of(URI.create(pdfSource)));
+            } catch (Exception ex) {
+                return java.nio.file.Files.readAllBytes(java.nio.file.Path.of(new URL(pdfSource).getPath()));
+            }
+        }
+        return java.nio.file.Files.readAllBytes(java.nio.file.Path.of(pdfSource));
+    }
+
+    public void setBackHandler(Runnable handler) {
+        this.backHandler = handler;
+    }
+
+    @FXML
+    private void onBack() {
+        close();
+        if (backHandler != null) {
+            backHandler.run();
+        } else if (currentStage != null) {
+            currentStage.close();
+        }
+    }
 
     public void setPdfSource(String pdfSource) throws IOException {
         close();
@@ -95,8 +158,8 @@ public class BookReaderController {
 
     public void setStage(Stage stage) {
         this.currentStage = stage;
-        stage.setWidth(windowWidth);
-        stage.setHeight(windowHeight);
+        stage.setWidth(900);
+        stage.setHeight(750);
         stage.setMinWidth(600);
         stage.setMinHeight(500);
     }

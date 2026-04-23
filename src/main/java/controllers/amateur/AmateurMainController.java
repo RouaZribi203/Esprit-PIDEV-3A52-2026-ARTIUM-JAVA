@@ -1,6 +1,7 @@
 package controllers.amateur;
 
 import controllers.MainFX;
+import entities.Livre;
 import entities.User;
 import entities.Evenement;
 import entities.Ticket;
@@ -134,8 +135,20 @@ public class AmateurMainController {
             detailController.setEvent(selectedEvent);
             detailController.setPurchaseHandler(this::onTicketPurchased);
             detailController.setBackHandler(() -> onNavigate("evenements"));
+        } else if (controller instanceof BibliofrontController biblioController) {
+            biblioController.setReaderNavigationHandler(livre -> {
+                this.selectedLivre = livre;
+                onNavigate("book-reader");
+            });
+        } else if (controller instanceof BookReaderController readerController) {
+            if (selectedLivre != null) {
+                readerController.setLivre(selectedLivre);
+                readerController.setBackHandler(() -> onNavigate("bibliotheque"));
+            }
         }
     }
+
+    private Livre selectedLivre;
 }
 
 

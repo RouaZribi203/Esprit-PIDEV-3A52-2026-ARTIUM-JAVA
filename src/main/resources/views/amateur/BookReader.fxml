@@ -12,34 +12,40 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.Region?>
 
-<BorderPane xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.amateur.BookReaderController" style="-fx-background-color: #1e293b;">
+<BorderPane xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.amateur.BookReaderController" style="-fx-background-color: #0f172a;">
     <top>
-        <VBox alignment="CENTER" spacing="8.0" style="-fx-background-color: #0f172a;">
+        <HBox alignment="CENTER_LEFT" spacing="20.0" style="-fx-background-color: #1e293b; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 2);">
             <padding>
-                <Insets bottom="16.0" left="24.0" right="24.0" top="16.0" />
+                <Insets bottom="12.0" left="24.0" right="24.0" top="12.0" />
             </padding>
-            <Label fx:id="titleLabel" style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;" text="Lecteur de livre" />
-            <Label fx:id="subtitleLabel" style="-fx-text-fill: #94a3b8; -fx-font-size: 13px;" text="Lecture en cours." wrapText="true" />
-        </VBox>
+            <Button mnemonicParsing="false" onAction="#onBack" style="-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand; -fx-border-color: #475569; -fx-border-radius: 8; -fx-padding: 8 16;" text="← Retour" />
+            <VBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                <Label fx:id="titleLabel" style="-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;" text="Chargement du livre..." />
+                <Label fx:id="subtitleLabel" style="-fx-text-fill: #94a3b8; -fx-font-size: 12px;" text="Veuillez patienter pendant le rendu du PDF" />
+            </VBox>
+            <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                <Label fx:id="pageLabel" style="-fx-text-fill: #3b82f6; -fx-font-size: 14px; -fx-font-weight: bold;" text="Page 0 / 0" />
+            </HBox>
+        </HBox>
     </top>
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="true" pannable="true" style="-fx-background-color: #1e293b;" BorderPane.alignment="CENTER">
-            <StackPane alignment="CENTER" style="-fx-background-color: #334155; -fx-padding: 20;">
-                <ImageView fx:id="pageImageView" smooth="true" pickOnBounds="true" preserveRatio="false" />
-            </StackPane>
-        </ScrollPane>
+        <StackPane style="-fx-background-color: #0f172a;">
+            <padding><Insets top="20" right="20" bottom="20" left="20" /></padding>
+            <ScrollPane fitToWidth="true" fitToHeight="true" pannable="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;">
+                <StackPane alignment="CENTER">
+                    <ImageView fx:id="pageImageView" pickOnBounds="true" preserveRatio="true">
+                        <style>
+                            -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 20, 0, 0, 0);
+                        </style>
+                    </ImageView>
+                </StackPane>
+            </ScrollPane>
+        </StackPane>
     </center>
     <bottom>
-        <VBox alignment="CENTER" spacing="12.0" style="-fx-background-color: #0f172a;">
-            <padding>
-                <Insets bottom="20.0" left="24.0" right="24.0" top="16.0" />
-            </padding>
-            <HBox spacing="16.0" alignment="CENTER">
-                <Button fx:id="prevButton" mnemonicParsing="false" onAction="#onPrev" style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 10 24; -fx-font-size: 14px; -fx-cursor: hand;" text="◄ Précédent" />
-                <Region prefWidth="40.0" />
-                <Button fx:id="nextButton" mnemonicParsing="false" onAction="#onNext" style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 10 24; -fx-font-size: 14px; -fx-cursor: hand;" text="Suivant ►" />
-            </HBox>
-            <Label fx:id="pageLabel" alignment="CENTER" style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;" text="Page 0 / 0" />
-        </VBox>
+        <HBox alignment="CENTER" spacing="30.0" style="-fx-background-color: #1e293b; -fx-padding: 15;">
+            <Button fx:id="prevButton" mnemonicParsing="false" onAction="#onPrev" style="-fx-background-color: #334155; -fx-text-fill: white; -fx-background-radius: 30; -fx-padding: 10 30; -fx-font-size: 14px; -fx-cursor: hand; -fx-font-weight: bold;" text="← Précédent" />
+            <Button fx:id="nextButton" mnemonicParsing="false" onAction="#onNext" style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 30; -fx-padding: 10 30; -fx-font-size: 14px; -fx-cursor: hand; -fx-font-weight: bold;" text="Suivant →" />
+        </HBox>
     </bottom>
 </BorderPane>

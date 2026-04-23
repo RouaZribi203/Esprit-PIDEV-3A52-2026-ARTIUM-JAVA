@@ -54,6 +54,11 @@ public class BibliofrontController {
     private final JdbcLocationLivreService locationLivreService = new JdbcLocationLivreService();
     private final int currentUserId = 1;
     private List<Livre> livres = new ArrayList<>();
+    private java.util.function.Consumer<Livre> readerNavigationHandler;
+
+    public void setReaderNavigationHandler(java.util.function.Consumer<Livre> handler) {
+        this.readerNavigationHandler = handler;
+    }
 
     @FXML
     private TextField searchField;
@@ -342,8 +347,8 @@ public class BibliofrontController {
     private Integer askNombreDeJours(Livre livre) {
         Dialog<Integer> dialog = new Dialog<>();
         dialog.setTitle("📅 Réserver votre livre");
-        dialog.setWidth(700);
-        dialog.setHeight(750);
+        dialog.setWidth(550);
+        dialog.setHeight(600);
 
         javafx.scene.control.ButtonType confirmButton = new javafx.scene.control.ButtonType("Confirmer la réservation", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(confirmButton, javafx.scene.control.ButtonType.CANCEL);
@@ -553,6 +558,7 @@ public class BibliofrontController {
 
     private VBox createPremiumCalendarUI(java.time.LocalDate[] selectedStart, java.time.LocalDate[] selectedEnd, Button confirmBtn) {
         VBox calendarContainer = new VBox(15);
+        calendarContainer.setAlignment(javafx.geometry.Pos.CENTER);
 
         java.time.LocalDate today = java.time.LocalDate.now();
         java.time.YearMonth[] currentMonth = {java.time.YearMonth.now()};
@@ -564,8 +570,6 @@ public class BibliofrontController {
 
         Button prevBtn = new Button("◀");
         prevBtn.setStyle("-fx-font-size: 14; -fx-padding: 8 16; -fx-background-color: #e0e7ff; -fx-text-fill: #1e3a8a; -fx-border-radius: 6; -fx-cursor: hand; -fx-font-weight: bold;");
-        prevBtn.setOnMouseEntered(e -> prevBtn.setStyle("-fx-font-size: 14; -fx-padding: 8 16; -fx-background-color: #c7d2fe; -fx-text-fill: #1e3a8a; -fx-border-radius: 6; -fx-font-weight: bold;"));
-        prevBtn.setOnMouseExited(e -> prevBtn.setStyle("-fx-font-size: 14; -fx-padding: 8 16; -fx-background-color: #e0e7ff; -fx-text-fill: #1e3a8a; -fx-border-radius: 6; -fx-font-weight: bold;"));
 
         Label monthLabel = new Label();
         monthLabel.setStyle("-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #1e3a8a; -fx-min-width: 200;");
@@ -573,30 +577,25 @@ public class BibliofrontController {
 
         Button nextBtn = new Button("▶");
         nextBtn.setStyle("-fx-font-size: 14; -fx-padding: 8 16; -fx-background-color: #e0e7ff; -fx-text-fill: #1e3a8a; -fx-border-radius: 6; -fx-cursor: hand; -fx-font-weight: bold;");
-        nextBtn.setOnMouseEntered(e -> nextBtn.setStyle("-fx-font-size: 14; -fx-padding: 8 16; -fx-background-color: #c7d2fe; -fx-text-fill: #1e3a8a; -fx-border-radius: 6; -fx-font-weight: bold;"));
-        nextBtn.setOnMouseExited(e -> nextBtn.setStyle("-fx-font-size: 14; -fx-padding: 8 16; -fx-background-color: #e0e7ff; -fx-text-fill: #1e3a8a; -fx-border-radius: 6; -fx-font-weight: bold;"));
 
         headerBox.getChildren().addAll(prevBtn, monthLabel, nextBtn);
 
-        // Calendar grid with proper 7-column layout
-        VBox calendarGrid = new VBox(10);
+        // Calendar grid with proper 7-column layout using GridPane for strict alignment
+        javafx.scene.layout.GridPane calendarGrid = new javafx.scene.layout.GridPane();
+        calendarGrid.setHgap(5);
+        calendarGrid.setVgap(5);
+        calendarGrid.setAlignment(javafx.geometry.Pos.CENTER);
         calendarGrid.setStyle("-fx-padding: 20; -fx-background-color: white; -fx-border-color: #e0e7ff; -fx-border-radius: 12; -fx-background-radius: 12; -fx-border-width: 2;");
-
-        TilePane daysGrid = new TilePane();
-        daysGrid.setPrefColumns(7);
-        daysGrid.setHgap(8);
-        daysGrid.setVgap(8);
-        daysGrid.setStyle("-fx-padding: 10;");
 
         // Day headers in French: DIM, LUN, MAR, MER, JEU, VEN, SAM
         String[] dayNames = {"DIM", "LUN", "MAR", "MER", "JEU", "VEN", "SAM"};
-        for (String day : dayNames) {
-            Label dayLabel = new Label(day);
-            dayLabel.setPrefWidth(70);
+        for (int i = 0; i < dayNames.length; i++) {
+            Label dayLabel = new Label(dayNames[i]);
+            dayLabel.setPrefWidth(60);
             dayLabel.setPrefHeight(40);
-            dayLabel.setStyle("-fx-text-alignment: center; -fx-font-weight: bold; -fx-text-fill: white; -fx-font-size: 13; -fx-background-color: #1e3a8a; -fx-border-radius: 8; -fx-background-radius: 8;");
+            dayLabel.setStyle("-fx-text-alignment: center; -fx-font-weight: bold; -fx-text-fill: white; -fx-font-size: 12; -fx-background-color: #1e3a8a; -fx-border-radius: 5; -fx-background-radius: 5;");
             dayLabel.setAlignment(javafx.geometry.Pos.CENTER);
-            daysGrid.getChildren().add(dayLabel);
+            calendarGrid.add(dayLabel, i, 0);
         }
 
         // Update calendar
@@ -606,30 +605,26 @@ public class BibliofrontController {
             String[] monthsInFrench = {"JANVIER", "FÉVRIER", "MARS", "AVRIL", "MAI", "JUIN", "JUILLET", "AOÛT", "SEPTEMBRE", "OCTOBRE", "NOVEMBRE", "DÉCEMBRE"};
             monthLabel.setText(monthsInFrench[month.getMonthValue() - 1] + " " + month.getYear());
             
-            // Remove only date buttons, keep headers (first 7 items)
-            daysGrid.getChildren().removeIf(node -> {
-                int index = daysGrid.getChildren().indexOf(node);
-                return index >= 7; // Keep first 7 items (headers), remove the rest
+            // Remove only date buttons, keep headers (row 0)
+            calendarGrid.getChildren().removeIf(node -> {
+                Integer rowIndex = javafx.scene.layout.GridPane.getRowIndex(node);
+                return rowIndex != null && rowIndex > 0;
             });
 
             java.time.LocalDate firstDay = month.atDay(1);
             java.time.LocalDate lastDay = month.atEndOfMonth();
-            int firstDayOfWeek = firstDay.getDayOfWeek().getValue() % 7;
+            // Java DayOfWeek: 1=MON, ..., 7=SUN. Our headers: 0=SUN, 1=MON, ...
+            int firstDayOfWeek = firstDay.getDayOfWeek().getValue() % 7; 
 
-            // Empty cells for days before month starts
-            for (int i = 0; i < firstDayOfWeek; i++) {
-                Label empty = new Label();
-                empty.setPrefWidth(70);
-                empty.setPrefHeight(70);
-                daysGrid.getChildren().add(empty);
-            }
+            int currentColumn = firstDayOfWeek;
+            int currentRow = 1;
 
             // Add all days of the month
             for (int day = 1; day <= lastDay.getDayOfMonth(); day++) {
                 java.time.LocalDate date = month.atDay(day);
                 Button dayBtn = new Button(String.valueOf(day));
-                dayBtn.setPrefWidth(70);
-                dayBtn.setPrefHeight(70);
+                dayBtn.setPrefWidth(60);
+                dayBtn.setPrefHeight(60);
 
                 boolean isPast = date.isBefore(today);
                 boolean isStart = selectedStart[0] != null && date.equals(selectedStart[0]);
@@ -638,40 +633,15 @@ public class BibliofrontController {
                                     !date.isBefore(selectedStart[0]) && !date.isAfter(selectedEnd[0]));
 
                 if (isPast) {
-                    dayBtn.setStyle("-fx-background-color: #e2e8f0; -fx-text-fill: #94a3b8; -fx-cursor: not-allowed; -fx-font-size: 14; -fx-font-weight: bold; -fx-border-radius: 8;");
+                    dayBtn.setStyle("-fx-background-color: #e2e8f0; -fx-text-fill: #94a3b8; -fx-cursor: not-allowed; -fx-font-size: 13; -fx-font-weight: bold; -fx-border-radius: 5;");
                     dayBtn.setDisable(true);
                 } else if (isStart || isEnd) {
-                    dayBtn.setStyle("-fx-background-color: #06b6d4; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-font-size: 14; -fx-border-radius: 8; -fx-effect: dropshadow(gaussian, rgba(6,182,212,0.4), 6, 0, 0, 2);");
+                    dayBtn.setStyle("-fx-background-color: #06b6d4; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-font-size: 13; -fx-border-radius: 5;");
                 } else if (isInRange) {
-                    dayBtn.setStyle("-fx-background-color: #cffafe; -fx-text-fill: #0c4a6e; -fx-font-weight: bold; -fx-cursor: hand; -fx-font-size: 14; -fx-border-radius: 8;");
+                    dayBtn.setStyle("-fx-background-color: #cffafe; -fx-text-fill: #0c4a6e; -fx-font-weight: bold; -fx-cursor: hand; -fx-font-size: 13; -fx-border-radius: 5;");
                 } else {
-                    dayBtn.setStyle("-fx-background-color: white; -fx-text-fill: #334155; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-cursor: hand; -fx-font-size: 14; -fx-border-width: 1;");
+                    dayBtn.setStyle("-fx-background-color: white; -fx-text-fill: #334155; -fx-border-color: #e2e8f0; -fx-border-radius: 5; -fx-cursor: hand; -fx-font-size: 13; -fx-border-width: 1;");
                 }
-
-                // ...existing code...
-                dayBtn.setOnMouseEntered(e -> {
-                    if (!isPast) {
-                        if (isStart || isEnd) {
-                            dayBtn.setStyle("-fx-background-color: #0891b2; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-font-size: 14; -fx-border-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 8, 0, 0, 3);");
-                        } else if (isInRange) {
-                            dayBtn.setStyle("-fx-background-color: #a5f3fc; -fx-text-fill: #0c4a6e; -fx-font-weight: bold; -fx-cursor: hand; -fx-font-size: 14; -fx-border-radius: 8;");
-                        } else {
-                            dayBtn.setStyle("-fx-background-color: #e0f2fe; -fx-text-fill: #0369a1; -fx-border-color: #06b6d4; -fx-border-radius: 8; -fx-cursor: hand; -fx-font-size: 14; -fx-border-width: 2; -fx-font-weight: bold;");
-                        }
-                    }
-                });
-
-                dayBtn.setOnMouseExited(e -> {
-                    if (!isPast) {
-                        if (isStart || isEnd) {
-                            dayBtn.setStyle("-fx-background-color: #06b6d4; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-font-size: 14; -fx-border-radius: 8; -fx-effect: dropshadow(gaussian, rgba(6,182,212,0.4), 6, 0, 0, 2);");
-                        } else if (isInRange) {
-                            dayBtn.setStyle("-fx-background-color: #cffafe; -fx-text-fill: #0c4a6e; -fx-font-weight: bold; -fx-cursor: hand; -fx-font-size: 14; -fx-border-radius: 8;");
-                        } else {
-                            dayBtn.setStyle("-fx-background-color: white; -fx-text-fill: #334155; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-cursor: hand; -fx-font-size: 14; -fx-border-width: 1;");
-                        }
-                    }
-                });
 
                 java.time.LocalDate finalDate = date;
                 dayBtn.setOnAction(e -> {
@@ -694,7 +664,13 @@ public class BibliofrontController {
                     updateCalendarHolder[0].accept(month);
                 });
 
-                daysGrid.getChildren().add(dayBtn);
+                calendarGrid.add(dayBtn, currentColumn, currentRow);
+                
+                currentColumn++;
+                if (currentColumn > 6) {
+                    currentColumn = 0;
+                    currentRow++;
+                }
             }
         };
 
@@ -710,7 +686,6 @@ public class BibliofrontController {
             updateCalendarHolder[0].accept(currentMonth[0]);
         });
 
-        calendarGrid.getChildren().add(daysGrid);
         calendarContainer.getChildren().addAll(headerBox, calendarGrid);
         return calendarContainer;
     }
@@ -947,36 +922,34 @@ public class BibliofrontController {
             return;
         }
 
-        String pdfSource = livre.getFichierPdf();
-        if (pdfSource == null || pdfSource.isBlank()) {
-            showError("PDF", "Aucun PDF pour ce livre.");
-            return;
-        }
-
-        // Run in background thread to prevent UI freeze during font cache rebuild/loading
-        CompletableFuture.runAsync(() -> {
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/amateur/BookReader.fxml"));
-                Parent root = loader.load();
-                BookReaderController controller = loader.getController();
-                
-                // This might take a while if PDFBox is rebuilding its font cache
-                controller.setPdfBytes(loadPdfBytes(pdfSource));
-
-                Platform.runLater(() -> {
-                    Stage stage = new Stage();
-                    String title = livre.getTitre() == null ? "Lecteur PDF" : livre.getTitre();
-                    stage.setTitle(title);
-                    stage.setScene(new Scene(root));
-                    controller.setStage(stage);
-                    controller.setBookTitle(title);
-                    stage.setOnHidden(e -> controller.close());
-                    stage.show();
-                });
-            } catch (IOException e) {
-                Platform.runLater(() -> showError("PDF", "Impossible d'ouvrir le lecteur."));
+        if (readerNavigationHandler != null) {
+            readerNavigationHandler.accept(livre);
+        } else {
+            // Standalone fallback
+            String pdfSource = livre.getFichierPdf();
+            if (pdfSource == null || pdfSource.isBlank()) {
+                showError("PDF", "Aucun PDF pour ce livre.");
+                return;
             }
-        });
+
+            CompletableFuture.runAsync(() -> {
+                try {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/amateur/BookReader.fxml"));
+                    Parent root = loader.load();
+                    BookReaderController controller = loader.getController();
+                    controller.setPdfBytes(loadPdfBytes(pdfSource));
+                    Platform.runLater(() -> {
+                        Stage stage = new Stage();
+                        stage.setTitle(livre.getTitre());
+                        stage.setScene(new Scene(root));
+                        controller.setStage(stage);
+                        stage.show();
+                    });
+                } catch (IOException e) {
+                    Platform.runLater(() -> showError("PDF", "Impossible d'ouvrir le lecteur."));
+                }
+            });
+        }
     }
 
     private Image toImage(String source) {
