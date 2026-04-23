@@ -82,7 +82,11 @@ public class OeuvresAdminController {
 
     @FXML
     public void initialize() {
-        sortCombo.getItems().addAll("Commentaires decroissant", "Commentaires croissant");
+        sortCombo.getItems().addAll(
+                "Commentaires decroissant", "Commentaires croissant",
+                "Likes decroissant", "Likes croissant",
+                "Favoris decroissant", "Favoris croissant"
+        );
         sortCombo.setValue("Commentaires decroissant");
         filterCombo.getItems().addAll("Tous types", "Peinture", "Sculpture", "Photographie");
 
@@ -107,24 +111,33 @@ public class OeuvresAdminController {
                 .filter(oeuvre -> matchesType(oeuvre, selectedType))
                 .collect(Collectors.toCollection(ArrayList::new));
 
-        applyCommentSort(filtered, sortCombo.getValue());
+        applySort(filtered, sortCombo.getValue());
 
         displayOeuvres(filtered);
     }
 
-    private void applyCommentSort(List<Oeuvre> oeuvres, String sortValue) {
-        if (oeuvres == null || oeuvres.isEmpty()) {
+    private void applySort(List<Oeuvre> oeuvres, String sortValue) {
+        if (oeuvres == null || oeuvres.isEmpty() || sortValue == null) {
             return;
         }
 
-        Comparator<Oeuvre> byCommentCount = Comparator.comparingInt(this::getCommentCount);
-        if ("Commentaires croissant".equals(sortValue)) {
-            oeuvres.sort(byCommentCount);
+        Comparator<Oeuvre> comparator;
+
+        if (sortValue.startsWith("Commentaires")) {
+            comparator = Comparator.comparingInt(this::getCommentCount);
+        } else if (sortValue.startsWith("Likes")) {
+            comparator = Comparator.comparingInt(this::getLikeCount);
+        } else if (sortValue.startsWith("Favoris")) {
+            comparator = Comparator.comparingInt(this::getFavoriCount);
+        } else {
             return;
         }
 
-        // Valeur par defaut: tri decroissant.
-        oeuvres.sort(byCommentCount.reversed());
+        if (sortValue.endsWith("croissant") && !sortValue.endsWith("decroissant")) {
+            oeuvres.sort(comparator);
+        } else {
+            oeuvres.sort(comparator.reversed());
+        }
     }
 
     private boolean matchesType(Oeuvre oeuvre, String selectedType) {

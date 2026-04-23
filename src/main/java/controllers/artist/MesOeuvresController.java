@@ -104,7 +104,11 @@ public class MesOeuvresController {
         }
         applyIcons();
         loadArtistIdentity();
-        sortCombo.getItems().addAll("Commentaires decroissant", "Commentaires croissant");
+        sortCombo.getItems().addAll(
+                "Commentaires decroissant", "Commentaires croissant",
+                "Likes decroissant", "Likes croissant",
+                "Favoris decroissant", "Favoris croissant"
+        );
         sortCombo.setValue("Commentaires decroissant");
 
         searchField.textProperty().addListener((observable, oldValue, newValue) -> applyFilters());
@@ -1030,7 +1034,7 @@ public class MesOeuvresController {
             }
         }
 
-        applyCommentSort(filtered, sortCombo.getValue());
+        applySort(filtered, sortCombo.getValue());
         renderOeuvres(filtered);
     }
 
@@ -1061,16 +1065,27 @@ public class MesOeuvresController {
         }
     }
 
-    private void applyCommentSort(List<Oeuvre> oeuvres, String sortValue) {
-        if (oeuvres == null || oeuvres.isEmpty()) {
+    private void applySort(List<Oeuvre> oeuvres, String sortValue) {
+        if (oeuvres == null || oeuvres.isEmpty() || sortValue == null) {
             return;
         }
 
-        Comparator<Oeuvre> byCommentCount = Comparator.comparingInt(oeuvre -> getCommentsForOeuvre(oeuvre).size());
-        if ("Commentaires croissant".equals(sortValue)) {
-            oeuvres.sort(byCommentCount);
+        Comparator<Oeuvre> comparator;
+
+        if (sortValue.startsWith("Commentaires")) {
+            comparator = Comparator.comparingInt(oeuvre -> getCommentsForOeuvre(oeuvre).size());
+        } else if (sortValue.startsWith("Likes")) {
+            comparator = Comparator.comparingInt(this::getLikesCount);
+        } else if (sortValue.startsWith("Favoris")) {
+            comparator = Comparator.comparingInt(this::getFavorisCount);
         } else {
-            oeuvres.sort(byCommentCount.reversed());
+            return;
+        }
+
+        if (sortValue.endsWith("croissant") && !sortValue.endsWith("decroissant")) {
+            oeuvres.sort(comparator);
+        } else {
+            oeuvres.sort(comparator.reversed());
         }
     }
 }

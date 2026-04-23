@@ -6,7 +6,11 @@ import entities.User;
 import services.CommentaireService;
 import services.LikeService;
 import services.OeuvreService;
+import javafx.animation.FadeTransition;
+import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -18,7 +22,9 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.SVGPath;
+import javafx.util.Duration;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -148,13 +154,16 @@ public class OeuvreDetailsPopupController {
 
     private void buildCommentsPreview(List<Commentaire> comments) {
         commentsListBox.getChildren().clear();
+        // Cacher l'ancien label statique s'il existe dans le FXML
+        if (moreCommentsLabel != null) {
+            moreCommentsLabel.setVisible(false);
+            moreCommentsLabel.setManaged(false);
+        }
 
         if (comments == null || comments.isEmpty()) {
             Label emptyLabel = new Label("Aucun commentaire pour le moment.");
             emptyLabel.getStyleClass().add("oeuvre-post-comments-empty");
             commentsListBox.getChildren().add(emptyLabel);
-            moreCommentsLabel.setVisible(false);
-            moreCommentsLabel.setManaged(false);
             return;
         }
 
@@ -164,13 +173,67 @@ public class OeuvreDetailsPopupController {
         }
 
         if (comments.size() > 3) {
-            moreCommentsLabel.setText("+" + (comments.size() - 3) + " autres commentaires");
-            moreCommentsLabel.setVisible(true);
-            moreCommentsLabel.setManaged(true);
-        } else {
-            moreCommentsLabel.setVisible(false);
-            moreCommentsLabel.setManaged(false);
+            StackPane btnStack = new StackPane();
+            Button showMoreBtn = new Button("Afficher plus (" + (comments.size() - 3) + ")");
+            showMoreBtn.getStyleClass().add("oeuvre-post-comments-more-btn");
+            showMoreBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #3f44d4; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 0; -fx-font-size: 12px;");
+
+            HBox loadingDots = buildLoadingDots();
+            loadingDots.setVisible(false);
+            loadingDots.setManaged(false);
+
+            showMoreBtn.setOnAction(event -> {
+                showMoreBtn.setVisible(false);
+                showMoreBtn.setManaged(false);
+                loadingDots.setVisible(true);
+                loadingDots.setManaged(true);
+
+                PauseTransition pause = new PauseTransition(Duration.seconds(1.2));
+                pause.setOnFinished(e -> {
+                    int subDelay = 0;
+                    for (int i = 3; i < comments.size(); i++) {
+                        Node row = buildCommentRow(comments.get(i));
+                        row.setOpacity(0);
+                        commentsListBox.getChildren().add(row);
+
+                        FadeTransition ft = new FadeTransition(Duration.seconds(0.4), row);
+                        ft.setFromValue(0);
+                        ft.setToValue(1);
+                        ft.setDelay(Duration.millis(subDelay));
+                        ft.play();
+
+                        subDelay += 80;
+                    }
+                    VBox parent = (VBox) btnStack.getParent();
+                    if (parent != null) {
+                        parent.getChildren().remove(btnStack);
+                    }
+                });
+                pause.play();
+            });
+
+            btnStack.getChildren().addAll(showMoreBtn, loadingDots);
+            // On ajoute le bouton dans la box parente de commentsListBox si possible, 
+            // ou directement à la fin de commentsListBox
+            commentsListBox.getChildren().add(btnStack);
         }
+    }
+
+    private HBox buildLoadingDots() {
+        HBox dots = new HBox(4);
+        dots.setAlignment(Pos.CENTER);
+        for (int i = 0; i < 3; i++) {
+            Circle dot = new Circle(3, i == 0 ? javafx.scene.paint.Color.valueOf("#3f44d4") : javafx.scene.paint.Color.valueOf("#94a3b8"));
+            FadeTransition ft = new FadeTransition(Duration.seconds(0.5), dot);
+            ft.setFromValue(1.0);
+            ft.setToValue(0.3);
+            ft.setCycleCount(javafx.animation.Animation.INDEFINITE);
+            ft.setAutoReverse(true);
+            ft.setDelay(Duration.seconds(i * 0.15));
+            dots.getChildren().add(dot);
+            ft.play();
+        }
+        return dots;
     }
 
     private HBox buildCommentRow(Commentaire comment) {

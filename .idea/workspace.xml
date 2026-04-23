@@ -4,13 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="stats top amateurs">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/FeedController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/FeedController.java" afterDir="false" />
+    <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="correction recommandation et ameliorer commentaire">
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/OeuvresAdminController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/OeuvresAdminController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/MesOeuvresController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/MesOeuvresController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/services/OeuvreRecommendationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/OeuvreRecommendationService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/services/OeuvreService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/OeuvreService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -132,7 +128,7 @@
       <workItem from="1776731538255" duration="74000" />
       <workItem from="1776773562120" duration="633000" />
       <workItem from="1776803086292" duration="4010000" />
-      <workItem from="1776881992405" duration="15493000" />
+      <workItem from="1776881992405" duration="15894000" />
     </task>
     <task id="LOCAL-00001" summary="corrections de blob">
       <option name="closed" value="true" />
@@ -182,7 +178,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776889808714</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="correction recommandation et ameliorer commentaire">
+      <option name="closed" value="true" />
+      <created>1776903365306</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1776903365306</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -206,7 +210,8 @@
     <MESSAGE value="recommandations v1" />
     <MESSAGE value="stats oeuvres" />
     <MESSAGE value="stats top amateurs" />
-    <option name="LAST_COMMIT_MESSAGE" value="stats top amateurs" />
+    <MESSAGE value="correction recommandation et ameliorer commentaire" />
+    <option name="LAST_COMMIT_MESSAGE" value="correction recommandation et ameliorer commentaire" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
