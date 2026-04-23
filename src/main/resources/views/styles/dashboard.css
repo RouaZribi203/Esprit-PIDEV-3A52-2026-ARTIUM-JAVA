@@ -1000,3 +1000,174 @@
     transparent 0%, rgba(52,72,108,0.50) 30%,
     rgba(52,72,108,0.50) 70%, transparent 100%);
 }
+
+/* ════════════════════════════════════════════════════════════════
+   DIALOGUES — classes manquantes
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── Chips (ligne du haut) ───────────────────────────────────── */
+.users-dialog-chip-row {
+    -fx-spacing: 8;
+    -fx-padding: 0 0 6 0;
+}
+
+.users-dialog-mode-chip {
+    -fx-background-color: #eef2ff;
+    -fx-text-fill: #4338ca;
+    -fx-background-radius: 999;
+    -fx-padding: 4 12 4 12;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+}
+
+.users-dialog-role-chip {
+    -fx-background-color: #ede9fe;
+    -fx-text-fill: #5b21b6;
+    -fx-background-radius: 999;
+    -fx-padding: 4 12 4 12;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+}
+
+.users-dialog-status-chip {
+    -fx-background-color: #f0fdf4;
+    -fx-text-fill: #15803d;
+    -fx-background-radius: 999;
+    -fx-padding: 4 12 4 12;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+}
+
+/* ── Hero (bloc titre/sous-titre) ────────────────────────────── */
+.users-dialog-hero {
+    -fx-padding: 0 0 10 0;
+    -fx-spacing: 4;
+}
+
+.users-dialog-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #0f1c2e;
+    -fx-wrap-text: true;
+}
+
+.users-dialog-subtitle {
+    -fx-font-size: 13px;
+    -fx-text-fill: #7a8fa8;
+    -fx-wrap-text: true;
+}
+
+/* ── Sections formulaire ─────────────────────────────────────── */
+.users-dialog-section-card {
+    -fx-background-color: rgba(237, 242, 251, 0.55);
+    -fx-background-radius: 14;
+    -fx-border-color: rgba(210, 222, 240, 0.75);
+    -fx-border-radius: 14;
+    -fx-border-width: 1;
+    -fx-padding: 14;
+}
+
+.users-dialog-section-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #0f1c2e;
+}
+
+.users-dialog-section-subtitle {
+    -fx-font-size: 11.5px;
+    -fx-text-fill: #7a8fa8;
+}
+
+/* ── ScrollPane & TextArea ───────────────────────────────────── */
+.users-dialog-scroll {
+    -fx-background: transparent;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.users-dialog-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.users-dialog-textarea {
+    -fx-pref-row-count: 3;
+}
+
+.users-dialog-bio-card {
+    -fx-spacing: 8;
+}
+
+/* ── Bouton succès (Activer) ─────────────────────────────────── */
+.card-success-button {
+    -fx-background-color: #f0fdf4;
+    -fx-border-color: rgba(134, 210, 164, 0.80);
+    -fx-text-fill: #15803d;
+}
+
+.card-success-button:hover {
+    -fx-background-color: #dcfce7;
+    -fx-border-color: rgba(74, 180, 120, 0.70);
+}
+
+/* ── Dialogue suppression ────────────────────────────────────── */
+.users-delete-dialog .users-dialog-status-chip {
+    -fx-background-color: #fff1f2;
+    -fx-text-fill: #be185d;
+}
+
+.users-delete-title {
+    -fx-text-fill: #be185d;
+}
+
+.users-delete-subtitle {
+    -fx-text-fill: #7a8fa8;
+}
+
+.users-delete-hero {
+    -fx-padding: 0 0 10 0;
+}
+
+.users-delete-identity-card {
+    -fx-background-color: rgba(255, 241, 242, 0.50);
+    -fx-border-color: rgba(252, 165, 165, 0.50);
+}
+
+/* ── Dialogue activation ─────────────────────────────────────── */
+.users-activate-dialog .users-dialog-status-chip {
+    -fx-background-color: #f0fdf4;
+    -fx-text-fill: #15803d;
+}
+
+/* ── Dialogue détails ────────────────────────────────────────── */
+.users-details-dialog .users-dialog-status-chip {
+    -fx-background-color: #eef2ff;
+    -fx-text-fill: #4338ca;
+}
+
+.users-details-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #0f1c2e;
+}
+
+.users-details-subtitle {
+    -fx-font-size: 13px;
+    -fx-text-fill: #7a8fa8;
+}
+
+.users-details-hero {
+    -fx-padding: 0 0 10 0;
+}
+
+.users-details-card {
+    -fx-background-color: rgba(237, 242, 251, 0.55);
+    -fx-border-color: rgba(210, 222, 240, 0.75);
+}
+
+.users-details-bio-text {
+    -fx-font-size: 13px;
+    -fx-text-fill: #3c4f6a;
+    -fx-wrap-text: true;
+}

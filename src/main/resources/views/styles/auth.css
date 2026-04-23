@@ -516,5 +516,55 @@
 	-fx-background-color: transparent;
 }
 
+.auth-captcha-container {
+    -fx-background-color: white;
+    -fx-border-color: #cbd5e1;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 14 16;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 6, 0, 0, 2);
+}
+
+.auth-captcha-container:hover {
+    -fx-border-color: #94a3b8;
+}
+
+.auth-captcha-checkbox .box {
+    -fx-background-color: white;
+    -fx-border-color: #9ca3af;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-min-width: 22;
+    -fx-min-height: 22;
+}
+
+.auth-captcha-checkbox:selected .box {
+    -fx-background-color: #4f46e5;
+    -fx-border-color: #4f46e5;
+}
+
+.auth-captcha-checkbox:selected .mark {
+    -fx-background-color: white;
+}
+
+.auth-captcha-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #374151;
+    -fx-font-weight: 600;
+}
+
+.auth-captcha-brand {
+    -fx-font-size: 8px;
+    -fx-text-fill: #6b7280;
+    -fx-font-weight: 700;
+}
+
+.auth-captcha-links {
+    -fx-font-size: 7px;
+    -fx-text-fill: #9ca3af;
+}
+
+
 
 

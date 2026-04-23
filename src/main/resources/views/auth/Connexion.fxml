@@ -18,83 +18,89 @@
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1"
-			fx:controller="controllers.ConnexionController"
-			stylesheets="@../styles/auth.css"
-			styleClass="auth-root">
-	<left>
-		<VBox spacing="20" alignment="CENTER_LEFT" prefWidth="550" minWidth="550" styleClass="auth-landing-hero auth-landing-hero-fluid">
-			<padding>
-				<Insets top="48" right="48" bottom="48" left="48"/>
-			</padding>
-			<StackPane styleClass="auth-hero-logo-wrap">
-				<ImageView fitWidth="250" preserveRatio="true" smooth="true" cache="true" styleClass="auth-hero-logo">
-					<image>
-						<Image url="@../images/logo2.png"/>
-					</image>
-				</ImageView>
-			</StackPane>
-			<Label text="Artium" styleClass="auth-panel-kicker"/>
-			<Label text="Bienvenue dans votre espace" wrapText="true" styleClass="auth-hero-title auth-landing-title"/>
-			<Label text="Connectez-vous pour retrouver votre espace personnel, vos œuvres préférées et votre expérience artistique au cœur d’un design inspiré de Rehletna." wrapText="true" styleClass="auth-hero-text auth-landing-text"/>
-			<HBox spacing="10" styleClass="auth-chip-row">
-				<Label text="Rapide" styleClass="auth-chip"/>
-				<Label text="Sécurisé" styleClass="auth-chip"/>
-				<Label text="Moderne" styleClass="auth-chip"/>
-			</HBox>
-		</VBox>
-	</left>
+            fx:controller="controllers.ConnexionController"
+            stylesheets="@../styles/auth.css"
+            styleClass="auth-root">
+    <left>
+        <VBox spacing="20" alignment="CENTER_LEFT" prefWidth="550" minWidth="550" styleClass="auth-landing-hero auth-landing-hero-fluid">
+            <padding>
+                <Insets top="48" right="48" bottom="48" left="48"/>
+            </padding>
+            <StackPane styleClass="auth-hero-logo-wrap">
+                <ImageView fitWidth="250" preserveRatio="true" smooth="true" cache="true" styleClass="auth-hero-logo">
+                    <image>
+                        <Image url="@../images/logo2.png"/>
+                    </image>
+                </ImageView>
+            </StackPane>
+            <Label text="Artium" styleClass="auth-panel-kicker"/>
+            <Label text="Bienvenue dans votre espace" wrapText="true" styleClass="auth-hero-title auth-landing-title"/>
+            <Label text="Connectez-vous pour retrouver votre espace personnel, vos œuvres préférées et votre expérience artistique au cœur d'un design inspiré de Rehletna." wrapText="true" styleClass="auth-hero-text auth-landing-text"/>
+            <HBox spacing="10" styleClass="auth-chip-row">
+                <Label text="Rapide" styleClass="auth-chip"/>
+                <Label text="Sécurisé" styleClass="auth-chip"/>
+                <Label text="Moderne" styleClass="auth-chip"/>
+            </HBox>
+        </VBox>
+    </left>
 
-	<center>
-		<ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefWidth="550" minWidth="550" styleClass="auth-scroll">
-			<content>
-				<StackPane styleClass="auth-signup-shell auth-login-shell">
-					<VBox spacing="18" maxWidth="720" styleClass="auth-card auth-signup-card auth-login-card auth-login-card-fluid auth-panel-block">
-						<padding>
-							<Insets top="34" right="34" bottom="34" left="34"/>
-						</padding>
+    <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefWidth="550" minWidth="550" styleClass="auth-scroll">
+            <content>
+                <StackPane styleClass="auth-signup-shell auth-login-shell">
 
-						<VBox spacing="4">
-							<Label text="Bienvenue" styleClass="auth-panel-kicker"/>
-							<Label text="Se connecter" styleClass="auth-title auth-panel-title auth-login-title"/>
-							<Label text="Utilisez vos identifiants pour accéder à votre compte." wrapText="true" styleClass="auth-subtitle auth-panel-text auth-login-subtitle"/>
-						</VBox>
+                    <!-- ✅ Seul changement : fx:id="loginCard" ajouté ici -->
+                    <VBox fx:id="loginCard" spacing="18" maxWidth="720"
+                          styleClass="auth-card auth-signup-card auth-login-card auth-login-card-fluid auth-panel-block">
+                        <padding>
+                            <Insets top="34" right="34" bottom="34" left="34"/>
+                        </padding>
 
-						<GridPane hgap="12" vgap="12">
-							<VBox spacing="6" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2">
-								<Label text="Adresse e-mail" styleClass="auth-field-label"/>
-								<TextField fx:id="emailField" promptText="Votre adresse e-mail" onAction="#onLogin" styleClass="auth-input"/>
-							</VBox>
+                        <VBox spacing="4">
+                            <Label text="Bienvenue" styleClass="auth-panel-kicker"/>
+                            <Label text="Se connecter" styleClass="auth-title auth-panel-title auth-login-title"/>
+                            <Label text="Utilisez vos identifiants pour accéder à votre compte." wrapText="true" styleClass="auth-subtitle auth-panel-text auth-login-subtitle"/>
+                        </VBox>
 
-							<VBox spacing="6" GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.columnSpan="2">
-								<Label text="Mot de passe" styleClass="auth-field-label"/>
-								<PasswordField fx:id="passwordField" promptText="Votre mot de passe" onAction="#onLogin" styleClass="auth-input"/>
-							</VBox>
-						</GridPane>
+                        <GridPane hgap="12" vgap="12">
+                            <VBox spacing="6" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2">
+                                <Label text="Adresse e-mail" styleClass="auth-field-label"/>
+                                <TextField fx:id="emailField" promptText="Votre adresse e-mail" onAction="#onLogin" styleClass="auth-input"/>
+                            </VBox>
+                            <VBox spacing="6" GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.columnSpan="2">
+                                <Label text="Mot de passe" styleClass="auth-field-label"/>
+                                <PasswordField fx:id="passwordField" promptText="Votre mot de passe" onAction="#onLogin" styleClass="auth-input"/>
+                            </VBox>
+                        </GridPane>
 
-						<HBox spacing="12" alignment="CENTER_LEFT" styleClass="auth-login-actions">
-							<CheckBox fx:id="rememberMeCheckBox" text="Se souvenir de moi" styleClass="auth-remember-checkbox"/>
-							<Region HBox.hgrow="ALWAYS"/>
-							<Hyperlink text="Mot de passe oublié ?" onAction="#onForgotPassword" styleClass="auth-link-button"/>
-						</HBox>
+                        <HBox spacing="12" alignment="CENTER_LEFT" styleClass="auth-login-actions">
+                            <CheckBox fx:id="rememberMeCheckBox" text="Se souvenir de moi" styleClass="auth-remember-checkbox"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Hyperlink text="Mot de passe oublié ?" onAction="#onForgotPassword" styleClass="auth-link-button"/>
+                        </HBox>
 
-						<Button text="Se connecter" onAction="#onLogin" styleClass="auth-primary-button" maxWidth="Infinity"/>
+                        <!-- index 0 = VBox titres -->
+                        <!-- index 1 = GridPane champs -->
+                        <!-- index 2 = HBox actions -->
+                        <!-- 👉 captchaPane inséré ici à l'index 3 par le controller -->
+                        <!-- index 4 = Button Se connecter (décalé) -->
 
+                        <Button text="Se connecter" onAction="#onLogin" styleClass="auth-primary-button" maxWidth="Infinity"/>
 
-						<VBox spacing="10" styleClass="auth-login-footer">
-							<Label fx:id="messageLabel" text="" wrapText="true" styleClass="auth-message"/>
-							<VBox styleClass="auth-login-links">
-								<HBox alignment="CENTER" spacing="4">
-									<Label text="Pas encore de compte ?"/>
-									<Hyperlink text="Inscription" onAction="#onCreateAccount" styleClass="auth-link-button"/>
-								</HBox>
-								<Hyperlink text="Retour a l'accueil" onAction="#onBackToLanding" styleClass="auth-link-button"/>
-							</VBox>
-						</VBox>
-					</VBox>
-				</StackPane>
-			</content>
-		</ScrollPane>
-	</center>
+                        <VBox spacing="10" styleClass="auth-login-footer">
+                            <Label fx:id="messageLabel" text="" wrapText="true" styleClass="auth-message"/>
+                            <VBox styleClass="auth-login-links">
+                                <HBox alignment="CENTER" spacing="4">
+                                    <Label text="Pas encore de compte ?"/>
+                                    <Hyperlink text="Inscription" onAction="#onCreateAccount" styleClass="auth-link-button"/>
+                                </HBox>
+                                <Hyperlink text="Retour a l'accueil" onAction="#onBackToLanding" styleClass="auth-link-button"/>
+                            </VBox>
+                        </VBox>
+
+                    </VBox>
+                </StackPane>
+            </content>
+        </ScrollPane>
+    </center>
 </BorderPane>
-
-

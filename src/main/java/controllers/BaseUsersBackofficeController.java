@@ -15,6 +15,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ScrollPane;
@@ -40,38 +41,35 @@ public abstract class BaseUsersBackofficeController {
     private static final String STATUT_ACTIVE = "Activé";
     private static final String STATUT_BLOQUE = "Bloqué";
     private static final String[] CENTRES_INTERET = {
-            "Peinture",
-            "Sculpture",
-            "Photographie",
-            "Musique",
-            "Lecture"
+            "Peinture", "Sculpture", "Photographie", "Musique", "Lecture"
     };
     private static final String[] SPECIALITES_ARTISTE = {
-            "Peintre",
-            "Sculpteur",
-            "Photographe",
-            "Musicien",
-            "Auteur"
+            "Peintre", "Sculpteur", "Photographe", "Musicien", "Auteur"
     };
 
-    @FXML
-    protected TextField searchField;
+    @FXML protected TextField searchField;
+    @FXML protected FlowPane  cardsContainer;
+    @FXML protected Label     messageLabel;
+    @FXML protected ComboBox<String> sortComboBox;
 
-    @FXML
-    protected FlowPane cardsContainer;
-
-    @FXML
-    protected Label messageLabel;
-
-    @FXML
-    protected ComboBox<String> sortComboBox;
-
-    private final UserService userService = new UserService();
-    private final ObservableList<User> users = FXCollections.observableArrayList();
+    private final UserService          userService = new UserService();
+    private final ObservableList<User> users       = FXCollections.observableArrayList();
 
     protected abstract String managedRole();
-
     protected abstract String managedRoleLabel();
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // Chargement CSS — une seule méthode, un seul endroit
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    private void applyStylesheets(DialogPane pane) {
+        String css = getClass().getResource("/views/styles/dashboard.css").toExternalForm();
+        pane.getStylesheets().add(css);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // FXML lifecycle
+    // ═══════════════════════════════════════════════════════════════════════════
 
     @FXML
     public void initialize() {
@@ -79,32 +77,26 @@ public abstract class BaseUsersBackofficeController {
         cardsContainer.setVgap(18);
         cardsContainer.setPrefWrapLength(1140);
         searchField.textProperty().addListener((obs, oldValue, newValue) -> renderCards());
-        
-        // Setup sort options
+
         if (sortComboBox != null) {
             sortComboBox.setItems(FXCollections.observableArrayList(
-                    "Nom (A-Z)",
-                    "Nom (Z-A)",
-                    "Email (A-Z)",
-                    "Date inscription (Récent)",
-                    "Date inscription (Ancien)",
-                    "Statut (Activé)",
-                    "Statut (Bloqué)"
-            ));
+                    "Nom (A-Z)", "Nom (Z-A)", "Email (A-Z)",
+                    "Date inscription (Récent)", "Date inscription (Ancien)",
+                    "Statut (Activé)", "Statut (Bloqué)"));
             sortComboBox.setValue("Nom (A-Z)");
             sortComboBox.valueProperty().addListener((obs, oldValue, newValue) -> renderCards());
         }
-        
         loadUsers();
     }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // CRUD actions
+    // ═══════════════════════════════════════════════════════════════════════════
 
     @FXML
     protected void onAddUser() {
         Optional<User> dialogResult = showUserDialog(null);
-        if (dialogResult.isEmpty()) {
-            return;
-        }
-
+        if (dialogResult.isEmpty()) return;
         try {
             userService.add(dialogResult.get());
             setMessage(managedRoleLabel() + " ajoute avec succes.", false);
@@ -116,10 +108,7 @@ public abstract class BaseUsersBackofficeController {
 
     protected void onEditUser(User existingUser) {
         Optional<User> dialogResult = showUserDialog(existingUser);
-        if (dialogResult.isEmpty()) {
-            return;
-        }
-
+        if (dialogResult.isEmpty()) return;
         try {
             userService.update(dialogResult.get());
             setMessage(managedRoleLabel() + " modifie avec succes.", false);
@@ -130,10 +119,7 @@ public abstract class BaseUsersBackofficeController {
     }
 
     protected void onDeleteUser(User user) {
-        if (!showDeleteConfirmationDialog(user)) {
-            return;
-        }
-
+        if (!showDeleteConfirmationDialog(user)) return;
         try {
             userService.delete(user);
             setMessage(managedRoleLabel() + " supprime avec succes.", false);
@@ -144,10 +130,7 @@ public abstract class BaseUsersBackofficeController {
     }
 
     protected void onActivateUser(User user) {
-        if (!showActivateConfirmationDialog(user)) {
-            return;
-        }
-
+        if (!showActivateConfirmationDialog(user)) return;
         try {
             userService.activateBlockedUser(user);
             setMessage(managedRoleLabel() + " active avec succes.", false);
@@ -157,105 +140,9 @@ public abstract class BaseUsersBackofficeController {
         }
     }
 
-    private boolean showActivateConfirmationDialog(User user) {
-        ButtonType activateButtonType = new ButtonType("Activer le compte", ButtonBar.ButtonData.OK_DONE);
-
-        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmation.setTitle("✓ Activer " + managedRoleLabel().toLowerCase(Locale.ROOT));
-        confirmation.setHeaderText(null);
-        confirmation.getDialogPane().getStyleClass().addAll("users-dialog-pane", "users-activate-dialog");
-        if (searchField != null && searchField.getScene() != null) {
-            confirmation.getDialogPane().getStylesheets().addAll(searchField.getScene().getStylesheets());
-        }
-        confirmation.getDialogPane().getButtonTypes().setAll(activateButtonType, ButtonType.CANCEL);
-        confirmation.getDialogPane().setPrefSize(560, 420);
-
-        // Icon/Visual indicator
-        Label iconLabel = new Label("🔓");
-        iconLabel.setStyle("-fx-font-size: 48; -fx-text-fill: #10b981;");
-
-        // Chips/Tags
-        Label modeChip = new Label("✓ Validation");
-        modeChip.getStyleClass().add("users-dialog-status-chip");
-        modeChip.setStyle("-fx-background-color: #d1fae5; -fx-text-fill: #047857; -fx-padding: 6 12;");
-        
-        Label roleChip = new Label(managedRoleLabel());
-        roleChip.getStyleClass().add("users-dialog-role-chip");
-        roleChip.setStyle("-fx-background-color: #f3f4f6; -fx-text-fill: #1f2937; -fx-padding: 6 12;");
-        
-        HBox chipRow = new HBox(8, modeChip, roleChip);
-        chipRow.getStyleClass().add("users-dialog-chip-row");
-
-        Label title = new Label("Activer ce profil ?");
-        title.setStyle("-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #1f2937;");
-        
-        Label subtitle = new Label("Le compte sera activé et l'utilisateur pourra se connecter immédiatement.");
-        subtitle.setStyle("-fx-font-size: 13; -fx-text-fill: #6b7280; -fx-wrap-text: true;");
-        subtitle.setWrapText(true);
-
-        VBox hero = new VBox(12, iconLabel, chipRow, title, subtitle);
-        hero.setAlignment(Pos.TOP_CENTER);
-        hero.setStyle("-fx-padding: 20; -fx-background-color: linear-gradient(to bottom, #f0fdf4, #f9fafb); -fx-border-radius: 8; -fx-border-color: #dcfce7; -fx-border-width: 1;");
-
-        // Profile information card
-        VBox profileCard = new VBox(10);
-        profileCard.setStyle("-fx-padding: 16; -fx-background-color: #f9fafb; -fx-border-radius: 8; -fx-border-color: #e5e7eb; -fx-border-width: 1;");
-        
-        Label profileTitle = new Label("📋 Profil à activer");
-        profileTitle.setStyle("-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #374151;");
-        
-        HBox nameRow = new HBox(8);
-        nameRow.setStyle("-fx-spacing: 8;");
-        Label nameKeyLabel = new Label("Utilisateur:");
-        nameKeyLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #4b5563; -fx-min-width: 100;");
-        Label nameValueLabel = new Label(safe(user.getNom()) + " " + safe(user.getPrenom()));
-        nameValueLabel.setStyle("-fx-text-fill: #1f2937; -fx-font-weight: 600;");
-        nameRow.getChildren().addAll(nameKeyLabel, nameValueLabel);
-        
-        HBox emailRow = new HBox(8);
-        Label emailKeyLabel = new Label("Email:");
-        emailKeyLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #4b5563; -fx-min-width: 100;");
-        Label emailValueLabel = new Label(safe(user.getEmail()));
-        emailValueLabel.setStyle("-fx-text-fill: #1f2937;");
-        emailRow.getChildren().addAll(emailKeyLabel, emailValueLabel);
-        
-        HBox roleRow = new HBox(8);
-        Label roleKeyLabel = new Label("Rôle:");
-        roleKeyLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #4b5563; -fx-min-width: 100;");
-        Label roleValueLabel = new Label(managedRoleLabel());
-        roleValueLabel.setStyle("-fx-text-fill: #1f2937; -fx-background-color: #f3f4f6; -fx-padding: 2 8; -fx-border-radius: 4;");
-        roleRow.getChildren().addAll(roleKeyLabel, roleValueLabel);
-        
-        HBox statusRow = new HBox(8);
-        Label statusKeyLabel = new Label("Statut actuel:");
-        statusKeyLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #4b5563; -fx-min-width: 100;");
-        Label statusValueLabel = new Label(formatStatusLabel(user.getStatut()));
-        statusValueLabel.setStyle("-fx-text-fill: #dc2626; -fx-background-color: #fee2e2; -fx-padding: 2 8; -fx-border-radius: 4; -fx-font-weight: bold;");
-        statusRow.getChildren().addAll(statusKeyLabel, statusValueLabel);
-        
-        profileCard.getChildren().addAll(profileTitle, nameRow, emailRow, roleRow, statusRow);
-
-        // Information message
-        Label infoLabel = new Label("ℹ Une fois activé, ce compte aura un accès complet à la plateforme.");
-        infoLabel.setStyle("-fx-font-size: 12; -fx-text-fill: #059669; -fx-background-color: #d1fae5; -fx-padding: 10; -fx-border-radius: 6; -fx-wrap-text: true;");
-        infoLabel.setWrapText(true);
-
-        VBox content = new VBox(14, hero, profileCard, infoLabel);
-        content.setStyle("-fx-padding: 10;");
-        content.getStyleClass().add("users-dialog-content");
-        confirmation.getDialogPane().setContent(content);
-
-        Button activateButton = (Button) confirmation.getDialogPane().lookupButton(activateButtonType);
-        activateButton.getStyleClass().addAll("card-action-button", "card-success-button", "users-activate-confirm-button");
-        activateButton.setStyle("-fx-font-size: 13; -fx-padding: 10 24; -fx-font-weight: bold;");
-        
-        Button cancelButton = (Button) confirmation.getDialogPane().lookupButton(ButtonType.CANCEL);
-        cancelButton.getStyleClass().addAll("card-action-button", "card-soft-button");
-        cancelButton.setStyle("-fx-font-size: 13; -fx-padding: 10 24;");
-
-        Optional<ButtonType> choice = confirmation.showAndWait();
-        return choice.isPresent() && choice.get() == activateButtonType;
-    }
+    // ═══════════════════════════════════════════════════════════════════════════
+    // DELETE confirmation dialog
+    // ═══════════════════════════════════════════════════════════════════════════
 
     private boolean showDeleteConfirmationDialog(User user) {
         ButtonType deleteButtonType = new ButtonType("Supprimer", ButtonBar.ButtonData.OK_DONE);
@@ -263,12 +150,11 @@ public abstract class BaseUsersBackofficeController {
         Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
         confirmation.setTitle("Suppression " + managedRoleLabel().toLowerCase(Locale.ROOT));
         confirmation.setHeaderText(null);
-        confirmation.getDialogPane().getStyleClass().addAll("users-dialog-pane", "users-delete-dialog");
-        if (searchField != null && searchField.getScene() != null) {
-            confirmation.getDialogPane().getStylesheets().addAll(searchField.getScene().getStylesheets());
-        }
         confirmation.getDialogPane().getButtonTypes().setAll(deleteButtonType, ButtonType.CANCEL);
         confirmation.getDialogPane().setPrefSize(520, 330);
+
+        applyStylesheets(confirmation.getDialogPane());
+        confirmation.getDialogPane().getStyleClass().addAll("users-dialog-pane", "users-delete-dialog");
 
         Label modeChip = new Label("Action sensible");
         modeChip.getStyleClass().add("users-dialog-status-chip");
@@ -279,7 +165,7 @@ public abstract class BaseUsersBackofficeController {
 
         Label title = new Label("Supprimer définitivement ce profil ?");
         title.getStyleClass().addAll("users-dialog-title", "users-delete-title");
-        Label subtitle = new Label("Cette action est irreversible et retire l'utilisateur du backoffice.");
+        Label subtitle = new Label("Cette action est irréversible et retire l'utilisateur du backoffice.");
         subtitle.getStyleClass().addAll("users-dialog-subtitle", "users-delete-subtitle");
 
         VBox hero = new VBox(6, chipRow, title, subtitle);
@@ -300,13 +186,83 @@ public abstract class BaseUsersBackofficeController {
         confirmation.getDialogPane().setContent(content);
 
         Button deleteButton = (Button) confirmation.getDialogPane().lookupButton(deleteButtonType);
-        deleteButton.getStyleClass().addAll("card-action-button", "card-danger-button", "users-delete-confirm-button");
+        deleteButton.getStyleClass().addAll("card-action-button", "card-danger-button");
         Button cancelButton = (Button) confirmation.getDialogPane().lookupButton(ButtonType.CANCEL);
         cancelButton.getStyleClass().addAll("card-action-button", "card-soft-button");
 
         Optional<ButtonType> choice = confirmation.showAndWait();
         return choice.isPresent() && choice.get() == deleteButtonType;
     }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // ACTIVATE confirmation dialog
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    private boolean showActivateConfirmationDialog(User user) {
+        ButtonType activateButtonType = new ButtonType("Activer le compte", ButtonBar.ButtonData.OK_DONE);
+
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmation.setTitle("Activer " + managedRoleLabel().toLowerCase(Locale.ROOT));
+        confirmation.setHeaderText(null);
+        confirmation.getDialogPane().getButtonTypes().setAll(activateButtonType, ButtonType.CANCEL);
+        confirmation.getDialogPane().setPrefSize(560, 420);
+
+        applyStylesheets(confirmation.getDialogPane());
+        confirmation.getDialogPane().getStyleClass().addAll("users-dialog-pane", "users-activate-dialog");
+
+        Label iconLabel = new Label("🔓");
+        iconLabel.setStyle("-fx-font-size: 48;");
+
+        Label modeChip = new Label("✓ Validation");
+        modeChip.getStyleClass().add("users-dialog-status-chip");
+        Label roleChip = new Label(managedRoleLabel());
+        roleChip.getStyleClass().add("users-dialog-role-chip");
+        HBox chipRow = new HBox(8, modeChip, roleChip);
+        chipRow.getStyleClass().add("users-dialog-chip-row");
+
+        Label title = new Label("Activer ce profil ?");
+        title.getStyleClass().add("users-dialog-title");
+        Label subtitle = new Label("Le compte sera activé et l'utilisateur pourra se connecter immédiatement.");
+        subtitle.getStyleClass().add("users-dialog-subtitle");
+        subtitle.setWrapText(true);
+
+        VBox hero = new VBox(12, iconLabel, chipRow, title, subtitle);
+        hero.setAlignment(Pos.TOP_CENTER);
+        hero.getStyleClass().add("users-dialog-hero");
+
+        VBox profileCard = new VBox(10);
+        profileCard.getStyleClass().add("users-dialog-section-card");
+
+        Label profileTitle = new Label("Profil à activer");
+        profileTitle.getStyleClass().add("users-dialog-section-title");
+
+        profileCard.getChildren().addAll(
+                profileTitle,
+                createDetailsRow("Utilisateur", safe(user.getNom()) + " " + safe(user.getPrenom())),
+                createDetailsRow("Email",        safe(user.getEmail())),
+                createDetailsRow("Rôle",         managedRoleLabel()),
+                createDetailsRow("Statut actuel",formatStatusLabel(user.getStatut())));
+
+        Label infoLabel = new Label("ℹ Une fois activé, ce compte aura un accès complet à la plateforme.");
+        infoLabel.getStyleClass().add("users-dialog-label");
+        infoLabel.setWrapText(true);
+
+        VBox content = new VBox(14, hero, profileCard, infoLabel);
+        content.getStyleClass().add("users-dialog-content");
+        confirmation.getDialogPane().setContent(content);
+
+        Button activateButton = (Button) confirmation.getDialogPane().lookupButton(activateButtonType);
+        activateButton.getStyleClass().addAll("card-action-button", "card-success-button");
+        Button cancelButton = (Button) confirmation.getDialogPane().lookupButton(ButtonType.CANCEL);
+        cancelButton.getStyleClass().addAll("card-action-button", "card-soft-button");
+
+        Optional<ButtonType> choice = confirmation.showAndWait();
+        return choice.isPresent() && choice.get() == activateButtonType;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // Load & render
+    // ═══════════════════════════════════════════════════════════════════════════
 
     private void loadUsers() {
         try {
@@ -328,7 +284,6 @@ public abstract class BaseUsersBackofficeController {
                 .filter(user -> matchesQuery(user, query))
                 .toList();
 
-        // Apply sorting
         String sortOption = sortComboBox != null ? sortComboBox.getValue() : "Nom (A-Z)";
         List<User> sortedUsers = applySorting(filteredUsers, sortOption);
 
@@ -343,52 +298,46 @@ public abstract class BaseUsersBackofficeController {
         }
     }
 
-    private List<User> applySorting(List<User> users, String sortOption) {
+    private List<User> applySorting(List<User> list, String sortOption) {
         return switch (sortOption) {
-            case "Nom (A-Z)" -> users.stream()
-                    .sorted((u1, u2) -> (u1.getNom() + " " + u1.getPrenom())
-                            .compareTo(u2.getNom() + " " + u2.getPrenom()))
+            case "Nom (A-Z)" -> list.stream()
+                    .sorted((u1, u2) -> (u1.getNom() + " " + u1.getPrenom()).compareTo(u2.getNom() + " " + u2.getPrenom()))
                     .toList();
-            case "Nom (Z-A)" -> users.stream()
-                    .sorted((u1, u2) -> (u2.getNom() + " " + u2.getPrenom())
-                            .compareTo(u1.getNom() + " " + u1.getPrenom()))
+            case "Nom (Z-A)" -> list.stream()
+                    .sorted((u1, u2) -> (u2.getNom() + " " + u2.getPrenom()).compareTo(u1.getNom() + " " + u1.getPrenom()))
                     .toList();
-            case "Email (A-Z)" -> users.stream()
+            case "Email (A-Z)" -> list.stream()
                     .sorted((u1, u2) -> safe(u1.getEmail()).compareTo(safe(u2.getEmail())))
                     .toList();
-            case "Date inscription (Récent)" -> users.stream()
+            case "Date inscription (Récent)" -> list.stream()
                     .sorted((u1, u2) -> u2.getDateInscription().compareTo(u1.getDateInscription()))
                     .toList();
-            case "Date inscription (Ancien)" -> users.stream()
+            case "Date inscription (Ancien)" -> list.stream()
                     .sorted((u1, u2) -> u1.getDateInscription().compareTo(u2.getDateInscription()))
                     .toList();
-            case "Statut (Activé)" -> users.stream()
+            case "Statut (Activé)" -> list.stream()
                     .filter(u -> u.getStatut() != null && u.getStatut().toLowerCase(Locale.ROOT).contains("activ"))
-                    .sorted((u1, u2) -> (u1.getNom() + " " + u1.getPrenom())
-                            .compareTo(u2.getNom() + " " + u2.getPrenom()))
+                    .sorted((u1, u2) -> (u1.getNom() + " " + u1.getPrenom()).compareTo(u2.getNom() + " " + u2.getPrenom()))
                     .toList();
-            case "Statut (Bloqué)" -> users.stream()
+            case "Statut (Bloqué)" -> list.stream()
                     .filter(u -> u.getStatut() != null && u.getStatut().toLowerCase(Locale.ROOT).contains("bloqu"))
-                    .sorted((u1, u2) -> (u1.getNom() + " " + u1.getPrenom())
-                            .compareTo(u2.getNom() + " " + u2.getPrenom()))
+                    .sorted((u1, u2) -> (u1.getNom() + " " + u1.getPrenom()).compareTo(u2.getNom() + " " + u2.getPrenom()))
                     .toList();
-            default -> users;
+            default -> list;
         };
     }
 
     private boolean matchesQuery(User user, String query) {
-        if (query.isEmpty()) {
-            return true;
-        }
-
+        if (query.isEmpty()) return true;
         String searchableText = String.join(" ",
-                safe(user.getNom()),
-                safe(user.getPrenom()),
-                safe(user.getEmail()),
-                safe(user.getVille()),
-                safe(user.getNumTel()));
+                safe(user.getNom()), safe(user.getPrenom()),
+                safe(user.getEmail()), safe(user.getVille()), safe(user.getNumTel()));
         return searchableText.toLowerCase(Locale.ROOT).contains(query);
     }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // User card
+    // ═══════════════════════════════════════════════════════════════════════════
 
     private Node createUserCard(User user) {
         VBox card = new VBox(14);
@@ -420,48 +369,47 @@ public abstract class BaseUsersBackofficeController {
         Label roleBadge = new Label(managedRoleLabel());
         roleBadge.getStyleClass().add("badge-role");
 
-        Label roleSpecificBadge = new Label("Artiste".equalsIgnoreCase(managedRole())
-                ? "Specialite"
-                : "Centre interet");
+        Label roleSpecificBadge = new Label("Artiste".equalsIgnoreCase(managedRole()) ? "Specialite" : "Centre interet");
         roleSpecificBadge.getStyleClass().add("badge-role-secondary");
 
         HBox badgeRow = new HBox(8, roleBadge, roleSpecificBadge);
         badgeRow.getStyleClass().add("user-card-badges");
 
         VBox body = new VBox(8,
-                createInfoRow("Telephone", safe(user.getNumTel())),
-                createInfoRow("Ville", safe(user.getVille())),
-                createInfoRow("Naissance", user.getDateNaissance() == null ? "-" : user.getDateNaissance().toString()),
-                createInfoRow("Statut", formatStatusLabel(user.getStatut())),
+                createInfoRow("Telephone",  safe(user.getNumTel())),
+                createInfoRow("Ville",      safe(user.getVille())),
+                createInfoRow("Naissance",  user.getDateNaissance() == null ? "-" : user.getDateNaissance().toString()),
+                createInfoRow("Statut",     formatStatusLabel(user.getStatut())),
                 createInfoRow("Artiste".equalsIgnoreCase(managedRole()) ? "Specialite" : "Centre interet",
-                        "Artiste".equalsIgnoreCase(managedRole()) ? safe(user.getSpecialite()) : safe(user.getCentreInteret()))
-        );
+                        "Artiste".equalsIgnoreCase(managedRole()) ? safe(user.getSpecialite()) : safe(user.getCentreInteret())));
         body.getStyleClass().add("user-card-body");
+
+        Button detailsButton = new Button("Voir details");
+        detailsButton.getStyleClass().addAll("card-action-button", "card-soft-button");
+        detailsButton.setOnAction(e -> showDetails(user));
+
+        Button editButton = new Button("Modifier");
+        editButton.getStyleClass().addAll("card-action-button", "card-soft-button");
+        editButton.setOnAction(e -> onEditUser(user));
+
+        Button deleteButton = new Button("Supprimer");
+        deleteButton.getStyleClass().addAll("card-action-button", "card-danger-button");
+        deleteButton.setOnAction(e -> onDeleteUser(user));
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
 
         HBox actions = new HBox(8);
         actions.setAlignment(Pos.CENTER_RIGHT);
         actions.getStyleClass().add("user-card-actions");
 
-        Button detailsButton = new Button("Voir details");
-        detailsButton.getStyleClass().addAll("card-action-button", "card-soft-button");
-        detailsButton.setOnAction(event -> showDetails(user));
-
-        Button editButton = new Button("Modifier");
-        editButton.getStyleClass().addAll("card-action-button", "card-soft-button");
-        editButton.setOnAction(event -> onEditUser(user));
-
-        Button deleteButton = new Button("Supprimer");
-        deleteButton.getStyleClass().addAll("card-action-button", "card-danger-button");
-        deleteButton.setOnAction(event -> onDeleteUser(user));
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        
-        boolean isBlocked = user.getStatut() != null && (user.getStatut().toLowerCase(Locale.ROOT).contains("bloqu") || user.getStatut().toLowerCase(Locale.ROOT).contains("blocked"));
-        if (isBlocked) {
+        boolean blocked = user.getStatut() != null &&
+                (user.getStatut().toLowerCase(Locale.ROOT).contains("bloqu") ||
+                        user.getStatut().toLowerCase(Locale.ROOT).contains("blocked"));
+        if (blocked) {
             Button activateButton = new Button("Activer");
             activateButton.getStyleClass().addAll("card-action-button", "card-success-button");
-            activateButton.setOnAction(event -> onActivateUser(user));
+            activateButton.setOnAction(e -> onActivateUser(user));
             actions.getChildren().addAll(detailsButton, spacer, activateButton, editButton, deleteButton);
         } else {
             actions.getChildren().addAll(detailsButton, spacer, editButton, deleteButton);
@@ -474,47 +422,27 @@ public abstract class BaseUsersBackofficeController {
     private HBox createInfoRow(String label, String value) {
         Label keyLabel = new Label(label);
         keyLabel.getStyleClass().add("user-info-key");
-
         Label valueLabel = new Label(value);
         valueLabel.getStyleClass().add("user-info-value");
-
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-
         HBox row = new HBox(8, keyLabel, spacer, valueLabel);
         row.getStyleClass().add("user-info-row");
         return row;
     }
 
-    private String formatStatusLabel(String status) {
-        String normalized = safe(status).toLowerCase(Locale.ROOT);
-        return switch (normalized) {
-            case "activé", "active" -> "Activé";
-            case "bloqué", "blocked" -> "Bloqué";
-            case "pending" -> "En attente";
-            default -> normalized.substring(0, 1).toUpperCase(Locale.ROOT) + normalized.substring(1);
-        };
-    }
-
-    private String statusStyleClass(String status) {
-        String normalized = safe(status).toLowerCase(Locale.ROOT);
-        return switch (normalized) {
-            case "activé", "active" -> "status-active";
-            case "bloqué", "blocked" -> "status-blocked";
-            case "pending" -> "status-pending";
-            default -> "status-neutral";
-        };
-    }
+    // ═══════════════════════════════════════════════════════════════════════════
+    // Details dialog
+    // ═══════════════════════════════════════════════════════════════════════════
 
     private void showDetails(User user) {
         Alert details = new Alert(Alert.AlertType.INFORMATION);
         details.setTitle("Details " + managedRoleLabel().toLowerCase(Locale.ROOT));
         details.setHeaderText(null);
-        details.getDialogPane().getStyleClass().addAll("users-dialog-pane", "users-details-dialog");
-        if (searchField != null && searchField.getScene() != null) {
-            details.getDialogPane().getStylesheets().addAll(searchField.getScene().getStylesheets());
-        }
         details.getDialogPane().setPrefSize(560, 440);
+
+        applyStylesheets(details.getDialogPane());
+        details.getDialogPane().getStyleClass().addAll("users-dialog-pane", "users-details-dialog");
 
         Label modeChip = new Label("Consultation");
         modeChip.getStyleClass().add("users-dialog-status-chip");
@@ -532,16 +460,16 @@ public abstract class BaseUsersBackofficeController {
         hero.getStyleClass().addAll("users-dialog-hero", "users-details-hero");
 
         String roleSpecificLabel = "Artiste".equalsIgnoreCase(managedRole()) ? "Specialite" : "Centre interet";
-        String roleSpecificValue = "Artiste".equalsIgnoreCase(managedRole()) ? safe(user.getSpecialite()) : safe(user.getCentreInteret());
+        String roleSpecificValue = "Artiste".equalsIgnoreCase(managedRole())
+                ? safe(user.getSpecialite()) : safe(user.getCentreInteret());
 
         VBox identityCard = new VBox(8,
-                createDetailsRow("Email", safe(user.getEmail())),
-                createDetailsRow("Telephone", safe(user.getNumTel())),
-                createDetailsRow("Ville", safe(user.getVille())),
+                createDetailsRow("Email",          safe(user.getEmail())),
+                createDetailsRow("Telephone",      safe(user.getNumTel())),
+                createDetailsRow("Ville",          safe(user.getVille())),
                 createDetailsRow("Date naissance", user.getDateNaissance() == null ? "-" : user.getDateNaissance().toString()),
-                createDetailsRow("Statut", formatStatusLabel(user.getStatut())),
-                createDetailsRow(roleSpecificLabel, roleSpecificValue)
-        );
+                createDetailsRow("Statut",         formatStatusLabel(user.getStatut())),
+                createDetailsRow(roleSpecificLabel, roleSpecificValue));
         identityCard.getStyleClass().addAll("users-dialog-section-card", "users-details-card");
 
         Label bioTitle = new Label("Biographie");
@@ -567,55 +495,54 @@ public abstract class BaseUsersBackofficeController {
     private HBox createDetailsRow(String label, String value) {
         Label keyLabel = new Label(label);
         keyLabel.getStyleClass().add("users-dialog-label");
-
         Label valueLabel = new Label(value);
         valueLabel.getStyleClass().add("user-info-value");
-
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-
         HBox row = new HBox(8, keyLabel, spacer, valueLabel);
         row.getStyleClass().add("user-info-row");
         return row;
     }
 
+    // ═══════════════════════════════════════════════════════════════════════════
+    // Add / Edit dialog
+    // ═══════════════════════════════════════════════════════════════════════════
+
     private Optional<User> showUserDialog(User existingUser) {
         boolean creation = existingUser == null;
 
         Dialog<User> dialog = new Dialog<>();
-        dialog.setTitle(creation ? "Ajouter " + managedRoleLabel().toLowerCase(Locale.ROOT) : "Modifier " + managedRoleLabel().toLowerCase(Locale.ROOT));
+        dialog.setTitle(creation
+                ? "Ajouter " + managedRoleLabel().toLowerCase(Locale.ROOT)
+                : "Modifier " + managedRoleLabel().toLowerCase(Locale.ROOT));
         dialog.setHeaderText(null);
-        dialog.getDialogPane().getStyleClass().add("users-dialog-pane");
-        if (searchField != null && searchField.getScene() != null) {
-            dialog.getDialogPane().getStylesheets().addAll(searchField.getScene().getStylesheets());
-        }
-        dialog.getDialogPane().setGraphic(null);
         dialog.setResizable(false);
         dialog.getDialogPane().setPrefSize(560, 640);
         dialog.getDialogPane().setMinSize(560, 640);
         dialog.getDialogPane().setMaxSize(560, 640);
+        dialog.getDialogPane().setGraphic(null);
+
+        applyStylesheets(dialog.getDialogPane());
+        dialog.getDialogPane().getStyleClass().add("users-dialog-pane");
 
         ButtonType saveButtonType = new ButtonType("Enregistrer", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
 
-        GridPane form = new GridPane();
-        form.setHgap(10);
-        form.setVgap(10);
-        form.getStyleClass().add("users-dialog-form");
-
-        TextField nomField = new TextField();
-        TextField prenomField = new TextField();
-        DatePicker dateNaissancePicker = new DatePicker();
-        TextField emailField = new TextField();
-        PasswordField passwordField = new PasswordField();
+        // ── Fields ──
+        TextField     nomField             = new TextField();
+        TextField     prenomField          = new TextField();
+        DatePicker    dateNaissancePicker  = new DatePicker();
+        TextField     emailField           = new TextField();
+        PasswordField passwordField        = new PasswordField();
         PasswordField confirmPasswordField = new PasswordField();
-        TextField telField = new TextField();
-        TextField villeField = new TextField();
-        ComboBox<String> statutCombo = new ComboBox<>(FXCollections.observableArrayList(STATUT_ACTIVE, STATUT_BLOQUE));
+        TextField     telField             = new TextField();
+        TextField     villeField           = new TextField();
+        ComboBox<String> statutCombo       = new ComboBox<>(FXCollections.observableArrayList(STATUT_ACTIVE, STATUT_BLOQUE));
         ComboBox<String> roleSpecificCombo = new ComboBox<>();
-        TextArea bioArea = new TextArea();
-        Label formErrorLabel = new Label();
+        TextArea      bioArea              = new TextArea();
+        Label         formErrorLabel       = new Label();
 
+        // Appliquer les classes CSS aux champs
         nomField.getStyleClass().add("users-dialog-field");
         prenomField.getStyleClass().add("users-dialog-field");
         dateNaissancePicker.getStyleClass().add("users-dialog-field");
@@ -627,24 +554,24 @@ public abstract class BaseUsersBackofficeController {
         statutCombo.getStyleClass().add("users-dialog-field");
         bioArea.getStyleClass().addAll("users-dialog-field", "users-dialog-textarea");
         roleSpecificCombo.getStyleClass().add("users-dialog-field");
-
         bioArea.setPrefRowCount(3);
+        formErrorLabel.getStyleClass().addAll("dialog-error", "users-dialog-error");
 
         boolean artistRole = "Artiste".equalsIgnoreCase(managedRole());
         String roleSpecificLabel = artistRole ? "Specialite" : "Centre interet";
-        String dialogModeLabel = creation ? "Nouveau profil" : "Modification du profil";
-        String dialogHint = creation
-                ? "Crée une fiche utilisateur claire, premium et bien structurée."
-                : "Mets à jour les informations avec une présentation plus soignée.";
+        String dialogModeLabel   = creation ? "Nouveau profil" : "Modification du profil";
+        String dialogHint        = creation
+                ? "Créez une fiche utilisateur claire et bien structurée."
+                : "Mettez à jour les informations du profil.";
 
         roleSpecificCombo.getItems().setAll(artistRole ? SPECIALITES_ARTISTE : CENTRES_INTERET);
-        roleSpecificCombo.setPromptText(artistRole ? "Choisissez une spécialité" : "Choisissez un centre d'interet");
+        roleSpecificCombo.setPromptText(artistRole ? "Choisissez une spécialité" : "Choisissez un centre d'intérêt");
+        passwordField.setPromptText(creation ? "Minimum 8 caracteres" : "Laisser vide pour conserver");
+        confirmPasswordField.setPromptText(creation ? "Confirmez le mot de passe" : "Laisser vide pour conserver");
 
         if (creation) {
             statutCombo.setValue(STATUT_ACTIVE);
-        }
-
-        if (!creation) {
+        } else {
             nomField.setText(existingUser.getNom());
             prenomField.setText(existingUser.getPrenom());
             dateNaissancePicker.setValue(existingUser.getDateNaissance());
@@ -653,22 +580,21 @@ public abstract class BaseUsersBackofficeController {
             villeField.setText(existingUser.getVille());
             selectComboValue(statutCombo, normalizeStatutValue(existingUser.getStatut()));
             bioArea.setText(existingUser.getBiographie());
-            String existingRoleSpecific = artistRole ? clean(existingUser.getSpecialite()) : clean(existingUser.getCentreInteret());
-            selectComboValue(roleSpecificCombo, existingRoleSpecific);
+            selectComboValue(roleSpecificCombo, artistRole
+                    ? clean(existingUser.getSpecialite())
+                    : clean(existingUser.getCentreInteret()));
         }
 
-        Label modeChip = new Label(dialogModeLabel);
+        // ── En-tête du dialog ──
+        Label modeChip   = new Label(dialogModeLabel);
         modeChip.getStyleClass().add("users-dialog-mode-chip");
-
-        Label roleChip = new Label(managedRoleLabel());
+        Label roleChip   = new Label(managedRoleLabel());
         roleChip.getStyleClass().add("users-dialog-role-chip");
-
         Label statusChip = new Label(creation ? "Création" : "Édition");
         statusChip.getStyleClass().add("users-dialog-status-chip");
 
-        Label dialogTitle = new Label((creation ? "Créer " : "Modifier ") + managedRoleLabel().toLowerCase(Locale.ROOT));
+        Label dialogTitle    = new Label((creation ? "Créer " : "Modifier ") + managedRoleLabel().toLowerCase(Locale.ROOT));
         dialogTitle.getStyleClass().add("users-dialog-title");
-
         Label dialogSubtitle = new Label(dialogHint);
         dialogSubtitle.getStyleClass().add("users-dialog-subtitle");
 
@@ -678,108 +604,29 @@ public abstract class BaseUsersBackofficeController {
         VBox hero = new VBox(6, chipRow, dialogTitle, dialogSubtitle);
         hero.getStyleClass().add("users-dialog-hero");
 
-        VBox identityCard = new VBox(10);
-        identityCard.getStyleClass().add("users-dialog-section-card");
+        // ── Sections ──
+        VBox identityCard  = buildFormSection("Identité",        "Les informations de base du profil.",
+                new String[]{"Nom", "Prenom", "Date naissance"},
+                new Node[]{nomField, prenomField, dateNaissancePicker});
 
-        Label identityTitle = new Label("Identité");
-        identityTitle.getStyleClass().add("users-dialog-section-title");
-        Label identitySubtitle = new Label("Les informations de base du profil.");
-        identitySubtitle.getStyleClass().add("users-dialog-section-subtitle");
-        VBox identityHeader = new VBox(2, identityTitle, identitySubtitle);
+        VBox contactCard   = buildFormSection("Coordonnées",     "Email, téléphone et ville de contact.",
+                new String[]{"Email", "Telephone", "Ville"},
+                new Node[]{emailField, telField, villeField});
 
-        GridPane identityGrid = new GridPane();
-        identityGrid.setHgap(10);
-        identityGrid.setVgap(10);
-        Label nomLabel = new Label("Nom");
-        nomLabel.getStyleClass().add("users-dialog-label");
-        Label prenomLabel = new Label("Prenom");
-        prenomLabel.getStyleClass().add("users-dialog-label");
-        Label naissanceLabel = new Label("Date naissance");
-        naissanceLabel.getStyleClass().add("users-dialog-label");
-        passwordField.setPromptText(creation ? "Minimum 8 caracteres" : "Laisser vide pour conserver");
-        Label emailLabel = new Label("Email");
-        emailLabel.getStyleClass().add("users-dialog-label");
-        Label passwordLabel = new Label("Mot de passe");
-        passwordLabel.getStyleClass().add("users-dialog-label");
-        Label confirmationLabel = new Label("Confirmation");
-        confirmationLabel.getStyleClass().add("users-dialog-label");
-        confirmPasswordField.setPromptText(creation ? "Confirmez le mot de passe" : "Laisser vide pour conserver");
-        Label telephoneLabel = new Label("Telephone");
-        telephoneLabel.getStyleClass().add("users-dialog-label");
-        Label villeLabel = new Label("Ville");
-        villeLabel.getStyleClass().add("users-dialog-label");
-        Label statutLabel = new Label("Statut");
-        statutLabel.getStyleClass().add("users-dialog-label");
-        Label roleSpecificTextLabel = new Label(roleSpecificLabel);
-        roleSpecificTextLabel.getStyleClass().add("users-dialog-label");
-        Label biographieLabel = new Label("Biographie");
-        biographieLabel.getStyleClass().add("users-dialog-label");
+        VBox securityCard  = buildFormSection("Sécurité et statut", "Accès, rôle et état du compte.",
+                new String[]{"Mot de passe", "Confirmation", "Statut", roleSpecificLabel},
+                new Node[]{passwordField, confirmPasswordField, statutCombo, roleSpecificCombo});
 
-        identityGrid.add(nomLabel, 0, 0);
-        identityGrid.add(nomField, 1, 0);
-        identityGrid.add(prenomLabel, 0, 1);
-        identityGrid.add(prenomField, 1, 1);
-        identityGrid.add(naissanceLabel, 0, 2);
-        identityGrid.add(dateNaissancePicker, 1, 2);
-
-        VBox identityCardContent = new VBox(10, identityHeader, identityGrid);
-        identityCard.getChildren().add(identityCardContent);
-
-        VBox contactCard = new VBox(10);
-        contactCard.getStyleClass().add("users-dialog-section-card");
-        Label contactTitle = new Label("Coordonnées");
-        contactTitle.getStyleClass().add("users-dialog-section-title");
-        Label contactSubtitle = new Label("Email, téléphone et ville de contact.");
-        contactSubtitle.getStyleClass().add("users-dialog-section-subtitle");
-        VBox contactHeader = new VBox(2, contactTitle, contactSubtitle);
-
-        GridPane contactGrid = new GridPane();
-        contactGrid.setHgap(10);
-        contactGrid.setVgap(10);
-        contactGrid.add(emailLabel, 0, 0);
-        contactGrid.add(emailField, 1, 0);
-        contactGrid.add(telephoneLabel, 0, 1);
-        contactGrid.add(telField, 1, 1);
-        contactGrid.add(villeLabel, 0, 2);
-        contactGrid.add(villeField, 1, 2);
-
-        contactCard.getChildren().addAll(contactHeader, contactGrid);
-
-        VBox securityCard = new VBox(10);
-        securityCard.getStyleClass().add("users-dialog-section-card");
-        Label securityTitle = new Label("Sécurité et statut");
-        securityTitle.getStyleClass().add("users-dialog-section-title");
-        Label securitySubtitle = new Label("Accès, rôle et état du compte.");
-        securitySubtitle.getStyleClass().add("users-dialog-section-subtitle");
-        VBox securityHeader = new VBox(2, securityTitle, securitySubtitle);
-
-        GridPane securityGrid = new GridPane();
-        securityGrid.setHgap(10);
-        securityGrid.setVgap(10);
-        securityGrid.add(passwordLabel, 0, 0);
-        securityGrid.add(passwordField, 1, 0);
-        securityGrid.add(confirmationLabel, 0, 1);
-        securityGrid.add(confirmPasswordField, 1, 1);
-        securityGrid.add(statutLabel, 0, 2);
-        securityGrid.add(statutCombo, 1, 2);
-        securityGrid.add(roleSpecificTextLabel, 0, 3);
-        securityGrid.add(roleSpecificCombo, 1, 3);
-
-        securityCard.getChildren().addAll(securityHeader, securityGrid);
-
-        VBox bioCard = new VBox(10);
-        bioCard.getStyleClass().addAll("users-dialog-section-card", "users-dialog-bio-card");
-        Label bioTitle = new Label("Biographie");
+        Label bioTitle    = new Label("Biographie");
         bioTitle.getStyleClass().add("users-dialog-section-title");
         Label bioSubtitle = new Label("Une présentation courte et soignée du profil.");
         bioSubtitle.getStyleClass().add("users-dialog-section-subtitle");
-        VBox bioHeader = new VBox(2, bioTitle, bioSubtitle);
-        bioCard.getChildren().addAll(bioHeader, bioArea);
+        VBox bioCard = new VBox(10, new VBox(2, bioTitle, bioSubtitle), bioArea);
+        bioCard.getStyleClass().addAll("users-dialog-section-card", "users-dialog-bio-card");
 
         VBox dialogContent = new VBox(14, hero, identityCard, contactCard, securityCard, bioCard, formErrorLabel);
         dialogContent.getStyleClass().add("users-dialog-content");
         dialogContent.setFillWidth(true);
-        formErrorLabel.getStyleClass().addAll("dialog-error", "users-dialog-error");
 
         ScrollPane dialogScroll = new ScrollPane(dialogContent);
         dialogScroll.getStyleClass().add("users-dialog-scroll");
@@ -796,259 +643,200 @@ public abstract class BaseUsersBackofficeController {
         Button cancelButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.CANCEL);
         cancelButton.getStyleClass().addAll("card-action-button", "card-soft-button");
 
-        final boolean[] nomTouched = {false};
-        final boolean[] prenomTouched = {false};
-        final boolean[] dateNaissanceTouched = {false};
-        final boolean[] emailTouched = {false};
-        final boolean[] passwordTouched = {false};
-        final boolean[] confirmPasswordTouched = {false};
-        final boolean[] telephoneTouched = {false};
-        final boolean[] villeTouched = {false};
-        final boolean[] statutTouched = {false};
-        final boolean[] roleSpecificTouched = {false};
+        // ── Live validation ──
+        final boolean[] touched = new boolean[10];
 
         Runnable liveValidation = () -> {
-            if (!hasAnyTouched(
-                    nomTouched[0],
-                    prenomTouched[0],
-                    dateNaissanceTouched[0],
-                    emailTouched[0],
-                    passwordTouched[0],
-                    confirmPasswordTouched[0],
-                    telephoneTouched[0],
-                    villeTouched[0],
-                    statutTouched[0],
-                    roleSpecificTouched[0])) {
-                formErrorLabel.setText("");
-                return;
-            }
-            String validationError = validateFormLive(
-                    creation,
-                    nomField.getText(),
-                    prenomField.getText(),
-                    dateNaissancePicker.getValue(),
-                    emailField.getText(),
-                    passwordField.getText(),
-                    confirmPasswordField.getText(),
-                    telField.getText(),
-                    villeField.getText(),
-                    statutCombo.getValue(),
-                    roleSpecificCombo.getValue(),
-                    nomTouched[0],
-                    prenomTouched[0],
-                    dateNaissanceTouched[0],
-                    emailTouched[0],
-                    passwordTouched[0],
-                    confirmPasswordTouched[0],
-                    telephoneTouched[0],
-                    villeTouched[0],
-                    statutTouched[0],
-                    roleSpecificTouched[0]);
-            formErrorLabel.setText(validationError == null ? "" : validationError);
+            boolean anyTouched = false;
+            for (boolean t : touched) if (t) { anyTouched = true; break; }
+            if (!anyTouched) { formErrorLabel.setText(""); return; }
+            String err = validateFormLive(creation,
+                    nomField.getText(), prenomField.getText(), dateNaissancePicker.getValue(),
+                    emailField.getText(), passwordField.getText(), confirmPasswordField.getText(),
+                    telField.getText(), villeField.getText(),
+                    statutCombo.getValue(), roleSpecificCombo.getValue(),
+                    touched[0], touched[1], touched[2], touched[3], touched[4],
+                    touched[5], touched[6], touched[7], touched[8], touched[9]);
+            formErrorLabel.setText(err == null ? "" : err);
         };
 
-        nomField.textProperty().addListener((obs, oldV, newV) -> { nomTouched[0] = true; liveValidation.run(); });
-        prenomField.textProperty().addListener((obs, oldV, newV) -> { prenomTouched[0] = true; liveValidation.run(); });
-        dateNaissancePicker.valueProperty().addListener((obs, oldV, newV) -> { dateNaissanceTouched[0] = true; liveValidation.run(); });
-        emailField.textProperty().addListener((obs, oldV, newV) -> { emailTouched[0] = true; liveValidation.run(); });
-        passwordField.textProperty().addListener((obs, oldV, newV) -> { passwordTouched[0] = true; liveValidation.run(); });
-        confirmPasswordField.textProperty().addListener((obs, oldV, newV) -> { confirmPasswordTouched[0] = true; liveValidation.run(); });
-        telField.textProperty().addListener((obs, oldV, newV) -> { telephoneTouched[0] = true; liveValidation.run(); });
-        villeField.textProperty().addListener((obs, oldV, newV) -> { villeTouched[0] = true; liveValidation.run(); });
-        statutCombo.valueProperty().addListener((obs, oldV, newV) -> { statutTouched[0] = true; liveValidation.run(); });
-        roleSpecificCombo.valueProperty().addListener((obs, oldV, newV) -> { roleSpecificTouched[0] = true; liveValidation.run(); });
+        nomField.textProperty().addListener((o,ov,nv)             ->{ touched[0]=true; liveValidation.run(); });
+        prenomField.textProperty().addListener((o,ov,nv)          ->{ touched[1]=true; liveValidation.run(); });
+        dateNaissancePicker.valueProperty().addListener((o,ov,nv) ->{ touched[2]=true; liveValidation.run(); });
+        emailField.textProperty().addListener((o,ov,nv)           ->{ touched[3]=true; liveValidation.run(); });
+        passwordField.textProperty().addListener((o,ov,nv)        ->{ touched[4]=true; liveValidation.run(); });
+        confirmPasswordField.textProperty().addListener((o,ov,nv) ->{ touched[5]=true; liveValidation.run(); });
+        telField.textProperty().addListener((o,ov,nv)             ->{ touched[6]=true; liveValidation.run(); });
+        villeField.textProperty().addListener((o,ov,nv)           ->{ touched[7]=true; liveValidation.run(); });
+        statutCombo.valueProperty().addListener((o,ov,nv)         ->{ touched[8]=true; liveValidation.run(); });
+        roleSpecificCombo.valueProperty().addListener((o,ov,nv)   ->{ touched[9]=true; liveValidation.run(); });
 
         saveButton.addEventFilter(ActionEvent.ACTION, event -> {
-            String validationError = validateForm(
-                    creation,
-                    nomField.getText(),
-                    prenomField.getText(),
-                    dateNaissancePicker.getValue(),
-                    emailField.getText(),
-                    passwordField.getText(),
-                    confirmPasswordField.getText(),
-                    telField.getText(),
-                    villeField.getText(),
-                    statutCombo.getValue(),
-                    roleSpecificCombo.getValue());
-
-            if (validationError != null) {
-                formErrorLabel.setText(validationError);
-                event.consume();
-            }
+            String err = validateForm(creation,
+                    nomField.getText(), prenomField.getText(), dateNaissancePicker.getValue(),
+                    emailField.getText(), passwordField.getText(), confirmPasswordField.getText(),
+                    telField.getText(), villeField.getText(),
+                    statutCombo.getValue(), roleSpecificCombo.getValue());
+            if (err != null) { formErrorLabel.setText(err); event.consume(); }
         });
 
         dialog.setResultConverter(buttonType -> {
-            if (buttonType != saveButtonType) {
-                return null;
-            }
-
-            User user = new User();
+            if (buttonType != saveButtonType) return null;
+            User u = new User();
             if (!creation) {
-                user.setId(existingUser.getId());
-                user.setDateInscription(existingUser.getDateInscription());
-                user.setPhotoProfil(existingUser.getPhotoProfil());
-                user.setPhotoReferencePath(existingUser.getPhotoReferencePath());
+                u.setId(existingUser.getId());
+                u.setDateInscription(existingUser.getDateInscription());
+                u.setPhotoProfil(existingUser.getPhotoProfil());
+                u.setPhotoReferencePath(existingUser.getPhotoReferencePath());
             }
-
-            user.setNom(clean(nomField.getText()));
-            user.setPrenom(clean(prenomField.getText()));
-            user.setDateNaissance(dateNaissancePicker.getValue());
-            user.setEmail(clean(emailField.getText()));
-            String cleanedPassword = clean(passwordField.getText());
-            user.setMdp(creation || !isBlank(cleanedPassword) ? cleanedPassword : null);
-            user.setRole(managedRole());
-            user.setStatut(clean(statutCombo.getValue()));
-            user.setNumTel(clean(telField.getText()));
-            user.setVille(clean(villeField.getText()));
-            user.setBiographie(clean(bioArea.getText()));
-            user.setDateInscription(user.getDateInscription() == null ? LocalDate.now() : user.getDateInscription());
+            u.setNom(clean(nomField.getText()));
+            u.setPrenom(clean(prenomField.getText()));
+            u.setDateNaissance(dateNaissancePicker.getValue());
+            u.setEmail(clean(emailField.getText()));
+            String pwd = clean(passwordField.getText());
+            u.setMdp(creation || !isBlank(pwd) ? pwd : null);
+            u.setRole(managedRole());
+            u.setStatut(clean(statutCombo.getValue()));
+            u.setNumTel(clean(telField.getText()));
+            u.setVille(clean(villeField.getText()));
+            u.setBiographie(clean(bioArea.getText()));
+            u.setDateInscription(u.getDateInscription() == null ? LocalDate.now() : u.getDateInscription());
             if (artistRole) {
-                user.setSpecialite(clean(roleSpecificCombo.getValue()));
-                user.setCentreInteret(null);
+                u.setSpecialite(clean(roleSpecificCombo.getValue()));
+                u.setCentreInteret(null);
             } else {
-                user.setCentreInteret(clean(roleSpecificCombo.getValue()));
-                user.setSpecialite(null);
+                u.setCentreInteret(clean(roleSpecificCombo.getValue()));
+                u.setSpecialite(null);
             }
-            return user;
+            return u;
         });
 
         return dialog.showAndWait();
     }
 
-    private String validateForm(boolean creation,
-                                String nom,
-                                String prenom,
-                                LocalDate dateNaissance,
-                                String email,
-                                String password,
-                                String confirmPassword,
-                                String telephone,
-                                String ville,
-                                String statut,
-                                String roleSpecificValue) {
-        if (!InputValidator.isValidName(nom)) return "Nom invalide (2-50 lettres).";
+    /** Construit une section de formulaire avec titre, sous-titre et grille label/champ */
+    private VBox buildFormSection(String title, String subtitle, String[] labels, Node[] fields) {
+        Label titleLabel = new Label(title);
+        titleLabel.getStyleClass().add("users-dialog-section-title");
+        Label subtitleLabel = new Label(subtitle);
+        subtitleLabel.getStyleClass().add("users-dialog-section-subtitle");
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        for (int i = 0; i < labels.length; i++) {
+            Label lbl = new Label(labels[i]);
+            lbl.getStyleClass().add("users-dialog-label");
+            grid.add(lbl,      0, i);
+            grid.add(fields[i],1, i);
+        }
+
+        VBox card = new VBox(10, new VBox(2, titleLabel, subtitleLabel), grid);
+        card.getStyleClass().add("users-dialog-section-card");
+        return card;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // Validation
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    private String validateForm(boolean creation, String nom, String prenom, LocalDate dob,
+                                String email, String pwd, String cpwd, String tel, String ville,
+                                String statut, String roleVal) {
+        if (!InputValidator.isValidName(nom))    return "Nom invalide (2-50 lettres).";
         if (!InputValidator.isValidName(prenom)) return "Prenom invalide (2-50 lettres).";
-        if (dateNaissance == null) return "La date de naissance est obligatoire.";
-        if (!InputValidator.isAdult(dateNaissance, MINIMUM_AGE)) return "Date de naissance invalide (age minimum " + MINIMUM_AGE + " ans).";
+        if (dob == null)                         return "La date de naissance est obligatoire.";
+        if (!InputValidator.isAdult(dob, MINIMUM_AGE)) return "Date de naissance invalide (age minimum " + MINIMUM_AGE + " ans).";
         if (!InputValidator.isValidEmail(email)) return "Email invalide.";
-
-        if (creation) {
-            if (!InputValidator.isValidPassword(password)) {
-                return "Mot de passe faible: 8+ caracteres avec majuscule, minuscule et chiffre.";
-            }
-        } else if (!isBlank(password) && !InputValidator.isValidPassword(password)) {
+        if (creation && !InputValidator.isValidPassword(pwd))
             return "Mot de passe faible: 8+ caracteres avec majuscule, minuscule et chiffre.";
-        }
-
-        if (!isBlank(password) && isBlank(confirmPassword)) return "Veuillez confirmer le mot de passe.";
-        if (!isBlank(password) && !password.equals(confirmPassword)) return "Confirmation du mot de passe invalide.";
-        if (!InputValidator.isValidPhone(telephone)) return "Telephone invalide (8 a 15 chiffres, + optionnel).";
-        if (!InputValidator.isValidCity(ville)) return "Ville invalide (2-60 lettres).";
-        if (isBlank(statut)) return "Le statut est obligatoire.";
-        if (isBlank(roleSpecificValue)) {
-            return "Artiste".equalsIgnoreCase(managedRole())
-                    ? "La specialite est obligatoire."
-                    : "Le centre interet est obligatoire.";
-        }
+        if (!creation && !isBlank(pwd) && !InputValidator.isValidPassword(pwd))
+            return "Mot de passe faible: 8+ caracteres avec majuscule, minuscule et chiffre.";
+        if (!isBlank(pwd) && isBlank(cpwd))      return "Veuillez confirmer le mot de passe.";
+        if (!isBlank(pwd) && !pwd.equals(cpwd))  return "Confirmation du mot de passe invalide.";
+        if (!InputValidator.isValidPhone(tel))   return "Telephone invalide (8 a 15 chiffres, + optionnel).";
+        if (!InputValidator.isValidCity(ville))  return "Ville invalide (2-60 lettres).";
+        if (isBlank(statut))                     return "Le statut est obligatoire.";
+        if (isBlank(roleVal)) return "Artiste".equalsIgnoreCase(managedRole())
+                ? "La specialite est obligatoire."
+                : "Le centre interet est obligatoire.";
         return null;
     }
 
-    private String validateFormLive(boolean creation,
-                                    String nom,
-                                    String prenom,
-                                    LocalDate dateNaissance,
-                                    String email,
-                                    String password,
-                                    String confirmPassword,
-                                    String telephone,
-                                    String ville,
-                                    String statut,
-                                    String roleSpecificValue,
-                                    boolean nomTouched,
-                                    boolean prenomTouched,
-                                    boolean dateNaissanceTouched,
-                                    boolean emailTouched,
-                                    boolean passwordTouched,
-                                    boolean confirmPasswordTouched,
-                                    boolean telephoneTouched,
-                                    boolean villeTouched,
-                                    boolean statutTouched,
-                                    boolean roleSpecificTouched) {
-        if (nomTouched && !InputValidator.isValidName(nom)) return "Nom invalide (2-50 lettres).";
-        if (prenomTouched && !InputValidator.isValidName(prenom)) return "Prenom invalide (2-50 lettres).";
-
-        if (dateNaissanceTouched) {
-            if (dateNaissance == null) return "La date de naissance est obligatoire.";
-            if (!InputValidator.isAdult(dateNaissance, MINIMUM_AGE)) return "Date de naissance invalide (age minimum " + MINIMUM_AGE + " ans).";
+    private String validateFormLive(boolean creation, String nom, String prenom, LocalDate dob,
+                                    String email, String pwd, String cpwd, String tel, String ville,
+                                    String statut, String roleVal,
+                                    boolean tNom, boolean tPrenom, boolean tDob, boolean tEmail, boolean tPwd,
+                                    boolean tCpwd, boolean tTel, boolean tVille, boolean tStatut, boolean tRole) {
+        if (tNom    && !InputValidator.isValidName(nom))    return "Nom invalide (2-50 lettres).";
+        if (tPrenom && !InputValidator.isValidName(prenom)) return "Prenom invalide (2-50 lettres).";
+        if (tDob) {
+            if (dob == null) return "La date de naissance est obligatoire.";
+            if (!InputValidator.isAdult(dob, MINIMUM_AGE)) return "Date de naissance invalide (age minimum " + MINIMUM_AGE + " ans).";
         }
-
-        if (emailTouched && !InputValidator.isValidEmail(email)) return "Email invalide.";
-
-        if (passwordTouched) {
-            if (creation && !InputValidator.isValidPassword(password)) {
+        if (tEmail && !InputValidator.isValidEmail(email))  return "Email invalide.";
+        if (tPwd) {
+            if (creation && !InputValidator.isValidPassword(pwd))
                 return "Mot de passe faible: 8+ caracteres avec majuscule, minuscule et chiffre.";
-            }
-            if (!creation && !isBlank(password) && !InputValidator.isValidPassword(password)) {
+            if (!creation && !isBlank(pwd) && !InputValidator.isValidPassword(pwd))
                 return "Mot de passe faible: 8+ caracteres avec majuscule, minuscule et chiffre.";
-            }
         }
-
-        if (confirmPasswordTouched) {
-            if (!isBlank(password) && isBlank(confirmPassword)) return "Veuillez confirmer le mot de passe.";
-            if (!isBlank(password) && !password.equals(confirmPassword)) return "Confirmation du mot de passe invalide.";
+        if (tCpwd) {
+            if (!isBlank(pwd) && isBlank(cpwd))     return "Veuillez confirmer le mot de passe.";
+            if (!isBlank(pwd) && !pwd.equals(cpwd)) return "Confirmation du mot de passe invalide.";
         }
-
-        if (telephoneTouched && !InputValidator.isValidPhone(telephone)) return "Telephone invalide (8 a 15 chiffres, + optionnel).";
-        if (villeTouched && !InputValidator.isValidCity(ville)) return "Ville invalide (2-60 lettres).";
-        if (statutTouched && isBlank(statut)) return "Le statut est obligatoire.";
-        if (roleSpecificTouched && isBlank(roleSpecificValue)) {
-            return "Artiste".equalsIgnoreCase(managedRole())
-                    ? "La specialite est obligatoire."
-                    : "Le centre interet est obligatoire.";
-        }
+        if (tTel    && !InputValidator.isValidPhone(tel))  return "Telephone invalide (8 a 15 chiffres, + optionnel).";
+        if (tVille  && !InputValidator.isValidCity(ville)) return "Ville invalide (2-60 lettres).";
+        if (tStatut && isBlank(statut))                    return "Le statut est obligatoire.";
+        if (tRole   && isBlank(roleVal)) return "Artiste".equalsIgnoreCase(managedRole())
+                ? "La specialite est obligatoire."
+                : "Le centre interet est obligatoire.";
         return null;
     }
 
-    private boolean hasAnyTouched(boolean... touchedValues) {
-        for (boolean touched : touchedValues) {
-            if (touched) {
-                return true;
-            }
-        }
-        return false;
+    // ═══════════════════════════════════════════════════════════════════════════
+    // Helpers
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    private String formatStatusLabel(String status) {
+        String n = safe(status).toLowerCase(Locale.ROOT);
+        return switch (n) {
+            case "activé", "active"  -> "Activé";
+            case "bloqué", "blocked" -> "Bloqué";
+            case "pending"           -> "En attente";
+            default -> n.isEmpty() ? "-" : n.substring(0,1).toUpperCase(Locale.ROOT) + n.substring(1);
+        };
+    }
+
+    private String statusStyleClass(String status) {
+        String n = safe(status).toLowerCase(Locale.ROOT);
+        return switch (n) {
+            case "activé", "active"  -> "status-active";
+            case "bloqué", "blocked" -> "status-blocked";
+            case "pending"           -> "status-pending";
+            default                  -> "status-neutral";
+        };
     }
 
     private String normalizeStatutValue(String status) {
-        String normalized = safe(status).trim().toLowerCase(Locale.ROOT);
-        return switch (normalized) {
-            case "activé", "active" -> STATUT_ACTIVE;
+        String n = safe(status).trim().toLowerCase(Locale.ROOT);
+        return switch (n) {
+            case "activé", "active"  -> STATUT_ACTIVE;
             case "bloqué", "blocked" -> STATUT_BLOQUE;
             default -> clean(status);
         };
     }
 
-    private void selectComboValue(ComboBox<String> comboBox, String value) {
-        if (comboBox == null) {
-            return;
-        }
-
-        String cleaned = clean(value);
-        if (isBlank(cleaned)) {
-            comboBox.setValue(null);
-            return;
-        }
-
-        if (!comboBox.getItems().contains(cleaned)) {
-            comboBox.getItems().add(0, cleaned);
-        }
-        comboBox.setValue(cleaned);
+    private void selectComboValue(ComboBox<String> cb, String value) {
+        if (cb == null) return;
+        String v = clean(value);
+        if (isBlank(v)) { cb.setValue(null); return; }
+        if (!cb.getItems().contains(v)) cb.getItems().add(0, v);
+        cb.setValue(v);
     }
 
     private void setMessage(String message, boolean error) {
-        if (messageLabel == null) {
-            return;
-        }
+        if (messageLabel == null) return;
         messageLabel.setText(message);
         messageLabel.getStyleClass().removeAll("error", "success");
         messageLabel.getStyleClass().add(error ? "error" : "success");
@@ -1059,19 +847,12 @@ public abstract class BaseUsersBackofficeController {
     }
 
     private String buildInitials(User user) {
-        String first = isBlank(user.getPrenom()) ? "" : user.getPrenom().trim();
-        String last = isBlank(user.getNom()) ? "" : user.getNom().trim();
-        String initials = (first.isEmpty() ? "" : first.substring(0, 1)) + (last.isEmpty() ? "" : last.substring(0, 1));
-        return initials.isEmpty() ? "U" : initials.toUpperCase(Locale.ROOT);
+        String f = isBlank(user.getPrenom()) ? "" : user.getPrenom().trim();
+        String l = isBlank(user.getNom())    ? "" : user.getNom().trim();
+        String i = (f.isEmpty() ? "" : f.substring(0,1)) + (l.isEmpty() ? "" : l.substring(0,1));
+        return i.isEmpty() ? "U" : i.toUpperCase(Locale.ROOT);
     }
 
-    private String clean(String value) {
-        return InputValidator.clean(value);
-    }
-
-    private boolean isBlank(String value) {
-        return InputValidator.isBlank(value);
-    }
+    private String clean(String value)    { return InputValidator.clean(value); }
+    private boolean isBlank(String value) { return InputValidator.isBlank(value); }
 }
-
-
