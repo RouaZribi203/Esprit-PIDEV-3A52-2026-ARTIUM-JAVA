@@ -6,6 +6,7 @@ import services.LikeService;
 import services.OeuvreCollectionService;
 import services.OeuvreService;
 import services.ai.PythonImageEmbeddingClient;
+import controllers.ImageEditorController;
 import entities.CollectionOeuvre;
 import entities.Commentaire;
 import entities.Oeuvre;
@@ -221,6 +222,13 @@ public class MesOeuvresController {
         chooseImageButton.getStyleClass().add("popup-close-button");
         chooseImageButton.setGraphic(createIcon("M20 6h-6.18L12 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z", 0.58));
         chooseImageButton.setGraphicTextGap(6);
+
+        Button editImageButton = new Button("Editer");
+        editImageButton.getStyleClass().add("popup-close-button");
+        editImageButton.setGraphic(createIcon("M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z", 0.58));
+        editImageButton.setGraphicTextGap(6);
+        editImageButton.setDisable(true);
+
         Label selectedFileLabel = new Label("Aucun fichier n'a ete selectionne");
         selectedFileLabel.getStyleClass().add("page-subtitle-small");
         Label imageError = createPopupErrorLabel();
@@ -229,7 +237,20 @@ public class MesOeuvresController {
         imagePathHolder[0] = editMode ? existingOeuvre.getImage() : null;
         if (editMode && imagePathHolder[0] != null && !imagePathHolder[0].isBlank()) {
             selectedFileLabel.setText("Image actuelle conservée");
+            editImageButton.setDisable(false);
         }
+
+        editImageButton.setOnAction(event -> {
+            if (imagePathHolder[0] != null) {
+                ImageEditorController editor = new ImageEditorController(popupStage, imagePathHolder[0]);
+                String editedPath = editor.showAndWait();
+                if (editedPath != null && !editedPath.equals(imagePathHolder[0])) {
+                    imagePathHolder[0] = editedPath;
+                    selectedFileLabel.setText("Image modifiée");
+                }
+            }
+        });
+
         titreField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (safeText(newValue).isEmpty()) {
                 showFieldError(titreError, titreField, "Le titre est obligatoire.");
@@ -273,6 +294,7 @@ public class MesOeuvresController {
             }
             imagePathHolder[0] = file.getAbsolutePath();
             selectedFileLabel.setText(file.getName());
+            editImageButton.setDisable(false);
             clearPopupError(imageError);
         });
 
@@ -365,7 +387,7 @@ public class MesOeuvresController {
             }
         });
 
-        HBox imageRow = new HBox(10, chooseImageButton, selectedFileLabel);
+        HBox imageRow = new HBox(10, chooseImageButton, editImageButton, selectedFileLabel);
         imageRow.setAlignment(Pos.CENTER_LEFT);
 
         HBox footer = new HBox(10, cancelButton, publishButton);
