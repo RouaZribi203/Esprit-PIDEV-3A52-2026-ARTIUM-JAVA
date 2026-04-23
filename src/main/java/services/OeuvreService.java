@@ -11,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLDataException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
@@ -51,7 +52,7 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
         LocalDate dateCreation = t.getDateCreation() == null ? LocalDate.now() : t.getDateCreation();
 
         String sql = "INSERT INTO oeuvre (titre, description, date_creation, image, type, embedding, image_embedding, collection_id, classe) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, titre);
             preparedStatement.setString(2, description);
             preparedStatement.setDate(3, Date.valueOf(dateCreation));
@@ -61,6 +62,27 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
             preparedStatement.setString(7, t.getImageEmbedding());
             preparedStatement.setInt(8, collectionId);
             preparedStatement.setString(9, "oeuvre");
+            preparedStatement.executeUpdate();
+
+            try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    t.setId(generatedKeys.getInt(1));
+                }
+            }
+        } catch (SQLException e) {
+            throw new SQLDataException(e.getMessage());
+        }
+    }
+
+    public void updateImageEmbedding(int oeuvreId, String imageEmbedding) throws SQLDataException {
+        if (oeuvreId <= 0) {
+            throw new SQLDataException("L'identifiant de l'oeuvre est obligatoire.");
+        }
+
+        String sql = "UPDATE oeuvre SET image_embedding = ? WHERE id = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setString(1, imageEmbedding);
+            preparedStatement.setInt(2, oeuvreId);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new SQLDataException(e.getMessage());
@@ -197,7 +219,7 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
 
     @Override
     public Oeuvre getById(int id) throws SQLDataException {
-        return null;
+        return getOeuvreById(id);
     }
 
     /**

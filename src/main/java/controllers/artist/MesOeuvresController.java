@@ -1,5 +1,6 @@
 package controllers.artist;
 
+import javafx.concurrent.Task;
 import services.CommentaireService;
 import services.LikeService;
 import services.OeuvreCollectionService;
@@ -31,7 +32,12 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.SVGPath;
+import javafx.animation.FadeTransition;
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
+import javafx.scene.Node;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -291,6 +297,7 @@ public class MesOeuvresController {
         publishButton.getStyleClass().add("popup-confirm-button");
         publishButton.setGraphic(createIcon("M9 16.17 4.83 12 3.41 13.41 9 19l12-12-1.41-1.41z", 0.58));
         publishButton.setGraphicTextGap(6);
+        final String previousImagePath = editMode ? safeText(existingOeuvre.getImage()) : "";
         publishButton.setOnAction(event -> {
             clearPopupError(titreError);
             clearPopupError(descriptionError);
@@ -336,10 +343,15 @@ public class MesOeuvresController {
                 oeuvre.setType(resolveTypeFromSpecialite(artistSpecialite));
                 if (editMode) {
                     oeuvreService.update(oeuvre);
+                    if (!previousImagePath.equals(safeText(imagePathHolder[0]))) {
+                        scheduleImageEmbeddingUpdate(existingOeuvre.getId(), imagePathHolder[0]);
+                    }
                 } else {
-                    // This popup exists only in the artist add flow, so always generate image embedding here.
-                    oeuvre.setImageEmbedding(imageEmbeddingClient.generateImageEmbeddingJson(imagePathHolder[0]));
                     oeuvreService.add(oeuvre);
+                    Integer oeuvreId = oeuvre.getId();
+                    if (oeuvreId != null) {
+                        scheduleImageEmbeddingUpdate(oeuvreId, imagePathHolder[0]);
+                    }
                 }
 
                 popupStage.close();
@@ -479,6 +491,32 @@ public class MesOeuvresController {
         errorLabel.setText("");
         errorLabel.setManaged(false);
         errorLabel.setVisible(false);
+    }
+
+    private void scheduleImageEmbeddingUpdate(int oeuvreId, String imagePath) {
+        if (imagePath == null || imagePath.isBlank()) {
+            return;
+        }
+
+        Task<Void> embeddingTask = new Task<>() {
+            @Override
+            protected Void call() throws Exception {
+                String imageEmbedding = imageEmbeddingClient.generateImageEmbeddingJson(imagePath);
+                if (imageEmbedding != null && !imageEmbedding.isBlank()) {
+                    oeuvreService.updateImageEmbedding(oeuvreId, imageEmbedding);
+                }
+                return null;
+            }
+        };
+
+        embeddingTask.setOnFailed(event -> {
+            Throwable error = embeddingTask.getException();
+            System.err.println("Image embedding generation failed for oeuvre " + oeuvreId + ": " + (error == null ? "unknown error" : error.getMessage()));
+        });
+
+        Thread thread = new Thread(embeddingTask, "oeuvre-image-embedding-" + oeuvreId);
+        thread.setDaemon(true);
+        thread.start();
     }
 
     private void loadOeuvres() {
@@ -670,6 +708,23 @@ public class MesOeuvresController {
         return count;
     }
 
+    private HBox buildLoadingDots() {
+        HBox dots = new HBox(4);
+        dots.setAlignment(Pos.CENTER);
+        for (int i = 0; i < 3; i++) {
+            Circle dot = new Circle(3, i == 0 ? javafx.scene.paint.Color.valueOf("#3f44d4") : javafx.scene.paint.Color.valueOf("#94a3b8"));
+            FadeTransition ft = new FadeTransition(Duration.seconds(0.5), dot);
+            ft.setFromValue(1.0);
+            ft.setToValue(0.3);
+            ft.setCycleCount(javafx.animation.Animation.INDEFINITE);
+            ft.setAutoReverse(true);
+            ft.setDelay(Duration.seconds(i * 0.15));
+            dots.getChildren().add(dot);
+            ft.play();
+        }
+        return dots;
+    }
+
     private VBox buildCommentsPreview(List<Commentaire> comments) {
         VBox commentsBox = new VBox(8);
         commentsBox.getStyleClass().add("oeuvre-post-comments-box");
@@ -685,15 +740,53 @@ public class MesOeuvresController {
             return commentsBox;
         }
 
+        VBox listContainer = new VBox(8);
+        commentsBox.getChildren().add(listContainer);
+
         int displayCount = Math.min(3, comments.size());
         for (int i = 0; i < displayCount; i++) {
-            commentsBox.getChildren().add(buildCommentRow(comments.get(i)));
+            listContainer.getChildren().add(buildCommentRow(comments.get(i)));
         }
 
         if (comments.size() > 3) {
-            Label moreLabel = new Label("+" + (comments.size() - 3) + " autres commentaires");
-            moreLabel.getStyleClass().add("oeuvre-post-comments-more");
-            commentsBox.getChildren().add(moreLabel);
+            StackPane btnStack = new StackPane();
+            Button showMoreBtn = new Button("Afficher plus (" + (comments.size() - 3) + ")");
+            showMoreBtn.getStyleClass().add("oeuvre-post-comments-more-btn");
+            showMoreBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #3f44d4; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 0; -fx-font-size: 12px;");
+
+            HBox loadingDots = buildLoadingDots();
+            loadingDots.setVisible(false);
+            loadingDots.setManaged(false);
+
+            showMoreBtn.setOnAction(event -> {
+                showMoreBtn.setVisible(false);
+                showMoreBtn.setManaged(false);
+                loadingDots.setVisible(true);
+                loadingDots.setManaged(true);
+
+                PauseTransition pause = new PauseTransition(Duration.seconds(1.2));
+                pause.setOnFinished(e -> {
+                    int subDelay = 0;
+                    for (int i = 3; i < comments.size(); i++) {
+                        Node row = buildCommentRow(comments.get(i));
+                        row.setOpacity(0);
+                        listContainer.getChildren().add(row);
+
+                        FadeTransition ft = new FadeTransition(Duration.seconds(0.4), row);
+                        ft.setFromValue(0);
+                        ft.setToValue(1);
+                        ft.setDelay(Duration.millis(subDelay));
+                        ft.play();
+
+                        subDelay += 80;
+                    }
+                    commentsBox.getChildren().remove(btnStack);
+                });
+                pause.play();
+            });
+
+            btnStack.getChildren().addAll(showMoreBtn, loadingDots);
+            commentsBox.getChildren().add(btnStack);
         }
 
         return commentsBox;

@@ -693,13 +693,26 @@
 }
 
 .oeuvre-post-card {
-    -fx-background-color: #f8f9fc;
-    -fx-border-color: #dfe4ea;
+    -fx-background-color: white;
+    -fx-border-color: #f1f5f9;
     -fx-border-width: 1;
-    -fx-background-radius: 10;
-    -fx-border-radius: 10;
-    -fx-padding: 12 14 12 14;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-padding: 20;
     -fx-max-width: 760;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.04), 15, 0, 0, 8);
+}
+
+.oeuvre-post-comments-box {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 12;
+    -fx-padding: 15;
+    -fx-spacing: 12;
+}
+
+.oeuvre-post-comments-more-btn:hover {
+    -fx-text-fill: #2563eb;
+    -fx-underline: true;
 }
 
 .oeuvre-post-author {
@@ -851,7 +864,10 @@
 }
 
 .oeuvre-post-comment-row {
-    -fx-padding: 2 0 4 0;
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-padding: 10 12;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.02), 5, 0, 0, 2);
 }
 
 .oeuvre-post-comment-avatar {
@@ -873,9 +889,9 @@
 }
 
 .oeuvre-post-comment-author {
-    -fx-font-size: 12px;
-    -fx-font-weight: 700;
-    -fx-text-fill: #111827;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-text-fill: #1e293b;
 }
 
 .oeuvre-post-comment-date {
@@ -884,8 +900,8 @@
 }
 
 .oeuvre-post-comment-text {
-    -fx-font-size: 12px;
-    -fx-text-fill: #4b5563;
+    -fx-font-size: 13px;
+    -fx-text-fill: #334155;
 }
 
 .oeuvre-post-comment-composer-box {

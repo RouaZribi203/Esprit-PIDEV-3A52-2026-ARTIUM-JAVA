@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 public class OeuvreRecommendationService {
@@ -37,7 +38,7 @@ public class OeuvreRecommendationService {
 
         Set<Integer> interactedIds = loadInteractedOeuvreIds(user.getId());
         if (interactedIds.isEmpty()) {
-            return new ArrayList<>();
+            return recommendByCentreInteret(user.getCentreInteret(), allOeuvres);
         }
 
         List<List<Double>> interactedEmbeddings = new ArrayList<>();
@@ -85,6 +86,47 @@ public class OeuvreRecommendationService {
         return recommendations;
     }
 
+    private List<Oeuvre> recommendByCentreInteret(String centreInteret, List<Oeuvre> allOeuvres) {
+        if (centreInteret == null || centreInteret.trim().isEmpty() || allOeuvres == null || allOeuvres.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<Oeuvre> recommendations = new ArrayList<>();
+        for (Oeuvre oeuvre : allOeuvres) {
+            if (oeuvre == null || oeuvre.getId() == null) {
+                continue;
+            }
+
+            if (matchesCentreInteret(centreInteret, oeuvre.getType())) {
+                recommendations.add(oeuvre);
+            }
+        }
+
+        return recommendations;
+    }
+
+    private boolean matchesCentreInteret(String centreInteret, String type) {
+        String interest = normalizeText(centreInteret);
+        String oeuvreType = normalizeText(type);
+        if (interest.isEmpty() || oeuvreType.isEmpty()) {
+            return false;
+        }
+
+        return oeuvreType.equals(interest);
+    }
+
+    private String normalizeText(String value) {
+        if (value == null) {
+            return "";
+        }
+
+        String normalized = java.text.Normalizer.normalize(value, java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .toLowerCase(Locale.ROOT)
+                .trim();
+        return normalized.replaceAll("\\s+", " ");
+    }
+
     private Set<Integer> loadInteractedOeuvreIds(int userId) throws SQLDataException {
         Set<Integer> oeuvreIds = new HashSet<>();
 
@@ -109,6 +151,39 @@ public class OeuvreRecommendationService {
             }
         } catch (SQLException e) {
             throw new SQLDataException(e.getMessage());
+        }
+
+        oeuvreIds.addAll(loadCommentedOeuvreIds(userId));
+
+        return oeuvreIds;
+    }
+
+    private Set<Integer> loadCommentedOeuvreIds(int userId) throws SQLDataException {
+        Set<Integer> oeuvreIds = new HashSet<>();
+
+        String[] tableCandidates = new String[] {"commentaire", "commentaires", "comments"};
+        String[] oeuvreColumnCandidates = new String[] {"oeuvre_id", "oeuvreId"};
+        String[] userColumnCandidates = new String[] {"user_id", "userId", "auteur_id"};
+
+        for (String table : tableCandidates) {
+            for (String oeuvreColumn : oeuvreColumnCandidates) {
+                for (String userColumn : userColumnCandidates) {
+                    String sql = "SELECT DISTINCT " + oeuvreColumn + " AS oeuvre_id FROM " + table + " WHERE " + userColumn + " = ?";
+                    try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                        preparedStatement.setInt(1, userId);
+                        try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                            while (resultSet.next()) {
+                                oeuvreIds.add(resultSet.getInt("oeuvre_id"));
+                            }
+                        }
+                        if (!oeuvreIds.isEmpty()) {
+                            return oeuvreIds;
+                        }
+                    } catch (SQLException ignored) {
+                        // Essayer la prochaine combinaison table/colonnes.
+                    }
+                }
+            }
         }
 
         return oeuvreIds;
