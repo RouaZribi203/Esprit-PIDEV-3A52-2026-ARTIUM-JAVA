@@ -20,17 +20,31 @@ import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 
 import java.awt.Desktop;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.Files;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Duration;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
+
+import javax.imageio.ImageIO;
 
 public class TicketPdfService {
 
@@ -41,6 +55,45 @@ public class TicketPdfService {
     private static final String LOGO_RESOURCE = "/views/assets/PNG Icon.png";
     private static final String WINDOWS_ARIAL = "C:/Windows/Fonts/arial.ttf";
     private static final String WINDOWS_ARIAL_BOLD = "C:/Windows/Fonts/arialbd.ttf";
+    private static final int QR_SIZE = 280;
+    // Configure with env vars or JVM props:
+    // QR_API_URL / -Dqr.api.url
+    // QR_API_KEY / -Dqr.api.key
+    // QR_API_HOST / -Dqr.api.host
+    // QR_API_LOGO_URL / -Dqr.api.logoUrl
+    private static final String QR_API_URL_PROP = "qr.api.url";
+    private static final String QR_API_KEY_PROP = "qr.api.key";
+    private static final String QR_API_HOST_PROP = "qr.api.host";
+    private static final String QR_API_LOGO_PROP = "qr.api.logoUrl";
+    private static final String QR_API_SIZE_PROP = "qr.api.size";
+    private static final String QR_API_FORMAT_PROP = "qr.api.format";
+    private static final String QR_API_ECC_PROP = "qr.api.ecc";
+    private static final String QR_API_MARGIN_PROP = "qr.api.margin";
+    private static final String QR_API_QZONE_PROP = "qr.api.qzone";
+    private static final String QR_API_COLOR_PROP = "qr.api.color";
+    private static final String QR_API_BGCOLOR_PROP = "qr.api.bgcolor";
+    private static final String QR_API_CHARSET_SOURCE_PROP = "qr.api.charsetSource";
+    private static final String QR_API_CHARSET_TARGET_PROP = "qr.api.charsetTarget";
+    private static final String QR_API_CONFIG_PATH_PROP = "qr.api.configPath";
+    private static final String QR_API_STRICT_PROP = "qr.api.strict";
+    private static final String QR_API_DEBUG_PROP = "qr.api.debug";
+    private static final String QR_API_URL_ENV = "QR_API_URL";
+    private static final String QR_API_KEY_ENV = "QR_API_KEY";
+    private static final String QR_API_HOST_ENV = "QR_API_HOST";
+    private static final String QR_API_LOGO_ENV = "QR_API_LOGO_URL";
+    private static final String QR_API_SIZE_ENV = "QR_API_SIZE";
+    private static final String QR_API_FORMAT_ENV = "QR_API_FORMAT";
+    private static final String QR_API_ECC_ENV = "QR_API_ECC";
+    private static final String QR_API_MARGIN_ENV = "QR_API_MARGIN";
+    private static final String QR_API_QZONE_ENV = "QR_API_QZONE";
+    private static final String QR_API_COLOR_ENV = "QR_API_COLOR";
+    private static final String QR_API_BGCOLOR_ENV = "QR_API_BGCOLOR";
+    private static final String QR_API_CHARSET_SOURCE_ENV = "QR_API_CHARSET_SOURCE";
+    private static final String QR_API_CHARSET_TARGET_ENV = "QR_API_CHARSET_TARGET";
+    private static final String QR_API_CONFIG_PATH_ENV = "QR_API_CONFIG_PATH";
+    private static final String QR_API_STRICT_ENV = "QR_API_STRICT";
+    private static final String QR_API_DEBUG_ENV = "QR_API_DEBUG";
+    private static final String LOCAL_QR_CONFIG_FILE = "config/qr-api.local.properties";
 
     public File createPreviewPdf(Evenement event, Ticket ticket) throws IOException {
         File preview = Files.createTempFile("ticket-preview-", ".pdf").toFile();
@@ -240,16 +293,292 @@ public class TicketPdfService {
     }
 
     private BufferedImage createQrImage(String payload) throws IOException {
+        try {
+            BufferedImage image = createQrImageFromApi(payload);
+            debug("QR API used successfully.");
+            return image;
+        } catch (IOException apiFailure) {
+            if (isApiStrict()) {
+                throw new IOException("QR API failed in strict mode: " + apiFailure.getMessage(), apiFailure);
+            }
+            // Keep PDF export reliable even when API config/network/provider fails.
+            debug("QR API failed, fallback ZXing used: " + apiFailure.getMessage());
+            return createQrImageWithZxing(payload);
+        }
+    }
+
+    private BufferedImage createQrImageFromApi(String payload) throws IOException {
+        String endpoint = readConfig(QR_API_URL_PROP, QR_API_URL_ENV);
+        if (endpoint.isBlank()) {
+            throw new IOException("QR API non configuree (QR_API_URL ou -D" + QR_API_URL_PROP + ").");
+        }
+        debug("QR endpoint: " + endpoint);
+
+        if (isQrServerEndpoint(endpoint)) {
+            debug("QR provider detected: qrserver (GET)");
+            return createQrImageFromQrServer(endpoint, payload);
+        }
+        debug("QR provider detected: generic/RapidAPI (POST)");
+
+        String apiKey = readConfig(QR_API_KEY_PROP, QR_API_KEY_ENV);
+        String apiHost = readConfig(QR_API_HOST_PROP, QR_API_HOST_ENV);
+        String logoUrl = readConfig(QR_API_LOGO_PROP, QR_API_LOGO_ENV);
+
+        HttpClient client = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(6))
+                .build();
+
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder(URI.create(endpoint))
+                .timeout(Duration.ofSeconds(12))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(buildQrApiBody(payload, logoUrl)));
+
+        if (!apiKey.isBlank()) {
+            requestBuilder.header("X-RapidAPI-Key", apiKey);
+        }
+        if (!apiHost.isBlank()) {
+            requestBuilder.header("X-RapidAPI-Host", apiHost);
+        }
+
+        HttpResponse<byte[]> response;
+        try {
+            response = client.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofByteArray());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException("Appel API QR interrompu.", e);
+        }
+
+        if (response.statusCode() < 200 || response.statusCode() >= 300) {
+            throw new IOException("API QR en echec: HTTP " + response.statusCode());
+        }
+
+        BufferedImage image = ImageIO.read(new ByteArrayInputStream(response.body()));
+        if (image == null) {
+            throw new IOException("Reponse API QR invalide (image illisible).");
+        }
+
+        return toArgbImage(image);
+    }
+
+    private BufferedImage createQrImageFromQrServer(String endpoint, String payload) throws IOException {
+        String requestUrl = buildQrServerUrl(endpoint, payload);
+        debug("QR request URL: " + requestUrl);
+
+        HttpClient client = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(6))
+                .build();
+
+        HttpRequest request = HttpRequest.newBuilder(URI.create(requestUrl))
+                .timeout(Duration.ofSeconds(12))
+                .GET()
+                .build();
+
+        HttpResponse<byte[]> response;
+        try {
+            response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException("Appel API QR interrompu.", e);
+        }
+
+        if (response.statusCode() < 200 || response.statusCode() >= 300) {
+            throw new IOException("API QR en echec: HTTP " + response.statusCode());
+        }
+
+        BufferedImage image = ImageIO.read(new ByteArrayInputStream(response.body()));
+        if (image == null) {
+            throw new IOException("Reponse API QR invalide (image illisible).");
+        }
+
+        return toArgbImage(image);
+    }
+
+    private boolean isQrServerEndpoint(String endpoint) {
+        String normalized = endpoint.toLowerCase();
+        return normalized.contains("api.qrserver.com") && normalized.contains("create-qr-code");
+    }
+
+    private String buildQrServerUrl(String endpoint, String payload) {
+        String size = readConfig(QR_API_SIZE_PROP, QR_API_SIZE_ENV);
+        if (size.isBlank()) {
+            size = QR_SIZE + "x" + QR_SIZE;
+        }
+
+        String format = readConfig(QR_API_FORMAT_PROP, QR_API_FORMAT_ENV);
+        if (format.isBlank()) {
+            format = "png";
+        }
+
+        String ecc = readConfig(QR_API_ECC_PROP, QR_API_ECC_ENV);
+        String margin = readConfig(QR_API_MARGIN_PROP, QR_API_MARGIN_ENV);
+        String qzone = readConfig(QR_API_QZONE_PROP, QR_API_QZONE_ENV);
+        String color = readConfig(QR_API_COLOR_PROP, QR_API_COLOR_ENV);
+        String bgColor = readConfig(QR_API_BGCOLOR_PROP, QR_API_BGCOLOR_ENV);
+        String charsetSource = readConfig(QR_API_CHARSET_SOURCE_PROP, QR_API_CHARSET_SOURCE_ENV);
+        String charsetTarget = readConfig(QR_API_CHARSET_TARGET_PROP, QR_API_CHARSET_TARGET_ENV);
+
+        StringBuilder url = new StringBuilder(endpoint);
+        char separator = endpoint.contains("?") ? '&' : '?';
+
+        separator = appendQueryParam(url, separator, "data", payload);
+        separator = appendQueryParam(url, separator, "size", size);
+        separator = appendQueryParam(url, separator, "format", format);
+        separator = appendQueryParam(url, separator, "ecc", ecc);
+        separator = appendQueryParam(url, separator, "margin", margin);
+        separator = appendQueryParam(url, separator, "qzone", qzone);
+        separator = appendQueryParam(url, separator, "color", color);
+        separator = appendQueryParam(url, separator, "bgcolor", bgColor);
+        separator = appendQueryParam(url, separator, "charset-source", charsetSource);
+        appendQueryParam(url, separator, "charset-target", charsetTarget);
+
+        return url.toString();
+    }
+
+    private char appendQueryParam(StringBuilder url, char separator, String key, String value) {
+        if (value == null || value.isBlank()) {
+            return separator;
+        }
+
+        url.append(separator)
+                .append(key)
+                .append('=')
+                .append(URLEncoder.encode(value, StandardCharsets.UTF_8));
+
+        return '&';
+    }
+
+    private BufferedImage createQrImageWithZxing(String payload) throws IOException {
         Map<EncodeHintType, Object> hints = new HashMap<>();
         hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.M);
         hints.put(EncodeHintType.MARGIN, 1);
 
         try {
-            BitMatrix matrix = new QRCodeWriter().encode(payload, BarcodeFormat.QR_CODE, 280, 280, hints);
+            BitMatrix matrix = new QRCodeWriter().encode(payload, BarcodeFormat.QR_CODE, QR_SIZE, QR_SIZE, hints);
             return MatrixToImageWriter.toBufferedImage(matrix);
         } catch (WriterException e) {
             throw new IOException("Impossible de générer le QR code du ticket.", e);
         }
+    }
+
+    private BufferedImage toArgbImage(BufferedImage source) {
+        if (source.getType() == BufferedImage.TYPE_INT_ARGB || source.getType() == BufferedImage.TYPE_INT_RGB) {
+            return source;
+        }
+
+        BufferedImage converted = new BufferedImage(source.getWidth(), source.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D graphics = converted.createGraphics();
+        try {
+            graphics.drawImage(source, 0, 0, null);
+        } finally {
+            graphics.dispose();
+        }
+        return converted;
+    }
+
+    private String buildQrApiBody(String payload, String logoUrl) {
+        // If your provider expects different field names, adjust this JSON only.
+        StringBuilder body = new StringBuilder();
+        body.append('{')
+                .append("\"data\":\"").append(escapeJson(payload)).append("\",")
+                .append("\"size\":").append(QR_SIZE).append(',')
+                .append("\"format\":\"png\"");
+
+        if (!logoUrl.isBlank()) {
+            body.append(',').append("\"logo\":\"").append(escapeJson(logoUrl)).append("\"");
+        }
+
+        body.append('}');
+        return body.toString();
+    }
+
+    private String readConfig(String propName, String envName) {
+        String byFile = readFromLocalConfig(propName);
+        if (!byFile.isBlank()) {
+            return byFile;
+        }
+
+        String byProp = System.getProperty(propName);
+        if (byProp != null && !byProp.isBlank()) {
+            return byProp.trim();
+        }
+        String byEnv = System.getenv(envName);
+        if (byEnv != null && !byEnv.isBlank()) {
+            return byEnv.trim();
+        }
+        return "";
+    }
+
+    private String readFromLocalConfig(String key) {
+        Properties config = loadLocalQrConfig();
+        String value = config.getProperty(key);
+        return value == null ? "" : value.trim();
+    }
+
+    private Properties loadLocalQrConfig() {
+        Properties loaded = new Properties();
+        Path configPath = resolveLocalConfigPath();
+        if (Files.exists(configPath) && Files.isRegularFile(configPath)) {
+            try (InputStream in = Files.newInputStream(configPath)) {
+                loaded.load(in);
+            } catch (IOException ignored) {
+                // Fallback to JVM/env config when local file is missing or invalid.
+            }
+        }
+
+        return loaded;
+    }
+
+    private Path resolveLocalConfigPath() {
+        String customPath = firstNonBlank(
+                System.getProperty(QR_API_CONFIG_PATH_PROP),
+                System.getenv(QR_API_CONFIG_PATH_ENV)
+        );
+        if (!customPath.isBlank()) {
+            return Paths.get(customPath.trim());
+        }
+
+        Path defaultPath = Paths.get(LOCAL_QR_CONFIG_FILE);
+        if (defaultPath.isAbsolute()) {
+            return defaultPath;
+        }
+        return Paths.get(System.getProperty("user.dir")).resolve(defaultPath).normalize();
+    }
+
+    private boolean isApiStrict() {
+        String raw = readConfig(QR_API_STRICT_PROP, QR_API_STRICT_ENV);
+        return "true".equalsIgnoreCase(raw) || "1".equals(raw);
+    }
+
+    private boolean isApiDebugEnabled() {
+        String raw = readConfig(QR_API_DEBUG_PROP, QR_API_DEBUG_ENV);
+        return "true".equalsIgnoreCase(raw) || "1".equals(raw);
+    }
+
+    private void debug(String message) {
+        if (isApiDebugEnabled()) {
+            System.out.println("[TicketPdfService] " + message);
+        }
+    }
+
+    private String firstNonBlank(String first, String second) {
+        if (first != null && !first.isBlank()) {
+            return first;
+        }
+        if (second != null && !second.isBlank()) {
+            return second;
+        }
+        return "";
+    }
+
+    private String escapeJson(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value
+                .replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r");
     }
 
     private PDImageXObject loadLogo(PDDocument document) {
@@ -257,7 +586,7 @@ public class TicketPdfService {
             if (inputStream == null) {
                 return null;
             }
-            BufferedImage image = javax.imageio.ImageIO.read(inputStream);
+            BufferedImage image = ImageIO.read(inputStream);
             if (image == null) {
                 return null;
             }

@@ -5,20 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="correction blob oeuvre livre">
-      <change beforePath="$PROJECT_DIR$/.idea/copilotDiffState.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/EvenementsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/EvenementsController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/AmateurMainController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/AmateurMainController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/EventDetailController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/EventDetailController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/NavbarAmateurController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/NavbarAmateurController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/PaymentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/PaymentController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/NavbarArtisteController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/NavbarArtisteController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/EventDetail.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/EventDetail.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/PaymentSuccess.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/PaymentSuccess.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/artist/components/evenement-artiste-card.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/artist/components/evenement-artiste-card.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/artist-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/artist-theme.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/TicketPdfService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/TicketPdfService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,7 +24,7 @@
     </persistenceIdMap>
   </component>
   <component name="CopilotUserSelectedChatMode">
-    <option name="chatModeId" value="Ask" />
+    <option name="chatModeId" value="Agent" />
   </component>
   <component name="CopilotUserSelectedModel">
     <selectedModels>
@@ -144,6 +134,7 @@
       <workItem from="1776938540326" duration="1594000" />
       <workItem from="1776980653827" duration="270000" />
       <workItem from="1777023199347" duration="923000" />
+      <workItem from="1777280564512" duration="4411000" />
     </task>
     <task id="LOCAL-00001" summary="corrections de blob">
       <option name="closed" value="true" />

@@ -34,5 +34,8 @@ build/
 ### VS Code ###
 .vscode/
 
+### Local config (secrets) ###
+config/qr-api.local.properties
+
 ### Mac OS ###
 .DS_Store
