@@ -37,6 +37,8 @@
         <Label fx:id="priceLabel" styleClass="amateur-event-price" text="20 TND" />
     </HBox>
 
+    <Label fx:id="scoreLabel" styleClass="amateur-event-meta" text="Match IA: -" />
+
     <Label fx:id="descriptionLabel" styleClass="amateur-event-description" text="Description" wrapText="true" />
 </VBox>
 

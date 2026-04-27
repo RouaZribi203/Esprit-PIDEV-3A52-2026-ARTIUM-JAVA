@@ -39,6 +39,29 @@ Artium centralise plusieurs domaines fonctionnels dans une seule application:
 - parcours de decouverte des contenus
 - point d'entree: `views/amateur/AmateurMain.fxml`
 
+#### Recherche IA locale des evenements
+
+La page `views/amateur/Evenements.fxml` utilise maintenant un service de recherche sémantique local basé sur Ollama.
+
+- modele principal de ranking: `nomic-embed-text:latest`
+- serveur local attendu: `http://localhost:11434`
+- fichier de configuration local: `config/ollama.local.properties`
+- modele optionnel pour des evolutions futures: `llama3.2:3b`
+
+Pour preparer le modele d'embedding si besoin:
+
+```powershell
+ollama pull nomic-embed-text:latest
+```
+
+Si vous voulez tester le modele de chat optionnel:
+
+```powershell
+ollama pull llama3.2:3b
+```
+
+La recherche se met a jour pendant la saisie, classe les evenements par score de similarite, puis affiche un score sur 10 directement sur chaque carte.
+
 ## Architecture technique
 
 Le projet suit une organisation en couches, proche d'un modele MVC:

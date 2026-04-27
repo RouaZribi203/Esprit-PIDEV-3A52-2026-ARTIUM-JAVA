@@ -5,11 +5,11 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 
 import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.function.Consumer;
 
 public class EventCardController {
@@ -44,8 +44,12 @@ public class EventCardController {
     @FXML
     private Label descriptionLabel;
 
+    @FXML
+    private Label scoreLabel;
+
     private Evenement evenement;
     private Consumer<Evenement> detailHandler;
+    private double currentScoreOutOf10 = Double.NaN;
 
     public void setData(Evenement evenement) {
         this.evenement = evenement;
@@ -58,7 +62,18 @@ public class EventCardController {
         statusLabel.setText(textOrDefault(evenement.getStatut(), "A venir"));
         priceLabel.setText(formatPrice(evenement.getPrixTicket()));
         descriptionLabel.setText(textOrDefault(evenement.getDescription(), ""));
+        scoreLabel.setText(formatScore(currentScoreOutOf10));
         applyImage(evenement.getImageCouverture());
+    }
+
+    public void setScore(double scoreOutOf10) {
+        this.currentScoreOutOf10 = scoreOutOf10;
+        if (scoreLabel != null) {
+            if (!scoreLabel.getStyleClass().contains("amateur-event-score")) {
+                scoreLabel.getStyleClass().add("amateur-event-score");
+            }
+            scoreLabel.setText(formatScore(scoreOutOf10));
+        }
     }
 
     public void setDetailHandler(Consumer<Evenement> detailHandler) {
@@ -66,7 +81,7 @@ public class EventCardController {
     }
 
     @FXML
-    private void onCardClick(MouseEvent event) {
+    private void onCardClick() {
         if (detailHandler != null && evenement != null) {
             detailHandler.accept(evenement);
         }
@@ -100,6 +115,13 @@ public class EventCardController {
 
     private String formatPrice(Double price) {
         return price == null ? "Prix non defini" : String.format("%.0f TND", price);
+    }
+
+    private String formatScore(double scoreOutOf10) {
+        if (Double.isNaN(scoreOutOf10) || scoreOutOf10 < 0) {
+            return "Match IA: -";
+        }
+        return String.format(Locale.ROOT, "Match IA: %.1f/10", scoreOutOf10);
     }
 
     private String textOrDefault(String value, String fallback) {
