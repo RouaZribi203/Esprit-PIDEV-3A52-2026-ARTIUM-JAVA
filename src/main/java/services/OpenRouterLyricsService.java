@@ -1,6 +1,8 @@
 package services;
 
 import entities.Musique;
+import utils.LanguageDetector;
+import utils.AudioAnalyzer;
 
 import java.io.IOException;
 import java.net.URI;
@@ -16,6 +18,7 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import utils.TranscriptionService;
 
 public class OpenRouterLyricsService {
     private static final String DEFAULT_MODEL = "inclusionai/ling-2.6-1t:free";
@@ -126,25 +129,43 @@ public class OpenRouterLyricsService {
         String title = safe(track != null ? track.getTitre() : null, "Morceau sans titre");
         String genre = safe(track != null ? track.getGenre() : null, "inconnu");
         String description = safe(track != null ? track.getDescription() : null, "Aucune description disponible.");
+        String language = LanguageDetector.detectLanguage(track);
 
-        return "Écris des paroles 100% originales en français, inspirées par ces informations de morceau. "
-                + "Ne copie aucune chanson existante et n'essaie pas de reproduire des paroles connues. "
-                + "Utilise une structure claire avec couplets et refrain, avec un ton cohérent avec le genre. "
-                + "Retourne uniquement les paroles, sans explication ni mise en contexte.\n\n"
-                + "Titre: " + title + "\n"
-                + "Genre: " + genre + "\n"
-                + "Description: " + description + "\n";
+        // Analyze audio file to get features
+        AudioAnalyzer.AudioFeatures audioFeatures = AudioAnalyzer.analyzeAudio(
+            track != null ? track.getAudio() : null
+        );
+
+        return "You are a professional songwriter. Create original and engaging song lyrics in " + language + " based on these specifications:\n\n"
+                + "SONG TITLE: " + title + "\n"
+                + "GENRE: " + genre + "\n"
+                + "THEME/DESCRIPTION: " + description + "\n"
+                + "ESTIMATED BPM: " + audioFeatures.estimatedBpm + "\n"
+                + "APPROXIMATE KEY: " + audioFeatures.approximateKey + "\n"
+                + "ENERGY LEVEL: " + audioFeatures.energyLevel + "\n"
+                + "MOOD: " + audioFeatures.mood + "\n\n"
+                + "IMPORTANT INSTRUCTIONS:\n"
+                + "1. MUST be directly inspired by and related to the theme described above\n"
+                + "2. MUST follow the style and tone appropriate for " + genre + " music\n"
+                + "3. MUST match the mood: " + audioFeatures.mood + "\n"
+                + "4. MUST have a rhythm and pacing suitable for " + audioFeatures.estimatedBpm + " BPM\n"
+                + "5. MUST include verses and a memorable chorus/refrain\n"
+                + "6. MUST be emotionally resonant and match the song's energy level\n"
+                + "7. Use vivid imagery and emotional language that reflects the theme\n"
+                + "8. MUST be completely original - do not reproduce any existing songs\n"
+                + "9. Return ONLY the lyrics without any explanation, intro, or metadata\n\n"
+                + "Now write the lyrics:";
     }
 
     private String buildRequestBody(String model, String prompt) {
         return "{" +
                 "\"model\":\"" + jsonEscape(model) + "\"," +
                 "\"messages\":[" +
-                "{\"role\":\"system\",\"content\":\"Tu es un assistant d'écriture de chansons. Génère uniquement des paroles originales et non protégées par le droit d'auteur.\"}," +
+                "{\"role\":\"system\",\"content\":\"You are a song writing assistant. Generate only original and non-copyrighted lyrics.\"}," +
                 "{\"role\":\"user\",\"content\":\"" + jsonEscape(prompt) + "\"}" +
                 "]," +
                 "\"temperature\":0.9," +
-                "\"max_tokens\":700," +
+                "\"max_tokens\":1000," +
                 "\"top_p\":0.95," +
                 "\"stream\":false" +
                 "}";
@@ -256,6 +277,15 @@ public class OpenRouterLyricsService {
     private String safe(String value, String fallback) {
         return value == null || value.isBlank() ? fallback : value.trim();
     }
+
+    /**
+     * Returns the verbatim transcript of the track's audio using local transcription (Whisper).
+     * If transcription fails, returns null.
+     */
+    public String transcribeTrack(Musique track) {
+        if (track == null) return null;
+        String audio = track.getAudio();
+        if (audio == null || audio.isBlank()) return null;
+        return TranscriptionService.transcribe(audio);
+    }
 }
-
-

@@ -597,7 +597,47 @@ public class AdminMusiquesController {
                 Button playButton = new Button("Play");
                 playButton.setOnAction(event -> playTrackFromAnyList(track));
 
-                row.getChildren().addAll(title, playButton);
+                Button removeButton = new Button("Retirer");
+                removeButton.setOnAction(event -> {
+                    event.consume();
+                    if (selectedPlaylistId == null || track == null || track.getId() == null) {
+                        Alert warn = new Alert(Alert.AlertType.WARNING);
+                        warn.setTitle("Retirer de la playlist");
+                        warn.setHeaderText(null);
+                        warn.setContentText("Identifiants manquants pour retirer la musique.");
+                        warn.showAndWait();
+                        return;
+                    }
+
+                    Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+                    confirm.setTitle("Retirer de la playlist");
+                    confirm.setHeaderText("Retirer \"" + (track.getTitre() != null ? track.getTitre() : "cette musique") + "\" ?");
+                    confirm.setContentText("Confirmer la suppression de cette musique de la playlist.");
+                    java.util.Optional<ButtonType> result = confirm.showAndWait();
+                    if (result.isEmpty() || result.get() != ButtonType.OK) {
+                        return;
+                    }
+
+                    try {
+                        playlistService.removeMusiqueFromPlaylist(selectedPlaylistId, track.getId());
+                        // refresh UI
+                        Playlist refreshed = findPlaylistById(selectedPlaylistId);
+                        if (refreshed != null) {
+                            showPlaylistDetails(refreshed);
+                        } else {
+                            hidePlaylistDetails();
+                        }
+                        refreshPlaylists();
+                    } catch (SQLDataException ex) {
+                        Alert err = new Alert(Alert.AlertType.ERROR);
+                        err.setTitle("Erreur");
+                        err.setHeaderText("Impossible de retirer la musique");
+                        err.setContentText(ex.getMessage());
+                        err.showAndWait();
+                    }
+                });
+
+                row.getChildren().addAll(title, playButton, removeButton);
                 playlistSongsBox.getChildren().add(row);
             }
         }

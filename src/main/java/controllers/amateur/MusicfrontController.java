@@ -898,7 +898,41 @@ public class MusicfrontController {
 				name.setStyle("-fx-text-fill: white; -fx-font-weight: 700;");
 				Button playBtn = new Button("Play");
 				playBtn.setOnAction(event -> playTrackFromPlaylist(track));
-				row.getChildren().addAll(name, playBtn);
+
+				Button removeBtn = new Button("Retirer");
+				removeBtn.setOnAction(event -> {
+					event.consume();
+					if (selectedPlaylistId == null || track == null || track.getId() == null) {
+						setPlaylistFeedback("Impossible de retirer la musique (identifiants manquants).", false);
+						return;
+					}
+
+					Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+					confirm.setTitle("Retirer de la playlist");
+					confirm.setHeaderText("Retirer \"" + (track.getTitre() != null ? track.getTitre() : "cette musique") + "\" ?");
+					confirm.setContentText("Confirmer la suppression de cette musique de la playlist.");
+					java.util.Optional<ButtonType> result = confirm.showAndWait();
+					if (result.isEmpty() || result.get() != ButtonType.OK) {
+						return;
+					}
+
+					try {
+						playlistService.removeMusiqueFromPlaylist(selectedPlaylistId, track.getId());
+						// Refresh the playlist details view
+						Playlist refreshed = findPlaylistById(selectedPlaylistId);
+						if (refreshed != null) {
+							showPlaylistDetails(refreshed);
+						} else {
+							hidePlaylistDetails();
+						}
+						refreshPlaylists();
+						setPlaylistFeedback("Musique retirée de la playlist.", true);
+					} catch (SQLDataException ex) {
+						setPlaylistFeedback("Erreur lors du retrait: " + ex.getMessage(), false);
+					}
+				});
+
+				row.getChildren().addAll(name, playBtn, removeBtn);
 				playlistSongsBox.getChildren().add(row);
 			}
 		}
