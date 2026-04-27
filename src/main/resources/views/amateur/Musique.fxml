@@ -9,6 +9,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.TilePane?>
 <?import javafx.scene.layout.VBox?>
 
@@ -55,6 +56,21 @@
                         <Label fx:id="emptyListLabel" styleClass="page-caption" text="Aucune musique disponible pour le moment." wrapText="true" />
                     </VBox>
                 </ScrollPane>
+
+                <VBox fx:id="lyricsPanel" spacing="10.0" style="-fx-background-color: rgba(255,255,255,0.04); -fx-background-radius: 8; -fx-padding: 12;">
+                    <HBox alignment="CENTER_LEFT" spacing="10.0">
+                        <Label style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;" text="Paroles IA" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label fx:id="lyricsTrackLabel" style="-fx-text-fill: #cbd5e1;" text="Aucune musique sélectionnée" wrapText="true" />
+                    </HBox>
+                    <Label style="-fx-text-fill: #cbd5e1;" text="Générez des paroles originales inspirées du morceau que vous écoutez." wrapText="true" />
+                    <HBox spacing="10.0">
+                        <Button fx:id="generateLyricsButton" mnemonicParsing="false" onAction="#handleGenerateLyrics" text="Générer les paroles" />
+                        <Button fx:id="copyLyricsButton" mnemonicParsing="false" onAction="#handleCopyLyrics" text="Copier" />
+                    </HBox>
+                    <TextArea fx:id="lyricsTextArea" editable="false" prefRowCount="10" promptText="Les paroles apparaîtront ici..." wrapText="true" />
+                    <Label fx:id="lyricsStatusLabel" styleClass="page-caption" text="Prêt" wrapText="true" />
+                </VBox>
             </VBox>
 
             <VBox fx:id="playlistsSection" spacing="10.0" visible="false" managed="false">
