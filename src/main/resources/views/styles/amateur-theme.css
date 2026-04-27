@@ -880,6 +880,23 @@
     -fx-font-weight: 700;
 }
 
+.ticket-toggle-button {
+    -fx-background-color: #f4f7fc;
+    -fx-border-color: #d7e1ef;
+    -fx-border-radius: 9;
+    -fx-background-radius: 9;
+    -fx-padding: 7 12 7 12;
+    -fx-text-fill: #33507a;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+}
+
+.ticket-toggle-button:hover {
+    -fx-background-color: #ebf1fb;
+    -fx-border-color: #c7d4e7;
+}
+
 .ticket-row {
     -fx-background-color: #f8fbff;
     -fx-background-radius: 12;
@@ -926,6 +943,65 @@
 .ticket-action-primary {
     -fx-background-color: linear-gradient(to bottom, #4654da, #3546c8);
     -fx-text-fill: white;
+}
+
+.event-location-card {
+    -fx-background-color: white;
+    -fx-background-radius: 14;
+    -fx-border-color: #e1e8f4;
+    -fx-border-radius: 14;
+    -fx-effect: dropshadow(gaussian, rgba(35, 54, 87, 0.08), 18, 0.10, 0, 4);
+}
+
+.event-location-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #16253b;
+}
+
+.event-location-details {
+    -fx-padding: 2 0 0 0;
+}
+
+.event-location-details-card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-color: #e6edf6;
+    -fx-border-radius: 12;
+    -fx-padding: 12 14 12 14;
+    -fx-effect: dropshadow(gaussian, rgba(35, 54, 87, 0.04), 10, 0.08, 0, 2);
+}
+
+.event-location-gallery-name {
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #152238;
+}
+
+.event-location-field-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #a0abc0;
+}
+
+.event-location-field-value {
+    -fx-font-size: 13px;
+    -fx-text-fill: #39506f;
+    -fx-font-weight: 600;
+}
+
+.event-map-box {
+    -fx-background-color: #edf0f5;
+    -fx-background-radius: 12;
+    -fx-border-color: #dfe5ed;
+    -fx-border-radius: 12;
+    -fx-min-height: 280;
+    -fx-pref-height: 320;
+    -fx-effect: innershadow(gaussian, rgba(255,255,255,0.6), 0, 0, 0, 0);
+}
+
+.event-map-box .web-view {
+    -fx-background-color: transparent;
 }
 
 .ticket-action-primary:hover {

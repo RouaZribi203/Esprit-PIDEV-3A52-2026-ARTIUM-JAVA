@@ -11,6 +11,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.web.WebView?>
 
 <BorderPane fx:controller="controllers.amateur.EventDetailController" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1">
     <center>
@@ -25,7 +26,7 @@
                         <ImageView fx:id="coverImageView" fitWidth="900.0" fitHeight="260.0" preserveRatio="true" />
                     </StackPane>
 
-                    <VBox spacing="14.0" styleClass="amateur-page-card,event-detail-header-card">
+                    <VBox spacing="14.0" styleClass="amateur-page-card event-detail-header-card">
                         <padding>
                             <Insets top="18.0" right="18.0" bottom="18.0" left="18.0" />
                         </padding>
@@ -73,6 +74,7 @@
                         <HBox alignment="CENTER_LEFT" spacing="12.0">
                             <Label text="Mes tickets" styleClass="ticket-section-title" />
                             <Label fx:id="ticketsCountLabel" styleClass="ticket-count-chip" text="0 ticket(s)" />
+                            <Button fx:id="ticketsToggleButton" mnemonicParsing="false" onAction="#onToggleTicketsClick" styleClass="ticket-toggle-button" text="Voir plus" visible="false" managed="false" />
                             <StackPane HBox.hgrow="ALWAYS" />
                             <Button fx:id="buyTicketButton" text="Acheter ticket" onAction="#onBuyTicketClick" styleClass="ticket-action-primary" />
                             <Button fx:id="backButton" text="Retour" onAction="#onBackClick" styleClass="ticket-action-secondary" />
@@ -80,6 +82,41 @@
 
                         <Label fx:id="ticketsEmptyLabel" styleClass="page-caption" text="Aucun ticket achete pour cet evenement." />
                         <VBox fx:id="ticketsContainer" spacing="8.0" VBox.vgrow="ALWAYS" />
+                    </VBox>
+
+                    <VBox spacing="16.0" styleClass="amateur-page-card event-location-card">
+                        <padding>
+                            <Insets top="18.0" right="18.0" bottom="18.0" left="18.0" />
+                        </padding>
+
+                        <Label text="Localisation de l'événement" styleClass="event-location-title" />
+
+                        <HBox spacing="24.0" alignment="TOP_LEFT">
+                            <VBox spacing="10.0" prefWidth="300.0" minWidth="260.0" maxWidth="340.0">
+                                <VBox spacing="10.0" styleClass="event-location-details-card">
+                                    <Label fx:id="galleryNameLabel" text="Galerie" styleClass="event-location-gallery-name" wrapText="true" />
+
+                                    <VBox spacing="3.0">
+                                        <Label text="Adresse" styleClass="event-location-field-label" />
+                                        <Label fx:id="galleryAddressLabel" text="-" styleClass="event-location-field-value" wrapText="true" />
+                                    </VBox>
+
+                                    <VBox spacing="3.0">
+                                        <Label text="Coordonnées" styleClass="event-location-field-label" />
+                                        <Label fx:id="galleryCoordinatesLabel" text="-" styleClass="event-location-field-value" wrapText="true" />
+                                    </VBox>
+
+                                    <VBox spacing="3.0">
+                                        <Label text="Capacité de la galerie" styleClass="event-location-field-label" />
+                                        <Label fx:id="galleryCapacityLabel" text="-" styleClass="event-location-field-value" wrapText="true" />
+                                    </VBox>
+                                </VBox>
+                            </VBox>
+
+                            <StackPane HBox.hgrow="ALWAYS" minHeight="280.0" styleClass="event-map-box">
+                                <WebView fx:id="mapWebView" />
+                            </StackPane>
+                        </HBox>
                     </VBox>
                 </VBox>
             </content>

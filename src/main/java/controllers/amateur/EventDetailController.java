@@ -14,23 +14,29 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
-import services.TicketService;
+import services.GalerieService;
 import services.TicketPdfService;
+import services.TicketService;
+import utils.CoordinateUtils;
 
 import java.io.File;
 import java.sql.SQLDataException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Consumer;
-import services.GalerieService;
 
 public class EventDetailController {
 
 	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm");
 	private static final DateTimeFormatter PURCHASE_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy");
+	private static final int COLLAPSED_TICKET_LIMIT = 3;
 
 	@FXML
 	private ImageView coverImageView;
@@ -66,10 +72,28 @@ public class EventDetailController {
 	private Label metaLabel;
 
 	@FXML
+	private Label galleryNameLabel;
+
+	@FXML
+	private Label galleryAddressLabel;
+
+	@FXML
+	private Label galleryCoordinatesLabel;
+
+	@FXML
+	private Label galleryCapacityLabel;
+
+	@FXML
+	private WebView mapWebView;
+
+	@FXML
 	private Button buyTicketButton;
 
 	@FXML
 	private Button backButton;
+
+	@FXML
+	private Button ticketsToggleButton;
 
 	@FXML
 	private VBox ticketsContainer;
@@ -84,17 +108,49 @@ public class EventDetailController {
 	private final TicketPdfService ticketPdfService = new TicketPdfService();
 	private final GalerieService galerieService = new GalerieService();
 	private Evenement event;
+	private Galerie currentGalerie;
+	private List<Ticket> currentPurchasedTickets = List.of();
+	private boolean ticketsExpanded;
 	private Consumer<Ticket> purchaseHandler;
 	private Runnable backHandler;
 
+	@FXML
+	private void initialize() {
+		if (mapWebView != null) {
+			mapWebView.setContextMenuEnabled(false);
+			renderMapPlaceholder();
+		}
+		updateTicketsToggleButton(false);
+	}
+
 	public void setEvent(Evenement event) {
 		this.event = event;
+		this.currentGalerie = null;
+		this.currentPurchasedTickets = List.of();
+		ticketsExpanded = false;
+
 		if (event == null) {
 			buyTicketButton.setDisable(true);
+			buyTicketButton.setText("Acheter ticket");
+			titleLabel.setText("Evenement");
+			typeLabel.setText("Type non precise");
+			statusLabel.setText("A venir");
+			dateDebutLabel.setText("-");
+			dateFinLabel.setText("-");
+			priceLabel.setText("-");
+			capacityLabel.setText("-");
+			galleryLabel.setText("Galerie");
+			descriptionLabel.setText("Aucune description disponible.");
+			metaLabel.setText("Date de creation: -");
+			galleryNameLabel.setText("Galerie");
+			galleryAddressLabel.setText("-");
+			galleryCoordinatesLabel.setText("-");
+			galleryCapacityLabel.setText("-");
+			renderPurchasedTickets(List.of());
+			renderMapPlaceholder();
 			if (backButton != null) {
 				backButton.setDisable(false);
 			}
-			renderPurchasedTickets(List.of());
 			return;
 		}
 
@@ -121,10 +177,10 @@ public class EventDetailController {
 		dateFinLabel.setText(formatDate(event.getDateFin()));
 		priceLabel.setText(formatPrice(event.getPrixTicket()));
 		capacityLabel.setText(formatCapacity(event.getCapaciteMax()));
-		galleryLabel.setText(resolveGalleryName(event));
 		descriptionLabel.setText(textOrDefault(event.getDescription(), "Aucune description disponible."));
 		metaLabel.setText("Date de creation: " + (event.getDateCreation() == null ? "-" : event.getDateCreation().toString()));
 		applyImage(event.getImageCouverture());
+		loadGalleryDetails();
 		loadPurchasedTickets();
 	}
 
@@ -173,6 +229,57 @@ public class EventDetailController {
 		}
 	}
 
+	@FXML
+	private void onToggleTicketsClick() {
+		if (currentPurchasedTickets.isEmpty()) {
+			return;
+		}
+		ticketsExpanded = !ticketsExpanded;
+		renderPurchasedTickets(currentPurchasedTickets);
+	}
+
+	private void loadGalleryDetails() {
+		if (event == null || event.getGalerieId() == null) {
+			renderGalleryDetails(null);
+			return;
+		}
+
+		try {
+			currentGalerie = galerieService.getById(event.getGalerieId());
+		} catch (SQLDataException e) {
+			currentGalerie = null;
+		}
+
+		renderGalleryDetails(currentGalerie);
+	}
+
+	private void renderGalleryDetails(Galerie galerie) {
+		String fallbackGalleryLabel = event != null && event.getGalerieId() != null ? "Galerie #" + event.getGalerieId() : "Galerie";
+
+		if (galerie == null) {
+			galleryLabel.setText(fallbackGalleryLabel);
+			galleryNameLabel.setText(fallbackGalleryLabel);
+			galleryAddressLabel.setText("Adresse non disponible");
+			galleryCoordinatesLabel.setText("Localisation non disponible");
+			galleryCapacityLabel.setText("Capacite non definie");
+			renderMapPlaceholder();
+			return;
+		}
+
+		String galleryName = textOrDefault(galerie.getNom(), fallbackGalleryLabel);
+		galleryLabel.setText(galleryName);
+		galleryNameLabel.setText(galleryName);
+		galleryAddressLabel.setText(textOrDefault(galerie.getAdresse(), "Adresse non disponible"));
+		galleryCoordinatesLabel.setText(textOrDefault(galerie.getLocalisation(), "Localisation non disponible"));
+		galleryCapacityLabel.setText(formatCapacity(galerie.getCapaciteMax()));
+
+		CoordinateUtils.parseCoordinates(galerie.getLocalisation())
+				.ifPresentOrElse(
+						coordinates -> renderMap(coordinates.latitude(), coordinates.longitude(), galleryName, galerie.getAdresse(), galerie.getLocalisation()),
+							this::renderMapPlaceholder
+				);
+	}
+
 	private void loadPurchasedTickets() {
 		Integer currentUserId = resolveCurrentUserId();
 		if (event == null || event.getId() == null || currentUserId == null) {
@@ -192,23 +299,35 @@ public class EventDetailController {
 	}
 
 	private void renderPurchasedTickets(List<Ticket> tickets) {
-		ticketsContainer.getChildren().clear();
-		ticketsCountLabel.setText(tickets.size() + " ticket(s)");
+		List<Ticket> sortedTickets = tickets == null ? new ArrayList<>() : new ArrayList<>(tickets);
+		sortedTickets.sort(Comparator.comparing(Ticket::getDateAchat, Comparator.nullsLast(Comparator.reverseOrder())));
+		currentPurchasedTickets = sortedTickets;
 
-		if (tickets.isEmpty()) {
+		if (currentPurchasedTickets.isEmpty()) {
+			ticketsExpanded = false;
+			ticketsContainer.getChildren().clear();
+			ticketsCountLabel.setText("0 ticket(s)");
 			ticketsEmptyLabel.setText("Aucun ticket achete pour cet evenement.");
 			ticketsEmptyLabel.setVisible(true);
 			ticketsEmptyLabel.setManaged(true);
+			updateTicketsToggleButton(false);
 			return;
 		}
 
 		ticketsEmptyLabel.setVisible(false);
 		ticketsEmptyLabel.setManaged(false);
+		ticketsCountLabel.setText(currentPurchasedTickets.size() + " ticket(s)");
 
-		for (int i = 0; i < tickets.size(); i++) {
-			Ticket ticket = tickets.get(i);
+		ticketsContainer.getChildren().clear();
+		int visibleLimit = ticketsExpanded ? currentPurchasedTickets.size() : Math.min(COLLAPSED_TICKET_LIMIT, currentPurchasedTickets.size());
+		for (int i = 0; i < currentPurchasedTickets.size(); i++) {
+			Ticket ticket = currentPurchasedTickets.get(i);
+			boolean visible = i < visibleLimit;
+
 			HBox row = new HBox(10);
 			row.getStyleClass().add("ticket-row");
+			row.setVisible(visible);
+			row.setManaged(visible);
 
 			VBox info = new VBox(3);
 			info.getStyleClass().add("ticket-info");
@@ -232,6 +351,109 @@ public class EventDetailController {
 			row.getChildren().addAll(info, actions);
 			ticketsContainer.getChildren().add(row);
 		}
+
+		updateTicketsToggleButton(currentPurchasedTickets.size() > COLLAPSED_TICKET_LIMIT);
+	}
+
+	private void updateTicketsToggleButton(boolean shouldShow) {
+		if (ticketsToggleButton == null) {
+			return;
+		}
+		ticketsToggleButton.setVisible(shouldShow);
+		ticketsToggleButton.setManaged(shouldShow);
+		ticketsToggleButton.setText(ticketsExpanded ? "Voir moins" : "Voir plus");
+	}
+
+	private void renderMap(double latitude, double longitude, String galleryName, String address, String coordinatesText) {
+		if (mapWebView == null) {
+			return;
+		}
+		mapWebView.getEngine().loadContent(buildLeafletMapHtml(latitude, longitude, galleryName, address, coordinatesText));
+	}
+
+	private void renderMapPlaceholder() {
+		if (mapWebView == null) {
+			return;
+		}
+		mapWebView.getEngine().loadContent(buildPlaceholderHtml());
+	}
+
+	private String buildLeafletMapHtml(double latitude, double longitude, String galleryName, String address, String coordinatesText) {
+		return String.format(Locale.ROOT, """
+			<!DOCTYPE html>
+			<html lang="fr">
+			<head>
+			    <meta charset="UTF-8" />
+			    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+			    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+			    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+			    <style>
+			        html, body {
+			            margin: 0;
+			            width: 100%%;
+			            height: 100%%;
+			            overflow: hidden;
+			            background: #edf0f5;
+			            font-family: 'Segoe UI', Arial, sans-serif;
+			        }
+			        #map {
+			            width: 100%%;
+			            height: 100%%;
+			        }
+			        .leaflet-container {
+			            background: #edf0f5;
+			        }
+			    </style>
+			</head>
+			<body>
+			    <div id="map"></div>
+			    <script>
+			        const map = L.map('map', { zoomControl: true, attributionControl: true }).setView([%s, %s], 16);
+			        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			            maxZoom: 19,
+			            attribution: '&copy; OpenStreetMap contributors'
+			        }).addTo(map);
+			        const marker = L.marker([%s, %s]).addTo(map);
+			        marker.bindPopup('<strong>%s</strong><br/>%s<br/>%s');
+			    </script>
+			</body>
+			</html>
+			""", latitude, longitude, latitude, longitude, jsString(textOrDefault(galleryName, "Galerie")), jsString(textOrDefault(address, "Adresse non disponible")), jsString(textOrDefault(coordinatesText, "Localisation non disponible")));
+	}
+
+	private String buildPlaceholderHtml() {
+		return """
+			<!DOCTYPE html>
+			<html lang="fr">
+			<head>
+			    <meta charset="UTF-8" />
+			    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+			    <style>
+			        html, body {
+			            margin: 0;
+			            width: 100%;
+			            height: 100%;
+			            display: flex;
+			            align-items: center;
+			            justify-content: center;
+			            background: #edf0f5;
+			            font-family: 'Segoe UI', Arial, sans-serif;
+			            color: #8ea0b8;
+			        }
+			        .message {
+			            display: flex;
+			            align-items: center;
+			            gap: 10px;
+			            font-size: 15px;
+			            font-weight: 600;
+			        }
+			    </style>
+			</head>
+			<body>
+			    <div class="message">&#x1f4cd; Localisation non disponible</div>
+			</body>
+			</html>
+			""";
 	}
 
 	private void showTicketPreview(Ticket ticket) {
@@ -323,12 +545,12 @@ public class EventDetailController {
 		}
 	}
 
-	private String formatDate(java.time.LocalDateTime dateTime) {
+	private String formatDate(LocalDateTime dateTime) {
 		return dateTime == null ? "Date non definie" : DATE_FORMATTER.format(dateTime);
 	}
 
 	private String formatPrice(Double price) {
-		return price == null ? "Prix non defini" : String.format("%.0f TND", price);
+		return price == null ? "Prix non defini" : String.format(Locale.ROOT, "%.0f TND", price);
 	}
 
 	private String formatCapacity(Integer value) {
@@ -337,24 +559,6 @@ public class EventDetailController {
 
 	private String textOrDefault(String value, String fallback) {
 		return value == null || value.isBlank() ? fallback : value;
-	}
-
-	private String resolveGalleryName(Evenement event) {
-		if (event == null || event.getGalerieId() == null) {
-			return "Galerie";
-		}
-
-		try {
-			for (Galerie galerie : galerieService.getAll()) {
-				if (galerie != null && event.getGalerieId().equals(galerie.getId())) {
-					return textOrDefault(galerie.getNom(), "Galerie");
-				}
-			}
-		} catch (SQLDataException ignored) {
-			// Fallback below keeps the UI readable even if the lookup fails.
-		}
-
-		return "Galerie";
 	}
 
 	private String resolveReference(Ticket ticket) {
@@ -379,6 +583,17 @@ public class EventDetailController {
 			return null;
 		}
 		return MainFX.getAuthenticatedUser().getId();
+	}
+
+	private String jsString(String value) {
+		if (value == null) {
+			return "";
+		}
+		return value
+				.replace("\\", "\\\\")
+				.replace("'", "\\'")
+				.replace("\r", " ")
+				.replace("\n", " ");
 	}
 }
 
