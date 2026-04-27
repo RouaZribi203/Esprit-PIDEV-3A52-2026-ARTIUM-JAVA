@@ -8,6 +8,7 @@ import com.google.zxing.WriterException;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import entities.Evenement;
+import entities.Galerie;
 import entities.Ticket;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -52,6 +53,16 @@ public class TicketPdfService {
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm");
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy");
     private static final DecimalFormat PRICE_FORMAT = new DecimalFormat("0.##");
+    private static final java.awt.Color HEADER_COLOR = new java.awt.Color(61, 59, 194);
+    private static final java.awt.Color PRIMARY_TEXT_COLOR = new java.awt.Color(32, 38, 55);
+    private static final java.awt.Color SECONDARY_TEXT_COLOR = new java.awt.Color(92, 101, 122);
+    private static final java.awt.Color MUTED_TEXT_COLOR = new java.awt.Color(120, 129, 149);
+    private static final java.awt.Color CARD_BORDER_COLOR = new java.awt.Color(214, 223, 238);
+    private static final java.awt.Color CHIP_BG_COLOR = new java.awt.Color(232, 248, 243);
+    private static final java.awt.Color CHIP_BORDER_COLOR = new java.awt.Color(199, 235, 223);
+    private static final java.awt.Color QR_PANEL_BG_COLOR = new java.awt.Color(248, 250, 255);
+    private static final java.awt.Color QR_PANEL_BORDER_COLOR = new java.awt.Color(219, 226, 241);
+    private final GalerieService galerieService = new GalerieService();
     private static final String LOGO_RESOURCE = "/views/assets/PNG Icon.png";
     private static final String WINDOWS_ARIAL = "C:/Windows/Fonts/arial.ttf";
     private static final String WINDOWS_ARIAL_BOLD = "C:/Windows/Fonts/arialbd.ttf";
@@ -156,9 +167,11 @@ public class TicketPdfService {
         drawRoundedCard(content, 18, 18, pageWidth - 36, pageHeight - 36, 18);
 
         // Header band
-        content.setNonStrokingColor(new java.awt.Color(61, 59, 194));
+        content.setNonStrokingColor(HEADER_COLOR);
         content.addRect(18, pageHeight - 86, pageWidth - 36, 68);
         content.fill();
+
+        content.setNonStrokingColor(java.awt.Color.WHITE);
 
         // Logo circle
         PDImageXObject logo = loadLogo(document);
@@ -176,64 +189,75 @@ public class TicketPdfService {
         String status = textOrDefault(event.getStatut(), "A venir");
         drawChip(content, pageWidth - 190, pageHeight - 61, 140, 24, status.toUpperCase(), regular);
 
+        // Make the body text readable after the colored header fill.
+        content.setNonStrokingColor(PRIMARY_TEXT_COLOR);
+
         // Left block
         float leftX = 34;
         float leftY = pageHeight - 118;
 
         writeText(content, bold, leftX, leftY, 20, textOrDefault(event.getTitre(), "Evenement"));
-        writeText(content, regular, leftX, leftY - 20, 11, textOrDefault(event.getType(), "Type non precise") + "  •  Galerie #" + textOrDash(event.getGalerieId()));
+        content.setNonStrokingColor(SECONDARY_TEXT_COLOR);
+        writeText(content, regular, leftX, leftY - 20, 11, textOrDefault(event.getType(), "Type non precise") + "  •  " + resolveGalleryName(event));
+        content.setNonStrokingColor(MUTED_TEXT_COLOR);
         writeText(content, regular, leftX, leftY - 38, 10, textOrDefault(event.getDescription(), "Aucune description disponible."), 430);
 
         float labelY = leftY - 78;
+        content.setNonStrokingColor(PRIMARY_TEXT_COLOR);
         writeKeyValue(content, regular, bold, leftX, labelY, "Début", formatDateTime(event.getDateDebut()));
         writeKeyValue(content, regular, bold, leftX, labelY - 22, "Fin", formatDateTime(event.getDateFin()));
         writeKeyValue(content, regular, bold, leftX, labelY - 44, "Prix", formatPrice(event.getPrixTicket()));
         writeKeyValue(content, regular, bold, leftX, labelY - 66, "Capacité", formatCapacity(event.getCapaciteMax()));
 
+        content.setStrokingColor(CARD_BORDER_COLOR);
+        content.moveTo(514, 54);
+        content.lineTo(514, 208);
+        content.stroke();
+
+        content.setNonStrokingColor(QR_PANEL_BG_COLOR);
+        content.addRect(530, 48, 176, 170);
+        content.fill();
+        content.setStrokingColor(QR_PANEL_BORDER_COLOR);
+        content.addRect(530, 48, 176, 170);
+        content.stroke();
+
         // Right block
         float rightX = 540;
-        writeText(content, bold, rightX, pageHeight - 118, 12, "Ticket #" + resolveReference(ticket));
-        writeText(content, regular, rightX, pageHeight - 136, 10, "Référence : " + resolveReference(ticket));
-        writeText(content, regular, rightX, pageHeight - 152, 10, "Utilisateur : " + textOrDash(ticket.getUserId()));
-        writeText(content, regular, rightX, pageHeight - 168, 10, "Achat : " + formatDate(ticket.getDateAchat()));
-        writeText(content, regular, rightX, pageHeight - 184, 10, "Évènement : " + textOrDash(ticket.getEvenementId()));
-
         BufferedImage qrImage = createQrImage(resolveQrPayload(ticket));
         if (qrImage != null) {
             PDImageXObject qr = LosslessFactory.createFromImage(document, qrImage);
             content.drawImage(qr, rightX - 2, 56, 152, 152);
         }
 
-        writeText(content, bold, rightX + 4, 42, 9, "Scan QR / vérification rapide");
-        writeText(content, regular, rightX + 4, 28, 8, resolveQrPayload(ticket), 150);
-
         // Footer
-        content.setStrokingColor(new java.awt.Color(214, 223, 238));
+        content.setStrokingColor(CARD_BORDER_COLOR);
         content.moveTo(34, 44);
         content.lineTo(pageWidth - 34, 44);
         content.stroke();
+        content.setNonStrokingColor(MUTED_TEXT_COLOR);
         writeText(content, regular, 34, 24, 8, "Merci pour votre achat. Présentez ce ticket à l'entrée ou enregistrez le PDF sur votre appareil.");
     }
 
     private void drawRoundedCard(PDPageContentStream content, float x, float y, float width, float height, float radius) throws IOException {
-        content.setNonStrokingColor(255, 255, 255);
+        content.setNonStrokingColor(java.awt.Color.WHITE);
         content.addRect(x, y, width, height);
         content.fill();
-        content.setStrokingColor(214, 223, 238);
+        content.setStrokingColor(CARD_BORDER_COLOR);
         content.addRect(x, y, width, height);
         content.stroke();
     }
 
     private void drawChip(PDPageContentStream content, float x, float y, float width, float height, String text, PDFont font) throws IOException {
-        content.setNonStrokingColor(new java.awt.Color(232, 248, 243));
+        content.setNonStrokingColor(CHIP_BG_COLOR);
         content.addRect(x, y, width, height);
         content.fill();
-        content.setStrokingColor(new java.awt.Color(199, 235, 223));
+        content.setStrokingColor(CHIP_BORDER_COLOR);
         content.addRect(x, y, width, height);
         content.stroke();
 
         float textWidth = (font.getStringWidth(text) / 1000f) * 9;
         float textX = x + Math.max(10, (width - textWidth) / 2);
+        content.setNonStrokingColor(new java.awt.Color(43, 117, 95));
         writeText(content, font, textX, y + 8, 9, text);
     }
 
@@ -641,6 +665,24 @@ public class TicketPdfService {
             return payload.substring(refIndex + 5);
         }
         return payload;
+    }
+
+    private String resolveGalleryName(Evenement event) {
+        if (event == null || event.getGalerieId() == null) {
+            return "Galerie";
+        }
+
+        try {
+            for (Galerie galerie : galerieService.getAll()) {
+                if (galerie != null && event.getGalerieId().equals(galerie.getId())) {
+                    return textOrDefault(galerie.getNom(), "Galerie");
+                }
+            }
+        } catch (java.sql.SQLDataException ignored) {
+            // Fallback below keeps the ticket readable even if the gallery lookup fails.
+        }
+
+        return "Galerie";
     }
 
     private String textOrDefault(String value, String fallback) {

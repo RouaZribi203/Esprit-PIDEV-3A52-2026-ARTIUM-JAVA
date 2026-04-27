@@ -2,6 +2,7 @@ package controllers.amateur;
 
 import controllers.MainFX;
 import entities.Evenement;
+import entities.Galerie;
 import entities.Ticket;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -24,6 +25,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.function.Consumer;
+import services.GalerieService;
 
 public class EventDetailController {
 
@@ -80,6 +82,7 @@ public class EventDetailController {
 
 	private final TicketService ticketService = new TicketService();
 	private final TicketPdfService ticketPdfService = new TicketPdfService();
+	private final GalerieService galerieService = new GalerieService();
 	private Evenement event;
 	private Consumer<Ticket> purchaseHandler;
 	private Runnable backHandler;
@@ -118,7 +121,7 @@ public class EventDetailController {
 		dateFinLabel.setText(formatDate(event.getDateFin()));
 		priceLabel.setText(formatPrice(event.getPrixTicket()));
 		capacityLabel.setText(formatCapacity(event.getCapaciteMax()));
-		galleryLabel.setText("Galerie #" + textOrDash(event.getGalerieId()));
+		galleryLabel.setText(resolveGalleryName(event));
 		descriptionLabel.setText(textOrDefault(event.getDescription(), "Aucune description disponible."));
 		metaLabel.setText("Date de creation: " + (event.getDateCreation() == null ? "-" : event.getDateCreation().toString()));
 		applyImage(event.getImageCouverture());
@@ -217,29 +220,18 @@ public class EventDetailController {
 
 			HBox actions = new HBox(8);
 			actions.getStyleClass().add("ticket-actions");
-			Button qrButton = new Button("QR Code");
-			qrButton.getStyleClass().add("ticket-action-secondary");
-			qrButton.setOnAction(event -> showQrPayload(ticket));
 			Button pdfButton = new Button("Aperçu PDF");
 			pdfButton.getStyleClass().add("ticket-action-secondary");
 			pdfButton.setOnAction(event -> showTicketPreview(ticket));
 			Button downloadButton = new Button("Télécharger PDF");
 			downloadButton.getStyleClass().add("ticket-action-primary");
 			downloadButton.setOnAction(event -> downloadTicketPdf(ticket));
-			actions.getChildren().addAll(qrButton, pdfButton, downloadButton);
+			actions.getChildren().addAll(pdfButton, downloadButton);
 
 			HBox.setHgrow(info, Priority.ALWAYS);
 			row.getChildren().addAll(info, actions);
 			ticketsContainer.getChildren().add(row);
 		}
-	}
-
-	private void showQrPayload(Ticket ticket) {
-		Alert alert = new Alert(Alert.AlertType.INFORMATION);
-		alert.setTitle("QR du ticket");
-		alert.setHeaderText("Contenu du QR");
-		alert.setContentText(resolveQrPayload(ticket));
-		alert.showAndWait();
 	}
 
 	private void showTicketPreview(Ticket ticket) {
@@ -347,16 +339,22 @@ public class EventDetailController {
 		return value == null || value.isBlank() ? fallback : value;
 	}
 
-	private String textOrDash(Integer value) {
-		return value == null ? "-" : String.valueOf(value);
-	}
-
-
-	private String resolveQrPayload(Ticket ticket) {
-		if (ticket.getCodeQr() == null || ticket.getCodeQr().isBlank()) {
-			return "QR non disponible";
+	private String resolveGalleryName(Evenement event) {
+		if (event == null || event.getGalerieId() == null) {
+			return "Galerie";
 		}
-		return ticket.getCodeQr();
+
+		try {
+			for (Galerie galerie : galerieService.getAll()) {
+				if (galerie != null && event.getGalerieId().equals(galerie.getId())) {
+					return textOrDefault(galerie.getNom(), "Galerie");
+				}
+			}
+		} catch (SQLDataException ignored) {
+			// Fallback below keeps the UI readable even if the lookup fails.
+		}
+
+		return "Galerie";
 	}
 
 	private String resolveReference(Ticket ticket) {
