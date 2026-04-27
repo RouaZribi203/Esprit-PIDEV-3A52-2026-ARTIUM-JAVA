@@ -676,8 +676,28 @@ public class MusiquesController {
     private void updateNowPlayingLabels(Musique musique) {
         String titre = musique.getTitre() != null ? musique.getTitre() : "Sans titre";
         String genre = musique.getGenre() != null ? musique.getGenre() : "-";
-        nowPlayingTitleLabel.setText(titre);
-        nowPlayingMetaLabel.setText("Genre: " + genre);
+        setNowPlayingText(titre, "Genre: " + genre);
+    }
+
+    private void setNowPlayingText(String title, String meta) {
+        if (nowPlayingTitleLabel != null) {
+            nowPlayingTitleLabel.setText(title);
+        }
+        if (nowPlayingMetaLabel != null) {
+            nowPlayingMetaLabel.setText(meta);
+        }
+    }
+
+    private void setPlayerStatusText(String status) {
+        if (playerStatusLabel != null) {
+            playerStatusLabel.setText(status);
+        }
+    }
+
+    private void setPlayPauseButtonText(String text) {
+        if (playPauseButton != null) {
+            playPauseButton.setText(text);
+        }
     }
 
     private String toMediaSource(String audioPath) {
@@ -768,8 +788,8 @@ public class MusiquesController {
                 if (current.getId() != null && current.getId().equals(musique.getId())) {
                     globalMediaPlayer.stop();
                     currentTrackIndex = -1;
-                    playPauseButton.setText("Play");
-                    playerStatusLabel.setText("Pret");
+                    setPlayPauseButtonText("Play");
+                    setPlayerStatusText("Pret");
                 }
             }
 
@@ -915,10 +935,9 @@ public class MusiquesController {
         if (visibleTracks.isEmpty()) {
             currentTrackIndex = -1;
             globalMediaPlayer.stop();
-            nowPlayingTitleLabel.setText("Selectionnez une musique");
-            nowPlayingMetaLabel.setText("Genre: -");
-            playerStatusLabel.setText("Pret");
-            playPauseButton.setText("Play");
+            setNowPlayingText("Selectionnez une musique", "Genre: -");
+            setPlayerStatusText("Pret");
+            setPlayPauseButtonText("Play");
         } else if (currentTrackIndex >= visibleTracks.size()) {
             currentTrackIndex = -1;
         }

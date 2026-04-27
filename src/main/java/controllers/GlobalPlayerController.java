@@ -46,9 +46,9 @@ public class GlobalPlayerController {
         coverImageView.imageProperty().bind(mediaPlayerService.coverImageProperty());
 
         mediaPlayerService.playingProperty().addListener((obs, oldValue, newValue) -> {
-            playPauseButton.setText(newValue ? "Pause" : "Play");
+            playPauseButton.setText(newValue ? "⏸" : "▶");
         });
-        playPauseButton.setText(mediaPlayerService.isPlaying() ? "Pause" : "Play");
+        playPauseButton.setText(mediaPlayerService.isPlaying() ? "⏸" : "▶");
 
         progressSlider.valueProperty().addListener((obs, oldValue, newValue) -> {
             if (seeking) {
