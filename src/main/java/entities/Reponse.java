@@ -1,11 +1,11 @@
 package entities;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public class Reponse {
     private Integer id;
     private String contenu;
-    private LocalDateTime dateReponse;
+    private LocalDate dateReponse;
     private Integer reclamationId;
     private Integer userAdminId;
 
@@ -28,11 +28,11 @@ public class Reponse {
         this.contenu = contenu;
     }
 
-    public LocalDateTime getDateReponse() {
+    public LocalDate getDateReponse() {
         return dateReponse;
     }
 
-    public void setDateReponse(LocalDateTime dateReponse) {
+    public void setDateReponse(LocalDate dateReponse) {
         this.dateReponse = dateReponse;
     }
 

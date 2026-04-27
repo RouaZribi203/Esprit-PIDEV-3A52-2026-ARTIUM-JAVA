@@ -41,17 +41,8 @@ import java.awt.Desktop;
  */
 public class ReclamationsController implements Initializable {
 
-	private static boolean openMyReclamationsTabOnNextLoad = false;
-
-	public static void requestOpenMyReclamationsTab() {
-		openMyReclamationsTabOnNextLoad = true;
-	}
-
 	@FXML
 	private TabPane tabs;
-
-	@FXML
-	private Tab myReclamationsTab;
 
 	// Send tab
 	@FXML
@@ -138,29 +129,6 @@ public class ReclamationsController implements Initializable {
 		updateTypeFilterButtons(typeFilterAll);
 
 		refreshMyReclamations();
-		if (openMyReclamationsTabOnNextLoad) {
-			openMyReclamationsTabOnNextLoad = false;
-			openMyReclamationsTab();
-		}
-	}
-
-	private void openMyReclamationsTab() {
-		if (tabs == null) {
-			return;
-		}
-		if (myReclamationsTab != null) {
-			tabs.getSelectionModel().select(myReclamationsTab);
-			return;
-		}
-		for (Tab tab : tabs.getTabs()) {
-			if (tab != null && "Mes Réclamations".equals(tab.getText())) {
-				tabs.getSelectionModel().select(tab);
-				return;
-			}
-		}
-		if (tabs.getTabs().size() > 1) {
-			tabs.getSelectionModel().select(1);
-		}
 	}
 
 	@FXML

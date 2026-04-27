@@ -4,7 +4,7 @@ import entities.Reponse;
 import utils.MyDatabase;
 
 import java.sql.*;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,8 +38,8 @@ public class ReponseService implements Iservice<Reponse> {
         try (PreparedStatement ps = connection.prepareStatement(INSERT_SQL)) {
             ps.setString(1, reponse.getContenu());
 
-            LocalDateTime d = reponse.getDateReponse() != null ? reponse.getDateReponse() : LocalDateTime.now();
-            ps.setTimestamp(2, Timestamp.valueOf(d));
+            LocalDate d = reponse.getDateReponse() != null ? reponse.getDateReponse() : LocalDate.now();
+            ps.setDate(2, Date.valueOf(d));
 
             if (reponse.getReclamationId() == null) {
                 throw new SQLDataException("reclamationId est obligatoire");
@@ -75,8 +75,8 @@ public class ReponseService implements Iservice<Reponse> {
         try (PreparedStatement ps = connection.prepareStatement(UPDATE_SQL)) {
             ps.setString(1, reponse.getContenu());
 
-            LocalDateTime d = reponse.getDateReponse() != null ? reponse.getDateReponse() : LocalDateTime.now();
-            ps.setTimestamp(2, Timestamp.valueOf(d));
+            LocalDate d = reponse.getDateReponse() != null ? reponse.getDateReponse() : LocalDate.now();
+            ps.setDate(2, Date.valueOf(d));
 
             if (reponse.getUserAdminId() != null) {
                 ps.setInt(3, reponse.getUserAdminId());
@@ -170,10 +170,8 @@ public class ReponseService implements Iservice<Reponse> {
         }
         r.setContenu(rs.getString("contenu"));
 
-        Timestamp ts = rs.getTimestamp("date_reponse");
-        if (ts != null) {
-            r.setDateReponse(ts.toLocalDateTime());
-        }
+        Date d = rs.getDate("date_reponse");
+        if (d != null) r.setDateReponse(d.toLocalDate());
 
         int recId = rs.getInt("reclamation_id");
         if (!rs.wasNull()) r.setReclamationId(recId);
