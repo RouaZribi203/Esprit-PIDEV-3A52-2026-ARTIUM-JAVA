@@ -59,8 +59,6 @@ public class EvenementsController {
     @FXML
     public void initialize() {
         filtreComboBox.getItems().addAll(
-                "ID (A-Z)",
-                "ID (Z-A)",
                 "Titre (A-Z)",
                 "Titre (Z-A)",
                 "Date debut (plus recente)",

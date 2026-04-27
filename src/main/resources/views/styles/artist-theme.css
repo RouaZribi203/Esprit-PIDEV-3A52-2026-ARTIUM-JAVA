@@ -171,6 +171,94 @@
     -fx-border-color: #3f4b6c;
 }
 
+/* Presentable notifications dropdown rows */
+.context-menu.notifications-context-menu {
+    -fx-min-width: 360;
+    -fx-max-width: 380;
+}
+
+.context-menu.notifications-context-menu .menu-item {
+    -fx-padding: 0;
+}
+
+.context-menu.notifications-context-menu .menu-item.notifications-item {
+    -fx-padding: 0;
+}
+
+.context-menu.notifications-context-menu .menu-item.notifications-item > .label {
+    -fx-padding: 0;
+}
+
+.context-menu.notifications-context-menu .menu-item.notifications-item:disabled {
+    -fx-opacity: 1;
+}
+
+.notifications-item-content {
+    -fx-padding: 10 12 10 12;
+    -fx-background-color: linear-gradient(to bottom, #fbfcff, #f4f7ff);
+    -fx-border-color: #e0e8f6;
+    -fx-border-width: 1;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+}
+
+.context-menu.notifications-context-menu .menu-item.notifications-item:hover .notifications-item-content,
+.context-menu.notifications-context-menu .menu-item.notifications-item:focused .notifications-item-content {
+    -fx-background-color: linear-gradient(to bottom, #f2f6ff, #eaf0ff);
+    -fx-border-color: #cfdafb;
+}
+
+.notifications-item-title {
+    -fx-text-fill: #1f2f46;
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+}
+
+.notifications-item-message {
+    -fx-text-fill: #5f718b;
+    -fx-font-size: 12px;
+}
+
+.notifications-item-time {
+    -fx-text-fill: #7a8ca4;
+    -fx-font-size: 11px;
+    -fx-font-style: italic;
+}
+
+.notifications-empty-row {
+    -fx-padding: 8 4 8 4;
+}
+
+.notifications-empty-label {
+    -fx-text-fill: #70839d;
+    -fx-font-size: 12px;
+    -fx-font-style: italic;
+}
+
+.artist-root.dark-mode .notifications-item-content {
+    -fx-background-color: linear-gradient(to bottom, #2c3d5b, #273854);
+    -fx-border-color: #3c5074;
+}
+
+.artist-root.dark-mode .context-menu.notifications-context-menu .menu-item.notifications-item:hover .notifications-item-content,
+.artist-root.dark-mode .context-menu.notifications-context-menu .menu-item.notifications-item:focused .notifications-item-content {
+    -fx-background-color: linear-gradient(to bottom, #344867, #2f4160);
+    -fx-border-color: #4c638d;
+}
+
+.artist-root.dark-mode .notifications-item-title {
+    -fx-text-fill: #edf3ff;
+}
+
+.artist-root.dark-mode .notifications-item-message {
+    -fx-text-fill: #c2d0e6;
+}
+
+.artist-root.dark-mode .notifications-item-time,
+.artist-root.dark-mode .notifications-empty-label {
+    -fx-text-fill: #9fb0cc;
+}
+
 .artist-avatar-menu,
 .avatar-menu {
     -fx-background-color: #edf2f8;
@@ -475,6 +563,21 @@
     -fx-text-fill: #2f3e52;
     -fx-font-weight: 600;
     -fx-cursor: hand;
+}
+
+.artist-warning-button {
+    -fx-background-color: #fff3cd;
+    -fx-border-color: #f1d48a;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-text-fill: #8a5a00;
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+}
+
+.artist-warning-button:hover {
+    -fx-background-color: #ffe7a3;
+    -fx-border-color: #e8c15f;
 }
 
 .artist-danger-button {

@@ -6,6 +6,7 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
@@ -15,72 +16,73 @@
     <center>
         <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="event-detail-scroll">
             <content>
-                <VBox spacing="14.0" styleClass="event-detail-root">
+                <VBox spacing="18.0" styleClass="event-detail-root">
                     <padding>
-                        <Insets bottom="8.0" left="2.0" right="2.0" top="2.0" />
+                        <Insets top="12.0" right="12.0" bottom="12.0" left="12.0" />
                     </padding>
 
-                    <VBox spacing="14.0" styleClass="amateur-page-card event-detail-main-card">
+                    <StackPane minHeight="260.0" styleClass="event-cover-box">
+                        <ImageView fx:id="coverImageView" fitWidth="900.0" fitHeight="260.0" preserveRatio="true" />
+                    </StackPane>
+
+                    <VBox spacing="14.0" styleClass="amateur-page-card,event-detail-header-card">
                         <padding>
-                            <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
+                            <Insets top="18.0" right="18.0" bottom="18.0" left="18.0" />
                         </padding>
 
-                        <StackPane minHeight="240.0" styleClass="event-cover-box">
-                            <ImageView fx:id="coverImageView" fitHeight="240.0" fitWidth="680.0" preserveRatio="true" />
-                        </StackPane>
+                        <Label fx:id="titleLabel" styleClass="event-title" text="Evenement" wrapText="true" />
 
-                        <HBox alignment="CENTER_LEFT" spacing="12.0">
-                            <VBox spacing="4.0">
-                                <Label fx:id="titleLabel" styleClass="event-title" text="Titre de l'évènement" />
-                                <HBox spacing="8.0">
-                                    <Label fx:id="typeLabel" styleClass="event-chip" text="Type" />
-                                    <Label fx:id="statusLabel" styleClass="event-chip event-chip-status" text="Statut" />
-                                </HBox>
-                            </VBox>
-                            <StackPane HBox.hgrow="ALWAYS" />
-                            <Button fx:id="buyTicketButton" mnemonicParsing="false" onAction="#onBuyTicketClick" styleClass="ticket-action-primary" text="Acheter ticket" />
+                        <HBox spacing="8.0">
+                            <Label fx:id="typeLabel" styleClass="event-chip event-chip-type" text="Type" />
+                            <Label fx:id="statusLabel" styleClass="event-chip event-chip-status" text="Statut" />
                         </HBox>
 
-                        <Label fx:id="descriptionLabel" styleClass="event-description" text="Description de l'évènement" wrapText="true" />
+                        <Label text="Description" styleClass="event-description-title" />
+                        <Label fx:id="descriptionLabel" styleClass="event-description" text="Description" wrapText="true" />
 
                         <GridPane hgap="18.0" vgap="8.0">
-                            <Label styleClass="event-stat-label" text="Horaire début" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                            <columnConstraints>
+                                <ColumnConstraints hgrow="ALWAYS" />
+                                <ColumnConstraints hgrow="ALWAYS" />
+                                <ColumnConstraints hgrow="ALWAYS" />
+                                <ColumnConstraints hgrow="ALWAYS" />
+                            </columnConstraints>
+                            <Label styleClass="event-stat-label" text="Horaire debut" GridPane.columnIndex="0" GridPane.rowIndex="0" />
                             <Label styleClass="event-stat-label" text="Horaire fin" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                            <Label styleClass="event-stat-label" text="Prix d'entrée" GridPane.columnIndex="2" GridPane.rowIndex="0" />
-                            <Label styleClass="event-stat-label" text="Capacité" GridPane.columnIndex="3" GridPane.rowIndex="0" />
-                            <Label fx:id="dateDebutLabel" styleClass="event-stat-value" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                            <Label fx:id="dateFinLabel" styleClass="event-stat-value" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                            <Label fx:id="priceLabel" styleClass="event-stat-value event-price-value" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                            <Label fx:id="capacityLabel" styleClass="event-stat-value" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                            <Label styleClass="event-stat-label" text="Prix" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                            <Label styleClass="event-stat-label" text="Capacite" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+
+                            <Label fx:id="dateDebutLabel" styleClass="event-stat-value" text="-" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                            <Label fx:id="dateFinLabel" styleClass="event-stat-value" text="-" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                            <Label fx:id="priceLabel" styleClass="event-stat-value event-price-value" text="-" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                            <Label fx:id="capacityLabel" styleClass="event-stat-value" text="-" GridPane.columnIndex="3" GridPane.rowIndex="1" />
                         </GridPane>
 
-                        <HBox alignment="CENTER_LEFT" spacing="8.0">
-                            <Label text="Galerie:" />
-                            <Label fx:id="galleryLabel" />
+                        <HBox spacing="8.0" alignment="CENTER_LEFT" styleClass="event-location-info">
+                            <Label text="Galerie:" styleClass="event-location-label" />
+                            <Label fx:id="galleryLabel" text="-" />
+                            <Label fx:id="metaLabel" styleClass="page-caption" text="-" />
                         </HBox>
-                        <Label fx:id="metaLabel" styleClass="page-caption" text="Métadonnées" />
                     </VBox>
 
                     <VBox spacing="10.0" styleClass="amateur-page-card ticket-section-card">
                         <padding>
-                            <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
+                            <Insets top="14.0" right="14.0" bottom="14.0" left="14.0" />
                         </padding>
 
-                        <HBox alignment="CENTER_LEFT" spacing="10.0">
-                            <Label styleClass="ticket-section-title" text="Vos tickets" />
-                            <StackPane HBox.hgrow="ALWAYS" />
+                        <HBox alignment="CENTER_LEFT" spacing="12.0">
+                            <Label text="Mes tickets" styleClass="ticket-section-title" />
                             <Label fx:id="ticketsCountLabel" styleClass="ticket-count-chip" text="0 ticket(s)" />
-                            <Button fx:id="backButton" mnemonicParsing="false" onAction="#onBackClick" styleClass="ticket-action-secondary" text="Retour" />
+                            <StackPane HBox.hgrow="ALWAYS" />
+                            <Button fx:id="buyTicketButton" text="Acheter ticket" onAction="#onBuyTicketClick" styleClass="ticket-action-primary" />
+                            <Button fx:id="backButton" text="Retour" onAction="#onBackClick" styleClass="ticket-action-secondary" />
                         </HBox>
 
                         <Label fx:id="ticketsEmptyLabel" styleClass="page-caption" text="Aucun ticket achete pour cet evenement." />
-                        <VBox fx:id="ticketsContainer" spacing="8.0" />
+                        <VBox fx:id="ticketsContainer" spacing="8.0" VBox.vgrow="ALWAYS" />
                     </VBox>
                 </VBox>
             </content>
-            <padding>
-                <Insets bottom="0.0" left="0.0" right="0.0" top="0.0" />
-            </padding>
         </ScrollPane>
     </center>
 </BorderPane>

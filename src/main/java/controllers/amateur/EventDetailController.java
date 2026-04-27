@@ -1,17 +1,22 @@
 package controllers.amateur;
 
+import controllers.MainFX;
 import entities.Evenement;
 import entities.Ticket;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
 import services.TicketService;
+import services.TicketPdfService;
 
 import java.io.File;
 import java.sql.SQLDataException;
@@ -24,7 +29,6 @@ public class EventDetailController {
 
 	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm");
 	private static final DateTimeFormatter PURCHASE_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy");
-	private static final int CURRENT_USER_ID = 1; // TODO: replace with authenticated user id.
 
 	@FXML
 	private ImageView coverImageView;
@@ -75,6 +79,7 @@ public class EventDetailController {
 	private Label ticketsCountLabel;
 
 	private final TicketService ticketService = new TicketService();
+	private final TicketPdfService ticketPdfService = new TicketPdfService();
 	private Evenement event;
 	private Consumer<Ticket> purchaseHandler;
 	private Runnable backHandler;
@@ -91,11 +96,17 @@ public class EventDetailController {
 		}
 
 		boolean purchasable = event.getStatut() == null || !"Annulé".equalsIgnoreCase(event.getStatut().trim());
-		if (purchasable && event.getDateDebut() != null) {
-			purchasable = LocalDateTime.now().isBefore(event.getDateDebut());
+		Integer currentUserId = resolveCurrentUserId();
+		if (currentUserId == null) {
+			buyTicketButton.setDisable(true);
+			buyTicketButton.setText("Connexion requise");
+		} else {
+			if (purchasable && event.getDateDebut() != null) {
+				purchasable = LocalDateTime.now().isBefore(event.getDateDebut());
+			}
+			buyTicketButton.setDisable(!purchasable);
+			buyTicketButton.setText(purchasable ? "Acheter ticket" : "Ticket indisponible");
 		}
-		buyTicketButton.setDisable(!purchasable);
-		buyTicketButton.setText(purchasable ? "Acheter ticket" : "Ticket indisponible");
 		if (backButton != null) {
 			backButton.setDisable(false);
 		}
@@ -128,8 +139,18 @@ public class EventDetailController {
 			return;
 		}
 
+		Integer currentUserId = resolveCurrentUserId();
+		if (currentUserId == null) {
+			Alert alert = new Alert(Alert.AlertType.WARNING);
+			alert.setTitle("Connexion requise");
+			alert.setHeaderText("Vous devez être connecté pour acheter un ticket");
+			alert.setContentText("Veuillez vous reconnecter avant de continuer.");
+			alert.showAndWait();
+			return;
+		}
+
 		try {
-			Ticket ticket = ticketService.purchaseTicket(event, CURRENT_USER_ID);
+			Ticket ticket = ticketService.purchaseTicket(event, currentUserId);
 			loadPurchasedTickets();
 			if (purchaseHandler != null) {
 				purchaseHandler.accept(ticket);
@@ -150,13 +171,14 @@ public class EventDetailController {
 	}
 
 	private void loadPurchasedTickets() {
-		if (event == null || event.getId() == null) {
+		Integer currentUserId = resolveCurrentUserId();
+		if (event == null || event.getId() == null || currentUserId == null) {
 			renderPurchasedTickets(List.of());
 			return;
 		}
 
 		try {
-			List<Ticket> tickets = ticketService.getTicketsByEventAndUser(event.getId(), CURRENT_USER_ID);
+			List<Ticket> tickets = ticketService.getTicketsByEventAndUser(event.getId(), currentUserId);
 			renderPurchasedTickets(tickets);
 		} catch (SQLDataException e) {
 			renderPurchasedTickets(List.of());
@@ -198,10 +220,13 @@ public class EventDetailController {
 			Button qrButton = new Button("QR Code");
 			qrButton.getStyleClass().add("ticket-action-secondary");
 			qrButton.setOnAction(event -> showQrPayload(ticket));
-			Button pdfButton = new Button("Voir ticket");
-			pdfButton.getStyleClass().add("ticket-action-primary");
+			Button pdfButton = new Button("Aperçu PDF");
+			pdfButton.getStyleClass().add("ticket-action-secondary");
 			pdfButton.setOnAction(event -> showTicketPreview(ticket));
-			actions.getChildren().addAll(qrButton, pdfButton);
+			Button downloadButton = new Button("Télécharger PDF");
+			downloadButton.getStyleClass().add("ticket-action-primary");
+			downloadButton.setOnAction(event -> downloadTicketPdf(ticket));
+			actions.getChildren().addAll(qrButton, pdfButton, downloadButton);
 
 			HBox.setHgrow(info, Priority.ALWAYS);
 			row.getChildren().addAll(info, actions);
@@ -218,17 +243,67 @@ public class EventDetailController {
 	}
 
 	private void showTicketPreview(Ticket ticket) {
+		if (event == null) {
+			return;
+		}
+
 		Alert alert = new Alert(Alert.AlertType.INFORMATION);
 		alert.setTitle("Aperçu du ticket");
-		alert.setHeaderText("Ticket acheté");
-		alert.setContentText(
-				"Référence: " + resolveReference(ticket)
-						+ "\nÉvènement: " + textOrDash(ticket.getEvenementId())
-						+ "\nUtilisateur: " + textOrDash(ticket.getUserId())
-						+ "\nDate d'achat: " + formatPurchaseDate(ticket)
-						+ "\nQR: " + resolveQrPayload(ticket)
-		);
+		alert.setHeaderText("Ticket PDF prêt à être ouvert");
+		alert.setContentText("Le PDF va être généré dans un fichier temporaire et ouvert dans votre lecteur PDF par défaut.");
 		alert.showAndWait();
+
+		try {
+			File previewPdf = ticketPdfService.createPreviewPdf(event, ticket);
+			ticketPdfService.openPdf(previewPdf);
+		} catch (Exception e) {
+			Alert error = new Alert(Alert.AlertType.ERROR, "Impossible d'ouvrir le PDF: " + e.getMessage(), ButtonType.OK);
+			error.setTitle("Aperçu PDF indisponible");
+			error.showAndWait();
+		}
+	}
+
+	private void downloadTicketPdf(Ticket ticket) {
+		if (event == null) {
+			return;
+		}
+
+		FileChooser chooser = new FileChooser();
+		chooser.setTitle("Télécharger le ticket PDF");
+		chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF", "*.pdf"));
+		chooser.setInitialFileName(ticketPdfService.buildSuggestedFileName(event, ticket));
+
+		Window owner = buyTicketButton == null ? null : buyTicketButton.getScene().getWindow();
+		File target = chooser.showSaveDialog(owner);
+		if (target == null) {
+			return;
+		}
+
+		File pdfFile = ensurePdfExtension(target);
+		try {
+			ticketPdfService.exportTicketPdf(event, ticket, pdfFile);
+			Alert info = new Alert(Alert.AlertType.INFORMATION);
+			info.setTitle("Ticket téléchargé");
+			info.setHeaderText("PDF généré avec succès");
+			info.setContentText("Le ticket a été enregistré dans:\n" + pdfFile.getAbsolutePath());
+			info.showAndWait();
+		} catch (Exception e) {
+			Alert error = new Alert(Alert.AlertType.ERROR);
+			error.setTitle("Téléchargement impossible");
+			error.setHeaderText("Le PDF n'a pas pu être créé");
+			error.setContentText(e.getMessage());
+			error.showAndWait();
+		}
+	}
+
+	private File ensurePdfExtension(File target) {
+		String name = target.getName().toLowerCase();
+		if (name.endsWith(".pdf")) {
+			return target;
+		}
+		File parent = target.getParentFile();
+		String baseName = target.getName() + ".pdf";
+		return parent == null ? new File(baseName) : new File(parent, baseName);
 	}
 
 	@FXML
@@ -299,6 +374,13 @@ public class EventDetailController {
 
 	private String formatPurchaseDate(Ticket ticket) {
 		return ticket.getDateAchat() == null ? "-" : PURCHASE_DATE_FORMATTER.format(ticket.getDateAchat());
+	}
+
+	private Integer resolveCurrentUserId() {
+		if (MainFX.getAuthenticatedUser() == null || MainFX.getAuthenticatedUser().getId() == null) {
+			return null;
+		}
+		return MainFX.getAuthenticatedUser().getId();
 	}
 }
 

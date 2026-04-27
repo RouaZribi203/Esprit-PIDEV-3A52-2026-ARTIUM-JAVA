@@ -4,7 +4,14 @@ import entities.Ticket;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
+import services.EvenementService;
+import services.TicketPdfService;
+import entities.Evenement;
 
+import java.io.File;
+import java.sql.SQLDataException;
 import java.time.format.DateTimeFormatter;
 
 public class PaymentController {
@@ -26,6 +33,8 @@ public class PaymentController {
 	@FXML
 	private Label qrPayloadLabel;
 
+	private final TicketPdfService ticketPdfService = new TicketPdfService();
+	private final EvenementService evenementService = new EvenementService();
 	private Ticket ticket;
 	private Runnable backToEventHandler;
 	private Runnable backToEventsHandler;
@@ -72,16 +81,78 @@ public class PaymentController {
 		}
 
 		Alert alert = new Alert(Alert.AlertType.INFORMATION);
-		alert.setTitle("Aperçu du ticket");
-		alert.setHeaderText("Ticket généré");
-		alert.setContentText(
-				"Référence: " + resolveReference(ticket)
-						+ "\nÉvènement: " + formatInteger(ticket.getEvenementId())
-						+ "\nUtilisateur: " + formatInteger(ticket.getUserId())
-						+ "\nDate d'achat: " + (ticket.getDateAchat() == null ? "-" : DATE_FORMATTER.format(ticket.getDateAchat()))
-						+ "\nQR: " + resolveQrPayload(ticket)
-		);
+		alert.setTitle("Aperçu du ticket PDF");
+		alert.setHeaderText("Le ticket sera ouvert en PDF");
+		alert.setContentText("Un document PDF professionnel va être généré puis ouvert dans votre lecteur PDF par défaut.");
 		alert.showAndWait();
+
+		try {
+			Evenement evenement = evenementService.getById(ticket.getEvenementId());
+			File preview = ticketPdfService.createPreviewPdf(evenement, ticket);
+			ticketPdfService.openPdf(preview);
+		} catch (SQLDataException e) {
+			Alert error = new Alert(Alert.AlertType.ERROR);
+			error.setTitle("Aperçu impossible");
+			error.setHeaderText("Impossible de charger l'évènement");
+			error.setContentText(e.getMessage());
+			error.showAndWait();
+		} catch (Exception e) {
+			Alert error = new Alert(Alert.AlertType.ERROR);
+			error.setTitle("Aperçu PDF indisponible");
+			error.setHeaderText("Le PDF n'a pas pu être ouvert");
+			error.setContentText(e.getMessage());
+			error.showAndWait();
+		}
+	}
+
+	@FXML
+	private void onDownloadTicketPdfClick() {
+		if (ticket == null) {
+			return;
+		}
+
+		try {
+			Evenement evenement = evenementService.getById(ticket.getEvenementId());
+			FileChooser chooser = new FileChooser();
+			chooser.setTitle("Télécharger le ticket PDF");
+			chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF", "*.pdf"));
+			chooser.setInitialFileName(ticketPdfService.buildSuggestedFileName(evenement, ticket));
+
+			Window owner = qrPayloadLabel == null ? null : qrPayloadLabel.getScene().getWindow();
+			File target = chooser.showSaveDialog(owner);
+			if (target == null) {
+				return;
+			}
+
+			File pdf = ticketPdfService.exportTicketPdf(evenement, ticket, ensurePdfExtension(target));
+			Alert info = new Alert(Alert.AlertType.INFORMATION);
+			info.setTitle("Téléchargement réussi");
+			info.setHeaderText("Votre ticket PDF est prêt");
+			info.setContentText("Le fichier a été enregistré dans:\n" + pdf.getAbsolutePath());
+			info.showAndWait();
+		} catch (SQLDataException e) {
+			Alert error = new Alert(Alert.AlertType.ERROR);
+			error.setTitle("Téléchargement impossible");
+			error.setHeaderText("Impossible de charger l'évènement");
+			error.setContentText(e.getMessage());
+			error.showAndWait();
+		} catch (Exception e) {
+			Alert error = new Alert(Alert.AlertType.ERROR);
+			error.setTitle("Téléchargement impossible");
+			error.setHeaderText("Le PDF n'a pas pu être créé");
+			error.setContentText(e.getMessage());
+			error.showAndWait();
+		}
+	}
+
+	private File ensurePdfExtension(File target) {
+		String lowerName = target.getName().toLowerCase();
+		if (lowerName.endsWith(".pdf")) {
+			return target;
+		}
+		File parent = target.getParentFile();
+		String fileName = target.getName() + ".pdf";
+		return parent == null ? new File(target.getAbsolutePath() + ".pdf") : new File(parent, fileName);
 	}
 
 	@FXML

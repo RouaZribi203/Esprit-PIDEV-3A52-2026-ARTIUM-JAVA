@@ -25,9 +25,9 @@
     <Region HBox.hgrow="ALWAYS" />
 
     <HBox alignment="CENTER_RIGHT" spacing="8.0">
+        <Button mnemonicParsing="false" onAction="#onCancelClick" styleClass="artist-warning-button" text="Annuler" />
         <Button mnemonicParsing="false" onAction="#onEditClick" styleClass="artist-secondary-button" text="Editer" />
         <Button mnemonicParsing="false" onAction="#onDeleteClick" styleClass="artist-danger-button" text="Supprimer" />
-        <Button mnemonicParsing="false" onAction="#onCancelClick" styleClass="artist-danger-button" text="Annuler" />
     </HBox>
 </HBox>
 

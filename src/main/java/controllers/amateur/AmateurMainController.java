@@ -34,6 +34,7 @@ public class AmateurMainController {
     private MiniAudioPlayerController miniAudioPlayerIncludeController;
 
     private Evenement selectedEvent;
+    private Ticket pendingPurchasedTicket;
 
     @FXML
     public void initialize() {
@@ -70,7 +71,7 @@ public class AmateurMainController {
     }
 
     public void onTicketPurchased(Ticket ticket) {
-        // Handle post-purchase actions, e.g. show confirmation, update UI, etc.
+        this.pendingPurchasedTicket = ticket;
         onNavigate("payment-success");
     }
 
@@ -134,6 +135,11 @@ public class AmateurMainController {
             detailController.setEvent(selectedEvent);
             detailController.setPurchaseHandler(this::onTicketPurchased);
             detailController.setBackHandler(() -> onNavigate("evenements"));
+        } else if (controller instanceof PaymentController paymentController) {
+            paymentController.setTicket(pendingPurchasedTicket);
+            paymentController.setBackToEventHandler(() -> onNavigate("event-detail"));
+            paymentController.setBackToEventsHandler(() -> onNavigate("evenements"));
+            pendingPurchasedTicket = null;
         }
     }
 }
