@@ -9,7 +9,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +36,7 @@ public class ReclamationReplyDialogController {
 
     private boolean readOnly = false;
 
-    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     private static final int MIN_REPONSE_LEN = 10;
     private static final int MAX_REPONSE_LEN = 500;
 
@@ -90,6 +90,19 @@ public class ReclamationReplyDialogController {
         reclamationIdLabel.setText(reclamation.getId() != null ? String.valueOf(reclamation.getId()) : "-");
         reclamationTexteArea.setText(reclamation.getTexte() != null ? reclamation.getTexte() : "");
         loadHistory();
+    }
+
+    public void focusResponse(Integer reponseId) {
+        if (reponseId == null || historyList == null) {
+            return;
+        }
+        for (Reponse response : historyList.getItems()) {
+            if (response != null && reponseId.equals(response.getId())) {
+                historyList.getSelectionModel().select(response);
+                historyList.scrollTo(response);
+                break;
+            }
+        }
     }
 
     /**
@@ -236,7 +249,7 @@ public class ReclamationReplyDialogController {
                 Reponse r = new Reponse();
                 r.setReclamationId(reclamation.getId());
                 r.setContenu(c);
-                r.setDateReponse(LocalDate.now());
+                r.setDateReponse(LocalDateTime.now());
                 reponseService.add(r);
             }
 
@@ -286,7 +299,7 @@ public class ReclamationReplyDialogController {
 
         try {
             selectedForEdit.setContenu(newText.trim());
-            selectedForEdit.setDateReponse(LocalDate.now());
+            selectedForEdit.setDateReponse(LocalDateTime.now());
             reponseService.update(selectedForEdit);
             loadHistory();
 

@@ -7,10 +7,13 @@
     <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="correction blob oeuvre livre">
       <change beforePath="$PROJECT_DIR$/.idea/copilotDiffState.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/copilotDiffState.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/NavbarAmateurController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/NavbarAmateurController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/ReclamationsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/ReclamationsController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/ReclamationsArtisteController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/ReclamationsArtisteController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationReplyDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationReplyDialogController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/entities/Reponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/entities/Reponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/ReponseService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/ReponseService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/Reclamations.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/Reclamations.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/artist/Reclamations.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/artist/Reclamations.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -130,7 +133,10 @@
       <workItem from="1776514744207" duration="5785000" />
       <workItem from="1776522849192" duration="6633000" />
       <workItem from="1776530552927" duration="6585000" />
-      <workItem from="1776849339454" duration="5882000" />
+      <workItem from="1776849339454" duration="6538000" />
+      <workItem from="1776889294855" duration="3017000" />
+      <workItem from="1776933595827" duration="5522000" />
+      <workItem from="1777280668402" duration="6806000" />
     </task>
     <task id="LOCAL-00001" summary="corrections de blob">
       <option name="closed" value="true" />

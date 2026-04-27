@@ -30,7 +30,6 @@
                 <Tab text="Envoyer Réclamation">
                     <content>
                         <VBox spacing="12.0">
-                            <Label styleClass="form-title" text="Soumettre une Réclamation" />
 
                             <VBox spacing="6.0">
                                 <Label styleClass="form-label" text="Type" />
@@ -61,10 +60,9 @@
                     </content>
                 </Tab>
 
-                <Tab text="Mes Réclamations">
+                <Tab fx:id="myReclamationsTab" text="Mes Réclamations">
                     <content>
                         <VBox spacing="10.0" VBox.vgrow="ALWAYS">
-                            <Label styleClass="form-title" text="Mes Réclamations" />
 
                             <HBox alignment="CENTER_LEFT" spacing="10.0">
                                 <Button fx:id="typeFilterAll" text="Tous les types" onAction="#onTypeFilterAll" styleClass="type-filter-btn,type-filter-active" />
