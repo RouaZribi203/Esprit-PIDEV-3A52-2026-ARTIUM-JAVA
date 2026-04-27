@@ -6,10 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="correction blob oeuvre livre">
       <change beforePath="$PROJECT_DIR$/.idea/copilotDiffState.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/copilotDiffState.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/EventDetailController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/EventDetailController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/services/GalerieService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/GalerieService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/EventDetail.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/EventDetail.fxml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" afterDir="false" />
     </list>
@@ -141,7 +137,7 @@
       <workItem from="1777280564512" duration="7102000" />
       <workItem from="1777287754697" duration="502000" />
       <workItem from="1777298312784" duration="3242000" />
-      <workItem from="1777307697655" duration="1897000" />
+      <workItem from="1777307697655" duration="2208000" />
     </task>
     <task id="LOCAL-00001" summary="corrections de blob">
       <option name="closed" value="true" />

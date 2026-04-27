@@ -1004,6 +1004,11 @@
     -fx-background-color: transparent;
 }
 
+.stat-icon {
+    -fx-font-size: 15px;
+    -fx-text-fill: #4d6180;
+}
+
 .ticket-action-primary:hover {
     -fx-background-color: linear-gradient(to bottom, #4f5fe3, #3d50d4);
 }

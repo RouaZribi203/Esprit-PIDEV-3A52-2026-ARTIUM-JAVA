@@ -48,10 +48,22 @@
                                 <ColumnConstraints hgrow="ALWAYS" />
                                 <ColumnConstraints hgrow="ALWAYS" />
                             </columnConstraints>
-                            <Label styleClass="event-stat-label" text="Horaire debut" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                            <Label styleClass="event-stat-label" text="Horaire fin" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                            <Label styleClass="event-stat-label" text="Prix" GridPane.columnIndex="2" GridPane.rowIndex="0" />
-                            <Label styleClass="event-stat-label" text="Capacite" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+                            <HBox spacing="6.0" alignment="CENTER_LEFT" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                <Label text="📅" styleClass="stat-icon" />
+                                <Label styleClass="event-stat-label" text="Horaire debut" />
+                            </HBox>
+                            <HBox spacing="6.0" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                                <Label text="⏱️" styleClass="stat-icon" />
+                                <Label styleClass="event-stat-label" text="Horaire fin" />
+                            </HBox>
+                            <HBox spacing="6.0" alignment="CENTER_LEFT" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                                <Label text="💰" styleClass="stat-icon" />
+                                <Label styleClass="event-stat-label" text="Prix" />
+                            </HBox>
+                            <HBox spacing="6.0" alignment="CENTER_LEFT" GridPane.columnIndex="3" GridPane.rowIndex="0">
+                                <Label text="👥" styleClass="stat-icon" />
+                                <Label styleClass="event-stat-label" text="Capacite" />
+                            </HBox>
 
                             <Label fx:id="dateDebutLabel" styleClass="event-stat-value" text="-" GridPane.columnIndex="0" GridPane.rowIndex="1" />
                             <Label fx:id="dateFinLabel" styleClass="event-stat-value" text="-" GridPane.columnIndex="1" GridPane.rowIndex="1" />
@@ -60,6 +72,7 @@
                         </GridPane>
 
                         <HBox spacing="8.0" alignment="CENTER_LEFT" styleClass="event-location-info">
+                            <Label text="📍" styleClass="stat-icon" />
                             <Label text="Galerie:" styleClass="event-location-label" />
                             <Label fx:id="galleryLabel" text="-" />
                             <Label fx:id="metaLabel" styleClass="page-caption" text="-" />
