@@ -4,10 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="ameliorer edit oeuvre">
+    <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/MesOeuvresController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/MesOeuvresController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/services/OeuvreRecommendationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/OeuvreRecommendationService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/OeuvreService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/OeuvreService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/SmsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/SmsService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,7 +26,7 @@
     </persistenceIdMap>
   </component>
   <component name="CopilotUserSelectedChatMode">
-    <option name="chatModeId" value="Ask" />
+    <option name="chatModeId" value="Agent" />
   </component>
   <component name="CopilotUserSelectedModel">
     <selectedModels>
@@ -166,7 +169,8 @@
       <workItem from="1776881992405" duration="21712000" />
       <workItem from="1776931324086" duration="5772000" />
       <workItem from="1777316904870" duration="17470000" />
-      <workItem from="1777382924937" duration="8389000" />
+      <workItem from="1777382924937" duration="8743000" />
+      <workItem from="1777403181902" duration="2360000" />
     </task>
     <task id="LOCAL-00001" summary="corrections de blob">
       <option name="closed" value="true" />
@@ -272,7 +276,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777385676732</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="dessiner ajout oeuvre">
+      <option name="closed" value="true" />
+      <created>1777391938810</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1777391938810</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -303,7 +315,8 @@
     <MESSAGE value="qrcodev1" />
     <MESSAGE value="qrcodev2" />
     <MESSAGE value="ameliorer edit oeuvre" />
-    <option name="LAST_COMMIT_MESSAGE" value="ameliorer edit oeuvre" />
+    <MESSAGE value="dessiner ajout oeuvre" />
+    <option name="LAST_COMMIT_MESSAGE" value="dessiner ajout oeuvre" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

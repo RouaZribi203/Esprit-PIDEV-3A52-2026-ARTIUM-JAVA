@@ -5,6 +5,7 @@ import services.CommentaireService;
 import services.LikeService;
 import services.OeuvreCollectionService;
 import services.OeuvreService;
+import services.QrCodeService;
 import services.ai.PythonImageEmbeddingClient;
 import controllers.ImageEditorController;
 import controllers.DrawingBoardController;
@@ -97,6 +98,7 @@ public class MesOeuvresController {
     private final OeuvreCollectionService oeuvreCollectionService = new OeuvreCollectionService();
     private final CommentaireService commentaireService = new CommentaireService();
     private final LikeService likeService = new LikeService();
+    private final QrCodeService qrCodeService = new QrCodeService();
     private final PythonImageEmbeddingClient imageEmbeddingClient = new PythonImageEmbeddingClient();
     private final List<Oeuvre> allOeuvres = new ArrayList<>();
     private final Map<Integer, List<Commentaire>> commentsByOeuvreId = new HashMap<>();
@@ -1073,7 +1075,7 @@ public class MesOeuvresController {
 
         try {
             String qrPayload = String.valueOf(oeuvre.getId());
-            String qrUrl = buildQrCodeUrl(qrPayload, 320);
+            String qrUrl = qrCodeService.generateQrCodeUrl(qrPayload, 320);
             BufferedImage qrImage = ImageIO.read(new URL(qrUrl));
             if (qrImage == null) {
                 throw new IOException("Impossible de récupérer l'image QR.");
@@ -1132,10 +1134,6 @@ public class MesOeuvresController {
         }
     }
 
-    private String buildQrCodeUrl(String content, int size) {
-        String encoded = URLEncoder.encode(content, StandardCharsets.UTF_8);
-        return "https://api.qrserver.com/v1/create-qr-code/?size=" + size + "x" + size + "&data=" + encoded;
-    }
 
     private void saveQrCodeImage(String qrUrl, Oeuvre oeuvre, Stage ownerStage) {
         FileChooser chooser = new FileChooser();

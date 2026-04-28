@@ -625,7 +625,7 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
      */
     public void checkTrendingAndNotify(int oeuvreId) throws SQLDataException {
         final double SEUIL_TRENDING = 15.0;
-        final String SMS_PHONE = "+21698115638"; // Numéro fixe de l'API
+        final String SMS_PHONE = "+21624340520"; // Numéro fixe de l'API
 
         try {
             double score = computeScore(oeuvreId);

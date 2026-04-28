@@ -82,6 +82,13 @@
             <version>3.5.3</version>
         </dependency>
 
+        <!-- Dotenv for environment variables -->
+        <dependency>
+            <groupId>io.github.cdimascio</groupId>
+            <artifactId>java-dotenv</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
     </dependencies>
 
     <build>
