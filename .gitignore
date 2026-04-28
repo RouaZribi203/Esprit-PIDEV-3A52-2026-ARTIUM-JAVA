@@ -37,6 +37,7 @@ build/
 ### Local config (secrets) ###
 config/qr-api.local.properties
 config/stripe.local.properties
+config/mail.local.properties
 
 ### Mac OS ###
 .DS_Store

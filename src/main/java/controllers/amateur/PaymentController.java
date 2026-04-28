@@ -13,6 +13,13 @@ import entities.Evenement;
 import java.io.File;
 import java.sql.SQLDataException;
 import java.time.format.DateTimeFormatter;
+import java.awt.image.BufferedImage;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.ButtonType;
 
 public class PaymentController {
 
@@ -87,11 +94,34 @@ public class PaymentController {
 			return;
 		}
 
-		Alert alert = new Alert(Alert.AlertType.INFORMATION);
-		alert.setTitle("QR du ticket");
-		alert.setHeaderText("Contenu du ticket généré");
-		alert.setContentText(resolveQrPayload(ticket));
-		alert.showAndWait();
+		try {
+			BufferedImage qrImage = ticketPdfService.createQrImage(resolveQrPayload(ticket));
+			if (qrImage != null) {
+				Image fxImage = SwingFXUtils.toFXImage(qrImage, null);
+				ImageView imageView = new ImageView(fxImage);
+				imageView.setFitWidth(250);
+				imageView.setFitHeight(250);
+				imageView.setPreserveRatio(true);
+
+				StackPane pane = new StackPane(imageView);
+				pane.setStyle("-fx-padding: 20px; -fx-background-color: white;");
+
+				Dialog<Void> dialog = new Dialog<>();
+				dialog.setTitle("QR Code du Ticket");
+				dialog.setHeaderText("Scannez ce QR Code à l'entrée");
+				dialog.getDialogPane().setContent(pane);
+				dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+				dialog.showAndWait();
+			} else {
+				throw new Exception("L'image QR n'a pas pu être générée.");
+			}
+		} catch (Exception e) {
+			Alert alert = new Alert(Alert.AlertType.ERROR);
+			alert.setTitle("Erreur");
+			alert.setHeaderText("Impossible d'afficher le QR Code");
+			alert.setContentText(e.getMessage());
+			alert.showAndWait();
+		}
 	}
 
 	@FXML

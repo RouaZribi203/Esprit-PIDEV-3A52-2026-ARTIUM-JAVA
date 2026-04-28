@@ -318,7 +318,7 @@ public class TicketPdfService {
         return lines.toArray(new String[0]);
     }
 
-    private BufferedImage createQrImage(String payload) throws IOException {
+    public BufferedImage createQrImage(String payload) throws IOException {
         try {
             BufferedImage image = createQrImageFromApi(payload);
             debug("QR API used successfully.");

@@ -14,13 +14,23 @@ import java.util.concurrent.CompletableFuture;
 
 public class EmailService {
 
-    // IMPORTANT: Remplacez ces valeurs par vos vrais identifiants
-    private static final String SMTP_HOST = "smtp.gmail.com";
-    private static final String SMTP_PORT = "587";
-    // Mettez votre email expéditeur ici:
-    private static final String SENDER_EMAIL = "khalil.elmnari@gmail.com";
-    // Mettez votre "Mot de passe d'application" Google ici:
-    private static final String SENDER_PASSWORD = "ohqrgcygvzbporza";
+    private static String SMTP_HOST = "smtp.gmail.com";
+    private static String SMTP_PORT = "587";
+    private static String SENDER_EMAIL = "";
+    private static String SENDER_PASSWORD = "";
+
+    static {
+        Properties config = new Properties();
+        try (java.io.FileInputStream fis = new java.io.FileInputStream("config/mail.local.properties")) {
+            config.load(fis);
+            SMTP_HOST = config.getProperty("mail.smtp.host", "smtp.gmail.com");
+            SMTP_PORT = config.getProperty("mail.smtp.port", "587");
+            SENDER_EMAIL = config.getProperty("mail.sender.email", "");
+            SENDER_PASSWORD = config.getProperty("mail.sender.password", "");
+        } catch (Exception e) {
+            System.err.println("Note: config/mail.local.properties introuvable. L'envoi d'emails utilise les identifiants par défaut (s'ils existent).");
+        }
+    }
 
     private final TicketPdfService ticketPdfService = new TicketPdfService();
 
@@ -41,8 +51,8 @@ public class EmailService {
             return;
         }
         
-        if (SENDER_EMAIL.equals("votre.email@gmail.com")) {
-            System.err.println("L'e-mail n'a pas été envoyé: Veuillez configurer vos identifiants dans EmailService.java");
+        if (SENDER_EMAIL == null || SENDER_EMAIL.isBlank() || "votre.email@gmail.com".equals(SENDER_EMAIL)) {
+            System.err.println("L'e-mail n'a pas été envoyé: Veuillez configurer vos identifiants dans config/mail.local.properties");
             return;
         }
 
