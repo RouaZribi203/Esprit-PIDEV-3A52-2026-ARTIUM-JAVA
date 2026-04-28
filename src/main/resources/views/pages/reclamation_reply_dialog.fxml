@@ -35,6 +35,7 @@
 
     <!-- Actions (Enregistrer / Fermer / +) -->
     <HBox alignment="CENTER_LEFT" spacing="12">
+        <Button fx:id="aiSuggestBtn" onAction="#onGenerateAiSuggestion" styleClass="reply-secondary" text="Suggérer IA" />
         <Button fx:id="saveBtn" onAction="#onSave" styleClass="reply-primary" text="Enregistrer" />
         <Button fx:id="cancelBtn" onAction="#onCancel" styleClass="reply-secondary" text="Fermer" />
         <HBox HBox.hgrow="ALWAYS" />

@@ -5,12 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="correction blob oeuvre livre">
-      <change beforePath="$PROJECT_DIR$/.idea/copilotDiffState.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/copilotDiffState.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/ReclamationsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/ReclamationsController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/ReclamationsArtisteController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/ReclamationsArtisteController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/Reclamations.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/Reclamations.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/artist/Reclamations.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/artist/Reclamations.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationReplyDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationReplyDialogController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/pages/reclamation_reply_dialog.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/pages/reclamation_reply_dialog.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,9 +35,9 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Class" />
         <option value="Interface" />
         <option value="FxmlFile" />
+        <option value="Class" />
       </list>
     </option>
   </component>

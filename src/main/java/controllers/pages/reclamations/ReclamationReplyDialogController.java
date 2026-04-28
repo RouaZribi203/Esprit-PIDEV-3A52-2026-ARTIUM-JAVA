@@ -1,7 +1,9 @@
 package controllers.pages.reclamations;
 
+import javafx.application.Platform;
 import services.ReclamationService;
 import services.ReponseService;
+import services.OpenRouterReclamationReplyService;
 import entities.Reclamation;
 import entities.Reponse;
 import javafx.fxml.FXML;
@@ -13,8 +15,12 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class ReclamationReplyDialogController {
+
+    private static final Logger LOGGER = Logger.getLogger(ReclamationReplyDialogController.class.getName());
 
     @FXML private Label reclamationIdLabel;
     @FXML private TextArea reclamationTexteArea;
@@ -24,15 +30,17 @@ public class ReclamationReplyDialogController {
     @FXML private Label validationErrorLabel;
 
     @FXML private Button saveBtn;
+    @FXML private Button aiSuggestBtn;
     @FXML private Button updateBtn;
     @FXML private Button deleteBtn;
     @FXML private Button cancelBtn;
 
     private final ReponseService reponseService = new ReponseService();
     private final ReclamationService reclamationService = new ReclamationService();
-
+    private final OpenRouterReclamationReplyService aiReplyService = new OpenRouterReclamationReplyService();
     private Reclamation reclamation;
     private Reponse selectedForEdit;
+    private List<Reponse> loadedHistory = new ArrayList<>();
 
     private boolean readOnly = false;
 
@@ -83,6 +91,9 @@ public class ReclamationReplyDialogController {
         addReplyField();
         updateBtn.setDisable(true);
         deleteBtn.setDisable(true);
+        if (aiSuggestBtn != null) {
+            aiSuggestBtn.setDisable(false);
+        }
     }
 
     public void setReclamation(Reclamation reclamation) {
@@ -90,6 +101,7 @@ public class ReclamationReplyDialogController {
         reclamationIdLabel.setText(reclamation.getId() != null ? String.valueOf(reclamation.getId()) : "-");
         reclamationTexteArea.setText(reclamation.getTexte() != null ? reclamation.getTexte() : "");
         loadHistory();
+        requestAiSuggestion(false);
     }
 
     /**
@@ -107,6 +119,10 @@ public class ReclamationReplyDialogController {
         if (saveBtn != null) saveBtn.setManaged(!readOnly);
         if (saveBtn != null) saveBtn.setVisible(!readOnly);
 
+        if (aiSuggestBtn != null) aiSuggestBtn.setManaged(!readOnly);
+        if (aiSuggestBtn != null) aiSuggestBtn.setVisible(!readOnly);
+        if (aiSuggestBtn != null) aiSuggestBtn.setDisable(readOnly);
+
         if (updateBtn != null) updateBtn.setManaged(!readOnly);
         if (updateBtn != null) updateBtn.setVisible(!readOnly);
         if (updateBtn != null) updateBtn.setDisable(true);
@@ -119,8 +135,8 @@ public class ReclamationReplyDialogController {
     }
 
     @FXML
-    private void onAddField() {
-        addReplyField();
+    private void onGenerateAiSuggestion() {
+        requestAiSuggestion(true);
     }
 
     private void addReplyField() {
@@ -165,10 +181,67 @@ public class ReclamationReplyDialogController {
         if (reclamation == null || reclamation.getId() == null) return;
         try {
             List<Reponse> reps = reponseService.getByReclamationId(reclamation.getId());
+            loadedHistory = reps == null ? new ArrayList<>() : new ArrayList<>(reps);
             historyList.getItems().setAll(reps);
         } catch (Exception e) {
+            loadedHistory = new ArrayList<>();
             historyList.getItems().clear();
         }
+    }
+
+    private void requestAiSuggestion(boolean overwriteExisting) {
+        if (readOnly || reclamation == null || reclamation.getId() == null) {
+            return;
+        }
+
+        TextArea target = getPrimaryReplyField();
+        if (!overwriteExisting && target != null && target.getText() != null && !target.getText().trim().isEmpty()) {
+            return;
+        }
+
+        List<Reponse> historySnapshot = new ArrayList<>(loadedHistory);
+        Thread worker = new Thread(() -> {
+            try {
+                String suggestion = aiReplyService.generateReplySuggestion(reclamation, historySnapshot);
+                if (suggestion == null || suggestion.isBlank()) {
+                    return;
+                }
+
+                Platform.runLater(() -> {
+                    if (readOnly) {
+                        return;
+                    }
+
+                    TextArea replyField = getPrimaryReplyField();
+                    if (replyField != null && (overwriteExisting || replyField.getText() == null || replyField.getText().trim().isEmpty())) {
+                        replyField.setText(suggestion);
+                        replyField.positionCaret(suggestion.length());
+                        clearValidationError();
+                    }
+                });
+            } catch (Exception e) {
+            }
+        }, "hf-reclamation-reply-suggestion");
+        worker.setDaemon(true);
+        worker.start();
+    }
+
+    private TextArea getPrimaryReplyField() {
+        if (replyFieldsBox == null || replyFieldsBox.getChildren().isEmpty()) {
+            return null;
+        }
+
+        for (var node : replyFieldsBox.getChildren()) {
+            if (node instanceof VBox wrapper) {
+                for (var child : wrapper.getChildren()) {
+                    if (child instanceof TextArea textArea) {
+                        return textArea;
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
     private void markReclamationTraite() {
