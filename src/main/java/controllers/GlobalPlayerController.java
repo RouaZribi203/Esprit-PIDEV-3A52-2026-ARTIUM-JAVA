@@ -47,6 +47,9 @@ public class GlobalPlayerController {
     private Button muteButton;
 
     @FXML
+    private Button modeToggleButton;
+
+    @FXML
     private VBox lyricsPanel;
 
     @FXML
@@ -82,6 +85,11 @@ public class GlobalPlayerController {
         });
         playPauseButton.setText(mediaPlayerService.isPlaying() ? "⏸" : "▶");
 
+        mediaPlayerService.playbackModeProperty().addListener((obs, oldMode, newMode) -> {
+            updateModeButton(newMode);
+        });
+        updateModeButton(mediaPlayerService.playbackModeProperty().get());
+
         progressSlider.valueProperty().addListener((obs, oldValue, newValue) -> {
             if (progressSlider.isPressed() || progressSlider.isValueChanging()) {
                 mediaPlayerService.seekToFraction(newValue.doubleValue());
@@ -116,6 +124,30 @@ public class GlobalPlayerController {
                 updateLyricsPanel(newTrack);
             }
         });
+    }
+
+    private void updateModeButton(GlobalMediaPlayerService.PlaybackMode mode) {
+        if (modeToggleButton == null) return;
+        String baseStyle = "-fx-padding: 0; -fx-font-size: 16px;";
+        switch (mode) {
+            case NORMAL:
+                modeToggleButton.setText("➡️");
+                modeToggleButton.setStyle(baseStyle);
+                break;
+            case SHUFFLE:
+                modeToggleButton.setText("🔀");
+                modeToggleButton.setStyle(baseStyle + " -fx-text-fill: #8e8cf5;");
+                break;
+            case SMART_SHUFFLE:
+                modeToggleButton.setText("✨");
+                modeToggleButton.setStyle(baseStyle + " -fx-text-fill: #ffd700;");
+                break;
+        }
+    }
+
+    @FXML
+    private void handleToggleMode() {
+        mediaPlayerService.togglePlaybackMode();
     }
 
     @FXML

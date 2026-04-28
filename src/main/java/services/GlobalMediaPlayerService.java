@@ -22,8 +22,13 @@ import java.io.File;
 import java.net.URI;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 public final class GlobalMediaPlayerService {
+    public enum PlaybackMode {
+        NORMAL, SHUFFLE, SMART_SHUFFLE
+    }
     private static final String XAMPP_IMAGE_DIR = "C:\\xampp\\htdocs\\img";
     private static final String XAMPP_AUDIO_DIR = "C:\\xampp\\htdocs\\audio";
     private static final String XAMPP_UPLOADS_AUDIO_DIR = "C:\\xampp\\htdocs\\uploads\\audio";
@@ -46,6 +51,10 @@ public final class GlobalMediaPlayerService {
 
     private final ObservableList<Musique> queue = FXCollections.observableArrayList();
     private int queueIndex = -1;
+    
+    private final ObjectProperty<PlaybackMode> playbackMode = new SimpleObjectProperty<>(PlaybackMode.NORMAL);
+    private int smartShuffleCounter = 0;
+    private final Random random = new Random();
 
     private MediaPlayer mediaPlayer;
 
@@ -60,6 +69,7 @@ public final class GlobalMediaPlayerService {
         if (track == null) {
             return;
         }
+        smartShuffleCounter = 0;
 
         queue.setAll(queueTracks != null ? queueTracks : List.of(track));
         if (queue.isEmpty()) {
@@ -101,7 +111,21 @@ public final class GlobalMediaPlayerService {
         if (queue.isEmpty()) {
             return;
         }
-        queueIndex = queueIndex <= 0 ? queue.size() - 1 : queueIndex - 1;
+        smartShuffleCounter = 0;
+        
+        if (playbackMode.get() == PlaybackMode.SHUFFLE) {
+            if (queue.size() > 1) {
+                int nextIndex;
+                do {
+                    nextIndex = random.nextInt(queue.size());
+                } while (nextIndex == queueIndex);
+                queueIndex = nextIndex;
+            }
+        } else {
+            // NORMAL and SMART_SHUFFLE both go sequentially backwards
+            queueIndex = queueIndex <= 0 ? queue.size() - 1 : queueIndex - 1;
+        }
+        
         Musique target = queue.get(queueIndex);
         openTrack(target, trackArtist.get(), true);
     }
@@ -110,6 +134,67 @@ public final class GlobalMediaPlayerService {
         if (queue.isEmpty()) {
             return;
         }
+
+        if (playbackMode.get() == PlaybackMode.SHUFFLE) {
+            if (queue.size() > 1) {
+                int nextIndex;
+                do {
+                    nextIndex = random.nextInt(queue.size());
+                } while (nextIndex == queueIndex);
+                queueIndex = nextIndex;
+            } else {
+                queueIndex = 0;
+            }
+            Musique target = queue.get(queueIndex);
+            openTrack(target, trackArtist.get(), true);
+            return;
+        }
+
+        if (playbackMode.get() == PlaybackMode.SMART_SHUFFLE) {
+            if (smartShuffleCounter >= 2) {
+                // Play a smart song
+                Musique current = currentTrack.get();
+                String genre = current != null && current.getGenre() != null ? current.getGenre() : "";
+                
+                try {
+                    services.MusiqueService ms = new services.MusiqueService();
+                    List<Musique> allMusics = ms.getAll();
+                    
+                    // Candidates: same genre, not currently playing, not in queue
+                    List<Musique> candidates = allMusics.stream()
+                        .filter(m -> !genre.isEmpty() ? (m.getGenre() != null && m.getGenre().equalsIgnoreCase(genre)) : true)
+                        .filter(m -> current == null || current.getId() == null || !current.getId().equals(m.getId()))
+                        .filter(m -> queue.stream().noneMatch(q -> q.getId() != null && q.getId().equals(m.getId())))
+                        .collect(Collectors.toList());
+                        
+                    if (candidates.isEmpty()) {
+                        // Fallback: any song not in queue and not currently playing
+                        candidates = allMusics.stream()
+                            .filter(m -> current == null || current.getId() == null || !current.getId().equals(m.getId()))
+                            .filter(m -> queue.stream().noneMatch(q -> q.getId() != null && q.getId().equals(m.getId())))
+                            .collect(Collectors.toList());
+                    }
+                        
+                    if (!candidates.isEmpty()) {
+                        Musique smartSong = candidates.get(random.nextInt(candidates.size()));
+                        smartShuffleCounter = 0;
+                        // Return without modifying current queueIndex
+                        openTrack(smartSong, "✨ Recommandation IA", true);
+                        return;
+                    }
+                } catch (Exception e) {
+                    System.err.println("Impossible de charger une musique smart: " + e.getMessage());
+                }
+            }
+            smartShuffleCounter++;
+            
+            queueIndex = queueIndex >= queue.size() - 1 ? 0 : queueIndex + 1;
+            Musique target = queue.get(queueIndex);
+            openTrack(target, trackArtist.get(), true);
+            return;
+        }
+
+        // NORMAL mode
         queueIndex = queueIndex >= queue.size() - 1 ? 0 : queueIndex + 1;
         Musique target = queue.get(queueIndex);
         openTrack(target, trackArtist.get(), true);
@@ -139,6 +224,22 @@ public final class GlobalMediaPlayerService {
 
     public ReadOnlyObjectProperty<Musique> currentTrackProperty() {
         return currentTrack.getReadOnlyProperty();
+    }
+
+    public ObjectProperty<PlaybackMode> playbackModeProperty() {
+        return playbackMode;
+    }
+
+    public void togglePlaybackMode() {
+        PlaybackMode current = playbackMode.get();
+        if (current == PlaybackMode.NORMAL) {
+            playbackMode.set(PlaybackMode.SHUFFLE);
+        } else if (current == PlaybackMode.SHUFFLE) {
+            playbackMode.set(PlaybackMode.SMART_SHUFFLE);
+        } else {
+            playbackMode.set(PlaybackMode.NORMAL);
+        }
+        smartShuffleCounter = 0;
     }
 
     public StringProperty trackTitleProperty() {

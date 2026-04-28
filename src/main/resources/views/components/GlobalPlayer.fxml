@@ -59,6 +59,10 @@
               HBox.hgrow="ALWAYS">
 
             <HBox alignment="CENTER" spacing="8" styleClass="global-player-controls">
+                <Button fx:id="modeToggleButton" mnemonicParsing="false" onAction="#handleToggleMode"
+                        styleClass="global-player-button" text="🔁"
+                        style="-fx-padding: 0; -fx-font-size: 16px;"
+                        minWidth="38" minHeight="38" maxWidth="38" maxHeight="38" />
                 <Button mnemonicParsing="false" onAction="#handlePrevious"
                         styleClass="global-player-button" text="⏮"
                         minWidth="36" minHeight="36" maxWidth="36" maxHeight="36" />

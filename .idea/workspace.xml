@@ -7,12 +7,9 @@
     <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="correction blob oeuvre livre">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/controllers/GlobalPlayerController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/GlobalPlayerController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/MusicfrontController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/MusicfrontController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/services/OpenRouterLyricsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/OpenRouterLyricsService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/GlobalMediaPlayerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/GlobalMediaPlayerService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/Musique.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/Musique.fxml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/views/components/GlobalPlayer.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/components/GlobalPlayer.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/artist-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/artist-theme.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/global-player.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/global-player.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -161,7 +158,7 @@
       <workItem from="1777049278154" duration="46000" />
       <workItem from="1777049333749" duration="344000" />
       <workItem from="1777053136200" duration="4482000" />
-      <workItem from="1777281541887" duration="28364000" />
+      <workItem from="1777281541887" duration="32607000" />
     </task>
     <task id="LOCAL-00001" summary="corrections de blob">
       <option name="closed" value="true" />

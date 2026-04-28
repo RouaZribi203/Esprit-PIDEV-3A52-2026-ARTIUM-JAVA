@@ -73,56 +73,56 @@
                 </VBox>
             </VBox>
 
-            <VBox fx:id="playlistsSection" spacing="10.0" visible="false" managed="false">
-                <Label text="Mes playlists" />
+            <VBox fx:id="playlistsSection" spacing="16.0" visible="false" managed="false">
+                <Label style="-fx-font-size: 20px; -fx-font-weight: 800; -fx-text-fill: white;" text="Mes Playlists" />
 
-                <VBox fx:id="aiPlaylistSection" spacing="10.0" style="-fx-background-color: rgba(139,92,246,0.08); -fx-background-radius: 8; -fx-padding: 12; -fx-border-color: rgba(139,92,246,0.3); -fx-border-radius: 8;">
+                <VBox fx:id="aiPlaylistSection" spacing="12.0" style="-fx-background-color: linear-gradient(to right, rgba(139,92,246,0.1), rgba(61,59,194,0.1)); -fx-background-radius: 12; -fx-padding: 18; -fx-border-color: rgba(139,92,246,0.25); -fx-border-radius: 12; -fx-effect: dropshadow(gaussian, rgba(139,92,246,0.1), 10, 0, 0, 4);">
                     <HBox alignment="CENTER_LEFT" spacing="10.0">
-                        <Label style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;" text="🤖 Générer avec IA" />
+                        <Label style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: 800;" text="🤖 Générer avec l'IA" />
                         <Region HBox.hgrow="ALWAYS" />
                     </HBox>
-                    <Label style="-fx-text-fill: #cbd5e1;" text="Décrivez le type de musique que vous cherchez et l'IA créera une playlist personnalisée." wrapText="true" />
-                    <HBox spacing="10.0">
-                        <TextField fx:id="aiPlaylistPromptField" HBox.hgrow="ALWAYS" promptText="Ex: Musique énergique pour l'entraînement, chansons romantiques pour faire la cuisine..." />
-                        <Button fx:id="generatePlaylistButton" mnemonicParsing="false" onAction="#handleGeneratePlaylistWithAI" text="Générer" />
+                    <Label style="-fx-text-fill: #b3b9c5; -fx-font-size: 13px;" text="Décrivez l'ambiance, le genre ou l'activité, et l'IA créera une playlist sur mesure." wrapText="true" />
+                    <HBox spacing="12.0">
+                        <TextField fx:id="aiPlaylistPromptField" HBox.hgrow="ALWAYS" style="-fx-background-color: rgba(255,255,255,0.06); -fx-text-fill: white; -fx-prompt-text-fill: #64748b; -fx-padding: 10 14; -fx-background-radius: 8; -fx-border-color: rgba(255,255,255,0.1); -fx-border-radius: 8;" promptText="Ex: Musique énergique pour l'entraînement, chansons douces pour étudier..." />
+                        <Button fx:id="generatePlaylistButton" mnemonicParsing="false" onAction="#handleGeneratePlaylistWithAI" style="-fx-background-color: #8b5cf6; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 8; -fx-cursor: hand;" text="Générer" />
                     </HBox>
-                    <Label fx:id="aiPlaylistStatusLabel" styleClass="page-caption" text="Prêt à générer votre playlist" wrapText="true" />
+                    <Label fx:id="aiPlaylistStatusLabel" style="-fx-text-fill: #a78bfa; -fx-font-size: 12px; -fx-font-style: italic;" text="Prêt à générer votre playlist" wrapText="true" />
                 </VBox>
 
                 <HBox spacing="10.0">
-                    <Button fx:id="togglePlaylistFormButton" mnemonicParsing="false" onAction="#handleTogglePlaylistForm" text="Nouvelle playlist" />
+                    <Button fx:id="togglePlaylistFormButton" mnemonicParsing="false" onAction="#handleTogglePlaylistForm" style="-fx-background-color: rgba(255,255,255,0.1); -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 16; -fx-background-radius: 8; -fx-cursor: hand;" text="+ Nouvelle playlist" />
                 </HBox>
 
-                <VBox fx:id="playlistDetailSection" spacing="8.0" visible="false" managed="false" style="-fx-background-color: rgba(255,255,255,0.04); -fx-background-radius: 8; -fx-padding: 12;">
-                    <HBox spacing="10.0">
-                        <VBox spacing="2.0" HBox.hgrow="ALWAYS">
-                            <Label fx:id="playlistDetailTitleLabel" style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;" text="Aucune playlist sélectionnée" />
-                            <Label fx:id="playlistDetailMetaLabel" style="-fx-text-fill: #cbd5e1;" text="Cliquez sur une playlist pour voir ses musiques." wrapText="true" />
+                <VBox fx:id="playlistDetailSection" spacing="12.0" visible="false" managed="false" style="-fx-background-color: rgba(255,255,255,0.03); -fx-background-radius: 12; -fx-padding: 16; -fx-border-color: rgba(255,255,255,0.05); -fx-border-radius: 12;">
+                    <HBox spacing="12.0" alignment="CENTER_LEFT">
+                        <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                            <Label fx:id="playlistDetailTitleLabel" style="-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;" text="Aucune playlist sélectionnée" />
+                            <Label fx:id="playlistDetailMetaLabel" style="-fx-text-fill: #94a3b8; -fx-font-size: 12px;" text="Cliquez sur une playlist pour voir ses musiques." wrapText="true" />
                         </VBox>
-                        <Button mnemonicParsing="false" onAction="#handleEditSelectedPlaylist" text="Modifier" />
-                        <Button mnemonicParsing="false" onAction="#handleDeleteSelectedPlaylist" text="Supprimer" />
-                        <Button fx:id="closePlaylistDetailButton" mnemonicParsing="false" onAction="#handleClosePlaylistDetail" text="Fermer" />
+                        <Button mnemonicParsing="false" onAction="#handleEditSelectedPlaylist" style="-fx-background-color: rgba(59, 130, 246, 0.2); -fx-text-fill: #60a5fa; -fx-background-radius: 6; -fx-padding: 6 12; -fx-cursor: hand;" text="Modifier" />
+                        <Button mnemonicParsing="false" onAction="#handleDeleteSelectedPlaylist" style="-fx-background-color: rgba(239, 68, 68, 0.2); -fx-text-fill: #f87171; -fx-background-radius: 6; -fx-padding: 6 12; -fx-cursor: hand;" text="Supprimer" />
+                        <Button fx:id="closePlaylistDetailButton" mnemonicParsing="false" onAction="#handleClosePlaylistDetail" style="-fx-background-color: rgba(255, 255, 255, 0.1); -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 6 12; -fx-cursor: hand;" text="✕" />
                     </HBox>
 
-                    <Label fx:id="playlistSongsEmptyLabel" styleClass="page-caption" text="Aucune musique dans cette playlist." wrapText="true" />
+                    <Label fx:id="playlistSongsEmptyLabel" style="-fx-text-fill: #94a3b8; -fx-font-size: 13px;" text="Aucune musique dans cette playlist." wrapText="true" />
                     <VBox fx:id="playlistSongsBox" spacing="8.0" />
                 </VBox>
 
-                <VBox fx:id="playlistFormSection" spacing="10.0" style="-fx-background-color: rgba(255,255,255,0.04); -fx-background-radius: 8; -fx-padding: 12;" visible="false" managed="false">
-                    <Label text="Créer une playlist" />
-                    <TextField fx:id="playlistNameField" promptText="Nom de la playlist" />
-                    <TextArea fx:id="playlistDescriptionArea" prefRowCount="3" promptText="Description (facultative)" wrapText="true" />
+                <VBox fx:id="playlistFormSection" spacing="12.0" style="-fx-background-color: rgba(255,255,255,0.03); -fx-background-radius: 12; -fx-padding: 16; -fx-border-color: rgba(255,255,255,0.05); -fx-border-radius: 12;" visible="false" managed="false">
+                    <Label style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;" text="Créer une nouvelle playlist" />
+                    <TextField fx:id="playlistNameField" style="-fx-background-color: rgba(255,255,255,0.06); -fx-text-fill: white; -fx-prompt-text-fill: #64748b; -fx-padding: 10; -fx-background-radius: 8;" promptText="Nom de la playlist" />
+                    <TextArea fx:id="playlistDescriptionArea" prefRowCount="3" style="-fx-background-color: rgba(255,255,255,0.06); -fx-text-fill: white; -fx-prompt-text-fill: #64748b; -fx-padding: 10; -fx-background-radius: 8;" promptText="Description (facultative)" wrapText="true" />
                     <HBox spacing="10.0">
-                        <TextField fx:id="playlistImageField" editable="false" HBox.hgrow="ALWAYS" promptText="Image de couverture" />
-                        <Button mnemonicParsing="false" onAction="#handleChoosePlaylistImage" text="Parcourir" />
+                        <TextField fx:id="playlistImageField" editable="false" HBox.hgrow="ALWAYS" style="-fx-background-color: rgba(255,255,255,0.06); -fx-text-fill: white; -fx-prompt-text-fill: #64748b; -fx-padding: 10; -fx-background-radius: 8;" promptText="Image de couverture" />
+                        <Button mnemonicParsing="false" onAction="#handleChoosePlaylistImage" style="-fx-background-color: rgba(255,255,255,0.1); -fx-text-fill: white; -fx-padding: 10 16; -fx-background-radius: 8; -fx-cursor: hand;" text="Parcourir" />
                     </HBox>
-                    <Button fx:id="createPlaylistButton" mnemonicParsing="false" onAction="#handleCreatePlaylist" text="Créer la playlist" />
+                    <Button fx:id="createPlaylistButton" mnemonicParsing="false" onAction="#handleCreatePlaylist" style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 8; -fx-cursor: hand;" text="Créer la playlist" />
                 </VBox>
 
-                <Label fx:id="playlistFeedbackLabel" wrapText="true" />
-                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="430.0" styleClass="amateur-scroll">
+                <Label fx:id="playlistFeedbackLabel" style="-fx-text-fill: #10b981; -fx-font-size: 13px;" wrapText="true" />
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="430.0" styleClass="amateur-scroll, amateur-events-scroll">
                     <content>
-                        <TilePane fx:id="playlistGrid" hgap="12.0" prefColumns="3" vgap="12.0" />
+                        <TilePane fx:id="playlistGrid" hgap="16.0" prefColumns="3" vgap="16.0" />
                     </content>
                 </ScrollPane>
             </VBox>
