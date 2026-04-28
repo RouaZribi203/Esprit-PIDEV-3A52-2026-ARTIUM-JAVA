@@ -228,6 +228,16 @@ public class ReclamationsArtisteController implements Initializable {
 
 		try {
 			reclamationService.add(r);
+			
+			// Envoi d'un email à l'administrateur
+			entities.User currentUser = utils.UserSession.getCurrentUser();
+			String userName = currentUser != null ? currentUser.getPrenom() + " " + currentUser.getNom() : "Inconnu (ID: " + userId + ")";
+			String emailSubject = "Nouvelle réclamation (" + type + ")";
+			String emailContent = "L'utilisateur " + userName + " a soumis une nouvelle réclamation.\n\n"
+					+ "Type: " + type + "\n"
+					+ "Description: \n" + description;
+			utils.EmailUtil.sendEmailToAdmin(emailSubject, emailContent);
+			
 			showInfo("Réclamation envoyée", "Votre réclamation a été envoyée avec succès.");
 			onReset(event);
 			clearSendValidation();

@@ -103,6 +103,8 @@ public class MainFX extends Application {
         primaryStage.setMinWidth(1100);
         primaryStage.setMinHeight(650);
         switchToAuthLandingView();
+
+
     }
 
     private User createDevUser(int id, String prenom, String nom, String role, String Mdp) {

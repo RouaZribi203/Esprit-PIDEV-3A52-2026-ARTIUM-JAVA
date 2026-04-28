@@ -110,4 +110,8 @@ public class NavbarArtisteController {
             throw new IllegalStateException("Failed to switch scene: " + fxmlPath, e);
         }
     }
+
 }
+
+
+

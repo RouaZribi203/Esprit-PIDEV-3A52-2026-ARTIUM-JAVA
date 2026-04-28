@@ -170,6 +170,5 @@ public class NavbarAmateurController {
             throw new IllegalStateException("Failed to switch scene: " + fxmlPath, e);
         }
     }
+
 }
-
-

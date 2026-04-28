@@ -10,30 +10,43 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.awt.SystemTray;
+import java.awt.TrayIcon;
+import java.awt.TrayIcon.MessageType;
+import java.awt.image.BufferedImage;
 
 public class ReclamationReplyDialogController {
 
     private static final Logger LOGGER = Logger.getLogger(ReclamationReplyDialogController.class.getName());
 
-    @FXML private Label reclamationIdLabel;
-    @FXML private TextArea reclamationTexteArea;
-    @FXML private ListView<Reponse> historyList;
+    @FXML
+    private Label reclamationIdLabel;
+    @FXML
+    private TextArea reclamationTexteArea;
+    @FXML
+    private ListView<Reponse> historyList;
 
-    @FXML private VBox replyFieldsBox;
-    @FXML private Label validationErrorLabel;
+    @FXML
+    private VBox replyFieldsBox;
+    @FXML
+    private Label validationErrorLabel;
 
-    @FXML private Button saveBtn;
-    @FXML private Button aiSuggestBtn;
-    @FXML private Button updateBtn;
-    @FXML private Button deleteBtn;
-    @FXML private Button cancelBtn;
+    @FXML
+    private Button saveBtn;
+    @FXML
+    private Button aiSuggestBtn;
+    @FXML
+    private Button updateBtn;
+    @FXML
+    private Button deleteBtn;
+    @FXML
+    private Button cancelBtn;
 
     private final ReponseService reponseService = new ReponseService();
     private final ReclamationService reclamationService = new ReclamationService();
@@ -50,8 +63,9 @@ public class ReclamationReplyDialogController {
 
     private static boolean isBlankOrTooShort(String value) {
         String v = value == null ? "" : value.trim();
-        if (v.isEmpty()) return true;
-        // on compte les caractères hors espaces pour éviter "          "
+        if (v.isEmpty())
+            return true;
+        // on compte les caractères hors espaces pour éviter " "
         String noSpaces = v.replaceAll("\\s+", "");
         return noSpaces.length() < MIN_REPONSE_LEN;
     }
@@ -81,7 +95,8 @@ public class ReclamationReplyDialogController {
         });
 
         historyList.setOnMouseClicked(e -> {
-            if (readOnly) return;
+            if (readOnly)
+                return;
             if (e.getClickCount() == 2 && historyList.getSelectionModel().getSelectedItem() != null) {
                 selectedForEdit = historyList.getSelectionModel().getSelectedItem();
                 fillEditField(selectedForEdit);
@@ -116,22 +131,34 @@ public class ReclamationReplyDialogController {
             replyFieldsBox.setManaged(!readOnly);
             replyFieldsBox.setVisible(!readOnly);
         }
-        if (saveBtn != null) saveBtn.setManaged(!readOnly);
-        if (saveBtn != null) saveBtn.setVisible(!readOnly);
+        if (saveBtn != null)
+            saveBtn.setManaged(!readOnly);
+        if (saveBtn != null)
+            saveBtn.setVisible(!readOnly);
 
-        if (aiSuggestBtn != null) aiSuggestBtn.setManaged(!readOnly);
-        if (aiSuggestBtn != null) aiSuggestBtn.setVisible(!readOnly);
-        if (aiSuggestBtn != null) aiSuggestBtn.setDisable(readOnly);
+        if (aiSuggestBtn != null)
+            aiSuggestBtn.setManaged(!readOnly);
+        if (aiSuggestBtn != null)
+            aiSuggestBtn.setVisible(!readOnly);
+        if (aiSuggestBtn != null)
+            aiSuggestBtn.setDisable(readOnly);
 
-        if (updateBtn != null) updateBtn.setManaged(!readOnly);
-        if (updateBtn != null) updateBtn.setVisible(!readOnly);
-        if (updateBtn != null) updateBtn.setDisable(true);
+        if (updateBtn != null)
+            updateBtn.setManaged(!readOnly);
+        if (updateBtn != null)
+            updateBtn.setVisible(!readOnly);
+        if (updateBtn != null)
+            updateBtn.setDisable(true);
 
-        if (deleteBtn != null) deleteBtn.setManaged(!readOnly);
-        if (deleteBtn != null) deleteBtn.setVisible(!readOnly);
-        if (deleteBtn != null) deleteBtn.setDisable(true);
+        if (deleteBtn != null)
+            deleteBtn.setManaged(!readOnly);
+        if (deleteBtn != null)
+            deleteBtn.setVisible(!readOnly);
+        if (deleteBtn != null)
+            deleteBtn.setDisable(true);
 
-        if (reclamationTexteArea != null) reclamationTexteArea.setEditable(false);
+        if (reclamationTexteArea != null)
+            reclamationTexteArea.setEditable(false);
     }
 
     @FXML
@@ -152,7 +179,8 @@ public class ReclamationReplyDialogController {
     }
 
     private void fillEditField(Reponse rep) {
-        if (rep == null) return;
+        if (rep == null)
+            return;
         clearValidationError();
 
         if (replyFieldsBox.getChildren().isEmpty()) {
@@ -178,7 +206,8 @@ public class ReclamationReplyDialogController {
     }
 
     private void loadHistory() {
-        if (reclamation == null || reclamation.getId() == null) return;
+        if (reclamation == null || reclamation.getId() == null)
+            return;
         try {
             List<Reponse> reps = reponseService.getByReclamationId(reclamation.getId());
             loadedHistory = reps == null ? new ArrayList<>() : new ArrayList<>(reps);
@@ -213,7 +242,8 @@ public class ReclamationReplyDialogController {
                     }
 
                     TextArea replyField = getPrimaryReplyField();
-                    if (replyField != null && (overwriteExisting || replyField.getText() == null || replyField.getText().trim().isEmpty())) {
+                    if (replyField != null && (overwriteExisting || replyField.getText() == null
+                            || replyField.getText().trim().isEmpty())) {
                         replyField.setText(suggestion);
                         replyField.positionCaret(suggestion.length());
                         clearValidationError();
@@ -245,7 +275,8 @@ public class ReclamationReplyDialogController {
     }
 
     private void markReclamationTraite() {
-        if (reclamation == null || reclamation.getId() == null) return;
+        if (reclamation == null || reclamation.getId() == null)
+            return;
         try {
             // Update only statut to avoid failing because of other columns
             reclamationService.updateStatutById(reclamation.getId(), "Traitée");
@@ -255,7 +286,8 @@ public class ReclamationReplyDialogController {
     }
 
     private void syncStatutWithReponses() {
-        if (reclamation == null || reclamation.getId() == null) return;
+        if (reclamation == null || reclamation.getId() == null)
+            return;
         try {
             List<Reponse> reps = reponseService.getByReclamationId(reclamation.getId());
             boolean hasReps = reps != null && !reps.isEmpty();
@@ -281,7 +313,8 @@ public class ReclamationReplyDialogController {
                     if (child instanceof TextArea ta) {
                         String txt = ta.getText() == null ? "" : ta.getText();
                         // Ne pas ajouter les réponses vides (espaces) dans la liste
-                        if (!txt.trim().isEmpty()) contenus.add(txt.trim());
+                        if (!txt.trim().isEmpty())
+                            contenus.add(txt.trim());
                     }
                 }
             }
@@ -289,7 +322,8 @@ public class ReclamationReplyDialogController {
 
         for (String c : contenus) {
             if (isBlankOrTooShort(c)) {
-                showValidationError("La reponse ne peut pas etre vide et doit contenir au moins " + MIN_REPONSE_LEN + " caracteres.");
+                showValidationError("La reponse ne peut pas etre vide et doit contenir au moins " + MIN_REPONSE_LEN
+                        + " caracteres.");
                 return;
             }
             if (isTooLong(c)) {
@@ -297,7 +331,6 @@ public class ReclamationReplyDialogController {
                 return;
             }
         }
-
 
         if (contenus.isEmpty()) {
             showValidationError("Veuillez saisir une reponse avant d'enregistrer.");
@@ -311,10 +344,14 @@ public class ReclamationReplyDialogController {
                 r.setContenu(c);
                 r.setDateReponse(LocalDate.now());
                 reponseService.add(r);
+
             }
 
             markReclamationTraite();
             clearValidationError();
+
+            // Envoyer une notification push à l'utilisateur
+            sendPushNotification(reclamation);
 
             close();
         } catch (Exception e) {
@@ -349,7 +386,8 @@ public class ReclamationReplyDialogController {
 
         String newText = ta.getText() == null ? "" : ta.getText();
         if (isBlankOrTooShort(newText)) {
-            showValidationError("La reponse ne peut pas etre vide et doit contenir au moins " + MIN_REPONSE_LEN + " caracteres.");
+            showValidationError(
+                    "La reponse ne peut pas etre vide et doit contenir au moins " + MIN_REPONSE_LEN + " caracteres.");
             return;
         }
         if (isTooLong(newText)) {
@@ -364,6 +402,9 @@ public class ReclamationReplyDialogController {
             loadHistory();
 
             markReclamationTraite();
+
+            // Envoyer une notification push à l'utilisateur
+            sendPushNotification(reclamation);
 
             selectedForEdit = null;
             updateBtn.setDisable(true);
@@ -408,12 +449,12 @@ public class ReclamationReplyDialogController {
         confirm.setHeaderText("Supprimer cette reponse ?");
         confirm.setContentText("Cette action est irreversible.");
 
-        if (confirm.showAndWait().orElse(cancelButton) != deleteButton) return;
+        if (confirm.showAndWait().orElse(cancelButton) != deleteButton)
+            return;
 
         try {
             reponseService.deleteById(selected.getId());
             loadHistory();
-
 
             syncStatutWithReponses();
 
@@ -445,7 +486,65 @@ public class ReclamationReplyDialogController {
         a.setContentText(message);
         a.showAndWait();
     }
+
+    private void sendPushNotification(Reclamation reclamation) {
+        if (SystemTray.isSupported()) {
+            try {
+                SystemTray tray = SystemTray.getSystemTray();
+                java.awt.Image image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+                TrayIcon trayIcon = new TrayIcon(image, "Notification Artium");
+                trayIcon.setImageAutoSize(true);
+                trayIcon.setToolTip("Notification");
+                tray.add(trayIcon);
+
+                entities.User user = null;
+                try {
+                    user = new services.JdbcUserService().getById(reclamation.getUserId());
+                } catch (Exception ex) {
+                }
+
+                String roleText = "";
+                String userName = "";
+                if (user != null) {
+                    String role = user.getRole() != null ? user.getRole().toLowerCase() : "";
+                    userName = (user.getNom() + " " + user.getPrenom()).trim();
+                    if (role.contains("artiste")) {
+                        roleText = "l'artiste :";
+                    } else {
+                        roleText = "l'amateur :";
+                    }
+                }
+
+                String message = "reponse a la reclamation de " + roleText + userName;
+                trayIcon.displayMessage("Réponse à votre réclamation", message, MessageType.INFO);
+
+                final entities.User finalUser = user;
+                trayIcon.addActionListener(e -> {
+                    if (finalUser != null) {
+                        javafx.application.Platform.runLater(() -> {
+                            String role = finalUser.getRole() != null ? finalUser.getRole().toLowerCase() : "";
+                            utils.SessionManager.setCurrentUser(finalUser);
+                            if (role.contains("artiste")) {
+                                controllers.MainFX.switchToArtistView(finalUser);
+                            } else {
+                                controllers.MainFX.switchToAmateurView(finalUser);
+                            }
+                        });
+                    }
+                });
+
+                // Retirer l'icône après l'affichage pour éviter l'encombrement
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(8000);
+                        tray.remove(trayIcon);
+                    } catch (InterruptedException e) {
+                        // ignore
+                    }
+                }).start();
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Erreur lors de l'envoi de la notification push", e);
+            }
+        }
+    }
 }
-
-
-

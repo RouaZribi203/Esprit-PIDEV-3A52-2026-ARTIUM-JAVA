@@ -17,6 +17,7 @@
 .amateur-left-sidebar {
     -fx-background-color: transparent;
 }
+
 .amateur-root {
     -fx-font-family: "Segoe UI", Arial, sans-serif;
     -fx-background-color: #eaf3ff;
@@ -27,7 +28,7 @@
 }
 
 .amateur-root .scroll-pane,
-.amateur-root .scroll-pane > .viewport,
+.amateur-root .scroll-pane>.viewport,
 .amateur-root .scroll-pane .content,
 .amateur-shell,
 .amateur-page-host,
@@ -85,8 +86,8 @@
     -fx-border-color: #bcc6d8;
 }
 
-.avatar-menu > .arrow-button,
-.avatar-menu > .arrow-button > .arrow {
+.avatar-menu>.arrow-button,
+.avatar-menu>.arrow-button>.arrow {
     -fx-padding: 0;
     -fx-background-insets: 0;
     -fx-background-color: transparent;
@@ -98,7 +99,7 @@
     -fx-padding: 9 14 9 14;
 }
 
-.context-menu .menu-item.avatar-dropdown-item > .label {
+.context-menu .menu-item.avatar-dropdown-item>.label {
     -fx-text-fill: #243146;
     -fx-font-size: 13px;
     -fx-font-weight: 700;
@@ -109,7 +110,7 @@
     -fx-background-color: #eef2ff;
 }
 
-.context-menu .menu-item#logoutMenuItem > .label {
+.context-menu .menu-item#logoutMenuItem>.label {
     -fx-text-fill: #a6324a;
 }
 
@@ -216,7 +217,7 @@
 
 
 .amateur-events-scroll,
-.amateur-events-scroll > .viewport {
+.amateur-events-scroll>.viewport {
     -fx-background-color: transparent;
 }
 
@@ -521,7 +522,7 @@
 }
 
 .event-detail-scroll,
-.event-detail-scroll > .viewport {
+.event-detail-scroll>.viewport {
     -fx-background-color: transparent;
 }
 
@@ -681,7 +682,7 @@
 }
 
 .oeuvres-feed-scroll,
-.oeuvres-feed-scroll > .viewport {
+.oeuvres-feed-scroll>.viewport {
     -fx-background-color: transparent;
 }
 
@@ -1006,4 +1007,3 @@
 .oeuvre-post-comment-action.danger {
     -fx-text-fill: #dc2626;
 }
-

@@ -24,7 +24,7 @@ public class OpenRouterReclamationReplyService {
 
     // 🔑 MET TON API KEY ICI
     private static final String API_KEY =
-            "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";
+            "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";
 
     private final HttpClient httpClient;
 
