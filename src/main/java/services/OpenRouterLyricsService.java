@@ -21,8 +21,8 @@ import java.util.regex.Pattern;
 import utils.TranscriptionService;
 
 public class OpenRouterLyricsService {
-    private static final String DEFAULT_MODEL = "inclusionai/ling-2.6-1t:free";
-    private static final String ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
+    private static final String DEFAULT_MODEL = "llama-3.1-8b-instant";
+    private static final String ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
     private static final String DEFAULT_CONFIG_PATH = "config/openrouter.properties";
     private static final Pattern CONTENT_PATTERN = Pattern.compile("\"content\"\\s*:\\s*\"((?:\\\\.|[^\"\\\\])*)\"", Pattern.DOTALL);
     private static final Pattern MESSAGE_PATTERN = Pattern.compile("\"message\"\\s*:\\s*\"((?:\\\\.|[^\"\\\\])*)\"", Pattern.DOTALL);
@@ -71,7 +71,9 @@ public class OpenRouterLyricsService {
 
         String content = extractContent(response.body());
         if (content == null || content.isBlank()) {
-            throw new IllegalStateException("OpenRouter n'a pas renvoyé de paroles.");
+            String responseBody = response.body();
+            System.err.println("API RAW RESPONSE: " + responseBody);
+            throw new IllegalStateException("L'IA n'a pas renvoyé de paroles. Réponse: " + (responseBody.length() > 200 ? responseBody.substring(0, 200) + "..." : responseBody));
         }
         return content.trim();
     }
@@ -79,15 +81,19 @@ public class OpenRouterLyricsService {
     private String resolveApiKey() {
         Properties config = loadConfig();
 
-        String apiKey = config.getProperty("openrouter.apiKey");
+        String apiKey = config.getProperty("groq.apiKey");
         if (apiKey == null || apiKey.isBlank()) {
-            apiKey = System.getProperty("openrouter.apiKey");
+            apiKey = System.getProperty("groq.apiKey");
         }
         if (apiKey == null || apiKey.isBlank()) {
-            apiKey = System.getenv("OPENROUTER_API_KEY");
+            apiKey = System.getenv("GROQ_API_KEY");
         }
         if (apiKey == null || apiKey.isBlank()) {
-            throw new IllegalStateException("Clé OpenRouter manquante. Ajoutez-la dans config/openrouter.properties ou définissez OPENROUTER_API_KEY.");
+            // Fallback to openrouter key if groq is missing
+            apiKey = config.getProperty("openrouter.apiKey");
+            if (apiKey == null || apiKey.isBlank()) {
+                throw new IllegalStateException("Clé API manquante. Ajoutez groq.apiKey dans config/openrouter.properties.");
+            }
         }
         return apiKey.trim();
     }
@@ -95,15 +101,19 @@ public class OpenRouterLyricsService {
     private String resolveModel() {
         Properties config = loadConfig();
 
-        String model = config.getProperty("openrouter.model");
+        String model = config.getProperty("groq.model");
         if (model == null || model.isBlank()) {
-            model = System.getProperty("openrouter.model");
+            model = System.getProperty("groq.model");
         }
         if (model == null || model.isBlank()) {
-            model = System.getenv("OPENROUTER_MODEL");
+            model = System.getenv("GROQ_MODEL");
         }
         if (model == null || model.isBlank()) {
-            model = DEFAULT_MODEL;
+            // Check if openrouter model is set, otherwise default
+            model = config.getProperty("openrouter.model");
+            if (model == null || model.isBlank() || model.contains("free")) {
+                model = DEFAULT_MODEL;
+            }
         }
         return model.trim();
     }
@@ -176,12 +186,40 @@ public class OpenRouterLyricsService {
             return null;
         }
 
+        // Use string search instead of regex to avoid StackOverflowError on huge text
+        String searchStr = "\"content\":";
+        int idx = responseBody.indexOf(searchStr);
+        while (idx != -1) {
+            int quoteStart = responseBody.indexOf("\"", idx + searchStr.length());
+            if (quoteStart != -1) {
+                int quoteEnd = responseBody.indexOf("\"", quoteStart + 1);
+                while (quoteEnd != -1 && responseBody.charAt(quoteEnd - 1) == '\\') {
+                    quoteEnd = responseBody.indexOf("\"", quoteEnd + 1);
+                }
+                
+                if (quoteEnd != -1) {
+                    String raw = responseBody.substring(quoteStart + 1, quoteEnd);
+                    // Check if it's not the system message echoing prompt
+                    if (!raw.contains("You are a song writing assistant") && raw.length() > 20) {
+                        String unescaped = unescapeJson(raw);
+                        if (unescaped != null && !unescaped.isBlank()) {
+                            return unescaped;
+                        }
+                    }
+                }
+            }
+            idx = responseBody.indexOf(searchStr, idx + searchStr.length());
+        }
+
+        // Fallback to regex
         Matcher matcher = CONTENT_PATTERN.matcher(responseBody);
         while (matcher.find()) {
             String raw = matcher.group(1);
-            String unescaped = unescapeJson(raw);
-            if (unescaped != null && !unescaped.isBlank()) {
-                return unescaped;
+            if (!raw.contains("You are a song writing assistant")) {
+                String unescaped = unescapeJson(raw);
+                if (unescaped != null && !unescaped.isBlank()) {
+                    return unescaped;
+                }
             }
         }
         return null;

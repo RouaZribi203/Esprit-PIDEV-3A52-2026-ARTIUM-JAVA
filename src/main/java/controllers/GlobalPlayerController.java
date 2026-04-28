@@ -4,8 +4,15 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.VBox;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
+import javafx.concurrent.Task;
 import services.GlobalMediaPlayerService;
+import services.OpenRouterLyricsService;
+import entities.Musique;
 
 public class GlobalPlayerController {
 
@@ -39,7 +46,27 @@ public class GlobalPlayerController {
     @FXML
     private Button muteButton;
 
+    @FXML
+    private VBox lyricsPanel;
+
+    @FXML
+    private Label lyricsStatusLabel;
+
+    @FXML
+    private Button generateLyricsButton;
+
+    @FXML
+    private Button copyLyricsButton;
+
+    @FXML
+    private TextArea lyricsTextArea;
+
+    @FXML
+    private Button lyricsToggleButton;
+
     private final GlobalMediaPlayerService mediaPlayerService = GlobalMediaPlayerService.getInstance();
+    private final OpenRouterLyricsService lyricsService = new OpenRouterLyricsService();
+    private boolean lyricsLoading = false;
 
     @FXML
     public void initialize() {
@@ -83,6 +110,12 @@ public class GlobalPlayerController {
                 muteButton.setText(newV ? "🔇" : "🔊");
             });
         }
+
+        mediaPlayerService.currentTrackProperty().addListener((obs, oldTrack, newTrack) -> {
+            if (lyricsPanel != null && lyricsPanel.isVisible()) {
+                updateLyricsPanel(newTrack);
+            }
+        });
     }
 
     @FXML
@@ -126,6 +159,102 @@ public class GlobalPlayerController {
             return (minutes * 60.0) + seconds;
         } catch (NumberFormatException ignored) {
             return 0.0;
+        }
+    }
+
+    @FXML
+    private void handleToggleLyrics() {
+        if (lyricsPanel == null) return;
+        boolean isVisible = !lyricsPanel.isVisible();
+        lyricsPanel.setVisible(isVisible);
+        lyricsPanel.setManaged(isVisible);
+        
+        if (isVisible) {
+            lyricsToggleButton.setStyle("-fx-background-color: #3d3bc2; -fx-text-fill: white;");
+            updateLyricsPanel(mediaPlayerService.getCurrentTrack());
+        } else {
+            lyricsToggleButton.setStyle("");
+        }
+    }
+
+    @FXML
+    private void handleGenerateLyrics() {
+        Musique track = mediaPlayerService.getCurrentTrack();
+        if (track == null) {
+            setLyricsStatus("Aucune musique en cours de lecture.");
+            return;
+        }
+        if (lyricsLoading) {
+            setLyricsStatus("Génération en cours, veuillez patienter...");
+            return;
+        }
+
+        lyricsLoading = true;
+        setLyricsStatus("Génération des paroles en cours...");
+        generateLyricsButton.setDisable(true);
+        copyLyricsButton.setDisable(true);
+        lyricsTextArea.setText("L'intelligence artificielle écrit les paroles...");
+
+        Task<String> task = new Task<>() {
+            @Override
+            protected String call() {
+                return lyricsService.generateLyrics(track);
+            }
+        };
+
+        task.setOnSucceeded(event -> {
+            lyricsLoading = false;
+            lyricsTextArea.setText(task.getValue());
+            setLyricsStatus("Paroles générées avec succès.");
+            generateLyricsButton.setDisable(false);
+            copyLyricsButton.setDisable(false);
+        });
+
+        task.setOnFailed(event -> {
+            lyricsLoading = false;
+            Throwable error = task.getException();
+            lyricsTextArea.setText("Impossible de générer les paroles.");
+            setLyricsStatus(error != null && error.getMessage() != null ? error.getMessage() : "Erreur.");
+            generateLyricsButton.setDisable(false);
+            copyLyricsButton.setDisable(false);
+        });
+
+        Thread worker = new Thread(task, "openrouter-lyrics-generator");
+        worker.setDaemon(true);
+        worker.start();
+    }
+
+    @FXML
+    private void handleCopyLyrics() {
+        if (lyricsTextArea == null || lyricsTextArea.getText() == null || lyricsTextArea.getText().isBlank()) {
+            setLyricsStatus("Aucune parole à copier.");
+            return;
+        }
+        ClipboardContent content = new ClipboardContent();
+        content.putString(lyricsTextArea.getText());
+        Clipboard.getSystemClipboard().setContent(content);
+        setLyricsStatus("Paroles copiées dans le presse-papiers.");
+    }
+
+    private void updateLyricsPanel(Musique track) {
+        if (track == null) {
+            lyricsTextArea.setText("Aucune piste en cours.");
+            setLyricsStatus("Lancez une musique pour générer les paroles.");
+            generateLyricsButton.setDisable(true);
+            copyLyricsButton.setDisable(true);
+        } else {
+            if (!lyricsLoading) {
+                lyricsTextArea.setText("Cliquez sur Générer pour créer des paroles pour ce morceau.");
+                setLyricsStatus("Prêt à générer.");
+                generateLyricsButton.setDisable(false);
+                copyLyricsButton.setDisable(true);
+            }
+        }
+    }
+
+    private void setLyricsStatus(String text) {
+        if (lyricsStatusLabel != null) {
+            lyricsStatusLabel.setText(text);
         }
     }
 }

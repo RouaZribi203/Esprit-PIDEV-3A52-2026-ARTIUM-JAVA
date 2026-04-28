@@ -1161,23 +1161,24 @@ public class MusicfrontController {
 		card.setMinWidth(PLAYLIST_CARD_WIDTH);
 		card.setPrefWidth(PLAYLIST_CARD_WIDTH);
 		card.setMaxWidth(PLAYLIST_CARD_WIDTH);
-		card.setStyle("-fx-background-color: #212529; -fx-background-radius: 8; -fx-padding: 8;");
+		card.getStyleClass().add("music-card");
 
 		Node coverNode = buildPlaylistCoverNode(playlist.getImage());
 		Label nameLabel = new Label(safePlaylistName(playlist));
 		nameLabel.setWrapText(true);
-		nameLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
+		nameLabel.getStyleClass().add("music-card-title");
 
 		Label descriptionLabel = new Label(playlist.getDescription() != null && !playlist.getDescription().isBlank()
 				? playlist.getDescription()
 				: "Aucune description");
 		descriptionLabel.setWrapText(true);
-		descriptionLabel.setStyle("-fx-text-fill: #cbd5e1;");
+		descriptionLabel.getStyleClass().add("music-card-meta");
 
 		Label countLabel = new Label((playlist.getMusiques() != null ? playlist.getMusiques().size() : 0) + " musique(s)");
-		countLabel.setStyle("-fx-text-fill: #9ca3af;");
+		countLabel.getStyleClass().add("music-card-meta");
 
 		Button openButton = new Button("Ouvrir");
+		openButton.getStyleClass().add("music-card-button");
 		openButton.setOnAction(event -> {
 			event.consume();
 			showPlaylistDetails(playlist);
@@ -1266,28 +1267,31 @@ public class MusicfrontController {
 		card.setMinWidth(TRACK_CARD_WIDTH);
 		card.setPrefWidth(TRACK_CARD_WIDTH);
 		card.setMaxWidth(TRACK_CARD_WIDTH);
-		card.setStyle(index == currentTrackIndex
-				? "-fx-background-color: #212529; -fx-background-radius: 8; -fx-border-color: #198754; -fx-border-radius: 8; -fx-padding: 8;"
-				: "-fx-background-color: #212529; -fx-background-radius: 8; -fx-padding: 8;");
+		card.getStyleClass().add("music-card");
+		if (index == currentTrackIndex) {
+			card.getStyleClass().add("music-card-active");
+		}
 
 		Node coverNode = buildCoverNode(musique.getImage());
 
 		String titre = musique.getTitre() != null ? musique.getTitre() : "Sans titre";
 		Label titleLabel = new Label(titre);
 		titleLabel.setWrapText(true);
-		titleLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
+		titleLabel.getStyleClass().add("music-card-title");
 
 		String genre = musique.getGenre() != null ? musique.getGenre() : "-";
 		Label metaLabel = new Label("Genre: " + genre);
-		metaLabel.setStyle("-fx-text-fill: #cbd5e1;");
+		metaLabel.getStyleClass().add("music-card-meta");
 
 		Button generateLyricsButton = new Button("Paroles IA");
+		generateLyricsButton.getStyleClass().add("music-card-button");
 		generateLyricsButton.setOnAction(event -> {
 			event.consume();
 			requestLyricsForTrack(musique);
 		});
 
 		Button addToPlaylistButton = new Button("+ Playlist");
+		addToPlaylistButton.getStyleClass().add("music-card-button");
 		addToPlaylistButton.setOnAction(event -> {
 			event.consume();
 			if (allPlaylists.isEmpty()) {

@@ -190,3 +190,50 @@
     -fx-text-fill: #3d3bc2;
     -fx-border-color: rgba(61,59,194,0.25);
 }
+
+/* Lyrics Panel */
+.global-player-lyrics-panel {
+    -fx-background-color: linear-gradient(to bottom, #111520, #141a26);
+    -fx-border-color: rgba(255,255,255,0.06) transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+}
+
+.global-player-lyrics-status {
+    -fx-text-fill: #aab9d4;
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+}
+
+.global-player-lyrics-area {
+    -fx-control-inner-background: #0e1320;
+    -fx-text-fill: #eef3ff;
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+    -fx-font-size: 14px;
+    -fx-border-color: rgba(143, 172, 255, 0.22);
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 10, 0.2, 0, 2);
+}
+
+.global-player-lyrics-area .content {
+    -fx-background-color: transparent;
+}
+
+.global-player-button-secondary {
+    -fx-background-color: rgba(140, 160, 255, 0.12);
+    -fx-text-fill: #d9e6ff;
+    -fx-background-radius: 8;
+    -fx-border-color: rgba(140, 160, 255, 0.3);
+    -fx-border-radius: 8;
+    -fx-cursor: hand;
+    -fx-font-weight: bold;
+    -fx-padding: 6 12 6 12;
+    -fx-transition: background-color 0.2s, border-color 0.2s;
+}
+
+.global-player-button-secondary:hover {
+    -fx-background-color: rgba(127,92,230,0.3);
+    -fx-border-color: rgba(127,92,230,0.5);
+    -fx-text-fill: #ffffff;
+}
