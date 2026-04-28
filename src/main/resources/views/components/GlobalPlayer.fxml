@@ -6,7 +6,6 @@
 <?import javafx.scene.control.Slider?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.StackPane?>
 
@@ -51,23 +50,36 @@
         </HBox>
 
         <!-- Progress row: time label + slider in one HBox, no BorderPane -->
-        <HBox alignment="CENTER" spacing="10" styleClass="global-player-progress-row">
+        <HBox alignment="CENTER" spacing="10" styleClass="global-player-progress-row"
+              minWidth="240" prefWidth="380" maxWidth="430">
             <Label fx:id="timeLabel" styleClass="global-player-time"
                    text="0:00 / 0:00" minWidth="72" maxWidth="72" />
             <Slider fx:id="progressSlider" max="1.0"
                     onMousePressed="#handleSeekStart"
                     onMouseReleased="#handleSeekEnd"
-                    minWidth="200" prefWidth="99999" maxWidth="99999"
+                    minWidth="150" prefWidth="300" maxWidth="340"
                     HBox.hgrow="ALWAYS" />
         </HBox>
 
     </VBox>
 
-    <!-- RIGHT: Genre + Status — fixed width, no grow -->
-    <VBox alignment="CENTER_RIGHT" spacing="5" styleClass="global-player-state"
-          minWidth="120" prefWidth="140" maxWidth="160" HBox.hgrow="NEVER">
-        <Label fx:id="metaLabel" styleClass="global-player-meta" text="Genre: -" />
-        <Label fx:id="statusLabel" styleClass="global-player-status" text="Prêt" />
-    </VBox>
+    <!-- RIGHT: Volume + Genre + Status — fixed width, no grow -->
+    <HBox alignment="CENTER_RIGHT" spacing="15" styleClass="global-player-right"
+          minWidth="200" prefWidth="250" maxWidth="300" HBox.hgrow="NEVER">
+          
+        <HBox alignment="CENTER" spacing="8" styleClass="global-player-volume-box">
+            <Button fx:id="muteButton" mnemonicParsing="false" onAction="#handleMute"
+                    styleClass="global-player-button global-player-button-secondary" text="🔊"
+                    minWidth="32" minHeight="32" maxWidth="32" maxHeight="32" />
+            <Slider fx:id="volumeSlider" max="1.0" value="0.5"
+                    minWidth="62" prefWidth="62" maxWidth="62" />
+        </HBox>
+
+        <VBox alignment="CENTER_RIGHT" spacing="5" styleClass="global-player-state"
+              minWidth="90">
+            <Label fx:id="metaLabel" styleClass="global-player-meta" text="Genre: -" />
+            <Label fx:id="statusLabel" styleClass="global-player-status" text="Prêt" />
+        </VBox>
+    </HBox>
 
 </HBox>

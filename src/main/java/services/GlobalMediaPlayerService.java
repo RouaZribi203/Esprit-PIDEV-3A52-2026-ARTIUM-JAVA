@@ -25,6 +25,8 @@ import java.util.Locale;
 
 public final class GlobalMediaPlayerService {
     private static final String XAMPP_IMAGE_DIR = "C:\\xampp\\htdocs\\img";
+    private static final String XAMPP_AUDIO_DIR = "C:\\xampp\\htdocs\\audio";
+    private static final String XAMPP_UPLOADS_AUDIO_DIR = "C:\\xampp\\htdocs\\uploads\\audio";
     private static final String DEFAULT_TITLE = "Aucune piste en lecture";
     private static final String DEFAULT_ARTIST = "Artiste inconnu";
 
@@ -38,6 +40,9 @@ public final class GlobalMediaPlayerService {
     private final StringProperty timeText = new SimpleStringProperty("0:00 / 0:00");
     private final BooleanProperty playing = new SimpleBooleanProperty(false);
     private final ObjectProperty<Image> coverImage = new SimpleObjectProperty<>();
+
+    private final javafx.beans.property.DoubleProperty volume = new javafx.beans.property.SimpleDoubleProperty(0.5);
+    private final javafx.beans.property.BooleanProperty muted = new javafx.beans.property.SimpleBooleanProperty(false);
 
     private final ObservableList<Musique> queue = FXCollections.observableArrayList();
     private int queueIndex = -1;
@@ -172,6 +177,22 @@ public final class GlobalMediaPlayerService {
         return playing.get();
     }
 
+    public javafx.beans.property.DoubleProperty volumeProperty() {
+        return volume;
+    }
+
+    public javafx.beans.property.BooleanProperty mutedProperty() {
+        return muted;
+    }
+
+    public void setVolume(double value) {
+        volume.set(value);
+    }
+
+    public void toggleMute() {
+        muted.set(!muted.get());
+    }
+
     private void openTrack(Musique track, String artistName, boolean autoPlay) {
         String source = toMediaSource(track.getAudio());
         if (source == null) {
@@ -184,6 +205,8 @@ public final class GlobalMediaPlayerService {
         try {
             Media media = new Media(source);
             mediaPlayer = new MediaPlayer(media);
+            mediaPlayer.volumeProperty().bind(volume);
+            mediaPlayer.muteProperty().bind(muted);
             currentTrack.set(track);
             trackTitle.set(track.getTitre() != null && !track.getTitre().isBlank() ? track.getTitre() : "Sans titre");
             trackArtist.set(normalizeArtist(artistName));
@@ -243,15 +266,72 @@ public final class GlobalMediaPlayerService {
         }
 
         String trimmed = audioPath.trim();
+        File local = resolveLocalAudioFile(trimmed);
+        if (local != null && local.exists() && local.isFile()) {
+            return local.toURI().toString();
+        }
+
         if (trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("file:/")) {
             return trimmed;
         }
+        return null;
+    }
 
-        File file = new File(trimmed);
-        if (!file.exists()) {
+    private File resolveLocalAudioFile(String source) {
+        String trimmed = source;
+        if (trimmed.length() > 1 && trimmed.startsWith("\"") && trimmed.endsWith("\"")) {
+            trimmed = trimmed.substring(1, trimmed.length() - 1);
+        }
+        if (trimmed.startsWith("/") && trimmed.length() > 2 && trimmed.charAt(2) == ':') {
+            trimmed = trimmed.substring(1);
+        }
+
+        if (trimmed.startsWith("file:")) {
+            try {
+                return new File(new URI(trimmed));
+            } catch (Exception ignored) {
+                String rawPath = trimmed.substring("file:".length());
+                if (rawPath.startsWith("//")) {
+                    rawPath = rawPath.substring(2);
+                }
+                if (rawPath.startsWith("/") && rawPath.length() > 2 && rawPath.charAt(2) == ':') {
+                    rawPath = rawPath.substring(1);
+                }
+                return new File(rawPath);
+            }
+        }
+
+        if (trimmed.startsWith("/audio/") || trimmed.startsWith("/htdocs/audio/")) {
+            String fileName = extractFileName(trimmed);
+            return fileName.isEmpty() ? null : new File(XAMPP_AUDIO_DIR, fileName);
+        }
+
+        if (trimmed.startsWith("/uploads/audio/") || trimmed.startsWith("/htdocs/uploads/audio/")) {
+            String fileName = extractFileName(trimmed);
+            return fileName.isEmpty() ? null : new File(XAMPP_UPLOADS_AUDIO_DIR, fileName);
+        }
+
+        if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+            try {
+                URI uri = URI.create(trimmed);
+                String path = uri.getPath();
+                if (path != null) {
+                    if (path.startsWith("/audio/") || path.startsWith("/htdocs/audio/")) {
+                        String fileName = extractFileName(path);
+                        return fileName.isEmpty() ? null : new File(XAMPP_AUDIO_DIR, fileName);
+                    }
+                    if (path.startsWith("/uploads/audio/") || path.startsWith("/htdocs/uploads/audio/")) {
+                        String fileName = extractFileName(path);
+                        return fileName.isEmpty() ? null : new File(XAMPP_UPLOADS_AUDIO_DIR, fileName);
+                    }
+                }
+            } catch (RuntimeException ignored) {
+                return null;
+            }
             return null;
         }
-        return file.toURI().toString();
+
+        return new File(trimmed);
     }
 
     private String describeMediaError(Throwable throwable) {

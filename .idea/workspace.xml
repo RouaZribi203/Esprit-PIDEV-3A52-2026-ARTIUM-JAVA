@@ -6,9 +6,15 @@
   <component name="ChangeListManager">
     <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="correction blob oeuvre livre">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/AdminMusiquesController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/AdminMusiquesController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/GlobalPlayerController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/GlobalPlayerController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/MainFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/MainFX.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/MusicfrontController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/MusicfrontController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/services/OpenRouterLyricsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/OpenRouterLyricsService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/GlobalMediaPlayerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/GlobalMediaPlayerService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/Musique.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/Musique.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/components/GlobalPlayer.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/components/GlobalPlayer.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/artist-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/artist-theme.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/dashboard.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/dashboard.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,11 +63,6 @@
     &quot;accountId&quot;: &quot;86d80bdd-8a50-41ef-b7d2-5f41496cd525&quot;
   }
 }</component>
-  <component name="JavaAutoRunManager">
-    <enabled-run-configurations>
-      <run-configuration type="MavenRunConfiguration" name="Esprit-PIDEV-3A52-2026-ARTIUM-JAVA [org.openjfx:javafx-maven-plugin:0.0.8:run]" />
-    </enabled-run-configurations>
-  </component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
@@ -162,7 +163,7 @@
       <workItem from="1777049278154" duration="46000" />
       <workItem from="1777049333749" duration="344000" />
       <workItem from="1777053136200" duration="4482000" />
-      <workItem from="1777281541887" duration="13169000" />
+      <workItem from="1777281541887" duration="23262000" />
     </task>
     <task id="LOCAL-00001" summary="corrections de blob">
       <option name="closed" value="true" />

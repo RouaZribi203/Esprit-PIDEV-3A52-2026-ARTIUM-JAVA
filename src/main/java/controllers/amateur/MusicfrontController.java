@@ -4,8 +4,11 @@ import javafx.concurrent.Task;
 import services.PlaylistService;
 import services.MusiqueService;
 import services.OpenRouterLyricsService;
+import services.GroqPlaylistGeneratorService;
+import services.GlobalMediaPlayerService;
 import entities.Musique;
 import entities.Playlist;
+import entities.User;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -26,9 +29,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaException;
-import javafx.scene.media.MediaPlayer;
 import javafx.scene.shape.Rectangle;
 import utils.ImageUrlUtils;
 
@@ -155,9 +155,25 @@ public class MusicfrontController {
 	@FXML
 	private TilePane playlistGrid;
 
+	@FXML
+	private VBox aiPlaylistSection;
+
+	@FXML
+	private TextField aiPlaylistPromptField;
+
+	@FXML
+	private Button generatePlaylistButton;
+
+	@FXML
+	private Label aiPlaylistStatusLabel;
+
+	@FXML
+	private Button toggleAIPlaylistFormButton;
 	private final MusiqueService musiqueService = new MusiqueService();
 	private final PlaylistService playlistService = new PlaylistService();
 	private final OpenRouterLyricsService lyricsService = new OpenRouterLyricsService();
+	private final GroqPlaylistGeneratorService playlistGeneratorService = new GroqPlaylistGeneratorService();
+	private final GlobalMediaPlayerService globalMediaPlayer = GlobalMediaPlayerService.getInstance();
 	private final ObservableList<Musique> allTracks = FXCollections.observableArrayList();
 	private final ObservableList<Musique> visibleTracks = FXCollections.observableArrayList();
 	private final ObservableList<Playlist> allPlaylists = FXCollections.observableArrayList();
@@ -171,7 +187,6 @@ public class MusicfrontController {
 	private boolean lyricsLoading;
 	private Musique currentLyricsTrack;
 
-	private MediaPlayer mediaPlayer;
 	private int currentTrackIndex = -1;
 
 	@FXML
@@ -429,8 +444,90 @@ public class MusicfrontController {
 	}
 
 	@FXML
+	private void handleGeneratePlaylistWithAI() {
+		String prompt = aiPlaylistPromptField != null ? aiPlaylistPromptField.getText().trim() : "";
+
+		if (prompt.isEmpty()) {
+			showAlert("Erreur", "Veuillez entrer une demande pour générer une playlist.", Alert.AlertType.WARNING);
+			return;
+		}
+
+		if (prompt.length() < 5 || prompt.length() > 500) {
+			showAlert("Erreur", "La demande doit contenir entre 5 et 500 caractères.", Alert.AlertType.WARNING);
+			return;
+		}
+
+		// Get current user ID (you may need to adjust this based on your user management)
+		Integer userId = getCurrentUserId();
+		if (userId == null) {
+			showAlert("Erreur", "Vous devez être connecté pour générer une playlist.", Alert.AlertType.WARNING);
+			return;
+		}
+
+		// Show loading status
+		setAIPlaylistStatus("Génération en cours... Cela peut prendre quelques secondes.", false);
+		generatePlaylistButton.setDisable(true);
+		aiPlaylistPromptField.setDisable(true);
+
+		// Run generation in background thread
+		Task<Playlist> task = new Task<Playlist>() {
+			@Override
+			protected Playlist call() throws Exception {
+				return playlistGeneratorService.generatePlaylistFromPrompt(prompt, userId);
+			}
+		};
+
+		task.setOnSucceeded(event -> {
+			Playlist generatedPlaylist = task.getValue();
+			setAIPlaylistStatus("✓ Playlist générée avec succès: " + generatedPlaylist.getNom(), true);
+			aiPlaylistPromptField.clear();
+			generatePlaylistButton.setDisable(false);
+			aiPlaylistPromptField.setDisable(false);
+			refreshPlaylists();
+			// Show success message
+			showAlert("Succès", "Votre playlist a été créée avec succès!\n\nNom: " + generatedPlaylist.getNom() +
+					"\nMusiques ajoutées: " + generatedPlaylist.getMusiques().size(), Alert.AlertType.INFORMATION);
+		});
+
+		task.setOnFailed(event -> {
+			Throwable exception = task.getException();
+			String errorMessage = exception != null ? exception.getMessage() : "Erreur inconnue lors de la génération.";
+			setAIPlaylistStatus("✗ Erreur: " + errorMessage, false);
+			generatePlaylistButton.setDisable(false);
+			aiPlaylistPromptField.setDisable(false);
+			showAlert("Erreur", "Impossible de générer la playlist:\n" + errorMessage, Alert.AlertType.ERROR);
+		});
+
+		new Thread(task).start();
+	}
+
+	private void setAIPlaylistStatus(String message, boolean success) {
+		if (aiPlaylistStatusLabel != null) {
+			aiPlaylistStatusLabel.setText(message);
+			aiPlaylistStatusLabel.setStyle(success ? "-fx-text-fill: #10b981;" : "-fx-text-fill: #ef4444;");
+		}
+	}
+
+	private Integer getCurrentUserId() {
+		// Get the authenticated user from MainFX
+		User currentUser = controllers.MainFX.getAuthenticatedUser();
+		if (currentUser != null && currentUser.getId() != null) {
+			return currentUser.getId();
+		}
+		return null;
+	}
+
+	private void showAlert(String title, String message, Alert.AlertType type) {
+		Alert alert = new Alert(type);
+		alert.setTitle(title);
+		alert.setHeaderText(null);
+		alert.setContentText(message);
+		alert.showAndWait();
+	}
+
+	@FXML
 	private void handlePlayPause() {
-		if (mediaPlayer == null) {
+		if (globalMediaPlayer.getCurrentTrack() == null) {
 			int selectedIndex = currentTrackIndex;
 			if (selectedIndex < 0 && !visibleTracks.isEmpty()) {
 				selectedIndex = 0;
@@ -440,17 +537,7 @@ public class MusicfrontController {
 			}
 			return;
 		}
-
-		MediaPlayer.Status status = mediaPlayer.getStatus();
-		if (status == MediaPlayer.Status.PLAYING) {
-			mediaPlayer.pause();
-			setPlayPauseText("Play");
-			setPlayerStatusText("En pause");
-		} else {
-			mediaPlayer.play();
-			setPlayPauseText("Pause");
-			setPlayerStatusText("Lecture en cours");
-		}
+		globalMediaPlayer.togglePlayPause();
 	}
 
 	@FXML
@@ -458,8 +545,7 @@ public class MusicfrontController {
 		if (visibleTracks.isEmpty()) {
 			return;
 		}
-		int targetIndex = currentTrackIndex <= 0 ? visibleTracks.size() - 1 : currentTrackIndex - 1;
-		playTrackAtIndex(targetIndex);
+		globalMediaPlayer.playPrevious();
 	}
 
 	@FXML
@@ -467,8 +553,7 @@ public class MusicfrontController {
 		if (visibleTracks.isEmpty()) {
 			return;
 		}
-		int targetIndex = currentTrackIndex >= visibleTracks.size() - 1 ? 0 : currentTrackIndex + 1;
-		playTrackAtIndex(targetIndex);
+		globalMediaPlayer.playNext();
 	}
 
 	private void refreshPlaylists() {
@@ -503,7 +588,7 @@ public class MusicfrontController {
 			emptyListLabel.setText("Impossible de charger les musiques: " + e.getMessage());
 			emptyListLabel.setVisible(true);
 			emptyListLabel.setManaged(true);
-			stopPlayer();
+			globalMediaPlayer.stop();
 			updateLyricsPanel(currentLyricsTrack);
 		}
 	}
@@ -546,7 +631,7 @@ public class MusicfrontController {
 
 		if (visibleTracks.isEmpty()) {
 			currentTrackIndex = -1;
-			stopPlayer();
+			globalMediaPlayer.stop();
 			setNowPlayingTitle("Selectionnez une musique");
 			setNowPlayingMeta("Genre: -");
 			setPlayerStatusText("Pret");
@@ -678,48 +763,11 @@ public class MusicfrontController {
 
 		Musique selectedTrack = visibleTracks.get(index);
 		currentLyricsTrack = selectedTrack;
-		String source = toMediaSource(selectedTrack.getAudio());
-		if (source == null) {
-			setPlayerStatusText("Fichier audio introuvable");
-			return;
-		}
-
-		stopPlayer();
-		try {
-			Media media = new Media(source);
-			mediaPlayer = new MediaPlayer(media);
-			currentTrackIndex = index;
-			renderGrid();
-			updateNowPlayingLabels(selectedTrack);
-			updateLyricsPanel(selectedTrack);
-
-			mediaPlayer.setOnReady(() -> {
-				mediaPlayer.play();
-				setPlayPauseText("Pause");
-				setPlayerStatusText("Lecture en cours");
-			});
-			mediaPlayer.setOnEndOfMedia(this::handleNextTrack);
-			mediaPlayer.setOnError(() -> setPlayerStatusText(describeMediaError(mediaPlayer.getError())));
-		} catch (MediaException mediaException) {
-			setPlayPauseText("Play");
-			setPlayerStatusText(describeMediaError(mediaException));
-		} catch (RuntimeException runtimeException) {
-			setPlayPauseText("Play");
-			setPlayerStatusText("Impossible de lire ce fichier audio");
-		}
-	}
-
-	private String describeMediaError(Throwable throwable) {
-		if (throwable instanceof MediaException mediaException) {
-			if (mediaException.getType() == MediaException.Type.MEDIA_UNSUPPORTED) {
-				return "Format non pris en charge par JavaFX (ex: OPUS)";
-			}
-			String message = mediaException.getMessage();
-			if (message != null && message.toLowerCase(Locale.ROOT).contains("unrecognized file signature")) {
-				return "Codec audio non pris en charge (essayez MP3/M4A/WAV)";
-			}
-		}
-		return "Impossible de lire ce fichier audio";
+		currentTrackIndex = index;
+		renderGrid();
+		updateNowPlayingLabels(selectedTrack);
+		updateLyricsPanel(selectedTrack);
+		globalMediaPlayer.playTrack(selectedTrack, visibleTracks, index, "Artiste inconnu");
 	}
 
 	private String validateImagePath(String imagePath) {
@@ -758,31 +806,6 @@ public class MusicfrontController {
 		String genre = musique.getGenre() != null ? musique.getGenre() : "-";
 		setNowPlayingTitle(titre);
 		setNowPlayingMeta("Genre: " + genre);
-	}
-
-	private String toMediaSource(String audioPath) {
-		if (audioPath == null || audioPath.isBlank()) {
-			return null;
-		}
-
-		String trimmed = audioPath.trim();
-		if (trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("file:/")) {
-			return trimmed;
-		}
-
-		File file = new File(trimmed);
-		if (!file.exists()) {
-			return null;
-		}
-		return file.toURI().toString();
-	}
-
-	private void stopPlayer() {
-		if (mediaPlayer != null) {
-			mediaPlayer.stop();
-			mediaPlayer.dispose();
-			mediaPlayer = null;
-		}
 	}
 
 	private void renderGrid() {
@@ -1185,31 +1208,12 @@ public class MusicfrontController {
 			return;
 		}
 
-		String source = toMediaSource(track.getAudio());
-		if (source == null) {
-			setPlayerStatusText("Fichier audio introuvable");
-			return;
-		}
-
-		stopPlayer();
-		try {
-			Media media = new Media(source);
-			mediaPlayer = new MediaPlayer(media);
-			currentLyricsTrack = track;
-			currentTrackIndex = -1;
-			renderGrid();
-			updateNowPlayingLabels(track);
-			updateLyricsPanel(track);
-			mediaPlayer.setOnReady(() -> {
-				mediaPlayer.play();
-				setPlayPauseText("Pause");
-				setPlayerStatusText("Lecture en cours");
-			});
-			mediaPlayer.setOnError(() -> setPlayerStatusText(describeMediaError(mediaPlayer.getError())));
-		} catch (MediaException mediaException) {
-			setPlayPauseText("Play");
-			setPlayerStatusText(describeMediaError(mediaException));
-		}
+		currentLyricsTrack = track;
+		currentTrackIndex = -1;
+		renderGrid();
+		updateNowPlayingLabels(track);
+		updateLyricsPanel(track);
+		globalMediaPlayer.playTrack(track, java.util.List.of(track), 0, "Artiste inconnu");
 	}
 
 	private Node buildPlaylistCoverNode(String imageSource) {
@@ -1348,7 +1352,7 @@ public class MusicfrontController {
 	}
 
 	public boolean isCurrentlyPlaying() {
-		return mediaPlayer != null && mediaPlayer.getStatus() == MediaPlayer.Status.PLAYING;
+		return globalMediaPlayer.isPlaying();
 	}
 
 	private Node buildCoverNode(String imageSource) {

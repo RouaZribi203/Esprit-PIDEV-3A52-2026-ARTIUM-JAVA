@@ -33,8 +33,13 @@ public class GlobalPlayerController {
     @FXML
     private Slider progressSlider;
 
+    @FXML
+    private Slider volumeSlider;
+
+    @FXML
+    private Button muteButton;
+
     private final GlobalMediaPlayerService mediaPlayerService = GlobalMediaPlayerService.getInstance();
-    private boolean seeking;
 
     @FXML
     public void initialize() {
@@ -51,13 +56,13 @@ public class GlobalPlayerController {
         playPauseButton.setText(mediaPlayerService.isPlaying() ? "⏸" : "▶");
 
         progressSlider.valueProperty().addListener((obs, oldValue, newValue) -> {
-            if (seeking) {
+            if (progressSlider.isPressed() || progressSlider.isValueChanging()) {
                 mediaPlayerService.seekToFraction(newValue.doubleValue());
             }
         });
 
         mediaPlayerService.timeTextProperty().addListener((obs, oldValue, newValue) -> {
-            if (!seeking) {
+            if (!progressSlider.isPressed() && !progressSlider.isValueChanging()) {
                 String[] parts = newValue.split("/");
                 if (parts.length == 2) {
                     double elapsed = parseTime(parts[0].trim());
@@ -66,6 +71,18 @@ public class GlobalPlayerController {
                 }
             }
         });
+
+        if (volumeSlider != null) {
+            volumeSlider.setValue(mediaPlayerService.volumeProperty().get());
+            mediaPlayerService.volumeProperty().bind(volumeSlider.valueProperty());
+        }
+
+        if (muteButton != null) {
+            muteButton.setText(mediaPlayerService.mutedProperty().get() ? "🔇" : "🔊");
+            mediaPlayerService.mutedProperty().addListener((obs, oldV, newV) -> {
+                muteButton.setText(newV ? "🔇" : "🔊");
+            });
+        }
     }
 
     @FXML
@@ -85,13 +102,17 @@ public class GlobalPlayerController {
 
     @FXML
     private void handleSeekStart() {
-        seeking = true;
+        // Not strictly needed anymore, handled by isPressed()
     }
 
     @FXML
     private void handleSeekEnd() {
         mediaPlayerService.seekToFraction(progressSlider.getValue());
-        seeking = false;
+    }
+
+    @FXML
+    private void handleMute() {
+        mediaPlayerService.toggleMute();
     }
 
     private double parseTime(String time) {

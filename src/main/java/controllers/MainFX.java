@@ -15,6 +15,7 @@ public class MainFX extends Application {
 
     private static Stage primaryStage;
     private static User authenticatedUser;
+    private static final String GLOBAL_PLAYER_STYLESHEET = "/views/styles/global-player.css";
 
     public static void switchToAuthLandingView() {
         authenticatedUser = null;
@@ -78,15 +79,20 @@ public class MainFX extends Application {
             FXMLLoader loader = new FXMLLoader(MainFX.class.getResource(fxmlPath));
             Parent root = loader.load();
             Scene scene = new Scene(root);
-            URL stylesheet = MainFX.class.getResource(stylesheetPath);
-            if (stylesheet != null) {
-                scene.getStylesheets().add(stylesheet.toExternalForm());
-            }
+            addStylesheet(scene, stylesheetPath);
+            addStylesheet(scene, GLOBAL_PLAYER_STYLESHEET);
             primaryStage.setTitle(title);
             primaryStage.setScene(scene);
             primaryStage.show();
         } catch (IOException e) {
             throw new IllegalStateException("Failed to switch scene: " + fxmlPath, e);
+        }
+    }
+
+    private static void addStylesheet(Scene scene, String stylesheetPath) {
+        URL stylesheet = MainFX.class.getResource(stylesheetPath);
+        if (stylesheet != null) {
+            scene.getStylesheets().add(stylesheet.toExternalForm());
         }
     }
 
