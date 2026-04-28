@@ -81,6 +81,7 @@ public class AmateurMainController {
             case "favoris" -> "/views/amateur/Favoris.fxml";
             case "evenements" -> "/views/amateur/Evenements.fxml";
             case "event-detail" -> "/views/amateur/EventDetail.fxml";
+            case "payment-form" -> "/views/amateur/PaymentForm.fxml";
             case "payment-success" -> "/views/amateur/PaymentSuccess.fxml";
             case "bibliotheque" -> "/views/amateur/Bibliotheque.fxml";
             case "book-reader" -> "/views/amateur/BookReader.fxml";
@@ -134,7 +135,15 @@ public class AmateurMainController {
         } else if (controller instanceof EventDetailController detailController) {
             detailController.setEvent(selectedEvent);
             detailController.setPurchaseHandler(this::onTicketPurchased);
+            detailController.setPayHandler(ev -> {
+                this.selectedEvent = ev;
+                onNavigate("payment-form");
+            });
             detailController.setBackHandler(() -> onNavigate("evenements"));
+        } else if (controller instanceof PaymentFormController formController) {
+            formController.setEvent(selectedEvent);
+            formController.setSuccessHandler(this::onTicketPurchased);
+            formController.setCancelHandler(() -> onNavigate("event-detail"));
         } else if (controller instanceof PaymentController paymentController) {
             paymentController.setTicket(pendingPurchasedTicket);
             paymentController.setBackToEventHandler(() -> onNavigate("event-detail"));

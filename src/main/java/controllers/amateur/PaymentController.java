@@ -47,10 +47,30 @@ public class PaymentController {
 		}
 
 		ticketReferenceLabel.setText(resolveReference(ticket));
-		eventIdLabel.setText(formatInteger(ticket.getEvenementId()));
-		userIdLabel.setText(formatInteger(ticket.getUserId()));
 		purchaseDateLabel.setText(ticket.getDateAchat() == null ? "-" : DATE_FORMATTER.format(ticket.getDateAchat()));
-		qrPayloadLabel.setText(resolveQrPayload(ticket));
+
+		try {
+			Evenement evenement = evenementService.getById(ticket.getEvenementId());
+			if (evenement != null) {
+				eventIdLabel.setText(evenement.getTitre() != null ? evenement.getTitre() : "Evénement inconnu");
+				qrPayloadLabel.setText(evenement.getPrixTicket() != null ? String.format(java.util.Locale.ROOT, "%.2f TND", evenement.getPrixTicket()) : "Gratuit");
+			} else {
+				eventIdLabel.setText(formatInteger(ticket.getEvenementId()));
+				qrPayloadLabel.setText("-");
+			}
+		} catch (Exception e) {
+			eventIdLabel.setText(formatInteger(ticket.getEvenementId()));
+			qrPayloadLabel.setText("-");
+		}
+
+		entities.User user = controllers.MainFX.getAuthenticatedUser();
+		if (user != null) {
+			String prenom = user.getPrenom() != null ? user.getPrenom() : "";
+			String nom = user.getNom() != null ? user.getNom() : "";
+			userIdLabel.setText((prenom + " " + nom).trim());
+		} else {
+			userIdLabel.setText(formatInteger(ticket.getUserId()));
+		}
 	}
 
 	public void setBackToEventHandler(Runnable backToEventHandler) {

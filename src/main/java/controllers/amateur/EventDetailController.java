@@ -112,6 +112,7 @@ public class EventDetailController {
 	private List<Ticket> currentPurchasedTickets = List.of();
 	private boolean ticketsExpanded;
 	private Consumer<Ticket> purchaseHandler;
+	private Consumer<Evenement> payHandler;
 	private Runnable backHandler;
 
 	@FXML
@@ -188,6 +189,10 @@ public class EventDetailController {
 		this.purchaseHandler = purchaseHandler;
 	}
 
+	public void setPayHandler(Consumer<Evenement> payHandler) {
+		this.payHandler = payHandler;
+	}
+
 	public void setBackHandler(Runnable backHandler) {
 		this.backHandler = backHandler;
 	}
@@ -208,24 +213,29 @@ public class EventDetailController {
 			return;
 		}
 
-		try {
-			Ticket ticket = ticketService.purchaseTicket(event, currentUserId);
-			loadPurchasedTickets();
-			if (purchaseHandler != null) {
-				purchaseHandler.accept(ticket);
-			} else {
-				Alert alert = new Alert(Alert.AlertType.INFORMATION);
-				alert.setTitle("Ticket généré");
-				alert.setHeaderText("Votre ticket a été créé avec succès");
-				alert.setContentText("Le ticket a été enregistré, mais aucun écran de succès n'est configuré.");
+		if (payHandler != null) {
+			payHandler.accept(event);
+		} else {
+			// Fallback: original behaviour if payHandler is not set
+			try {
+				Ticket ticket = ticketService.purchaseTicket(event, currentUserId);
+				loadPurchasedTickets();
+				if (purchaseHandler != null) {
+					purchaseHandler.accept(ticket);
+				} else {
+					Alert alert = new Alert(Alert.AlertType.INFORMATION);
+					alert.setTitle("Ticket généré");
+					alert.setHeaderText("Votre ticket a été créé avec succès");
+					alert.setContentText("Le ticket a été enregistré.");
+					alert.showAndWait();
+				}
+			} catch (SQLDataException e) {
+				Alert alert = new Alert(Alert.AlertType.ERROR);
+				alert.setTitle("Achat impossible");
+				alert.setHeaderText("Le ticket n'a pas pu etre achete");
+				alert.setContentText(e.getMessage());
 				alert.showAndWait();
 			}
-		} catch (SQLDataException e) {
-			Alert alert = new Alert(Alert.AlertType.ERROR);
-			alert.setTitle("Achat impossible");
-			alert.setHeaderText("Le ticket n'a pas pu etre achete");
-			alert.setContentText(e.getMessage());
-			alert.showAndWait();
 		}
 	}
 
