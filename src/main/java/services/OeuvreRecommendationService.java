@@ -36,6 +36,9 @@ public class OeuvreRecommendationService {
             return new ArrayList<>();
         }
 
+        // Éliminer les œuvres de type "Privee"
+        allOeuvres.removeIf(o -> "Privee".equalsIgnoreCase(o.getType()));
+
         Set<Integer> interactedIds = loadInteractedOeuvreIds(user.getId());
         if (interactedIds.isEmpty()) {
             return recommendByCentreInteret(user.getCentreInteret(), allOeuvres);

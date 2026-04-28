@@ -7,6 +7,11 @@ import services.OeuvreCollectionService;
 import services.OeuvreService;
 import services.ai.PythonImageEmbeddingClient;
 import controllers.ImageEditorController;
+import controllers.DrawingBoardController;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.SVGPath;
+import javafx.scene.Cursor;
+import javafx.scene.paint.Color;
 import entities.CollectionOeuvre;
 import entities.Commentaire;
 import entities.Oeuvre;
@@ -35,8 +40,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.SVGPath;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.embed.swing.SwingFXUtils;
@@ -169,6 +172,49 @@ public class MesOeuvresController {
         }
     }
 
+    private VBox createImageSourceCard(String title, String subtitle, String iconPath, boolean selected) {
+        VBox card = new VBox(5);
+        card.setAlignment(Pos.CENTER);
+        card.setPrefSize(225, 100);
+        card.setCursor(Cursor.HAND);
+        
+        String baseStyle = "-fx-background-radius: 12; -fx-border-radius: 12; -fx-border-width: 1; -fx-padding: 15;";
+        String normalStyle = baseStyle + "-fx-background-color: white; -fx-border-color: #e2e8f0;";
+        String selectedStyle = baseStyle + "-fx-background-color: #f7f7f2; -fx-border-color: #1a1a1a;";
+        
+        card.setStyle(selected ? selectedStyle : normalStyle);
+
+        StackPane iconContainer = new StackPane();
+        iconContainer.setPrefSize(40, 40);
+        iconContainer.setMaxSize(40, 40);
+        iconContainer.setStyle("-fx-background-color: " + (selected ? "white" : "#f8fafc") + "; -fx-background-radius: 8;");
+        
+        SVGPath icon = new SVGPath();
+        icon.setContent(iconPath);
+        icon.setScaleX(0.7);
+        icon.setScaleY(0.7);
+        icon.setStyle("-fx-fill: #1a1a1a;");
+        iconContainer.getChildren().add(icon);
+
+        Label titleLabel = new Label(title);
+        titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #1a1a1a;");
+        
+        Label subtitleLabel = new Label(subtitle);
+        subtitleLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #64748b;");
+
+        card.getChildren().addAll(iconContainer, titleLabel, subtitleLabel);
+        
+        return card;
+    }
+
+    private void updateCardSelection(VBox card, boolean selected) {
+        String baseStyle = "-fx-background-radius: 12; -fx-border-radius: 12; -fx-border-width: 1; -fx-padding: 15;";
+        String normalStyle = baseStyle + "-fx-background-color: white; -fx-border-color: #e2e8f0;";
+        String selectedStyle = baseStyle + "-fx-background-color: #f7f7f2; -fx-border-color: #1a1a1a;";
+        card.setStyle(selected ? selectedStyle : normalStyle);
+        ((StackPane)card.getChildren().get(0)).setStyle("-fx-background-color: " + (selected ? "white" : "#f8fafc") + "; -fx-background-radius: 8;");
+    }
+
     private void showOeuvrePopup(Oeuvre existingOeuvre) {
         boolean editMode = existingOeuvre != null;
         Stage popupStage = new Stage();
@@ -227,38 +273,74 @@ public class MesOeuvresController {
 
         Label imageLabel = new Label("Image");
         imageLabel.getStyleClass().add("popup-field-label");
-        Button chooseImageButton = new Button("Choisir un fichier");
-        chooseImageButton.getStyleClass().add("popup-close-button");
-        chooseImageButton.setGraphic(createIcon("M20 6h-6.18L12 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z", 0.58));
-        chooseImageButton.setGraphicTextGap(6);
-
-        Button editImageButton = new Button("Editer");
-        editImageButton.getStyleClass().add("popup-close-button");
-        editImageButton.setGraphic(createIcon("M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z", 0.58));
-        editImageButton.setGraphicTextGap(6);
-        editImageButton.setDisable(true);
-
-        Label selectedFileLabel = new Label("Aucun fichier n'a ete selectionne");
-        selectedFileLabel.getStyleClass().add("page-subtitle-small");
-        Label imageError = createPopupErrorLabel();
 
         final String[] imagePathHolder = new String[1];
         imagePathHolder[0] = editMode ? existingOeuvre.getImage() : null;
-        if (editMode && imagePathHolder[0] != null && !imagePathHolder[0].isBlank()) {
-            selectedFileLabel.setText("Image actuelle conservée");
-            editImageButton.setDisable(false);
-        }
 
-        if (editMode) {
-            // En mode modification, on autorise le changement de fichier,
-            // mais le bouton d'edition avancee est totalement retire.
-            editImageButton.setDisable(true);
-            editImageButton.setVisible(false);
-            editImageButton.setManaged(false);
-            if (imagePathHolder[0] != null && !imagePathHolder[0].isBlank()) {
-                selectedFileLabel.setText("Image actuelle (edition desactivee)");
+        // Cards for source selection
+        VBox importCard = createImageSourceCard("Importer", "Depuis votre appareil", "M21,15V18H24V20H21V23H19V20H16V18H19V15H21M18,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H14.1C13.4,20.9 13,19.7 13,18.5C13,17.9 13.1,17.2 13.2,16.6L8.5,12L5,15.5V5H19V11.5C19.7,11.2 20.3,11.1 21,11.1V4A2,2 0 0,0 19,2M14,14.5V11L11,14L8,11V14.5L11,17.5L14,14.5Z", false);
+        VBox drawCard = createImageSourceCard("Dessiner", "Créer depuis zéro", "M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87L20.71,7.04M3,17.25V21H6.75L17.81,9.94L14.06,6.19L3,17.25Z", false);
+        
+        HBox cardsRow = new HBox(15, importCard, drawCard);
+        cardsRow.setPadding(new Insets(5, 0, 10, 0));
+
+        // Status bar for selection
+        HBox statusBar = new HBox(10);
+        statusBar.setAlignment(Pos.CENTER_LEFT);
+        statusBar.setPadding(new Insets(10, 15, 10, 15));
+        statusBar.setStyle("-fx-background-color: #f7f7f2; -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;");
+        statusBar.setVisible(imagePathHolder[0] != null);
+        statusBar.setManaged(imagePathHolder[0] != null);
+
+        Circle statusDot = new Circle(4, Color.web("#166534"));
+        Label statusLabel = new Label(editMode ? "Image actuelle conservée" : "Aucune image sélectionnée");
+        statusLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #1a1a1a;");
+        
+        Region statusSpacer = new Region();
+        HBox.setHgrow(statusSpacer, Priority.ALWAYS);
+
+        Button editImageButton = new Button("Éditer");
+        editImageButton.getStyleClass().add("popup-close-button"); // Reuse existing style or similar
+        editImageButton.setGraphic(createColoredIcon("M3,17.25V21H6.75L17.81,9.94L14.06,6.19L3,17.25M20.71,7.04L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87L20.71,7.04Z", 0.5, "#1a1a1a"));
+        editImageButton.setGraphicTextGap(6);
+        editImageButton.setStyle("-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-radius: 6; -fx-padding: 5 15; -fx-text-fill: #1a1a1a; -fx-font-weight: bold;");
+
+        statusBar.getChildren().addAll(statusDot, statusLabel, statusSpacer, editImageButton);
+
+        Label imageError = createPopupErrorLabel();
+
+        // Logic for selection
+        importCard.setOnMouseClicked(e -> {
+            FileChooser chooser = new FileChooser();
+            chooser.setTitle("Selectionner une image");
+            chooser.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.webp")
+            );
+            File file = chooser.showOpenDialog(popupStage);
+            if (file != null) {
+                imagePathHolder[0] = file.getAbsolutePath();
+                statusLabel.setText("Image importée");
+                statusBar.setVisible(true);
+                statusBar.setManaged(true);
+                updateCardSelection(importCard, true);
+                updateCardSelection(drawCard, false);
+                clearPopupError(imageError);
             }
-        }
+        });
+
+        drawCard.setOnMouseClicked(e -> {
+            DrawingBoardController drawingBoard = new DrawingBoardController(popupStage, imagePathHolder[0]);
+            String drawingPath = drawingBoard.showAndWait();
+            if (drawingPath != null) {
+                imagePathHolder[0] = drawingPath;
+                statusLabel.setText("Dessin créé");
+                statusBar.setVisible(true);
+                statusBar.setManaged(true);
+                updateCardSelection(drawCard, true);
+                updateCardSelection(importCard, false);
+                clearPopupError(imageError);
+            }
+        });
 
         editImageButton.setOnAction(event -> {
             if (imagePathHolder[0] != null) {
@@ -266,10 +348,21 @@ public class MesOeuvresController {
                 String editedPath = editor.showAndWait();
                 if (editedPath != null && !editedPath.equals(imagePathHolder[0])) {
                     imagePathHolder[0] = editedPath;
-                    selectedFileLabel.setText("Image modifiée");
+                    statusLabel.setText("Image modifiée");
                 }
             }
         });
+
+        if (editMode) {
+            // In edit mode, we might want to hide cards or just show current status
+            cardsRow.setVisible(false);
+            cardsRow.setManaged(false);
+            if (imagePathHolder[0] != null && !imagePathHolder[0].isBlank()) {
+                statusLabel.setText("Image actuelle");
+                editImageButton.setVisible(false); // Disable advanced edit in modification as requested before
+                editImageButton.setManaged(false);
+            }
+        }
 
         titreField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (safeText(newValue).isEmpty()) {
@@ -302,24 +395,6 @@ public class MesOeuvresController {
             }
         });
 
-        chooseImageButton.setOnAction(event -> {
-            FileChooser chooser = new FileChooser();
-            chooser.setTitle("Selectionner une image");
-            chooser.getExtensionFilters().addAll(
-                    new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.webp")
-            );
-            File file = chooser.showOpenDialog(popupStage);
-            if (file == null) {
-                return;
-            }
-            imagePathHolder[0] = file.getAbsolutePath();
-            selectedFileLabel.setText(file.getName());
-            if (!editMode) {
-                editImageButton.setDisable(false);
-            }
-            clearPopupError(imageError);
-        });
-
         try {
             List<CollectionOeuvre> collections = oeuvreCollectionService.getCollectionsByArtisteId(artisteId);
             collectionCombo.setItems(FXCollections.observableArrayList(collections));
@@ -339,6 +414,12 @@ public class MesOeuvresController {
         visibilityLabel.getStyleClass().add("popup-field-label");
 
         ToggleGroup visibilityGroup = new ToggleGroup();
+        // Prevent deselection by clicking the already selected button
+        visibilityGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal == null) {
+                oldVal.setSelected(true);
+            }
+        });
         ToggleButton publicToggle = new ToggleButton("Public");
         publicToggle.setToggleGroup(visibilityGroup);
         publicToggle.getStyleClass().addAll("visibility-toggle", "visibility-toggle-public");
@@ -431,9 +512,6 @@ public class MesOeuvresController {
             }
         });
 
-        HBox imageRow = new HBox(10, chooseImageButton, editImageButton, selectedFileLabel);
-        imageRow.setAlignment(Pos.CENTER_LEFT);
-
         HBox footer = new HBox(10, cancelButton, publishButton);
         footer.setAlignment(Pos.CENTER_RIGHT);
 
@@ -452,14 +530,15 @@ public class MesOeuvresController {
                 visibilityLabel,
                 visibilityRow,
                 imageLabel,
-                imageRow,
+                cardsRow,
+                statusBar,
                 imageError,
                 footer
         );
         root.setPadding(new Insets(16));
         root.getStyleClass().add("collection-popup");
 
-        Scene scene = new Scene(root, 720, 500);
+        Scene scene = new Scene(root, 720, 700);
         scene.getStylesheets().addAll(addOeuvreButton.getScene().getStylesheets());
 
         popupStage.setScene(scene);

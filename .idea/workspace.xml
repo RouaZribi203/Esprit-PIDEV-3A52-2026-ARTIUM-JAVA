@@ -4,10 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="qrcodev2">
+    <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="ameliorer edit oeuvre">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/ImageEditorController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/ImageEditorController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/MesOeuvresController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/MesOeuvresController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/OeuvreRecommendationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/OeuvreRecommendationService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -166,7 +166,7 @@
       <workItem from="1776881992405" duration="21712000" />
       <workItem from="1776931324086" duration="5772000" />
       <workItem from="1777316904870" duration="17470000" />
-      <workItem from="1777382924937" duration="2678000" />
+      <workItem from="1777382924937" duration="8389000" />
     </task>
     <task id="LOCAL-00001" summary="corrections de blob">
       <option name="closed" value="true" />
@@ -264,7 +264,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777343626943</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="ameliorer edit oeuvre">
+      <option name="closed" value="true" />
+      <created>1777385676732</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1777385676732</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -294,7 +302,8 @@
     <MESSAGE value="sms" />
     <MESSAGE value="qrcodev1" />
     <MESSAGE value="qrcodev2" />
-    <option name="LAST_COMMIT_MESSAGE" value="qrcodev2" />
+    <MESSAGE value="ameliorer edit oeuvre" />
+    <option name="LAST_COMMIT_MESSAGE" value="ameliorer edit oeuvre" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
