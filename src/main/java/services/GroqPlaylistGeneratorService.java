@@ -107,8 +107,29 @@ public class GroqPlaylistGeneratorService {
      */
     private Playlist parseAIResponseAndCreatePlaylist(String aiResponse, String originalPrompt, Integer userId) {
         try {
-            // Extract song titles/descriptions from AI response
-            List<String> suggestedTitles = extractSuggestedTitles(aiResponse);
+            // Extract title and suggested song titles from AI response
+            String[] lines = aiResponse.split("\n");
+            String playlistName = generatePlaylistName(originalPrompt);
+            List<String> suggestedTitles = new ArrayList<>();
+            
+            if (lines.length > 0) {
+                String firstLine = lines[0].trim();
+                firstLine = firstLine.replaceAll("^(\\*\\*.*?\\*\\*|#+)\\s*", "").replaceAll("[\"']", "");
+                if (!firstLine.isBlank()) {
+                    playlistName = "🎵 " + firstLine.substring(0, 1).toUpperCase() + firstLine.substring(1);
+                }
+                
+                for (int i = 1; i < lines.length; i++) {
+                    String line = lines[i].trim();
+                    if (line.matches("^\\d+\\.\\s+.*")) {
+                        line = line.replaceFirst("^\\d+\\.\\s+", "");
+                    }
+                    line = line.replaceFirst("^[\\-\\*\u2022]\\s+", "");
+                    if (!line.isBlank() && line.length() > 2) {
+                        suggestedTitles.add(line);
+                    }
+                }
+            }
 
             // Get all available songs
             List<Musique> allMusiques = musiqueService.getAll();
@@ -116,19 +137,22 @@ public class GroqPlaylistGeneratorService {
             // Match suggested titles with available songs
             List<Musique> selectedMusiques = matchSongsToSuggestions(suggestedTitles, allMusiques);
 
-            // If no perfect matches, select songs by genre/mood keywords
-            if (selectedMusiques.size() < 3) {
-                selectedMusiques.addAll(selectSongsByKeywords(originalPrompt, allMusiques, selectedMusiques));
-            }
+            // Always add songs by genre/mood keywords to enrich the playlist
+            List<Musique> keywordMatches = selectSongsByKeywords(originalPrompt, allMusiques, selectedMusiques);
+            selectedMusiques.addAll(keywordMatches);
 
-            // Limit to reasonable playlist size
-            if (selectedMusiques.size() > 20) {
-                selectedMusiques = selectedMusiques.subList(0, 20);
+            // Determine a random number of songs depending on available musics (e.g. between 5 and 15)
+            if (selectedMusiques.size() > 3) {
+                java.util.Collections.shuffle(selectedMusiques);
+                int minSongs = Math.min(5, selectedMusiques.size());
+                int maxSongs = Math.min(15, selectedMusiques.size());
+                int randomCount = minSongs + new java.util.Random().nextInt(maxSongs - minSongs + 1);
+                selectedMusiques = new ArrayList<>(selectedMusiques.subList(0, randomCount));
             }
 
             // Create playlist entity
             Playlist playlist = new Playlist();
-            playlist.setNom(generatePlaylistName(originalPrompt));
+            playlist.setNom(playlistName);
             playlist.setDescription("Playlist générée par IA basée sur: " + originalPrompt);
             playlist.setDateCreation(LocalDate.now());
             playlist.setUserId(userId);
@@ -145,24 +169,10 @@ public class GroqPlaylistGeneratorService {
     }
 
     /**
-     * Extracts suggested song titles from AI response.
+     * Legacy method: Extracts suggested song titles from AI response.
      */
     private List<String> extractSuggestedTitles(String aiResponse) {
-        List<String> titles = new ArrayList<>();
-
-        // Split by common delimiters and extract potential song titles
-        String[] lines = aiResponse.split("\n");
-        for (String line : lines) {
-            line = line.trim();
-            // Remove numbering (1. Song Title, 2. Song Title, etc.)
-            if (line.matches("^\\d+\\.\\s+.*")) {
-                line = line.replaceFirst("^\\d+\\.\\s+", "");
-            }
-            if (!line.isBlank() && line.length() > 2) {
-                titles.add(line);
-            }
-        }
-        return titles;
+        return new ArrayList<>(); // Unused, logic moved to parseAIResponseAndCreatePlaylist
     }
 
     /**
@@ -185,10 +195,10 @@ public class GroqPlaylistGeneratorService {
     }
 
     /**
-     * Selects songs by keyword matching on genre and description.
+     * Selects all songs matching keyword matching on genre and description.
      */
     private List<Musique> selectSongsByKeywords(String prompt, List<Musique> allMusiques, List<Musique> alreadySelected) {
-        List<Musique> selected = new ArrayList<>();
+        List<Musique> matched = new ArrayList<>();
         String[] keywords = extractKeywords(prompt);
 
         for (Musique musique : allMusiques) {
@@ -198,15 +208,13 @@ public class GroqPlaylistGeneratorService {
                                      (musique.getGenre() != null ? musique.getGenre() : "");
 
             for (String keyword : keywords) {
-                if (musicDescription.toLowerCase().contains(keyword.toLowerCase())) {
-                    selected.add(musique);
+                if (keyword.length() > 2 && musicDescription.toLowerCase().contains(keyword.toLowerCase())) {
+                    matched.add(musique);
                     break;
                 }
             }
-
-            if (selected.size() >= 5) break;
         }
-        return selected;
+        return matched;
     }
 
     /**
@@ -234,10 +242,11 @@ public class GroqPlaylistGeneratorService {
      */
     private String buildContextualPrompt(String userPrompt) {
         return "Tu es un expert en recommandation musicale. Un utilisateur te demande: \"" + userPrompt + "\"\n\n" +
-               "Recommande une liste de style/genre/thème de chansons qui correspondraient parfaitement à cette demande. " +
-               "Donne des titres ou des descriptions de chansons qui pourraient convenir. " +
-               "Lis ta réponse comme une liste simple, une suggestion par ligne.\n\n" +
-               "Fournis UNIQUEMENT la liste des suggestions, sans explication supplémentaire.";
+               "Recommande une liste de chansons correspondant à cette demande.\n" +
+               "RÈGLES IMPORTANTES :\n" +
+               "1. La PREMIÈRE ligne de ta réponse DOIT être un titre court et accrocheur pour cette playlist (sans le mot 'Playlist', ex: 'Vibes d'Été').\n" +
+               "2. Les lignes SUIVANTES doivent être UNIQUEMENT la liste des chansons (Titre - Artiste), une suggestion par ligne.\n" +
+               "3. Ne fournis AUCUNE autre explication ou introduction.";
     }
 
     private String buildRequestBody(String model, String prompt) {
