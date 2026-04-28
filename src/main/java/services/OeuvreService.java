@@ -218,6 +218,29 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
         }
     }
 
+    public List<Oeuvre> getAllAmteur() throws SQLDataException {
+
+        String sql = "SELECT id, titre, description, date_creation, image, type, embedding, image_embedding, collection_id "
+                + "FROM oeuvre "
+                + "WHERE type IN ('Peinture', 'Sculpture', 'Photographie') "
+                + "ORDER BY date_creation DESC, id DESC";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql);
+             ResultSet resultSet = preparedStatement.executeQuery()) {
+
+            List<Oeuvre> oeuvres = new ArrayList<>();
+
+            while (resultSet.next()) {
+                oeuvres.add(mapOeuvre(resultSet));
+            }
+
+            return oeuvres;
+
+        } catch (SQLException e) {
+            throw new SQLDataException(e.getMessage());
+        }
+    }
+
     @Override
     public Oeuvre getById(int id) throws SQLDataException {
         return getOeuvreById(id);

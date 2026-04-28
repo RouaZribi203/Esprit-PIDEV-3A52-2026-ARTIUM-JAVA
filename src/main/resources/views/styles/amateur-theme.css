@@ -170,6 +170,34 @@
     -fx-prompt-text-fill: #9aa3b2;
 }
 
+.oeuvres-feed-toolbar {
+    -fx-padding: 2 0 2 0;
+}
+
+.oeuvres-search-wrap {
+    -fx-background-color: #f7f9fc;
+    -fx-border-color: #d8dfeb;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 0;
+}
+
+.oeuvres-search-field {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-padding: 7 28 7 10;
+    -fx-font-size: 13px;
+}
+
+.oeuvres-search-icon {
+    -fx-text-fill: #7c8da6;
+    -fx-font-size: 12px;
+    -fx-padding: 0 10 0 0;
+}
+
 .amateur-search-button,
 .amateur-primary-pill {
     -fx-background-color: #3d3bc2;

@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
 <VBox alignment="CENTER" spacing="12.0" styleClass="amateur-page-card collections-page" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.amateur.FeedController">
@@ -11,6 +15,13 @@
     <VBox alignment="CENTER" maxWidth="860.0" spacing="10.0" styleClass="collections-body-card" VBox.vgrow="ALWAYS">
         <padding><Insets bottom="12.0" left="12.0" right="12.0" top="12.0" /></padding>
 
+        <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="oeuvres-feed-toolbar">
+            <StackPane styleClass="oeuvres-search-wrap">
+                <TextField fx:id="searchField" minWidth="430.0" prefHeight="34.0" prefWidth="430.0" maxWidth="430.0" promptText="Rechercher oeuvre (titre, collection, artiste)" styleClass="oeuvres-search-field" />
+                <Label mouseTransparent="true" styleClass="oeuvres-search-icon" text="⌕" StackPane.alignment="CENTER_RIGHT" />
+            </StackPane>
+            <Region HBox.hgrow="ALWAYS" />
+        </HBox>
 
         <Label fx:id="emptyStateLabel" styleClass="page-subtitle-small" text="Chargement des oeuvres..." wrapText="true" />
 

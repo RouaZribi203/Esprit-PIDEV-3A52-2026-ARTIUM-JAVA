@@ -60,6 +60,9 @@ public class FeedController {
 	private VBox oeuvresContainer;
 
 	@FXML
+	private TextField searchField;
+
+	@FXML
 	private Label emptyStateLabel;
 
 	private final OeuvreService oeuvreService = new OeuvreService();
@@ -78,6 +81,9 @@ public class FeedController {
 	@FXML
 	public void initialize() {
 		currentUserId = UserSession.getCurrentUserId();
+		if (searchField != null) {
+			searchField.textProperty().addListener((obs, oldValue, newValue) -> applySearch());
+		}
 		loadOeuvres();
 	}
 
@@ -90,7 +96,7 @@ public class FeedController {
 	private void loadOeuvres() {
 		try {
 			allOeuvres.clear();
-			allOeuvres.addAll(oeuvreService.getAll());
+			allOeuvres.addAll(oeuvreService.getAllAmteur());
 			recommendedOeuvres.clear();
 			if (isRecommendationRoute(currentRouteFilter)) {
 				User currentUser = UserSession.getCurrentUser();
@@ -1085,9 +1091,10 @@ public class FeedController {
 	private void applySearch() {
 		List<Oeuvre> source = isRecommendationRoute(currentRouteFilter) ? recommendedOeuvres : allOeuvres;
 		List<Oeuvre> filtered = new ArrayList<>();
+		String keyword = searchField == null ? "" : safeText(searchField.getText()).toLowerCase(Locale.ROOT);
 
 		for (Oeuvre oeuvre : source) {
-			boolean keywordOk = true;
+			boolean keywordOk = matchesSearch(oeuvre, keyword);
 			boolean routeOk = matchesRouteFilter(oeuvre);
 
 			if (keywordOk && routeOk) {
@@ -1096,6 +1103,32 @@ public class FeedController {
 		}
 
 		renderOeuvres(filtered);
+	}
+
+	private boolean matchesSearch(Oeuvre oeuvre, String keyword) {
+		if (keyword == null || keyword.isBlank() || oeuvre == null) {
+			return true;
+		}
+
+		String title = safeText(oeuvre.getTitre()).toLowerCase(Locale.ROOT);
+		if (title.contains(keyword)) {
+			return true;
+		}
+
+		String collectionTitle = "";
+		try {
+			CollectionOeuvre collection = getCollectionById(oeuvre.getCollectionId());
+			collectionTitle = collection == null ? "" : safeText(collection.getTitre()).toLowerCase(Locale.ROOT);
+		} catch (Exception ignored) {
+			collectionTitle = "";
+		}
+		if (collectionTitle.contains(keyword)) {
+			return true;
+		}
+
+		User artist = loadArtistForOeuvre(oeuvre);
+		String artistName = buildArtistName(artist).toLowerCase(Locale.ROOT);
+		return artistName.contains(keyword);
 	}
 
 	private boolean matchesRouteFilter(Oeuvre oeuvre) {

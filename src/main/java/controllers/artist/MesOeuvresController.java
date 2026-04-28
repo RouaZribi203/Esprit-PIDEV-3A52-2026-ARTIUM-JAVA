@@ -39,6 +39,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.SVGPath;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.util.Duration;
 import javafx.scene.Node;
 import javafx.stage.FileChooser;
@@ -48,6 +49,11 @@ import javafx.util.StringConverter;
 import utils.UserSession;
 
 import java.io.File;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -58,6 +64,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import javax.imageio.ImageIO;
 
 public class MesOeuvresController {
 
@@ -926,12 +933,25 @@ public class MesOeuvresController {
         editItem.setGraphic(createColoredIcon("M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z", 0.58, "#6b7280"));
         editItem.setOnAction(event -> showOeuvrePopup(oeuvre));
 
+        MenuItem qrItem = new MenuItem("Générer QR code");
+        qrItem.getStyleClass().add("collection-menu-qr");
+        qrItem.setGraphic(createColoredIcon(
+                "M3 3h8v8H3V3zm2 2v4h4V5H5zm8 0h8v8h-8V5zm2 2v4h4V7h-4zM3 13h8v8H3v-8zm2 2v4h4v-4H5zm10 0h2v2h-2v-2zm2 2h2v2h-2v-2zm2-2h2v2h-2v-2zm-4 4h2v2h-2v-2zm4 0h2v2h-2v-2z",
+                0.58,
+                "#3f44d4"
+        ));
+        qrItem.setOnAction(event -> showQrCodePopup(oeuvre));
+
         MenuItem deleteItem = new MenuItem("Supprimer");
         deleteItem.getStyleClass().add("collection-menu-delete");
         deleteItem.setGraphic(createColoredIcon("M6 7h12v2H6V7zm2 3h8v10H8V10zm3-6h2l1 1h4v2H6V5h4l1-1z", 0.58, "#dc3545"));
         deleteItem.setOnAction(event -> onDeleteOeuvre(oeuvre));
 
-        ContextMenu menu = new ContextMenu(editItem, deleteItem);
+        ContextMenu menu = new ContextMenu(editItem);
+        if (oeuvre != null && "Privee".equalsIgnoreCase(safeText(oeuvre.getType()))) {
+            menu.getItems().add(qrItem);
+        }
+        menu.getItems().add(deleteItem);
         menu.getStyleClass().add("collection-menu");
         return menu;
     }
@@ -960,7 +980,127 @@ public class MesOeuvresController {
             errorAlert.showAndWait();
         }
     }
+    /****qrcode gen**/
+    private void showQrCodePopup(Oeuvre oeuvre) {
+        if (oeuvre == null || oeuvre.getId() == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.initOwner(addOeuvreButton.getScene().getWindow());
+            alert.setTitle("QR code");
+            alert.setHeaderText(null);
+            alert.setContentText("Impossible de générer le QR code : oeuvre invalide.");
+            alert.showAndWait();
+            return;
+        }
 
+        try {
+            String qrPayload = String.valueOf(oeuvre.getId());
+            String qrUrl = buildQrCodeUrl(qrPayload, 320);
+            BufferedImage qrImage = ImageIO.read(new URL(qrUrl));
+            if (qrImage == null) {
+                throw new IOException("Impossible de récupérer l'image QR.");
+            }
+            Image fxQrImage = SwingFXUtils.toFXImage(qrImage, null);
+
+            ImageView qrPreview = new ImageView(fxQrImage);
+            qrPreview.setFitWidth(280);
+            qrPreview.setFitHeight(280);
+            qrPreview.setPreserveRatio(true);
+            qrPreview.setSmooth(true);
+
+            Label title = new Label("QR code privé");
+            title.getStyleClass().add("popup-title");
+
+            Button downloadButton = new Button("Télécharger");
+            downloadButton.getStyleClass().add("popup-confirm-button");
+            downloadButton.setGraphic(createColoredIcon("M12 16l4-4h-3V4h-2v8H8l4 4zm-7 2h14v2H5v-2z", 0.58, "#ffffff"));
+            downloadButton.setGraphicTextGap(6);
+
+            Button closeButton = new Button("Fermer");
+            closeButton.getStyleClass().add("popup-close-button");
+            closeButton.setGraphic(createColoredIcon("M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z", 0.52, "#6b7280"));
+            closeButton.setGraphicTextGap(6);
+
+            Stage popupStage = new Stage();
+            popupStage.initModality(Modality.APPLICATION_MODAL);
+            popupStage.initOwner(addOeuvreButton.getScene().getWindow());
+            popupStage.setTitle("QR code oeuvre #" + oeuvre.getId());
+
+            downloadButton.setOnAction(event -> saveQrCodeImage(qrUrl, oeuvre, popupStage));
+            closeButton.setOnAction(event -> popupStage.close());
+
+            HBox actionRow = new HBox(10, downloadButton, closeButton);
+            actionRow.setAlignment(Pos.CENTER);
+
+            VBox root = new VBox(14, title, qrPreview, actionRow);
+            root.setAlignment(Pos.CENTER);
+            root.setPadding(new Insets(18));
+            root.getStyleClass().add("collection-popup");
+
+            Scene scene = new Scene(root, 420, 460);
+            if (addOeuvreButton.getScene() != null) {
+                scene.getStylesheets().addAll(addOeuvreButton.getScene().getStylesheets());
+            }
+
+            popupStage.setScene(scene);
+            popupStage.showAndWait();
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.initOwner(addOeuvreButton.getScene().getWindow());
+            alert.setTitle("QR code");
+            alert.setHeaderText("Erreur de génération");
+            alert.setContentText(e.getMessage() == null ? "Impossible de générer le QR code." : e.getMessage());
+            alert.showAndWait();
+        }
+    }
+
+    private String buildQrCodeUrl(String content, int size) {
+        String encoded = URLEncoder.encode(content, StandardCharsets.UTF_8);
+        return "https://api.qrserver.com/v1/create-qr-code/?size=" + size + "x" + size + "&data=" + encoded;
+    }
+
+    private void saveQrCodeImage(String qrUrl, Oeuvre oeuvre, Stage ownerStage) {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Télécharger le QR code");
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image PNG", "*.png"));
+        chooser.setInitialFileName("oeuvre_qr_" + oeuvre.getTitre() + ".png");
+
+        File defaultDir = new File(System.getProperty("user.home"), "Downloads");
+        if (defaultDir.exists()) {
+            chooser.setInitialDirectory(defaultDir);
+        }
+
+        File target = chooser.showSaveDialog(ownerStage);
+        if (target == null) {
+            return;
+        }
+
+        if (!target.getName().toLowerCase(Locale.ROOT).endsWith(".png")) {
+            target = new File(target.getParentFile(), target.getName() + ".png");
+        }
+
+        try {
+            BufferedImage image = ImageIO.read(new URL(qrUrl));
+            if (image == null) {
+                throw new IOException("Impossible de récupérer l'image QR.");
+            }
+            ImageIO.write(image, "png", target);
+
+            Alert success = new Alert(Alert.AlertType.INFORMATION);
+            success.initOwner(ownerStage);
+            success.setTitle("QR code");
+            success.setHeaderText(null);
+            success.setContentText("QR code téléchargé avec succès.");
+            success.showAndWait();
+        } catch (IOException e) {
+            Alert error = new Alert(Alert.AlertType.ERROR);
+            error.initOwner(ownerStage);
+            error.setTitle("QR code");
+            error.setHeaderText("Téléchargement impossible");
+            error.setContentText(e.getMessage() == null ? "Impossible d'enregistrer l'image." : e.getMessage());
+            error.showAndWait();
+        }
+    }
+    /****qrcode gen**/
     private ImageView createImageViewFromSource(String imageSource) {
         if (imageSource == null || imageSource.isBlank()) {
             return null;
