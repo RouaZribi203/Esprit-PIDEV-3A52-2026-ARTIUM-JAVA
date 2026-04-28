@@ -2,6 +2,7 @@ package controllers;
 
 import Services.UserService;
 import entities.User;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -26,6 +27,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import utils.InputValidator;
 
@@ -58,18 +60,10 @@ public abstract class BaseUsersBackofficeController {
     protected abstract String managedRole();
     protected abstract String managedRoleLabel();
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    // Chargement CSS — une seule méthode, un seul endroit
-    // ═══════════════════════════════════════════════════════════════════════════
-
     private void applyStylesheets(DialogPane pane) {
         String css = getClass().getResource("/views/styles/dashboard.css").toExternalForm();
         pane.getStylesheets().add(css);
     }
-
-    // ═══════════════════════════════════════════════════════════════════════════
-    // FXML lifecycle
-    // ═══════════════════════════════════════════════════════════════════════════
 
     @FXML
     public void initialize() {
@@ -88,10 +82,6 @@ public abstract class BaseUsersBackofficeController {
         }
         loadUsers();
     }
-
-    // ═══════════════════════════════════════════════════════════════════════════
-    // CRUD actions
-    // ═══════════════════════════════════════════════════════════════════════════
 
     @FXML
     protected void onAddUser() {
@@ -140,9 +130,80 @@ public abstract class BaseUsersBackofficeController {
         }
     }
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    // DELETE confirmation dialog
-    // ═══════════════════════════════════════════════════════════════════════════
+    protected void onBlockUser(User user) {
+        if (!showBlockConfirmationDialog(user)) return;
+        try {
+            userService.blockUser(user);
+            setMessage(managedRoleLabel() + " bloqué avec succès.", false);
+            loadUsers();
+        } catch (SQLDataException e) {
+            setMessage("Erreur blocage: " + e.getMessage(), true);
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // COMMANDES VOCALES
+    // ══════════════════════════════════════════════════════════════════════════
+
+    public void setSearchQuery(String query) {
+        if (query == null || query.isBlank()) return;
+        Platform.runLater(() -> searchField.setText(query));
+    }
+
+    public void openCreateForm(String prefillName) {
+        Platform.runLater(() -> onAddUser());
+    }
+
+    public void deleteUserByName(String name) {
+        if (name == null || name.isBlank()) return;
+        Platform.runLater(() ->
+                users.stream()
+                        .filter(u -> matchesName(u, name))
+                        .findFirst()
+                        .ifPresentOrElse(
+                                u -> onDeleteUser(u),
+                                () -> setMessage("Utilisateur introuvable : " + name, true)
+                        )
+        );
+    }
+
+    public void blockUserByName(String name) {
+        if (name == null || name.isBlank()) return;
+        Platform.runLater(() ->
+                users.stream()
+                        .filter(u -> matchesName(u, name))
+                        .findFirst()
+                        .ifPresentOrElse(
+                                u -> onBlockUser(u),
+                                () -> setMessage("Utilisateur introuvable : " + name, true)
+                        )
+        );
+    }
+
+    public void activateUserByName(String name) {
+        if (name == null || name.isBlank()) return;
+        Platform.runLater(() ->
+                users.stream()
+                        .filter(u -> matchesName(u, name))
+                        .findFirst()
+                        .ifPresentOrElse(
+                                u -> onActivateUser(u),
+                                () -> setMessage("Utilisateur introuvable : " + name, true)
+                        )
+        );
+    }
+
+    private boolean matchesName(User u, String name) {
+        String n = name.trim().toLowerCase(Locale.ROOT);
+        return safe(u.getNom()).toLowerCase(Locale.ROOT).contains(n)
+                || safe(u.getPrenom()).toLowerCase(Locale.ROOT).contains(n)
+                || (safe(u.getNom()) + " " + safe(u.getPrenom())).toLowerCase(Locale.ROOT).contains(n)
+                || (safe(u.getPrenom()) + " " + safe(u.getNom())).toLowerCase(Locale.ROOT).contains(n);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // DIALOGS
+    // ══════════════════════════════════════════════════════════════════════════
 
     private boolean showDeleteConfirmationDialog(User user) {
         ButtonType deleteButtonType = new ButtonType("Supprimer", ButtonBar.ButtonData.OK_DONE);
@@ -193,10 +254,6 @@ public abstract class BaseUsersBackofficeController {
         Optional<ButtonType> choice = confirmation.showAndWait();
         return choice.isPresent() && choice.get() == deleteButtonType;
     }
-
-    // ═══════════════════════════════════════════════════════════════════════════
-    // ACTIVATE confirmation dialog
-    // ═══════════════════════════════════════════════════════════════════════════
 
     private boolean showActivateConfirmationDialog(User user) {
         ButtonType activateButtonType = new ButtonType("Activer le compte", ButtonBar.ButtonData.OK_DONE);
@@ -260,9 +317,71 @@ public abstract class BaseUsersBackofficeController {
         return choice.isPresent() && choice.get() == activateButtonType;
     }
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    // Load & render
-    // ═══════════════════════════════════════════════════════════════════════════
+    private boolean showBlockConfirmationDialog(User user) {
+        ButtonType blockButtonType = new ButtonType("Bloquer le compte", ButtonBar.ButtonData.OK_DONE);
+
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmation.setTitle("Bloquer " + managedRoleLabel().toLowerCase(Locale.ROOT));
+        confirmation.setHeaderText(null);
+        confirmation.getDialogPane().getButtonTypes().setAll(blockButtonType, ButtonType.CANCEL);
+        confirmation.getDialogPane().setPrefSize(560, 420);
+
+        applyStylesheets(confirmation.getDialogPane());
+        confirmation.getDialogPane().getStyleClass().addAll("users-dialog-pane", "users-delete-dialog");
+
+        Label iconLabel = new Label("🔒");
+        iconLabel.setStyle("-fx-font-size: 48;");
+
+        Label modeChip = new Label("⊘ Blocage");
+        modeChip.getStyleClass().add("users-dialog-status-chip");
+        Label roleChip = new Label(managedRoleLabel());
+        roleChip.getStyleClass().add("users-dialog-role-chip");
+        HBox chipRow = new HBox(8, modeChip, roleChip);
+        chipRow.getStyleClass().add("users-dialog-chip-row");
+
+        Label title = new Label("Bloquer ce profil ?");
+        title.getStyleClass().add("users-dialog-title");
+        Label subtitle = new Label("Le compte sera bloqué et l'utilisateur ne pourra plus se connecter.");
+        subtitle.getStyleClass().add("users-dialog-subtitle");
+        subtitle.setWrapText(true);
+
+        VBox hero = new VBox(12, iconLabel, chipRow, title, subtitle);
+        hero.setAlignment(Pos.TOP_CENTER);
+        hero.getStyleClass().add("users-dialog-hero");
+
+        VBox profileCard = new VBox(10);
+        profileCard.getStyleClass().add("users-dialog-section-card");
+
+        Label profileTitle = new Label("Profil à bloquer");
+        profileTitle.getStyleClass().add("users-dialog-section-title");
+
+        profileCard.getChildren().addAll(
+                profileTitle,
+                createDetailsRow("Utilisateur", safe(user.getNom()) + " " + safe(user.getPrenom())),
+                createDetailsRow("Email",        safe(user.getEmail())),
+                createDetailsRow("Rôle",         managedRoleLabel()),
+                createDetailsRow("Statut actuel",formatStatusLabel(user.getStatut())));
+
+        Label infoLabel = new Label("⚠ Une fois bloqué, cet utilisateur perdra l'accès à la plateforme.");
+        infoLabel.getStyleClass().add("users-dialog-label");
+        infoLabel.setWrapText(true);
+
+        VBox content = new VBox(14, hero, profileCard, infoLabel);
+        content.getStyleClass().add("users-dialog-content");
+        confirmation.getDialogPane().setContent(content);
+
+        Button blockButton = (Button) confirmation.getDialogPane().lookupButton(blockButtonType);
+        blockButton.getStyleClass().addAll("card-action-button", "card-danger-button");
+        Button cancelButton = (Button) confirmation.getDialogPane().lookupButton(ButtonType.CANCEL);
+        cancelButton.getStyleClass().addAll("card-action-button", "card-soft-button");
+
+        Optional<ButtonType> choice = confirmation.showAndWait();
+        return choice.isPresent() && choice.get() == blockButtonType;
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // CHARGEMENT & RENDU
+    // ══════════════════════════════════════════════════════════════════════════
 
     private void loadUsers() {
         try {
@@ -335,10 +454,6 @@ public abstract class BaseUsersBackofficeController {
         return searchableText.toLowerCase(Locale.ROOT).contains(query);
     }
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    // User card
-    // ═══════════════════════════════════════════════════════════════════════════
-
     private Node createUserCard(User user) {
         VBox card = new VBox(14);
         card.setPrefWidth(356);
@@ -406,13 +521,17 @@ public abstract class BaseUsersBackofficeController {
         boolean blocked = user.getStatut() != null &&
                 (user.getStatut().toLowerCase(Locale.ROOT).contains("bloqu") ||
                         user.getStatut().toLowerCase(Locale.ROOT).contains("blocked"));
+
         if (blocked) {
-            Button activateButton = new Button("Activer");
+            Button activateButton = new Button("✓ Activer");
             activateButton.getStyleClass().addAll("card-action-button", "card-success-button");
             activateButton.setOnAction(e -> onActivateUser(user));
             actions.getChildren().addAll(detailsButton, spacer, activateButton, editButton, deleteButton);
         } else {
-            actions.getChildren().addAll(detailsButton, spacer, editButton, deleteButton);
+            Button blockButton = new Button("⊘ Bloquer");
+            blockButton.getStyleClass().addAll("card-action-button", "card-danger-button");
+            blockButton.setOnAction(e -> onBlockUser(user));
+            actions.getChildren().addAll(detailsButton, spacer, blockButton, editButton, deleteButton);
         }
 
         card.getChildren().addAll(topRow, badgeRow, body, actions);
@@ -430,10 +549,6 @@ public abstract class BaseUsersBackofficeController {
         row.getStyleClass().add("user-info-row");
         return row;
     }
-
-    // ═══════════════════════════════════════════════════════════════════════════
-    // Details dialog
-    // ═══════════════════════════════════════════════════════════════════════════
 
     private void showDetails(User user) {
         Alert details = new Alert(Alert.AlertType.INFORMATION);
@@ -504,10 +619,6 @@ public abstract class BaseUsersBackofficeController {
         return row;
     }
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    // Add / Edit dialog
-    // ═══════════════════════════════════════════════════════════════════════════
-
     private Optional<User> showUserDialog(User existingUser) {
         boolean creation = existingUser == null;
 
@@ -528,7 +639,6 @@ public abstract class BaseUsersBackofficeController {
         ButtonType saveButtonType = new ButtonType("Enregistrer", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
 
-        // ── Fields ──
         TextField     nomField             = new TextField();
         TextField     prenomField          = new TextField();
         DatePicker    dateNaissancePicker  = new DatePicker();
@@ -542,7 +652,6 @@ public abstract class BaseUsersBackofficeController {
         TextArea      bioArea              = new TextArea();
         Label         formErrorLabel       = new Label();
 
-        // Appliquer les classes CSS aux champs
         nomField.getStyleClass().add("users-dialog-field");
         prenomField.getStyleClass().add("users-dialog-field");
         dateNaissancePicker.getStyleClass().add("users-dialog-field");
@@ -585,7 +694,6 @@ public abstract class BaseUsersBackofficeController {
                     : clean(existingUser.getCentreInteret()));
         }
 
-        // ── En-tête du dialog ──
         Label modeChip   = new Label(dialogModeLabel);
         modeChip.getStyleClass().add("users-dialog-mode-chip");
         Label roleChip   = new Label(managedRoleLabel());
@@ -604,12 +712,11 @@ public abstract class BaseUsersBackofficeController {
         VBox hero = new VBox(6, chipRow, dialogTitle, dialogSubtitle);
         hero.getStyleClass().add("users-dialog-hero");
 
-        // ── Sections ──
-        VBox identityCard  = buildFormSection("Identité",        "Les informations de base du profil.",
+        VBox identityCard  = buildFormSection("Identité", "Les informations de base du profil.",
                 new String[]{"Nom", "Prenom", "Date naissance"},
                 new Node[]{nomField, prenomField, dateNaissancePicker});
 
-        VBox contactCard   = buildFormSection("Coordonnées",     "Email, téléphone et ville de contact.",
+        VBox contactCard   = buildFormSection("Coordonnées", "Email, téléphone et ville de contact.",
                 new String[]{"Email", "Telephone", "Ville"},
                 new Node[]{emailField, telField, villeField});
 
@@ -617,7 +724,7 @@ public abstract class BaseUsersBackofficeController {
                 new String[]{"Mot de passe", "Confirmation", "Statut", roleSpecificLabel},
                 new Node[]{passwordField, confirmPasswordField, statutCombo, roleSpecificCombo});
 
-        Label bioTitle    = new Label("Biographie");
+        Label bioTitle = new Label("Biographie");
         bioTitle.getStyleClass().add("users-dialog-section-title");
         Label bioSubtitle = new Label("Une présentation courte et soignée du profil.");
         bioSubtitle.getStyleClass().add("users-dialog-section-subtitle");
@@ -643,7 +750,6 @@ public abstract class BaseUsersBackofficeController {
         Button cancelButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.CANCEL);
         cancelButton.getStyleClass().addAll("card-action-button", "card-soft-button");
 
-        // ── Live validation ──
         final boolean[] touched = new boolean[10];
 
         Runnable liveValidation = () -> {
@@ -714,7 +820,6 @@ public abstract class BaseUsersBackofficeController {
         return dialog.showAndWait();
     }
 
-    /** Construit une section de formulaire avec titre, sous-titre et grille label/champ */
     private VBox buildFormSection(String title, String subtitle, String[] labels, Node[] fields) {
         Label titleLabel = new Label(title);
         titleLabel.getStyleClass().add("users-dialog-section-title");
@@ -735,10 +840,6 @@ public abstract class BaseUsersBackofficeController {
         card.getStyleClass().add("users-dialog-section-card");
         return card;
     }
-
-    // ═══════════════════════════════════════════════════════════════════════════
-    // Validation
-    // ═══════════════════════════════════════════════════════════════════════════
 
     private String validateForm(boolean creation, String nom, String prenom, LocalDate dob,
                                 String email, String pwd, String cpwd, String tel, String ville,
@@ -794,9 +895,9 @@ public abstract class BaseUsersBackofficeController {
         return null;
     }
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    // Helpers
-    // ═══════════════════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════════════════
+    // UTILITAIRES
+    // ══════════════════════════════════════════════════════════════════════════
 
     private String formatStatusLabel(String status) {
         String n = safe(status).toLowerCase(Locale.ROOT);

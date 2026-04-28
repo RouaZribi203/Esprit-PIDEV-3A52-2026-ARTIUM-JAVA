@@ -65,8 +65,8 @@
 					<Label text="Commencez votre inscription" wrapText="true" styleClass="auth-panel-title auth-landing-panel-title"/>
 					<Label text="Créez votre profil et accédez à une interface intuitive, optimisée pour amateur, artiste ou admin." wrapText="true" styleClass="auth-panel-text auth-landing-panel-text"/>
 					<VBox spacing="12" styleClass="auth-landing-actions">
-						<Button text="Créer mon compte" onAction="#onCreateAccount" styleClass="auth-primary-button" maxWidth="Infinity"/>
-						<Button text="J'ai déjà un compte" onAction="#onLoginClick" styleClass="auth-secondary-button" maxWidth="Infinity"/>
+                        <Button text="Se connecter" onAction="#onLoginClick" styleClass="auth-primary-button" maxWidth="Infinity"/>
+                        <Button text="Créer un compte" onAction="#onCreateAccount" styleClass="auth-secondary-button" maxWidth="Infinity"/>
 					</VBox>
 				</VBox>
 			</HBox>

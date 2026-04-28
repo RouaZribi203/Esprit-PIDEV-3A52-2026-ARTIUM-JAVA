@@ -462,6 +462,98 @@
     -fx-translate-y: 1;
 }
 
+.primary-action-button.report-action-button {
+    -fx-font-size: 12px;
+    -fx-font-weight: 800;
+    -fx-padding: 9 18 9 18;
+    -fx-background-radius: 11;
+}
+
+.report-action-button:hover {
+    -fx-effect: dropshadow(gaussian, rgba(55, 48, 212, 0.34), 18, 0.22, 0, 5);
+}
+
+.report-action-button:pressed {
+    -fx-translate-y: 1;
+}
+
+.report-action-button:disabled {
+    -fx-opacity: 0.95;
+}
+
+.report-button-spinner {
+    -fx-pref-width: 14px;
+    -fx-pref-height: 14px;
+    -fx-max-width: 14px;
+    -fx-max-height: 14px;
+}
+
+.report-button-spinner .percentage {
+    -fx-fill: transparent;
+}
+
+.report-button-spinner .spinner {
+    -fx-progress-color: white;
+}
+
+.report-dialog-pane {
+    -fx-background-color: linear-gradient(to bottom, #f8faff, #f2f6ff);
+    -fx-border-color: rgba(210, 222, 240, 0.95);
+    -fx-border-width: 1;
+    -fx-border-radius: 14;
+    -fx-background-radius: 14;
+}
+
+.report-dialog-pane .header-panel {
+    -fx-background-color: transparent;
+    -fx-padding: 14 16 8 16;
+}
+
+.report-dialog-pane:header .header-panel .label {
+    -fx-text-fill: #1f2e45;
+    -fx-font-size: 16px;
+    -fx-font-weight: 800;
+}
+
+.report-preview-area {
+    -fx-font-family: "Consolas", "Segoe UI", monospace;
+    -fx-font-size: 12px;
+    -fx-text-fill: #1f2e45;
+    -fx-highlight-fill: rgba(91, 86, 232, 0.34);
+    -fx-highlight-text-fill: white;
+    -fx-control-inner-background: white;
+    -fx-border-color: rgba(200, 214, 232, 0.95);
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 10;
+}
+
+.report-preview-area .content {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+}
+
+.report-dialog-pane .button-bar {
+    -fx-padding: 10 16 14 16;
+}
+
+.report-dialog-pane .button-bar .button {
+    -fx-background-radius: 11;
+    -fx-border-radius: 11;
+    -fx-font-weight: 800;
+    -fx-padding: 10 16 10 16;
+    -fx-cursor: hand;
+}
+
+.report-dialog-pane .button-bar .button.report-dialog-export-button {
+    -fx-effect: dropshadow(gaussian, rgba(55, 48, 212, 0.28), 18, 0.18, 0, 5);
+}
+
+.report-dialog-pane .button-bar .button.report-dialog-close-button {
+    -fx-background-color: linear-gradient(to bottom, #fcfdff, #edf2f8);
+    -fx-border-color: #d9e3ef;
+}
+
 .icon-button {
     -fx-background-color: white;
     -fx-border-color: rgba(200, 214, 232, 0.85);
@@ -1170,4 +1262,45 @@
     -fx-font-size: 13px;
     -fx-text-fill: #3c4f6a;
     -fx-wrap-text: true;
+}
+
+/* ── Commande vocale IA ──────────────────────────────────────────── */
+.voice-mic-btn {
+    -fx-background-color: linear-gradient(to bottom right, #4f46e5, #7c3aed);
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-background-radius: 999;
+    -fx-min-width: 42;
+    -fx-min-height: 42;
+    -fx-max-width: 42;
+    -fx-max-height: 42;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(79,70,229,0.40), 12, 0.2, 0, 3);
+}
+
+.voice-mic-btn:hover {
+    -fx-background-color: linear-gradient(to bottom right, #4338ca, #6d28d9);
+}
+
+.voice-mic-btn-active {
+    -fx-background-color: linear-gradient(to bottom right, #dc2626, #be185d);
+    -fx-effect: dropshadow(gaussian, rgba(220,38,38,0.50), 14, 0.25, 0, 4);
+}
+
+.voice-live-field {
+    -fx-background-color: rgba(255,255,255,0.92);
+    -fx-border-color: rgba(79,70,229,0.25);
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-border-width: 1.5;
+    -fx-padding: 8 14;
+    -fx-font-size: 13px;
+    -fx-font-style: italic;
+    -fx-text-fill: #0f1c2e;
+}
+
+.voice-ai-response {
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #4338ca;
 }

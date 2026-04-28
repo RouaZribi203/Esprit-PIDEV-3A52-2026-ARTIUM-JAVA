@@ -3,12 +3,17 @@ package controllers;
 import Services.UserService;
 import components.HumanVerificationPane;
 import entities.User;
+import utils.GoogleAuthService;        // ← nouveau
+import utils.LoginRateLimiter;
 import utils.SessionManager;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 import utils.InputValidator;
 
 import java.sql.SQLDataException;
@@ -18,16 +23,17 @@ public class ConnexionController {
     @FXML private TextField emailField;
     @FXML private PasswordField passwordField;
     @FXML private Label messageLabel;
-    @FXML private VBox loginCard; // ← nouveau, lié au fx:id du FXML
+    @FXML private VBox loginCard;
 
     private final UserService userService = new UserService();
-    private HumanVerificationPane captchaPane; // ← nouveau
+    private HumanVerificationPane captchaPane;
+    private Timeline countdownTimer;
+    private String blockedEmail;
 
     @FXML
     public void initialize() {
-        // Créer et insérer le captcha à l'index 3 (avant le bouton "Se connecter")
         captchaPane = new HumanVerificationPane();
-        loginCard.getChildren().add(3, captchaPane); // ← nouveau
+        loginCard.getChildren().add(3, captchaPane);
 
         emailField.textProperty().addListener((obs, oldV, newV) -> validateLiveInput());
         passwordField.textProperty().addListener((obs, oldV, newV) -> validateLiveInput());
@@ -36,34 +42,89 @@ public class ConnexionController {
     @FXML
     private void onLogin() {
         clearMessage();
+        stopCountdown();
 
-        // ← nouveau : vérification humaine avant tout
         if (!captchaPane.isHumanVerified()) {
             setMessage("Veuillez compléter la vérification humaine.");
             return;
         }
 
-        String email = emailField.getText() == null ? "" : emailField.getText().trim();
+        String email    = emailField.getText() == null ? "" : emailField.getText().trim();
         String password = passwordField.getText() == null ? "" : passwordField.getText();
 
         String localError = validateCredentials(email, password);
-        if (localError != null) {
-            setMessage(localError);
+        if (localError != null) { setMessage(localError); return; }
+
+        String rateError = LoginRateLimiter.check(email);
+        if (rateError != null) {
+            setMessage(rateError);
+            startCountdown(email);
             return;
         }
 
         try {
             User user = userService.authenticate(email, password);
+            LoginRateLimiter.resetOnSuccess(email);
             SessionManager.setCurrentUser(user);
             routeByRole(user);
         } catch (SQLDataException e) {
-            setMessage(e.getMessage());
+            LoginRateLimiter.recordFailure(email);
+            String newRateError = LoginRateLimiter.check(email);
+            if (newRateError != null) {
+                setMessage(newRateError);
+                startCountdown(email);
+            } else {
+                setMessage(e.getMessage());
+            }
         }
     }
 
+    // ← nouveau
+    @FXML
+    private void onGoogleLogin() {
+        clearMessage();
+        stopCountdown();
+        setMessage("Ouverture de Google...");
+
+        GoogleAuthService.signIn(
+                googleUser -> {
+                    try {
+                        User user = userService.findOrCreateGoogleUser(
+                                googleUser.email(),
+                                googleUser.name(),
+                                googleUser.googleId()
+                        );
+                        SessionManager.setCurrentUser(user);
+                        routeByRole(user);
+                    } catch (SQLDataException e) {
+                        setMessage("Erreur : " + e.getMessage());
+                    }
+                },
+                errorMsg -> setMessage(errorMsg)
+        );
+    }
+
+    private void startCountdown(String email) {
+        blockedEmail = email;
+        countdownTimer = new Timeline(
+                new KeyFrame(Duration.seconds(1), e -> {
+                    String msg = LoginRateLimiter.check(blockedEmail);
+                    if (msg != null) setMessage(msg);
+                    else { clearMessage(); stopCountdown(); }
+                })
+        );
+        countdownTimer.setCycleCount(Timeline.INDEFINITE);
+        countdownTimer.play();
+    }
+
+    private void stopCountdown() {
+        if (countdownTimer != null) { countdownTimer.stop(); countdownTimer = null; }
+        blockedEmail = null;
+    }
+
     @FXML private void onCreateAccount()  { MainFX.switchToRegistrationView(); }
-    @FXML private void onBackToLanding()  { MainFX.switchToAuthLandingView(); }
-    @FXML private void onForgotPassword() { MainFX.switchToForgotPasswordView(); }
+    @FXML private void onBackToLanding()  { MainFX.switchToAuthLandingView(); stopCountdown(); }
+    @FXML private void onForgotPassword() { MainFX.switchToForgotPasswordView(); stopCountdown(); }
 
     private void routeByRole(User user) {
         String role = user.getRole() == null ? "" : user.getRole().trim().toLowerCase();
@@ -71,7 +132,7 @@ public class ConnexionController {
             case "amateur"           -> MainFX.switchToAmateurView(user);
             case "artiste", "artist" -> MainFX.switchToArtistView(user);
             case "admin"             -> MainFX.switchToAdminView(user);
-            default                  -> setMessage("Rôle utilisateur non supporté : " + user.getRole());
+            default                  -> setMessage("Rôle non supporté : " + user.getRole());
         }
     }
 

@@ -39,11 +39,11 @@ public class DashboardService {
         int totalReclamations = loadSimpleTableCount("reclamation", "reclamations");
         int totalEvenements   = loadSimpleTableCount("evenement", "evenements");
 
-        List<MonthlySignupPoint> signupsByMonth    = loadSignupsByMonth();
-        Map<String, Integer>     roleDistribution  = loadRoleDistribution();
-        List<String>             recentSignups     = loadRecentSignups();
+        List<MonthlySignupPoint> signupsByMonth     = loadSignupsByMonth();
+        Map<String, Integer>     roleDistribution   = loadRoleDistribution();
+        List<String>             recentSignups      = loadRecentSignups();
         List<String>             recentReclamations = loadRecentReclamations();
-        List<String>             topArtistes       = loadTopArtistes();
+        List<String>             topArtistes        = loadTopArtistes();
 
         return new DashboardData(
                 totalUsers, totalArtistes, totalAmateurs,
@@ -149,17 +149,20 @@ public class DashboardService {
         return distribution;
     }
 
+    // ✅ MÉTHODE CORRIGÉE — plus de fallback sans filtre de date
     private List<String> loadRecentSignups() throws SQLDataException {
         String table      = resolveTableName("user");
         String dateColumn = table == null ? null : resolveColumn(table, "date_inscription", "dateinscription");
         if (table == null || dateColumn == null) {
-            return List.of(); // liste vide → controller affiche l'état vide
+            return List.of();
         }
 
-        String dateType     = resolveColumnType(table, dateColumn);
+        String dateType = resolveColumnType(table, dateColumn);
+
+        // Filtre strict 24h glissantes selon le type de colonne
         String recentFilter = isTimestampLike(dateType)
-                ? "`" + dateColumn + "` >= DATE_SUB(NOW(), INTERVAL 1 DAY)"
-                : "`" + dateColumn + "` >= CURDATE()";
+                ? "`" + dateColumn + "` >= DATE_SUB(NOW(), INTERVAL 24 HOUR)"
+                : "`" + dateColumn + "` >= DATE_SUB(CURDATE(), INTERVAL 1 DAY)";
 
         String sql = "SELECT `nom`, `prenom`, `" + dateColumn + "` AS signup_date FROM `" + table + "` " +
                 "WHERE `" + dateColumn + "` IS NOT NULL AND " + recentFilter + " " +
@@ -176,28 +179,14 @@ public class DashboardService {
             throw new SQLDataException("Lecture inscriptions recentes impossible: " + e.getMessage());
         }
 
-        // Fallback : si aucune inscription aujourd'hui, prendre les 8 dernières
-        if (rows.isEmpty()) {
-            String fallbackSql = "SELECT `nom`, `prenom`, `" + dateColumn + "` AS signup_date FROM `" + table + "` " +
-                    "WHERE `" + dateColumn + "` IS NOT NULL ORDER BY `" + dateColumn + "` DESC LIMIT 8";
-            try (PreparedStatement ps = connection.prepareStatement(fallbackSql);
-                 ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    String fullName = (safeTrim(rs.getString("prenom")) + " " + safeTrim(rs.getString("nom"))).trim();
-                    rows.add(fullName + " - " + formatDateValue(rs.getObject("signup_date")));
-                }
-            } catch (SQLException e) {
-                throw new SQLDataException("Lecture inscriptions recentes (fallback) impossible: " + e.getMessage());
-            }
-        }
-
-        return rows; // liste vide → controller affiche "Aucune inscription récente."
+        // ⚠ PAS DE FALLBACK — liste vide = "Aucune inscription récente" affiché dans le controller
+        return rows;
     }
 
     private List<String> loadRecentReclamations() throws SQLDataException {
         String table = resolveTableName("reclamation", "reclamations");
         if (table == null) {
-            return List.of(); // liste vide → controller affiche l'état vide
+            return List.of();
         }
 
         String textColumn   = resolveColumn(table, "texte", "description", "objet", "titre", "contenu");
@@ -259,7 +248,7 @@ public class DashboardService {
             }
         }
 
-        return rows; // liste vide → controller affiche "Aucune réclamation récente."
+        return rows;
     }
 
     private List<String> loadTopArtistes() throws SQLDataException {
@@ -307,10 +296,10 @@ public class DashboardService {
             throw new SQLDataException("Lecture top artistes (fallback) impossible: " + e.getMessage());
         }
 
-        return rows; // liste vide → controller affiche "Aucun artiste disponible."
+        return rows;
     }
 
-    // ── Helpers metadata ────────────────────────────────────────────────────
+    // ── Helpers metadata ─────────────────────────────────────────────────────
 
     private String resolveTableName(String... candidates) throws SQLDataException {
         Map<String, String> existingTables = loadTablesByLowerName();
@@ -381,10 +370,10 @@ public class DashboardService {
 
     private String formatDateValue(Object rawDate) {
         if (rawDate == null) return "";
-        if (rawDate instanceof LocalDate localDate)                       return localDate.toString();
-        if (rawDate instanceof java.time.LocalDateTime localDateTime)     return localDateTime.toLocalDate().toString();
-        if (rawDate instanceof java.sql.Date sqlDate)                     return sqlDate.toLocalDate().toString();
-        if (rawDate instanceof java.sql.Timestamp timestamp)              return timestamp.toLocalDateTime().toLocalDate().toString();
+        if (rawDate instanceof LocalDate localDate)                   return localDate.toString();
+        if (rawDate instanceof java.time.LocalDateTime localDateTime) return localDateTime.toLocalDate().toString();
+        if (rawDate instanceof java.sql.Date sqlDate)                 return sqlDate.toLocalDate().toString();
+        if (rawDate instanceof java.sql.Timestamp timestamp)          return timestamp.toLocalDateTime().toLocalDate().toString();
         return String.valueOf(rawDate);
     }
 
@@ -396,7 +385,7 @@ public class DashboardService {
         if (connection == null) throw new SQLDataException("Connexion base de donnees indisponible.");
     }
 
-    // ── Data classes ─────────────────────────────────────────────────────────
+    // ── Data classes ──────────────────────────────────────────────────────────
 
     public static final class DashboardData {
         private final int totalUsers, totalArtistes, totalAmateurs;
@@ -418,17 +407,18 @@ public class DashboardService {
             this.recentSignups = recentSignups; this.recentReclamations = recentReclamations; this.topArtistes = topArtistes;
         }
 
-        public int getTotalUsers()           { return totalUsers; }
-        public int getTotalArtistes()        { return totalArtistes; }
-        public int getTotalAmateurs()        { return totalAmateurs; }
-        public int getTotalOeuvres()         { return totalOeuvres; }
-        public int getTotalReclamations()    { return totalReclamations; }
-        public int getTotalEvenements()      { return totalEvenements; }
-        public List<MonthlySignupPoint> getSignupsByMonth()    { return signupsByMonth; }
-        public Map<String, Integer>     getRoleDistribution()  { return roleDistribution; }
-        public List<String> getRecentSignups()       { return recentSignups; }
-        public List<String> getRecentReclamations()  { return recentReclamations; }
-        public List<String> getTopArtistes()         { return topArtistes; }
+        public int getTotalUsers()        { return totalUsers; }
+        public int getTotalArtistes()     { return totalArtistes; }
+        public int getTotalAmateurs()     { return totalAmateurs; }
+        public int getTotalOeuvres()      { return totalOeuvres; }
+        public int getTotalReclamations() { return totalReclamations; }
+        public int getTotalEvenements()   { return totalEvenements; }
+
+        public List<MonthlySignupPoint> getSignupsByMonth()   { return signupsByMonth; }
+        public Map<String, Integer>     getRoleDistribution() { return roleDistribution; }
+        public List<String> getRecentSignups()      { return recentSignups; }
+        public List<String> getRecentReclamations() { return recentReclamations; }
+        public List<String> getTopArtistes()        { return topArtistes; }
     }
 
     public static final class MonthlySignupPoint {

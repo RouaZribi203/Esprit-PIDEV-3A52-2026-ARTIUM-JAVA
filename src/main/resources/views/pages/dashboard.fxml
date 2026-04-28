@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import java.lang.String?>
 
 <ScrollPane
         fitToHeight="true"
@@ -28,7 +30,19 @@
                     <Label styleClass="page-title"    text="Tableau de Bord" />
                     <Label styleClass="page-subtitle" text="Vue d'ensemble  ·  Administration" />
                 </VBox>
-                <HBox fx:id="headerChipsContainer" alignment="CENTER_RIGHT" spacing="8.0" />
+                <HBox fx:id="headerChipsContainer" alignment="CENTER_RIGHT" spacing="8.0">
+                    <children>
+                        <Button fx:id="generateReportButton"
+                                text="Generer rapport"
+                                onAction="#onGenerateReport">
+                            <styleClass>
+                                <String fx:value="button" />
+                                <String fx:value="primary-action-button" />
+                                <String fx:value="report-action-button" />
+                            </styleClass>
+                        </Button>
+                    </children>
+                </HBox>
             </HBox>
 
             <HBox fx:id="statsContainer" spacing="14.0" />

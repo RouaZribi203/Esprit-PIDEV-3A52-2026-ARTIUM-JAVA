@@ -411,15 +411,9 @@ public class UserService implements Iservice<User> {
             throw new SQLDataException("Role invalide.");
         }
 
-        if ("admin".equalsIgnoreCase(role.trim())) {
-            return "Admin";
-        }
-        if ("amateur".equalsIgnoreCase(role.trim())) {
-            return "Amateur";
-        }
-        if ("artiste".equalsIgnoreCase(role.trim())) {
-            return "Artiste";
-        }
+        if ("admin".equalsIgnoreCase(role.trim())) return "Admin";
+        if ("amateur".equalsIgnoreCase(role.trim())) return "Amateur";
+        if ("artiste".equalsIgnoreCase(role.trim())) return "Artiste";
         throw new SQLDataException("Role non supporte: " + role);
     }
 
@@ -429,7 +423,6 @@ public class UserService implements Iservice<User> {
             user.setCentreInteret(null);
             return;
         }
-
         if ("Amateur".equals(role)) {
             user.setSpecialite(null);
             if (isBlank(user.getCentreInteret())) {
@@ -437,7 +430,6 @@ public class UserService implements Iservice<User> {
             }
             return;
         }
-
         if ("Artiste".equals(role)) {
             user.setCentreInteret(null);
             if (isBlank(user.getSpecialite())) {
@@ -457,13 +449,9 @@ public class UserService implements Iservice<User> {
     }
 
     private boolean isBlockedStatus(String statut) {
-        if (isBlank(statut)) {
-            return false;
-        }
-        String normalizedStatut = statut.trim().toLowerCase();
-        return "bloque".equals(normalizedStatut)
-                || "bloqué".equals(normalizedStatut)
-                || "blocked".equals(normalizedStatut);
+        if (isBlank(statut)) return false;
+        String n = statut.trim().toLowerCase();
+        return "bloque".equals(n) || "bloqué".equals(n) || "blocked".equals(n);
     }
 
     private void validateSchemaColumns() throws SQLDataException {
@@ -477,16 +465,11 @@ public class UserService implements Iservice<User> {
     }
 
     private String resolveExistingColumn(String[] candidates) {
-        if (connection == null) {
-            return null;
-        }
-
+        if (connection == null) return null;
         try {
             DatabaseMetaData metaData = connection.getMetaData();
             for (String candidate : candidates) {
-                if (columnExists(metaData, "user", candidate)) {
-                    return candidate;
-                }
+                if (columnExists(metaData, "user", candidate)) return candidate;
             }
         } catch (SQLException ignored) {
             return null;
@@ -502,7 +485,6 @@ public class UserService implements Iservice<User> {
 
     private void validateRequiredFields(User user) throws SQLDataException {
         List<String> missingFields = new ArrayList<>();
-
         if (isBlank(user.getNom())) missingFields.add("nom");
         if (isBlank(user.getPrenom())) missingFields.add("prenom");
         if (user.getDateNaissance() == null) missingFields.add("date_naissance");
@@ -539,18 +521,11 @@ public class UserService implements Iservice<User> {
     }
 
     private boolean matchesPassword(String rawPassword, String storedPassword) throws SQLDataException {
-        if (isBlank(storedPassword)) {
-            return false;
-        }
-
-        if (!storedPassword.startsWith("pbkdf2_sha256$")) {
-            return rawPassword.equals(storedPassword);
-        }
+        if (isBlank(storedPassword)) return false;
+        if (!storedPassword.startsWith("pbkdf2_sha256$")) return rawPassword.equals(storedPassword);
 
         String[] parts = storedPassword.split("\\$");
-        if (parts.length != 4) {
-            return false;
-        }
+        if (parts.length != 4) return false;
 
         try {
             int iterations = Integer.parseInt(parts[1]);
@@ -684,6 +659,33 @@ public class UserService implements Iservice<User> {
         }
     }
 
+    // ✅ AJOUT — bloquer un compte activé
+    public void blockUser(User user) throws SQLDataException {
+        if (user == null || user.getId() == null) {
+            throw new SQLDataException("Blocage impossible: identifiant utilisateur manquant.");
+        }
+        ensureConnection();
+        ensureIdColumn();
+
+        if (isBlockedStatus(user.getStatut())) {
+            throw new SQLDataException("Ce compte est déjà bloqué.");
+        }
+
+        String sql = "UPDATE `user` SET `statut` = ? WHERE `" + idColumn + "` = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, BLOCKED_STATUT);
+            ps.setInt(2, user.getId());
+            int affectedRows = ps.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLDataException("Aucun utilisateur bloqué (id introuvable).");
+            }
+        } catch (SQLDataException e) {
+            throw e;
+        } catch (SQLException e) {
+            throw new SQLDataException("Blocage utilisateur impossible: " + e.getMessage());
+        }
+    }
+
     @Override
     public List<User> getAll() throws SQLDataException {
         ensureConnection();
@@ -755,11 +757,52 @@ public class UserService implements Iservice<User> {
             return LocalDateTime.now().isAfter(expiresAt);
         }
     }
+
+    public User findByEmail(String email) throws SQLDataException {
+        return findUserByEmail(email);
+    }
+
+    public User findOrCreateGoogleUser(String email, String name, String googleId) throws SQLDataException {
+        ensureConnection();
+
+        User existing = findUserByEmail(email);
+        if (existing != null) {
+            if (isBlockedStatus(existing.getStatut())) {
+                throw new SQLDataException(BLOCKED_LOGIN_MESSAGE);
+            }
+            return existing;
+        }
+
+        String nom    = name.contains(" ") ? name.substring(0, name.lastIndexOf(" "))  : name;
+        String prenom = name.contains(" ") ? name.substring(name.lastIndexOf(" ") + 1) : "-";
+
+        String sql = "INSERT INTO `user` " +
+                "(`nom`, `prenom`, `date_naissance`, `email`, `mdp`, `role`, `statut`, `date_inscription`, " +
+                "`num_tel`, `ville`, `biographie`, `" + specialiteColumn + "`, `" + centreInteretColumn + "`, " +
+                "`photo_reference_path`, `photo_profil`) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1,  nom);
+            ps.setString(2,  prenom);
+            ps.setDate(3,    Date.valueOf(LocalDate.of(2000, 1, 1)));
+            ps.setString(4,  email);
+            ps.setString(5,  "google_oauth_" + googleId);
+            ps.setString(6,  "Amateur");
+            ps.setString(7,  ADMIN_STATUT);
+            ps.setDate(8,    Date.valueOf(LocalDate.now()));
+            ps.setString(9,  "00000000");
+            ps.setString(10, "Non défini");
+            ps.setString(11, "Compte créé via Google");
+            ps.setNull(12,   java.sql.Types.VARCHAR);
+            ps.setString(13, "Art général");
+            ps.setNull(14,   java.sql.Types.VARCHAR);
+            ps.setNull(15,   java.sql.Types.VARCHAR);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new SQLDataException("Création compte Google impossible: " + e.getMessage());
+        }
+
+        return findUserByEmail(email);
+    }
 }
-
-
-
-
-
-
-
