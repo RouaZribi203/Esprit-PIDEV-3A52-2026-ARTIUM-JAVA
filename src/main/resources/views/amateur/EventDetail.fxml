@@ -12,128 +12,151 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.web.WebView?>
+<?import javafx.scene.shape.Rectangle?>
 
-<BorderPane fx:controller="controllers.amateur.EventDetailController" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane fx:controller="controllers.amateur.EventDetailController" style="-fx-background-color: #f3f4f6;" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1">
     <center>
-        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="event-detail-scroll">
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent; -fx-background: transparent;">
             <content>
-                <VBox spacing="18.0" styleClass="event-detail-root">
+                <VBox spacing="24.0" alignment="TOP_CENTER">
                     <padding>
-                        <Insets top="12.0" right="12.0" bottom="12.0" left="12.0" />
+                        <Insets top="20.0" right="40.0" bottom="40.0" left="40.0" />
                     </padding>
 
-                    <StackPane minHeight="260.0" styleClass="event-cover-box">
-                        <ImageView fx:id="coverImageView" fitWidth="900.0" fitHeight="260.0" preserveRatio="true" />
+                    <!-- Hero Section -->
+                    <StackPane>
+                        <VBox alignment="CENTER" style="-fx-background-color: #ffffff; -fx-background-radius: 16px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 15, 0, 0, 5); -fx-overflow: hidden;">
+                            <StackPane minHeight="320.0" style="-fx-background-color: #e5e7eb; -fx-background-radius: 16px 16px 0 0;">
+                                <!-- To implement rounded corners on an ImageView in FXML without a custom clip, we wrap it in a StackPane with rounded corners and hide overflow. JavaFX doesn't easily do overflow:hidden, so we keep the standard approach but with nicer paddings -->
+                                <ImageView fx:id="coverImageView" fitWidth="1000.0" fitHeight="320.0" preserveRatio="false" />
+                                <VBox alignment="BOTTOM_LEFT" style="-fx-background-color: linear-gradient(to top, rgba(0,0,0,0.8), transparent);">
+                                    <padding>
+                                        <Insets bottom="20.0" left="30.0" right="30.0" top="60.0" />
+                                    </padding>
+                                    <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                        <Label fx:id="typeLabel" text="Type" style="-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-padding: 4px 12px; -fx-background-radius: 20px; -fx-font-weight: bold; -fx-font-size: 13px; -fx-border-color: rgba(255,255,255,0.4); -fx-border-radius: 20px;" />
+                                        <Label fx:id="statusLabel" text="Statut" style="-fx-background-color: rgba(52,211,153,0.9); -fx-text-fill: white; -fx-padding: 4px 12px; -fx-background-radius: 20px; -fx-font-weight: bold; -fx-font-size: 13px;" />
+                                    </HBox>
+                                    <Label fx:id="titleLabel" text="Titre de l'évènement" wrapText="true" style="-fx-font-size: 36px; -fx-font-weight: 900; -fx-text-fill: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 5, 0, 0, 2);" />
+                                </VBox>
+                            </StackPane>
+                            
+                            <VBox spacing="20.0" style="-fx-padding: 30px;">
+                                <!-- Description -->
+                                <VBox spacing="8.0">
+                                    <Label text="À propos de l'évènement" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #111827;" />
+                                    <Label fx:id="descriptionLabel" text="Description" wrapText="true" style="-fx-font-size: 15px; -fx-text-fill: #4b5563; -fx-line-spacing: 4px;" />
+                                </VBox>
+
+                                <!-- Stats Grid -->
+                                <GridPane hgap="20.0" vgap="16.0">
+                                    <columnConstraints>
+                                        <ColumnConstraints hgrow="ALWAYS" percentWidth="25.0" />
+                                        <ColumnConstraints hgrow="ALWAYS" percentWidth="25.0" />
+                                        <ColumnConstraints hgrow="ALWAYS" percentWidth="25.0" />
+                                        <ColumnConstraints hgrow="ALWAYS" percentWidth="25.0" />
+                                    </columnConstraints>
+                                    
+                                    <!-- Date -->
+                                    <VBox spacing="6.0" style="-fx-background-color: #f8fafc; -fx-padding: 16px; -fx-background-radius: 12px; -fx-border-color: #e2e8f0; -fx-border-radius: 12px;" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                        <HBox spacing="8.0" alignment="CENTER_LEFT">
+                                            <Label text="📅" style="-fx-font-size: 18px;" />
+                                            <Label text="Début" style="-fx-text-fill: #64748b; -fx-font-weight: bold; -fx-font-size: 13px;" />
+                                        </HBox>
+                                        <Label fx:id="dateDebutLabel" text="-" style="-fx-text-fill: #0f172a; -fx-font-weight: bold; -fx-font-size: 15px;" wrapText="true" />
+                                    </VBox>
+
+                                    <!-- Fin -->
+                                    <VBox spacing="6.0" style="-fx-background-color: #f8fafc; -fx-padding: 16px; -fx-background-radius: 12px; -fx-border-color: #e2e8f0; -fx-border-radius: 12px;" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                                        <HBox spacing="8.0" alignment="CENTER_LEFT">
+                                            <Label text="⏱️" style="-fx-font-size: 18px;" />
+                                            <Label text="Fin" style="-fx-text-fill: #64748b; -fx-font-weight: bold; -fx-font-size: 13px;" />
+                                        </HBox>
+                                        <Label fx:id="dateFinLabel" text="-" style="-fx-text-fill: #0f172a; -fx-font-weight: bold; -fx-font-size: 15px;" wrapText="true" />
+                                    </VBox>
+
+                                    <!-- Prix -->
+                                    <VBox spacing="6.0" style="-fx-background-color: #f0fdf4; -fx-padding: 16px; -fx-background-radius: 12px; -fx-border-color: #bbf7d0; -fx-border-radius: 12px;" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                                        <HBox spacing="8.0" alignment="CENTER_LEFT">
+                                            <Label text="💰" style="-fx-font-size: 18px;" />
+                                            <Label text="Prix" style="-fx-text-fill: #166534; -fx-font-weight: bold; -fx-font-size: 13px;" />
+                                        </HBox>
+                                        <Label fx:id="priceLabel" text="-" style="-fx-text-fill: #15803d; -fx-font-weight: 900; -fx-font-size: 18px;" wrapText="true" />
+                                    </VBox>
+
+                                    <!-- Capacité -->
+                                    <VBox spacing="6.0" style="-fx-background-color: #f8fafc; -fx-padding: 16px; -fx-background-radius: 12px; -fx-border-color: #e2e8f0; -fx-border-radius: 12px;" GridPane.columnIndex="3" GridPane.rowIndex="0">
+                                        <HBox spacing="8.0" alignment="CENTER_LEFT">
+                                            <Label text="👥" style="-fx-font-size: 18px;" />
+                                            <Label text="Capacité" style="-fx-text-fill: #64748b; -fx-font-weight: bold; -fx-font-size: 13px;" />
+                                        </HBox>
+                                        <Label fx:id="capacityLabel" text="-" style="-fx-text-fill: #0f172a; -fx-font-weight: bold; -fx-font-size: 15px;" wrapText="true" />
+                                    </VBox>
+                                </GridPane>
+                                
+                                <HBox spacing="10.0" alignment="CENTER_LEFT" style="-fx-padding: 10px 0 0 0;">
+                                    <Label text="📍 Galerie:" style="-fx-text-fill: #6b7280; -fx-font-weight: bold; -fx-font-size: 14px;" />
+                                    <Label fx:id="galleryLabel" text="-" style="-fx-text-fill: #1f2937; -fx-font-weight: bold; -fx-font-size: 14px;" />
+                                    <StackPane HBox.hgrow="ALWAYS" />
+                                    <Label fx:id="metaLabel" text="-" style="-fx-text-fill: #9ca3af; -fx-font-size: 12px;" />
+                                </HBox>
+                            </VBox>
+                        </VBox>
                     </StackPane>
 
-                    <VBox spacing="14.0" styleClass="amateur-page-card event-detail-header-card">
-                        <padding>
-                            <Insets top="18.0" right="18.0" bottom="18.0" left="18.0" />
-                        </padding>
-
-                        <Label fx:id="titleLabel" styleClass="event-title" text="Evenement" wrapText="true" />
-
-                        <HBox spacing="8.0">
-                            <Label fx:id="typeLabel" styleClass="event-chip event-chip-type" text="Type" />
-                            <Label fx:id="statusLabel" styleClass="event-chip event-chip-status" text="Statut" />
-                        </HBox>
-
-                        <Label text="Description" styleClass="event-description-title" />
-                        <Label fx:id="descriptionLabel" styleClass="event-description" text="Description" wrapText="true" />
-
-                        <GridPane hgap="18.0" vgap="8.0">
-                            <columnConstraints>
-                                <ColumnConstraints hgrow="ALWAYS" />
-                                <ColumnConstraints hgrow="ALWAYS" />
-                                <ColumnConstraints hgrow="ALWAYS" />
-                                <ColumnConstraints hgrow="ALWAYS" />
-                            </columnConstraints>
-                            <HBox spacing="6.0" alignment="CENTER_LEFT" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                                <Label text="📅" styleClass="stat-icon" />
-                                <Label styleClass="event-stat-label" text="Horaire debut" />
-                            </HBox>
-                            <HBox spacing="6.0" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                                <Label text="⏱️" styleClass="stat-icon" />
-                                <Label styleClass="event-stat-label" text="Horaire fin" />
-                            </HBox>
-                            <HBox spacing="6.0" alignment="CENTER_LEFT" GridPane.columnIndex="2" GridPane.rowIndex="0">
-                                <Label text="💰" styleClass="stat-icon" />
-                                <Label styleClass="event-stat-label" text="Prix" />
-                            </HBox>
-                            <HBox spacing="6.0" alignment="CENTER_LEFT" GridPane.columnIndex="3" GridPane.rowIndex="0">
-                                <Label text="👥" styleClass="stat-icon" />
-                                <Label styleClass="event-stat-label" text="Capacite" />
-                            </HBox>
-
-                            <Label fx:id="dateDebutLabel" styleClass="event-stat-value" text="-" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                            <Label fx:id="dateFinLabel" styleClass="event-stat-value" text="-" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                            <Label fx:id="priceLabel" styleClass="event-stat-value event-price-value" text="-" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                            <Label fx:id="capacityLabel" styleClass="event-stat-value" text="-" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                        </GridPane>
-
-                        <HBox spacing="8.0" alignment="CENTER_LEFT" styleClass="event-location-info">
-                            <Label text="📍" styleClass="stat-icon" />
-                            <Label text="Galerie:" styleClass="event-location-label" />
-                            <Label fx:id="galleryLabel" text="-" />
-                            <Label fx:id="metaLabel" styleClass="page-caption" text="-" />
-                        </HBox>
-                    </VBox>
-
-                    <VBox spacing="10.0" styleClass="amateur-page-card ticket-section-card">
-                        <padding>
-                            <Insets top="14.0" right="14.0" bottom="14.0" left="14.0" />
-                        </padding>
-
-                        <HBox alignment="CENTER_LEFT" spacing="12.0">
-                            <Label text="Mes tickets" styleClass="ticket-section-title" />
-                            <Label fx:id="ticketsCountLabel" styleClass="ticket-count-chip" text="0 ticket(s)" />
-                            <Button fx:id="ticketsToggleButton" mnemonicParsing="false" onAction="#onToggleTicketsClick" styleClass="ticket-toggle-button" text="Voir plus" visible="false" managed="false" />
+                    <!-- Tickets Section -->
+                    <VBox spacing="16.0" style="-fx-background-color: #ffffff; -fx-background-radius: 16px; -fx-padding: 24px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 4);">
+                        <HBox alignment="CENTER_LEFT" spacing="16.0">
+                            <Label text="🎟️ Mes tickets" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #111827;" />
+                            <Label fx:id="ticketsCountLabel" text="0 ticket(s)" style="-fx-background-color: #e0e7ff; -fx-text-fill: #4338ca; -fx-padding: 4px 12px; -fx-background-radius: 20px; -fx-font-weight: bold; -fx-font-size: 13px;" />
+                            <Button fx:id="ticketsToggleButton" mnemonicParsing="false" onAction="#onToggleTicketsClick" text="Voir plus" visible="false" managed="false" style="-fx-background-color: transparent; -fx-text-fill: #6366f1; -fx-cursor: hand; -fx-underline: true;" />
+                            
                             <StackPane HBox.hgrow="ALWAYS" />
-                            <Button fx:id="buyTicketButton" text="Acheter ticket" onAction="#onBuyTicketClick" styleClass="ticket-action-primary" />
-                            <Button fx:id="backButton" text="Retour" onAction="#onBackClick" styleClass="ticket-action-secondary" />
+                            
+                            <Button fx:id="backButton" text="Retour" onAction="#onBackClick" style="-fx-background-color: #f3f4f6; -fx-text-fill: #4b5563; -fx-font-weight: bold; -fx-padding: 10px 20px; -fx-background-radius: 8px; -fx-cursor: hand;" />
+                            <Button fx:id="buyTicketButton" text="Acheter ticket" onAction="#onBuyTicketClick" style="-fx-background-color: #4f46e5; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10px 24px; -fx-background-radius: 8px; -fx-cursor: hand; -fx-font-size: 15px;" />
                         </HBox>
 
-                        <Label fx:id="ticketsEmptyLabel" styleClass="page-caption" text="Aucun ticket achete pour cet evenement." />
-                        <VBox fx:id="ticketsContainer" spacing="8.0" VBox.vgrow="ALWAYS" />
+                        <Label fx:id="ticketsEmptyLabel" text="Aucun ticket acheté pour cet évènement." style="-fx-text-fill: #6b7280; -fx-font-size: 14px; -fx-padding: 10px 0;" />
+                        <VBox fx:id="ticketsContainer" spacing="12.0" VBox.vgrow="ALWAYS" />
                     </VBox>
 
-                    <VBox spacing="16.0" styleClass="amateur-page-card event-location-card">
-                        <padding>
-                            <Insets top="18.0" right="18.0" bottom="18.0" left="18.0" />
-                        </padding>
+                    <!-- Location Section -->
+                    <VBox spacing="20.0" style="-fx-background-color: #ffffff; -fx-background-radius: 16px; -fx-padding: 24px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 4);">
+                        <Label text="🗺️ Localisation" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #111827;" />
 
-                        <Label text="Localisation de l'événement" styleClass="event-location-title" />
+                        <HBox spacing="30.0" alignment="TOP_LEFT">
+                            <!-- Info Column -->
+                            <VBox spacing="16.0" prefWidth="320.0" minWidth="280.0">
+                                <Label fx:id="galleryNameLabel" text="Galerie" wrapText="true" style="-fx-font-size: 22px; -fx-font-weight: 800; -fx-text-fill: #1f2937;" />
 
-                        <HBox spacing="24.0" alignment="TOP_LEFT">
-                            <VBox spacing="10.0" prefWidth="300.0" minWidth="260.0" maxWidth="340.0">
-                                <VBox spacing="10.0" styleClass="event-location-details-card">
-                                    <Label fx:id="galleryNameLabel" text="Galerie" styleClass="event-location-gallery-name" wrapText="true" />
+                                <VBox spacing="4.0">
+                                    <Label text="Adresse" style="-fx-text-fill: #6b7280; -fx-font-size: 13px; -fx-font-weight: bold; -fx-text-transform: uppercase;" />
+                                    <Label fx:id="galleryAddressLabel" text="-" wrapText="true" style="-fx-text-fill: #111827; -fx-font-size: 15px;" />
+                                </VBox>
 
-                                    <VBox spacing="3.0">
-                                        <Label text="Adresse" styleClass="event-location-field-label" />
-                                        <Label fx:id="galleryAddressLabel" text="-" styleClass="event-location-field-value" wrapText="true" />
-                                    </VBox>
+                                <VBox spacing="4.0">
+                                    <Label text="Coordonnées" style="-fx-text-fill: #6b7280; -fx-font-size: 13px; -fx-font-weight: bold; -fx-text-transform: uppercase;" />
+                                    <Label fx:id="galleryCoordinatesLabel" text="-" wrapText="true" style="-fx-text-fill: #111827; -fx-font-size: 15px;" />
+                                </VBox>
 
-                                    <VBox spacing="3.0">
-                                        <Label text="Coordonnées" styleClass="event-location-field-label" />
-                                        <Label fx:id="galleryCoordinatesLabel" text="-" styleClass="event-location-field-value" wrapText="true" />
-                                    </VBox>
-
-                                    <VBox spacing="3.0">
-                                        <Label text="Capacité de la galerie" styleClass="event-location-field-label" />
-                                        <Label fx:id="galleryCapacityLabel" text="-" styleClass="event-location-field-value" wrapText="true" />
-                                    </VBox>
+                                <VBox spacing="4.0">
+                                    <Label text="Capacité max de la galerie" style="-fx-text-fill: #6b7280; -fx-font-size: 13px; -fx-font-weight: bold; -fx-text-transform: uppercase;" />
+                                    <Label fx:id="galleryCapacityLabel" text="-" wrapText="true" style="-fx-text-fill: #111827; -fx-font-size: 15px;" />
                                 </VBox>
                             </VBox>
 
-                            <StackPane HBox.hgrow="ALWAYS" minHeight="280.0" styleClass="event-map-box">
-                                <WebView fx:id="mapWebView" />
+                            <!-- Map View -->
+                            <StackPane HBox.hgrow="ALWAYS" minHeight="200.0" prefHeight="220.0" maxHeight="220.0" style="-fx-background-color: #f3f4f6; -fx-background-radius: 12px; -fx-border-color: #e5e7eb; -fx-border-radius: 12px; -fx-overflow: hidden;">
+                                <WebView fx:id="mapWebView" prefHeight="220.0" maxHeight="220.0" />
                             </StackPane>
                         </HBox>
                     </VBox>
+                    
+                    <!-- Spacer -->
+                    <StackPane minHeight="20.0" />
                 </VBox>
             </content>
         </ScrollPane>
     </center>
 </BorderPane>
-
