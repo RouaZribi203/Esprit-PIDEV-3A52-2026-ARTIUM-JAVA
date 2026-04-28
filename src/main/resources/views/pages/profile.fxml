@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.geometry.Insets?>
+
+<ScrollPane fx:controller="controllers.ProfileController"
+            xmlns:fx="http://javafx.com/fxml"
+            fitToWidth="true"
+            hbarPolicy="NEVER"
+            styleClass="profile-scroll"
+            stylesheets="@../styles/profile.css">
+
+    <VBox styleClass="profile-root">
+
+        <!-- ══ HERO BANNER ══ -->
+        <StackPane styleClass="profile-hero">
+            <Pane/>
+
+            <VBox alignment="CENTER">
+                <StackPane styleClass="avatar-ring-outer"
+                           prefWidth="112" prefHeight="112">
+                    <Circle radius="56" styleClass="avatar-ring-inner"/>
+                    <ImageView fx:id="profileAvatar"
+                               fitWidth="108" fitHeight="108"
+                               preserveRatio="true"
+                               StackPane.alignment="CENTER"/>
+                </StackPane>
+                <VBox.margin><Insets top="24"/></VBox.margin>
+            </VBox>
+
+            <Button fx:id="editPhotoBtn" text="✎" styleClass="edit-photo-btn"
+                    StackPane.alignment="TOP_RIGHT" onAction="#onEditPhoto">
+                <StackPane.margin><Insets top="16" right="24"/></StackPane.margin>
+            </Button>
+        </StackPane>
+
+        <!-- ══ NAME + META ══ -->
+        <VBox styleClass="profile-identity" alignment="CENTER" spacing="6">
+            <Label fx:id="fullNameLabel" styleClass="profile-fullname" text="— —"/>
+            <Label fx:id="roleLabel"     styleClass="profile-role-badge" text="Artiste"/>
+            <HBox alignment="CENTER" spacing="20" styleClass="profile-meta-row">
+                <Label fx:id="villeLabel" styleClass="meta-chip" text="📍 —"/>
+                <Label fx:id="emailLabel" styleClass="meta-chip" text="✉ —"/>
+                <Label fx:id="telLabel"   styleClass="meta-chip" text="☏ —"/>
+            </HBox>
+        </VBox>
+
+        <!-- ══ STATS ROW ══ -->
+        <HBox styleClass="stats-row">
+            <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" alignment="CENTER" spacing="4">
+                <Label fx:id="statOeuvres" styleClass="stat-number" text="0"/>
+                <Label styleClass="stat-label" text="Œuvres"/>
+            </VBox>
+            <Separator orientation="VERTICAL" styleClass="stat-sep"/>
+            <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" alignment="CENTER" spacing="4">
+                <Label fx:id="statDays" styleClass="stat-number" text="0"/>
+                <Label styleClass="stat-label" text="Jours membre"/>
+            </VBox>
+            <Separator orientation="VERTICAL" styleClass="stat-sep"/>
+            <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" alignment="CENTER" spacing="4">
+                <HBox alignment="CENTER" spacing="6">
+                    <Circle fx:id="statutDot" radius="7" styleClass="statut-dot-actif"/>
+                    <Label fx:id="statStatut" styleClass="stat-statut" text="Actif"/>
+                </HBox>
+                <Label styleClass="stat-label" text="Statut"/>
+            </VBox>
+        </HBox>
+
+        <!-- ══ CONTENT GRID ══ -->
+        <HBox styleClass="profile-content-grid" spacing="24">
+            <HBox.margin><Insets right="40" bottom="40" left="40"/></HBox.margin>
+
+            <!-- LEFT column -->
+            <VBox spacing="20" HBox.hgrow="ALWAYS">
+                <VBox styleClass="info-card">
+                    <Label styleClass="card-section-title" text="BIOGRAPHIE"/>
+                    <Label fx:id="bioLabel" styleClass="card-body-text"
+                           text="—" wrapText="true"/>
+                </VBox>
+            </VBox>
+
+            <!-- RIGHT column -->
+            <VBox spacing="20" prefWidth="300" minWidth="260">
+                <VBox styleClass="info-card">
+                    <Label styleClass="card-section-title" text="INFORMATIONS"/>
+                    <GridPane styleClass="info-grid" hgap="12" vgap="10">
+                        <columnConstraints>
+                            <ColumnConstraints minWidth="90" prefWidth="90"/>
+                            <ColumnConstraints minWidth="140" prefWidth="140" hgrow="ALWAYS"/>
+                        </columnConstraints>
+
+                        <Label styleClass="info-key" text="Prénom"
+                               GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                        <Label fx:id="prenomVal" styleClass="info-val" text="—"
+                               GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                        <Label styleClass="info-key" text="Nom"
+                               GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                        <Label fx:id="nomVal" styleClass="info-val" text="—"
+                               GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                        <Label styleClass="info-key" text="Naissance"
+                               GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                        <Label fx:id="naissanceVal" styleClass="info-val" text="—"
+                               GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+                        <Label styleClass="info-key" text="Inscription"
+                               GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                        <Label fx:id="inscriptionVal" styleClass="info-val" text="—"
+                               GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+                        <Label styleClass="info-key" text="Spécialité"
+                               GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                        <Label fx:id="specialiteVal" styleClass="info-val" text="—"
+                               GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                    </GridPane>
+                </VBox>
+
+                <Button fx:id="editProfileBtn" text="MODIFIER LE PROFIL"
+                        styleClass="btn-edit-profile" maxWidth="Infinity"
+                        onAction="#onEditProfile"/>
+            </VBox>
+        </HBox>
+
+    </VBox>
+</ScrollPane>

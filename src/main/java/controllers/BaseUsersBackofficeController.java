@@ -27,7 +27,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
+import utils.CardAnimator;
 import javafx.scene.layout.VBox;
 import utils.InputValidator;
 
@@ -415,6 +415,10 @@ public abstract class BaseUsersBackofficeController {
             emptyState.getStyleClass().add("users-empty-state");
             cardsContainer.getChildren().add(emptyState);
         }
+
+        // Animation d'affichage des cartes (limiter pour performance si liste très longue)
+        int limit = Math.min(cardsContainer.getChildren().size(), 18);
+        CardAnimator.animateFadeSlideUp(cardsContainer.getChildren().subList(0, limit), 60);
     }
 
     private List<User> applySorting(List<User> list, String sortOption) {

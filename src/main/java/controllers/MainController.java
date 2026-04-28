@@ -6,6 +6,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
+import utils.CardAnimator;
 
 import java.io.IOException;
 import java.net.URL;
@@ -55,6 +56,8 @@ public class MainController {
             case "evenements"   -> loadPage("/views/pages/evenements.fxml");
             case "galeries"     -> loadPage("/views/pages/galeries.fxml");
             case "reclamations" -> loadPage("/views/pages/reclamations.fxml");
+            case "profile"      -> loadPage("/views/pages/profile.fxml");
+            case "editProfile"  -> loadPage("/views/pages/editProfile.fxml");
             default             -> loadPage("/views/pages/dashboard.fxml");
         }
     }
@@ -67,6 +70,9 @@ public class MainController {
             Node       page     = loader.load();
             currentController   = loader.getController();
             contentArea.getChildren().setAll(page);
+
+            // Petite animation à chaque ouverture de page
+            CardAnimator.animatePageTransition(page);
         } catch (IOException e) {
             throw new IllegalStateException("Failed to load page: " + fxmlPath, e);
         }

@@ -110,7 +110,7 @@ public class NavbarController {
 
     @FXML
     private void onProfileClick() {
-        // Profil: point d'extension pour ouvrir une page profil admin.
+        MainController.getInstance().navigateTo("profile");
     }
 
 	@FXML

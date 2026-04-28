@@ -16,7 +16,7 @@
 			stylesheets="@../styles/auth.css"
 			styleClass="auth-root">
 	<top>
-		<HBox spacing="12" alignment="CENTER_LEFT" styleClass="auth-topbar auth-topbar-glass">
+		<HBox fx:id="topbar" spacing="12" alignment="CENTER_LEFT" styleClass="auth-topbar auth-topbar-glass">
 			<padding>
 				<Insets top="14" right="18" bottom="14" left="18"/>
 			</padding>
@@ -34,9 +34,9 @@
 	</top>
 
 	<center>
-		<StackPane styleClass="auth-landing-shell auth-landing-shell-fluid">
-			<HBox spacing="0" alignment="CENTER" styleClass="auth-landing-card auth-landing-card-fluid">
-				<VBox spacing="20" alignment="CENTER_LEFT" prefWidth="565" maxWidth="Infinity" styleClass="auth-landing-hero auth-landing-hero-fluid" HBox.hgrow="ALWAYS">
+		<StackPane fx:id="landingShell" styleClass="auth-landing-shell auth-landing-shell-fluid">
+			<HBox fx:id="landingCard" spacing="0" alignment="CENTER" styleClass="auth-landing-card auth-landing-card-fluid">
+				<VBox fx:id="landingHero" spacing="20" alignment="CENTER_LEFT" prefWidth="565" maxWidth="Infinity" styleClass="auth-landing-hero auth-landing-hero-fluid" HBox.hgrow="ALWAYS">
 					<padding>
 						<Insets top="48" right="48" bottom="48" left="48"/>
 					</padding>
@@ -57,7 +57,7 @@
 					</HBox>
 				</VBox>
 
-				<VBox spacing="16" alignment="CENTER_LEFT" prefWidth="565" maxWidth="Infinity" styleClass="auth-landing-panel auth-landing-panel-fluid auth-panel-block" HBox.hgrow="ALWAYS">
+				<VBox fx:id="landingPanel" spacing="16" alignment="CENTER_LEFT" prefWidth="565" maxWidth="Infinity" styleClass="auth-landing-panel auth-landing-panel-fluid auth-panel-block" HBox.hgrow="ALWAYS">
 					<padding>
 						<Insets top="48" right="44" bottom="48" left="44"/>
 					</padding>

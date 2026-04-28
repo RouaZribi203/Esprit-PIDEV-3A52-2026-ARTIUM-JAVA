@@ -1,0 +1,304 @@
+/* ══════════════════════════════════════════════════════════════════
+   profile.css  —  Page Profil
+   ══════════════════════════════════════════════════════════════════ */
+
+.profile-root {
+    -fx-background-color: #f5f7fa;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.profile-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+.profile-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+/* ── Hero ────────────────────────────────────────────────────────── */
+.profile-hero {
+    -fx-background-color: #4f46e5;
+    -fx-pref-height: 160;
+    -fx-min-height:  160;
+    -fx-max-height:  160;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 24, 0.3, 0, 6);
+}
+
+/* ── Avatar ──────────────────────────────────────────────────────── */
+.avatar-ring-outer {
+    -fx-background-color: #4f46e5;
+    -fx-background-radius: 64;
+    -fx-padding: 3;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 16, 0.3, 0, 0);
+}
+.avatar-ring-inner {
+    -fx-fill: #FFFFFF;
+}
+
+/* ── Edit photo ──────────────────────────────────────────────────── */
+.edit-photo-btn {
+    -fx-background-color: rgba(255,255,255,0.2);
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+    -fx-background-radius: 20;
+    -fx-padding: 6 12;
+    -fx-cursor: hand;
+    -fx-border-color: rgba(255,255,255,0.3);
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
+    -fx-font-weight: 700;
+}
+.edit-photo-btn:hover {
+    -fx-background-color: rgba(255,255,255,0.3);
+    -fx-border-color: rgba(255,255,255,0.5);
+}
+
+/* ── Identity ────────────────────────────────────────────────────── */
+.profile-identity {
+    -fx-background-color: #f5f7fa;
+    -fx-padding: 80 24 20 24;
+}
+.profile-fullname {
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1e293b;
+}
+.profile-role-badge {
+    -fx-background-color: #4f46e5;
+    -fx-text-fill: white;
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 10px;
+    -fx-background-radius: 20;
+    -fx-padding: 4 16;
+    -fx-font-weight: 700;
+}
+.meta-chip {
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 11px;
+    -fx-text-fill: #64748b;
+    -fx-background-color: white;
+    -fx-background-radius: 20;
+    -fx-padding: 4 12;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 1;
+    -fx-border-radius: 20;
+}
+.profile-meta-row {
+    -fx-padding: 6 0 0 0;
+}
+
+/* ── Stats ───────────────────────────────────────────────────────── */
+.stats-row {
+    -fx-background-color: white;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 1 0;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 8, 0, 0, 2);
+}
+.stat-card {
+    -fx-padding: 22 20;
+    -fx-cursor: default;
+}
+.stat-card:hover {
+    -fx-background-color: #f8fafc;
+}
+.stat-number {
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 26px;
+    -fx-text-fill: #1e293b;
+    -fx-font-weight: bold;
+}
+.stat-statut {
+    -fx-font-size: 18px;
+    -fx-font-weight: 600;
+}
+.stat-label {
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 10px;
+    -fx-text-fill: #94a3b8;
+    -fx-font-weight: 500;
+}
+.stat-sep {
+    -fx-background-color: #e2e8f0;
+    -fx-pref-width: 1;
+    -fx-min-width: 1;
+    -fx-max-width: 1;
+}
+
+/* ── Statut dot ──────────────────────────────────────────────────── */
+.statut-dot-actif {
+    -fx-fill: #10b981;
+    -fx-stroke: #d1fae5;
+    -fx-stroke-width: 2;
+}
+.statut-dot-bloque {
+    -fx-fill: #ef4444;
+    -fx-stroke: #fee2e2;
+    -fx-stroke-width: 2;
+}
+.statut-dot-inactif {
+    -fx-fill: #f59e0b;
+    -fx-stroke: #fef3c7;
+    -fx-stroke-width: 2;
+}
+
+/* ── Content grid ────────────────────────────────────────────────── */
+.profile-content-grid {
+    -fx-background-color: #f5f7fa;
+    -fx-padding: 32 40 40 40;
+}
+
+/* ── Info cards ──────────────────────────────────────────────────── */
+.info-card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-padding: 20 24;
+    -fx-spacing: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 8, 0, 0, 2);
+}
+.info-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(99,102,241,0.15), 12, 0.2, 0, 4);
+    -fx-border-color: #cbd5e1;
+}
+.card-section-title {
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 10px;
+    -fx-text-fill: #4f46e5;
+    -fx-font-weight: 700;
+    -fx-padding: 0 0 6 0;
+    -fx-border-color: transparent transparent #e2e8f0 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+.card-body-text {
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 13px;
+    -fx-text-fill: #475569;
+    -fx-line-spacing: 4;
+}
+
+/* ── Info grid ───────────────────────────────────────────────────── */
+.info-grid {
+    -fx-padding: 4 0 0 0;
+}
+.info-key {
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 10px;
+    -fx-text-fill: #94a3b8;
+    -fx-font-weight: 500;
+}
+.info-val {
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 13px;
+    -fx-text-fill: #1e293b;
+    -fx-font-weight: 600;
+}
+
+/* ── Tags intérêts ───────────────────────────────────────────────── */
+.tags-pane {
+    -fx-padding: 4 0 0 0;
+}
+.interest-tag {
+    -fx-background-color: #f0f4ff;
+    -fx-background-radius: 20;
+    -fx-border-color: #c7d2fe;
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
+    -fx-padding: 4 14;
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 10px;
+    -fx-text-fill: #4f46e5;
+    -fx-font-weight: 500;
+}
+
+/* ── Edit button ─────────────────────────────────────────────────── */
+.btn-edit-profile {
+    -fx-background-color: #4f46e5;
+    -fx-text-fill: white;
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 11px;
+    -fx-padding: 14 0;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+    -fx-font-weight: 700;
+    -fx-effect: dropshadow(gaussian, rgba(79,70,229,0.3), 10, 0.3, 0, 3);
+}
+.btn-edit-profile:hover {
+    -fx-background-color: #4338ca;
+    -fx-effect: dropshadow(gaussian, rgba(79,70,229,0.5), 16, 0.4, 0, 4);
+}
+.btn-edit-profile:armed {
+    -fx-background-color: #3730a3;
+}
+
+/* ── Secondary button ────────────────────────────────────────────── */
+.btn-secondary {
+    -fx-background-color: #e2e8f0;
+    -fx-text-fill: #1e293b;
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 11px;
+    -fx-padding: 10 16;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-font-weight: 600;
+}
+.btn-secondary:hover {
+    -fx-background-color: #cbd5e1;
+}
+.btn-secondary:armed {
+    -fx-background-color: #94a3b8;
+}
+
+/* ── Edit form fields ────────────────────────────────────────────── */
+.edit-field {
+    -fx-padding: 10 12;
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 6;
+    -fx-border-width: 1;
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 12px;
+    -fx-text-fill: #1e293b;
+    -fx-control-inner-background: #f8fafc;
+}
+.edit-field:focused {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #4f46e5;
+    -fx-border-width: 2;
+}
+.edit-area {
+    -fx-padding: 10 12;
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 6;
+    -fx-border-width: 1;
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 12px;
+    -fx-text-fill: #1e293b;
+    -fx-control-inner-background: #f8fafc;
+}
+.edit-area:focused {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #4f46e5;
+    -fx-border-width: 2;
+}
+
+/* ── Dark mode ───────────────────────────────────────────────────── */
+.dark-mode .profile-root,
+.dark-mode .profile-scroll > .viewport { -fx-background-color: #0f172a; }
+.dark-mode .profile-identity           { -fx-background-color: #0f172a; }
+.dark-mode .profile-content-grid       { -fx-background-color: #0f172a; }
+.dark-mode .stats-row,
+.dark-mode .info-card                  { -fx-background-color: #1e293b; -fx-border-color: #334155; }
+.dark-mode .stat-card:hover            { -fx-background-color: #1a2332; }
+.dark-mode .profile-fullname           { -fx-text-fill: #f1f5f9; }
+.dark-mode .info-val                   { -fx-text-fill: #f1f5f9; }
+.dark-mode .card-body-text             { -fx-text-fill: #cbd5e1; }
+.dark-mode .meta-chip                  { -fx-background-color: #1e293b; -fx-text-fill: #cbd5e1; -fx-border-color: #334155; }
+.dark-mode .interest-tag               { -fx-background-color: #312e81; -fx-text-fill: #a5b4fc; -fx-border-color: #4c1d95; }
+.dark-mode .edit-field                 { -fx-background-color: #1a2332; -fx-border-color: #334155; -fx-text-fill: #f1f5f9; -fx-control-inner-background: #1a2332; }
+.dark-mode .edit-field:focused         { -fx-background-color: #0f172a; -fx-border-color: #7c3aed; }
+.dark-mode .edit-area                  { -fx-background-color: #1a2332; -fx-border-color: #334155; -fx-text-fill: #f1f5f9; -fx-control-inner-background: #1a2332; }
+.dark-mode .edit-area:focused          { -fx-background-color: #0f172a; -fx-border-color: #7c3aed; }

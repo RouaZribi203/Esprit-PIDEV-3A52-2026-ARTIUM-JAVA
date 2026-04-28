@@ -71,10 +71,159 @@
 
 /* ── Navbar ──────────────────────────────────────────────────────── */
 .navbar {
-    -fx-background-color: rgba(255, 255, 255, 0.96);
+    -fx-background-color: rgba(255, 255, 255, 0.97);
     -fx-border-color: rgba(210, 220, 238, 0.85);
     -fx-border-width: 0 0 1 0;
     -fx-effect: dropshadow(gaussian, rgba(15, 28, 46, 0.07), 10, 0, 0, 3);
+}
+
+/* Bouton sidebar toggle ─────────────────────────────────────────── */
+.navbar .icon-button {
+    -fx-background-color: white;
+    -fx-border-color: rgba(200, 214, 232, 0.85);
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-text-fill: #3c4f6a;
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(15, 28, 46, 0.07), 8, 0.06, 0, 2);
+}
+
+.navbar .icon-button:hover {
+    -fx-background-color: #eef2ff;
+    -fx-border-color: rgba(91, 86, 232, 0.30);
+    -fx-text-fill: #4338ca;
+}
+
+/* Bouton notifications ──────────────────────────────────────────── */
+.navbar-notif-btn {
+    -fx-font-size: 15px;
+}
+
+/* Ring autour de l'avatar ───────────────────────────────────────── */
+.navbar-avatar-ring {
+    -fx-background-color: linear-gradient(to bottom right, #5b56e8, #7c3aed);
+    -fx-background-radius: 999;
+    -fx-padding: 2;
+    -fx-effect: dropshadow(gaussian, rgba(91, 86, 232, 0.35), 10, 0.2, 0, 0);
+}
+
+/* Image avatar ──────────────────────────────────────────────────── */
+.navbar-avatar-image {
+    -fx-background-radius: 999;
+}
+
+/* MenuButton avatar (supprimer flèche et fond natif) ────────────── */
+.avatar-menu {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+}
+
+.avatar-menu:hover {
+    -fx-background-color: transparent;
+}
+
+.avatar-menu .arrow-button {
+    -fx-pref-width: 0;
+    -fx-min-width: 0;
+    -fx-max-width: 0;
+    -fx-padding: 0;
+    -fx-opacity: 0;
+}
+
+.avatar-menu .arrow {
+    -fx-pref-width: 0;
+    -fx-min-width: 0;
+    -fx-opacity: 0;
+}
+
+/* Dropdown menu ─────────────────────────────────────────────────── */
+.context-menu {
+    -fx-background-color: white;
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(210, 222, 238, 0.95);
+    -fx-border-radius: 16;
+    -fx-border-width: 1;
+    -fx-padding: 8;
+    -fx-effect: dropshadow(gaussian, rgba(15, 28, 46, 0.18), 24, 0.16, 0, 8);
+}
+
+.context-menu .menu-item.avatar-dropdown-item {
+    -fx-background-color: transparent;
+    -fx-background-radius: 10;
+    -fx-padding: 10 16 10 16;
+}
+
+.context-menu .menu-item.avatar-dropdown-item > .label {
+    -fx-text-fill: #0f1c2e;
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+}
+
+.context-menu .menu-item.avatar-dropdown-item:hover,
+.context-menu .menu-item.avatar-dropdown-item:focused {
+    -fx-background-color: #eef2ff;
+}
+
+.context-menu .menu-item.avatar-dropdown-item:hover > .label,
+.context-menu .menu-item.avatar-dropdown-item:focused > .label {
+    -fx-text-fill: #4338ca;
+}
+
+.context-menu .menu-item#logoutMenuItem > .label {
+    -fx-text-fill: #be185d;
+}
+
+.context-menu .menu-item#logoutMenuItem:hover,
+.context-menu .menu-item#logoutMenuItem:focused {
+    -fx-background-color: #fff1f2;
+}
+
+.context-menu .separator.avatar-dropdown-separator:horizontal .line {
+    -fx-border-color: #e2e8f2;
+    -fx-border-width: 1 0 0 0;
+}
+
+/* ── Dark mode navbar ────────────────────────────────────────────── */
+.app-root.dark-mode .navbar {
+    -fx-background-color: rgba(22, 34, 55, 0.97);
+    -fx-border-color: rgba(42, 60, 92, 0.85);
+}
+
+.app-root.dark-mode .navbar .icon-button {
+    -fx-background-color: rgba(30, 46, 72, 0.90);
+    -fx-border-color: rgba(52, 72, 108, 0.80);
+    -fx-text-fill: #a0b4cc;
+}
+
+.app-root.dark-mode .navbar .icon-button:hover {
+    -fx-background-color: rgba(55, 48, 212, 0.18);
+    -fx-border-color: rgba(91, 86, 232, 0.45);
+    -fx-text-fill: #a5b4fc;
+}
+
+.app-root.dark-mode .context-menu {
+    -fx-background-color: #1e2e48;
+    -fx-border-color: rgba(52, 70, 106, 0.90);
+}
+
+.app-root.dark-mode .context-menu .menu-item.avatar-dropdown-item > .label {
+    -fx-text-fill: #d4e0f5;
+}
+
+.app-root.dark-mode .context-menu .menu-item.avatar-dropdown-item:hover {
+    -fx-background-color: rgba(55, 48, 212, 0.18);
+}
+
+.app-root.dark-mode .context-menu .menu-item.avatar-dropdown-item:hover > .label {
+    -fx-text-fill: #a5b4fc;
+}
+
+.app-root.dark-mode .context-menu .menu-item#logoutMenuItem:hover {
+    -fx-background-color: rgba(190, 24, 93, 0.15);
 }
 
 /* ── En-tête page ────────────────────────────────────────────────── */

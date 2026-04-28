@@ -39,6 +39,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
+import utils.CardAnimator;
+
 public class DashboardController {
 
     @FXML private HBox      statsContainer;
@@ -388,6 +390,22 @@ public class DashboardController {
         buildLineChart(data);
         buildRolePie(data);
         fillRecentLists(data);
+
+        // Animation légère d'affichage (après injection des nodes dans les containers)
+        Platform.runLater(this::animateDashboardCards);
+    }
+
+    private void animateDashboardCards() {
+        // Stat cards (effet "pop")
+        CardAnimator.animateScalePop(statsContainer.getChildren(), 40);
+
+        // Sections principales (chart/pie) en fade+slide up
+        CardAnimator.animateFadeSlideUp(java.util.List.of(lineChartContainer, rolePieContainer), 140);
+
+        // Items des listes récentes (stagger latéral)
+        CardAnimator.animateStaggerList(signupsList.getChildren(), 180);
+        CardAnimator.animateStaggerList(reclamationsList.getChildren(), 220);
+        CardAnimator.animateStaggerList(topArtistesList.getChildren(), 260);
     }
 
     private void showLoadingState() {
