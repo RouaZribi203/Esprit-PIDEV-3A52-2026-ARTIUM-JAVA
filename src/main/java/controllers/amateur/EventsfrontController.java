@@ -10,7 +10,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.animation.PauseTransition;
 import javafx.util.Duration;
-import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.GridPane;
 import services.EvenementService;
 import services.EventAiSearchService;
 
@@ -48,7 +48,7 @@ public class EventsfrontController {
 	private ToggleButton conferenceTabButton;
 
 	@FXML
-	private FlowPane eventsFlowPane;
+	private GridPane eventsGridPane;
 
 	@FXML
 	private Label emptyStateLabel;
@@ -187,8 +187,10 @@ public class EventsfrontController {
 	}
 
 	private void renderCards(List<EventAiSearchService.RankedEvent> rankedEvents) {
-		eventsFlowPane.getChildren().clear();
+		eventsGridPane.getChildren().clear();
 
+        int row = 0;
+        int col = 0;
 		for (EventAiSearchService.RankedEvent rankedEvent : rankedEvents) {
 			Evenement event = rankedEvent.event();
 			try {
@@ -198,7 +200,13 @@ public class EventsfrontController {
 				controller.setData(event);
 				controller.setScore(rankedEvent.scoreOutOf10());
 				controller.setDetailHandler(detailNavigationHandler);
-				eventsFlowPane.getChildren().add(card);
+				
+                eventsGridPane.add(card, col, row);
+                col++;
+                if (col == 3) {
+                    col = 0;
+                    row++;
+                }
 			} catch (IOException e) {
 				emptyStateLabel.setText("Erreur lors de l'affichage des evenements.");
 				emptyStateLabel.setVisible(true);

@@ -429,9 +429,9 @@
 }
 
 .amateur-tab-button.active {
-    -fx-text-fill: #2f349a;
-    -fx-background-color: #edf1ff;
-    -fx-border-color: #cfd8fb;
+    -fx-text-fill: white;
+    -fx-background-color: #4f46e5;
+    -fx-border-color: #4338ca;
 }
 
 
