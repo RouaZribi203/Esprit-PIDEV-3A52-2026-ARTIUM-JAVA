@@ -14,6 +14,7 @@ import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import services.NotificationService;
@@ -157,70 +158,76 @@ public class NavbarAmateurController {
 
          Integer userId = UserSession.getCurrentUserId();
          notificationsButton.getItems().clear();
-         if (notificationsButton.getContextMenu() != null
-                 && !notificationsButton.getContextMenu().getStyleClass().contains("notifications-context-menu")) {
-             notificationsButton.getContextMenu().getStyleClass().add("notifications-context-menu");
-         }
+
+         VBox container = new VBox();
+         container.setSpacing(8);
+         container.setStyle("-fx-background-color: transparent; -fx-padding: 4px;");
          
          // Add header
-         MenuItem headerItem = new MenuItem("Notifications");
-         headerItem.getStyleClass().add("notifications-header");
-         headerItem.setDisable(true);
-         notificationsButton.getItems().add(headerItem);
-         notificationsButton.getItems().add(new SeparatorMenuItem());
+         Label headerLabel = new Label("Notifications");
+         headerLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: 900; -fx-text-fill: #111827; -fx-padding: 4px 8px;");
+         container.getChildren().add(headerLabel);
+         
+         Region separator = new Region();
+         separator.setStyle("-fx-background-color: #f3f4f6; -fx-min-height: 2px; -fx-max-height: 2px;");
+         container.getChildren().add(separator);
 
          if (userId == null) {
              notificationsButton.setText("🔔");
-             notificationsButton.getItems().add(disabledItem("Aucune session utilisateur active."));
-             return;
+             container.getChildren().add(createEmptyNode("Aucune session utilisateur active."));
+         } else {
+             List<Notification> notifications = notificationService.getUnreadNotifications(userId);
+             notificationsButton.setText(notifications.isEmpty() ? "🔔" : "🔔 " + notifications.size());
+
+             if (notifications.isEmpty()) {
+                 container.getChildren().add(createEmptyNode("Aucune notification pour le moment."));
+             } else {
+                 for (Notification notification : notifications) {
+                     container.getChildren().add(createNotificationNode(notification));
+                 }
+             }
          }
 
-         List<Notification> notifications = notificationService.getUnreadNotifications(userId);
-          notificationsButton.setText(notifications.isEmpty() ? "🔔" : "🔔 " + notifications.size());
-
-         if (notifications.isEmpty()) {
-             notificationsButton.getItems().add(disabledItem("Aucune notification pour le moment."));
-             return;
-         }
-
-         for (Notification notification : notifications) {
-             notificationsButton.getItems().add(createNotificationItem(notification));
-         }
+         CustomMenuItem wrapperItem = new CustomMenuItem(container, false);
+         wrapperItem.setHideOnClick(false);
+         // Prevent default MenuItem styles from breaking our layout
+         wrapperItem.setStyle("-fx-background-color: transparent;");
+         
+         notificationsButton.getItems().add(wrapperItem);
      }
 
-     private MenuItem disabledItem(String text) {
+     private javafx.scene.Node createEmptyNode(String text) {
          Label emptyLabel = new Label(text);
-         emptyLabel.getStyleClass().add("notifications-empty-label");
-
+         emptyLabel.setStyle("-fx-text-fill: #9ca3af; -fx-font-size: 14px; -fx-font-style: italic;");
          HBox wrapper = new HBox(emptyLabel);
-         wrapper.getStyleClass().add("notifications-empty-row");
-
-         CustomMenuItem item = new CustomMenuItem(wrapper, false);
-         item.setHideOnClick(false);
-         item.setDisable(true);
-         return item;
+         wrapper.setStyle("-fx-padding: 24px 20px; -fx-alignment: center;");
+         wrapper.setPrefWidth(320);
+         return wrapper;
      }
 
-     private MenuItem createNotificationItem(Notification notification) {
-         Label titleLabel = new Label(resolveTitle(notification));
-         titleLabel.getStyleClass().add("notifications-item-title");
-
+     private javafx.scene.Node createNotificationNode(Notification notification) {
+         String title = resolveTitle(notification);
+         Label titleLabel = new Label(title);
          Label messageLabel = new Label(resolveMessage(notification));
          messageLabel.setWrapText(true);
-         messageLabel.setMaxWidth(320);
-         messageLabel.getStyleClass().add("notifications-item-message");
-
+         messageLabel.setMaxWidth(300);
          Label timeLabel = new Label(resolveTime(notification));
-         timeLabel.getStyleClass().add("notifications-item-time");
 
-         VBox content = new VBox(3, titleLabel, messageLabel, timeLabel);
-         content.getStyleClass().add("notifications-item-content");
-
-         CustomMenuItem item = new CustomMenuItem(content, false);
-         item.getStyleClass().add("notifications-item");
-         item.setHideOnClick(false);
-         item.setDisable(true);
-         return item;
+         VBox content = new VBox(6, titleLabel, messageLabel, timeLabel);
+         content.setPrefWidth(320);
+         
+         if (title.toLowerCase().contains("annul")) {
+             content.setStyle("-fx-background-color: #fff7ed; -fx-border-color: #fed7aa; -fx-border-radius: 12px; -fx-background-radius: 12px; -fx-padding: 14px; -fx-cursor: hand;");
+             titleLabel.setStyle("-fx-text-fill: #c2410c; -fx-font-size: 15px; -fx-font-weight: 800;");
+             messageLabel.setStyle("-fx-text-fill: #ea580c; -fx-font-size: 13px;");
+             timeLabel.setStyle("-fx-text-fill: #f97316; -fx-font-size: 11px; -fx-font-weight: bold;");
+         } else {
+             content.setStyle("-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 12px; -fx-background-radius: 12px; -fx-padding: 14px; -fx-cursor: hand;");
+             titleLabel.setStyle("-fx-text-fill: #1e293b; -fx-font-size: 15px; -fx-font-weight: 800;");
+             messageLabel.setStyle("-fx-text-fill: #475569; -fx-font-size: 13px;");
+             timeLabel.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-font-weight: bold;");
+         }
+         return content;
      }
 
      private String resolveTitle(Notification notification) {

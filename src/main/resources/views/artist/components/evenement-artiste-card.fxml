@@ -32,16 +32,16 @@
         <!-- Meta details -->
         <HBox alignment="CENTER_LEFT" spacing="20.0">
             <HBox alignment="CENTER_LEFT" spacing="8.0">
-                <Label text="📅" style="-fx-font-size: 14px;" />
-                <Label fx:id="dateLabel" text="14/04/2026 17:04" style="-fx-text-fill: #4b5563; -fx-font-size: 14px; -fx-font-weight: bold;" />
+                <Label text="📅" style="-fx-font-size: 14px;" minWidth="-Infinity" />
+                <Label fx:id="dateLabel" text="14/04/2026 17:04" style="-fx-text-fill: #4b5563; -fx-font-size: 14px; -fx-font-weight: bold;" minWidth="-Infinity" />
             </HBox>
             <HBox alignment="CENTER_LEFT" spacing="8.0">
-                <Label text="🏷️" style="-fx-font-size: 14px;" />
-                <Label fx:id="categoryLabel" text="Concert" style="-fx-text-fill: #4b5563; -fx-font-size: 14px;" />
+                <Label text="🏷️" style="-fx-font-size: 14px;" minWidth="-Infinity" />
+                <Label fx:id="categoryLabel" text="Concert" style="-fx-text-fill: #4b5563; -fx-font-size: 14px;" minWidth="-Infinity" />
             </HBox>
             <HBox alignment="CENTER_LEFT" spacing="8.0">
-                <Label text="👥" style="-fx-font-size: 14px;" />
-                <Label fx:id="placesLabel" text="120 places" style="-fx-text-fill: #4b5563; -fx-font-size: 14px;" />
+                <Label text="👥" style="-fx-font-size: 14px;" minWidth="-Infinity" />
+                <Label fx:id="placesLabel" text="120 places" style="-fx-text-fill: #4b5563; -fx-font-size: 14px;" minWidth="-Infinity" />
             </HBox>
         </HBox>
 
@@ -54,9 +54,9 @@
     <!-- Action Buttons -->
     <VBox alignment="CENTER" spacing="12.0">
         <HBox alignment="CENTER_RIGHT" spacing="12.0">
-            <Button mnemonicParsing="false" onAction="#onEditClick" text="Editer" style="-fx-background-color: #f3f4f6; -fx-text-fill: #374151; -fx-font-weight: bold; -fx-padding: 10px 20px; -fx-background-radius: 8px; -fx-cursor: hand;" />
-            <Button mnemonicParsing="false" onAction="#onCancelClick" text="Annuler" style="-fx-background-color: #fff7ed; -fx-text-fill: #c2410c; -fx-border-color: #fed7aa; -fx-border-radius: 8px; -fx-font-weight: bold; -fx-padding: 9px 19px; -fx-background-radius: 8px; -fx-cursor: hand;" />
-            <Button mnemonicParsing="false" onAction="#onDeleteClick" text="Supprimer" style="-fx-background-color: #fef2f2; -fx-text-fill: #b91c1c; -fx-border-color: #fecaca; -fx-border-radius: 8px; -fx-font-weight: bold; -fx-padding: 9px 19px; -fx-background-radius: 8px; -fx-cursor: hand;" />
+            <Button mnemonicParsing="false" onAction="#onEditClick" text="Editer" minWidth="-Infinity" style="-fx-background-color: #f3f4f6; -fx-text-fill: #374151; -fx-font-weight: bold; -fx-padding: 10px 20px; -fx-background-radius: 8px; -fx-cursor: hand;" />
+            <Button mnemonicParsing="false" onAction="#onCancelClick" text="Annuler" minWidth="-Infinity" style="-fx-background-color: #fff7ed; -fx-text-fill: #c2410c; -fx-border-color: #fed7aa; -fx-border-radius: 8px; -fx-font-weight: bold; -fx-padding: 9px 19px; -fx-background-radius: 8px; -fx-cursor: hand;" />
+            <Button mnemonicParsing="false" onAction="#onDeleteClick" text="Supprimer" minWidth="-Infinity" style="-fx-background-color: #fef2f2; -fx-text-fill: #b91c1c; -fx-border-color: #fecaca; -fx-border-radius: 8px; -fx-font-weight: bold; -fx-padding: 9px 19px; -fx-background-radius: 8px; -fx-cursor: hand;" />
         </HBox>
     </VBox>
 </HBox>

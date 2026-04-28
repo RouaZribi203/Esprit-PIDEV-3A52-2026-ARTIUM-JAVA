@@ -94,6 +94,14 @@
                                     </VBox>
                                 </GridPane>
                                 
+                                <!-- Weather Panel moved here -->
+                                <HBox fx:id="weatherContainer" spacing="16.0" alignment="CENTER_LEFT" style="-fx-background-color: #f0f9ff; -fx-padding: 12px 16px; -fx-background-radius: 12px; -fx-border-color: #bae6fd; -fx-border-radius: 12px;" managed="false" visible="false">
+                                    <Label text="Météo prévue :" style="-fx-text-fill: #0369a1; -fx-font-size: 14px; -fx-font-weight: bold; -fx-text-transform: uppercase;" />
+                                    <Label fx:id="weatherTempLabel" text="- °C" style="-fx-font-size: 18px; -fx-font-weight: 900; -fx-text-fill: #f59e0b;" />
+                                    <Label fx:id="weatherWindLabel" text="Vent: - km/h" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #3b82f6;" />
+                                    <Label fx:id="weatherRainLabel" text="Pluie: - mm" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0ea5e9;" />
+                                </HBox>
+                                
                                 <HBox spacing="10.0" alignment="CENTER_LEFT" style="-fx-padding: 10px 0 0 0;">
                                     <Label text="📍 Galerie:" style="-fx-text-fill: #6b7280; -fx-font-weight: bold; -fx-font-size: 14px;" />
                                     <Label fx:id="galleryLabel" text="-" style="-fx-text-fill: #1f2937; -fx-font-weight: bold; -fx-font-size: 14px;" />

@@ -20,7 +20,10 @@ import javafx.stage.Window;
 import services.GalerieService;
 import services.TicketPdfService;
 import services.TicketService;
+import services.WeatherService;
 import utils.CoordinateUtils;
+import javafx.application.Platform;
+import java.util.concurrent.CompletableFuture;
 
 import java.io.File;
 import java.sql.SQLDataException;
@@ -104,9 +107,22 @@ public class EventDetailController {
 	@FXML
 	private Label ticketsCountLabel;
 
+	@FXML
+	private HBox weatherContainer;
+
+	@FXML
+	private Label weatherTempLabel;
+
+	@FXML
+	private Label weatherWindLabel;
+
+	@FXML
+	private Label weatherRainLabel;
+
 	private final TicketService ticketService = new TicketService();
 	private final TicketPdfService ticketPdfService = new TicketPdfService();
 	private final GalerieService galerieService = new GalerieService();
+	private final WeatherService weatherService = new WeatherService();
 	private Evenement event;
 	private Galerie currentGalerie;
 	private List<Ticket> currentPurchasedTickets = List.of();
@@ -285,9 +301,49 @@ public class EventDetailController {
 
 		CoordinateUtils.parseCoordinates(galerie.getLocalisation())
 				.ifPresentOrElse(
-						coordinates -> renderMap(coordinates.latitude(), coordinates.longitude(), galleryName, galerie.getAdresse(), galerie.getLocalisation()),
-							this::renderMapPlaceholder
+						coordinates -> {
+							renderMap(coordinates.latitude(), coordinates.longitude(), galleryName, galerie.getAdresse(), galerie.getLocalisation());
+							fetchWeather(coordinates);
+						},
+						() -> {
+							renderMapPlaceholder();
+							hideWeatherPanel();
+						}
 				);
+	}
+
+	private void fetchWeather(CoordinateUtils.Coordinates coordinates) {
+		if (event == null || event.getDateDebut() == null || weatherContainer == null) {
+			hideWeatherPanel();
+			return;
+		}
+
+		weatherTempLabel.setText("Chargement...");
+		weatherWindLabel.setText("");
+		weatherRainLabel.setText("");
+		weatherContainer.setVisible(true);
+		weatherContainer.setManaged(true);
+
+		CompletableFuture.supplyAsync(() -> weatherService.getForecastForEvent(coordinates, event.getDateDebut()))
+			.thenAccept(weatherOpt -> {
+				Platform.runLater(() -> {
+					if (weatherOpt.isPresent()) {
+						WeatherService.WeatherData w = weatherOpt.get();
+						weatherTempLabel.setText(String.format(Locale.ROOT, "%.1f °C", w.temperature()));
+						weatherWindLabel.setText(String.format(Locale.ROOT, "Vent: %.1f km/h", w.windSpeed()));
+						weatherRainLabel.setText(String.format(Locale.ROOT, "Pluie: %.1f mm", w.rain()));
+					} else {
+						hideWeatherPanel();
+					}
+				});
+			});
+	}
+
+	private void hideWeatherPanel() {
+		if (weatherContainer != null) {
+			weatherContainer.setVisible(false);
+			weatherContainer.setManaged(false);
+		}
 	}
 
 	private void loadPurchasedTickets() {
