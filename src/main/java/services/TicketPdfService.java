@@ -49,19 +49,17 @@ import javax.imageio.ImageIO;
 
 public class TicketPdfService {
 
-    private static final PDRectangle TICKET_PAGE = new PDRectangle(760, 320);
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm");
+    private static final PDRectangle TICKET_PAGE = new PDRectangle(850, 350);
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy 'à' HH:mm");
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy");
     private static final DecimalFormat PRICE_FORMAT = new DecimalFormat("0.##");
-    private static final java.awt.Color HEADER_COLOR = new java.awt.Color(61, 59, 194);
-    private static final java.awt.Color PRIMARY_TEXT_COLOR = new java.awt.Color(32, 38, 55);
-    private static final java.awt.Color SECONDARY_TEXT_COLOR = new java.awt.Color(92, 101, 122);
-    private static final java.awt.Color MUTED_TEXT_COLOR = new java.awt.Color(120, 129, 149);
-    private static final java.awt.Color CARD_BORDER_COLOR = new java.awt.Color(214, 223, 238);
-    private static final java.awt.Color CHIP_BG_COLOR = new java.awt.Color(232, 248, 243);
-    private static final java.awt.Color CHIP_BORDER_COLOR = new java.awt.Color(199, 235, 223);
-    private static final java.awt.Color QR_PANEL_BG_COLOR = new java.awt.Color(248, 250, 255);
-    private static final java.awt.Color QR_PANEL_BORDER_COLOR = new java.awt.Color(219, 226, 241);
+    
+    // VIP Colors (Brand matched)
+    private static final java.awt.Color PAGE_BG_COLOR = new java.awt.Color(58, 57, 197); // #3A39C5
+    private static final java.awt.Color TICKET_BG_COLOR = new java.awt.Color(255, 255, 255);
+    private static final java.awt.Color TICKET_ACCENT_COLOR = new java.awt.Color(177, 240, 5); // #B1F005
+    private static final java.awt.Color TEXT_PRIMARY = new java.awt.Color(17, 24, 39);
+    private static final java.awt.Color TEXT_SECONDARY = new java.awt.Color(107, 114, 128);
     private final GalerieService galerieService = new GalerieService();
     private static final String LOGO_RESOURCE = "/views/assets/PNG Icon.png";
     private static final String WINDOWS_ARIAL = "C:/Windows/Fonts/arial.ttf";
@@ -161,109 +159,113 @@ public class TicketPdfService {
                             Ticket ticket,
                             PDFont regular,
                             PDFont bold) throws IOException {
-        float pageWidth = TICKET_PAGE.getWidth();
-        float pageHeight = TICKET_PAGE.getHeight();
+        float width = TICKET_PAGE.getWidth();
+        float height = TICKET_PAGE.getHeight();
 
-        drawRoundedCard(content, 18, 18, pageWidth - 36, pageHeight - 36, 18);
-
-        // Header band
-        content.setNonStrokingColor(HEADER_COLOR);
-        content.addRect(18, pageHeight - 86, pageWidth - 36, 68);
+        // 1. Draw Page Background (Dark Premium Theme)
+        content.setNonStrokingColor(PAGE_BG_COLOR);
+        content.addRect(0, 0, width, height);
         content.fill();
 
-        content.setNonStrokingColor(java.awt.Color.WHITE);
+        // 2. Draw Main Ticket Card (White)
+        float cardX = 40;
+        float cardY = 40;
+        float cardW = width - 80;
+        float cardH = height - 80;
+        
+        drawRoundedRect(content, cardX, cardY, cardW, cardH, 20, TICKET_BG_COLOR);
 
-        // Logo circle
-        PDImageXObject logo = loadLogo(document);
-        if (logo != null) {
-            content.drawImage(logo, 34, pageHeight - 76, 44, 44);
-        } else {
-            content.setNonStrokingColor(java.awt.Color.WHITE);
-            content.addRect(34, pageHeight - 76, 44, 44);
-            content.fill();
-        }
+        // 3. Right Stub coordinates
+        float stubWidth = 240;
+        float stubX = cardX + cardW - stubWidth;
 
-        writeText(content, bold, 92, pageHeight - 50, 22, "ARTIUM");
-        writeText(content, regular, 92, pageHeight - 68, 9, "Ticket officiel / prêt à présenter");
-
-        String status = textOrDefault(event.getStatut(), "A venir");
-        drawChip(content, pageWidth - 190, pageHeight - 61, 140, 24, status.toUpperCase(), regular);
-
-        // Make the body text readable after the colored header fill.
-        content.setNonStrokingColor(PRIMARY_TEXT_COLOR);
-
-        // Left block
-        float leftX = 34;
-        float leftY = pageHeight - 118;
-
-        writeText(content, bold, leftX, leftY, 20, textOrDefault(event.getTitre(), "Evenement"));
-        content.setNonStrokingColor(SECONDARY_TEXT_COLOR);
-        writeText(content, regular, leftX, leftY - 20, 11, textOrDefault(event.getType(), "Type non precise") + "  •  " + resolveGalleryName(event));
-        content.setNonStrokingColor(MUTED_TEXT_COLOR);
-        writeText(content, regular, leftX, leftY - 38, 10, textOrDefault(event.getDescription(), "Aucune description disponible."), 430);
-
-        float labelY = leftY - 78;
-        content.setNonStrokingColor(PRIMARY_TEXT_COLOR);
-        writeKeyValue(content, regular, bold, leftX, labelY, "Début", formatDateTime(event.getDateDebut()));
-        writeKeyValue(content, regular, bold, leftX, labelY - 22, "Fin", formatDateTime(event.getDateFin()));
-        writeKeyValue(content, regular, bold, leftX, labelY - 44, "Prix", formatPrice(event.getPrixTicket()));
-        writeKeyValue(content, regular, bold, leftX, labelY - 66, "Capacité", formatCapacity(event.getCapaciteMax()));
-
-        content.setStrokingColor(CARD_BORDER_COLOR);
-        content.moveTo(514, 54);
-        content.lineTo(514, 208);
-        content.stroke();
-
-        content.setNonStrokingColor(QR_PANEL_BG_COLOR);
-        content.addRect(530, 48, 176, 170);
+        // 4. Draw Gold Accent Band on the Left
+        content.setNonStrokingColor(TICKET_ACCENT_COLOR);
+        content.addRect(cardX, cardY + 25, 12, cardH - 50);
         content.fill();
-        content.setStrokingColor(QR_PANEL_BORDER_COLOR);
-        content.addRect(530, 48, 176, 170);
-        content.stroke();
 
-        // Right block
-        float rightX = 540;
+        // 5. Draw Perforated Line (Tear-off separator)
+        content.setStrokingColor(new java.awt.Color(220, 220, 220));
+        content.setLineWidth(2.5f);
+        content.setLineDashPattern(new float[]{8, 8}, 0);
+        content.moveTo(stubX, cardY + 15);
+        content.lineTo(stubX, cardY + cardH - 15);
+        content.stroke();
+        content.setLineDashPattern(new float[]{}, 0); // reset dash
+
+        // Draw Half circles for the perforation cutouts at top and bottom
+        content.setNonStrokingColor(PAGE_BG_COLOR);
+        drawCircle(content, stubX, cardY + cardH, 16); // Top cutout
+        drawCircle(content, stubX, cardY, 16); // Bottom cutout
+
+        // 6. Draw Content - Left Side (Main Event Info)
+        float leftMargin = cardX + 45;
+        float topMargin = cardY + cardH - 45;
+
+        // ARTIUM Brand Header
+        content.setNonStrokingColor(TICKET_ACCENT_COLOR);
+        writeText(content, bold, leftMargin, topMargin, 16, "ARTIUM VIP ADMISSION");
+
+        // Event Title (Huge and Bold)
+        content.setNonStrokingColor(TEXT_PRIMARY);
+        writeText(content, bold, leftMargin, topMargin - 45, 32, textOrDefault(event.getTitre(), "Évènement Exclusif").toUpperCase(), 450);
+
+        // Event Type & Gallery
+        content.setNonStrokingColor(TEXT_SECONDARY);
+        writeText(content, regular, leftMargin, topMargin - 75, 13, (textOrDefault(event.getType(), "VIP EVENT") + "  •  " + resolveGalleryName(event)).toUpperCase());
+
+        // Info Grid
+        float gridY = topMargin - 130;
+        drawInfoBlock(content, regular, bold, leftMargin, gridY, "DÉBUT DE L'ÉVÈNEMENT", formatDateTime(event.getDateDebut()));
+        drawInfoBlock(content, regular, bold, leftMargin + 220, gridY, "FIN DE L'ÉVÈNEMENT", formatDateTime(event.getDateFin()));
+        
+        drawInfoBlock(content, regular, bold, leftMargin, gridY - 55, "LIEU", textOrDefault(event.getGalerieId() != null ? resolveGalleryName(event) : "Galerie non définie", "-").toUpperCase());
+        drawInfoBlock(content, regular, bold, leftMargin + 220, gridY - 55, "PRIX DU TICKET", formatPrice(event.getPrixTicket()));
+
+        // Reference text removed as requested
+        
+        // 7. Draw Content - Right Side (QR Code Stub)
+        float qrSize = 150;
+        float qrX = stubX + (stubWidth - qrSize) / 2;
+        float qrY = cardY + (cardH - qrSize) / 2 + 15;
+
         BufferedImage qrImage = createQrImage(resolveQrPayload(ticket));
         if (qrImage != null) {
             PDImageXObject qr = LosslessFactory.createFromImage(document, qrImage);
-            content.drawImage(qr, rightX - 2, 56, 152, 152);
+            content.drawImage(qr, qrX, qrY, qrSize, qrSize);
         }
-
-        // Footer
-        content.setStrokingColor(CARD_BORDER_COLOR);
-        content.moveTo(34, 44);
-        content.lineTo(pageWidth - 34, 44);
-        content.stroke();
-        content.setNonStrokingColor(MUTED_TEXT_COLOR);
-        writeText(content, regular, 34, 24, 8, "Merci pour votre achat. Présentez ce ticket à l'entrée ou enregistrez le PDF sur votre appareil.");
+        
+        // Text under QR code removed as requested
     }
 
-    private void drawRoundedCard(PDPageContentStream content, float x, float y, float width, float height, float radius) throws IOException {
-        content.setNonStrokingColor(java.awt.Color.WHITE);
-        content.addRect(x, y, width, height);
+    private void drawInfoBlock(PDPageContentStream content, PDFont regular, PDFont bold, float x, float y, String label, String value) throws IOException {
+        content.setNonStrokingColor(TEXT_SECONDARY);
+        writeText(content, regular, x, y, 10, label);
+        content.setNonStrokingColor(TEXT_PRIMARY);
+        writeText(content, bold, x, y - 18, 14, value);
+    }
+
+    private void drawRoundedRect(PDPageContentStream content, float x, float y, float width, float height, float radius, java.awt.Color color) throws IOException {
+        content.setNonStrokingColor(color);
+        // Draw intersecting rects
+        content.addRect(x + radius, y, width - 2 * radius, height);
+        content.addRect(x, y + radius, width, height - 2 * radius);
         content.fill();
-        content.setStrokingColor(CARD_BORDER_COLOR);
-        content.addRect(x, y, width, height);
-        content.stroke();
+        // Draw 4 corners
+        drawCircle(content, x + radius, y + radius, radius);
+        drawCircle(content, x + width - radius, y + radius, radius);
+        drawCircle(content, x + radius, y + height - radius, radius);
+        drawCircle(content, x + width - radius, y + height - radius, radius);
     }
 
-    private void drawChip(PDPageContentStream content, float x, float y, float width, float height, String text, PDFont font) throws IOException {
-        content.setNonStrokingColor(CHIP_BG_COLOR);
-        content.addRect(x, y, width, height);
+    private void drawCircle(PDPageContentStream content, float cx, float cy, float r) throws IOException {
+        final float k = 0.552284749831f;
+        content.moveTo(cx, cy + r);
+        content.curveTo(cx + k * r, cy + r, cx + r, cy + k * r, cx + r, cy);
+        content.curveTo(cx + r, cy - k * r, cx + k * r, cy - r, cx, cy - r);
+        content.curveTo(cx - k * r, cy - r, cx - r, cy - k * r, cx - r, cy);
+        content.curveTo(cx - r, cy + k * r, cx - k * r, cy + r, cx, cy + r);
         content.fill();
-        content.setStrokingColor(CHIP_BORDER_COLOR);
-        content.addRect(x, y, width, height);
-        content.stroke();
-
-        float textWidth = (font.getStringWidth(text) / 1000f) * 9;
-        float textX = x + Math.max(10, (width - textWidth) / 2);
-        content.setNonStrokingColor(new java.awt.Color(43, 117, 95));
-        writeText(content, font, textX, y + 8, 9, text);
-    }
-
-    private void writeKeyValue(PDPageContentStream content, PDFont labelFont, PDFont valueFont, float x, float y, String label, String value) throws IOException {
-        writeText(content, labelFont, x, y, 10, label + ":");
-        writeText(content, valueFont, x + 68, y, 10, value);
     }
 
     private void writeText(PDPageContentStream content, PDFont font, float x, float y, float size, String text) throws IOException {
