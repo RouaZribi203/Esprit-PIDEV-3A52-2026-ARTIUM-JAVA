@@ -2,6 +2,7 @@ package services;
 
 import entities.User;
 import entities.Oeuvre;
+import entities.Commentaire;
 import utils.ImageUrlUtils;
 import utils.MyDatabase;
 
@@ -542,5 +543,130 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
             throw new SQLDataException(e.getMessage());
         }
         return topAmateurs;
+    }
+
+    /**
+     * Calcule le score de tendance d'une oeuvre
+     * Score = likes + (favoris * 3) + score_commentaires_pondérés
+     * Utilisé pour déterminer si une oeuvre est "trending" (score > seuil)
+     */
+    public double computeScore(int oeuvreId) throws SQLDataException {
+        try {
+            LikeService likeService = new LikeService();
+            CommentaireService commentService = new CommentaireService();
+
+            // Compter les likes
+            int likes = likeService.countLikesByOeuvre(oeuvreId);
+
+            // Compter les favoris
+            int favoris = likeService.countFavorisByOeuvre(oeuvreId);
+
+            // Récupérer les commentaires avec calcul de score pondéré par récence
+            List<Commentaire> commentaires = commentService.getCommentsByOeuvreId(oeuvreId);
+
+            double scoreCommentaires = 0;
+            LocalDate maintenant = LocalDate.now();
+
+            for (Commentaire c : commentaires) {
+                LocalDate dateCommentaire = c.getDateCommentaire();
+                if (dateCommentaire != null) {
+                    long joursEcoules = java.time.temporal.ChronoUnit.DAYS.between(dateCommentaire, maintenant);
+
+                    if (joursEcoules <= 1) {
+                        scoreCommentaires += 2;
+                    } else if (joursEcoules <= 3) {
+                        scoreCommentaires += 1;
+                    } else {
+                        scoreCommentaires += 0.5;
+                    }
+                }
+            }
+
+            double scoreTotal = likes + (favoris * 2) + scoreCommentaires;
+
+            System.out.println("Score oeuvre #" + oeuvreId + ": " + scoreTotal +
+                             " (likes=" + likes + ", favoris=" + favoris +
+                             ", commentScore=" + scoreCommentaires + ")");
+
+            return scoreTotal;
+
+        } catch (SQLException e) {
+            throw new SQLDataException("Erreur calcul score: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Vérifie si une oeuvre est trending et envoie SMS si seuil dépassé
+     * SEUIL_TRENDING = 10.0
+     * Utilise le numéro fixe de l'API SMS
+     */
+    public void checkTrendingAndNotify(int oeuvreId) throws SQLDataException {
+        final double SEUIL_TRENDING = 15.0;
+        final String SMS_PHONE = "+21698115638"; // Numéro fixe de l'API
+
+        try {
+            double score = computeScore(oeuvreId);
+
+            if (score >= SEUIL_TRENDING) {
+                // Récupérer l'oeuvre et sa collection
+                Oeuvre oeuvre = getOeuvreById(oeuvreId);
+                if (oeuvre != null && oeuvre.getCollectionId() != null) {
+                    // Récupérer la collection pour trouver l'artiste
+                    String sqlCollection = "SELECT artiste_id FROM collections WHERE id = ?";
+                    try (PreparedStatement stmt = connection.prepareStatement(sqlCollection)) {
+                        stmt.setInt(1, oeuvre.getCollectionId());
+                        try (ResultSet rs = stmt.executeQuery()) {
+                            if (rs.next()) {
+                                int artisteId = rs.getInt("artiste_id");
+
+                                // Récupérer l'artiste pour ses infos
+                                User artiste = getUserArtiste(artisteId);
+
+                                if (artiste != null) {
+                                    // Envoyer SMS au numéro fixe
+                                    String message = String.format(
+                                        "🎉 Bravo %s! Votre oeuvre '%s' atteint un niveau élevé d’engagement !",
+                                        artiste.getPrenom() != null ? artiste.getPrenom() : artiste.getNom(),
+                                        oeuvre.getTitre(),
+                                        score
+                                    );
+
+                                    SmsService smsService = new SmsService();
+                                    smsService.sendSms(SMS_PHONE, message);
+
+                                    System.out.println("SMS envoyé pour oeuvre: " + oeuvre.getTitre() + " (artiste: " + artiste.getNom() + ", score: " + score + ")");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new SQLDataException("Erreur lors de la vérification trending: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Récupère l'artiste (User avec numTel)
+     */
+    private User getUserArtiste(int userId) {
+        String sql = "SELECT id, nom, prenom, num_tel, email FROM `user` WHERE id = ? LIMIT 1";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    User user = new User();
+                    user.setId(rs.getInt("id"));
+                    user.setNom(rs.getString("nom"));
+                    user.setPrenom(rs.getString("prenom"));
+                    user.setNumTel(rs.getString("num_tel"));
+                    user.setEmail(rs.getString("email"));
+                    return user;
+                }
+            }
+        } catch (SQLException ignored) {
+            // Fallback gracieux
+        }
+        return null;
     }
 }

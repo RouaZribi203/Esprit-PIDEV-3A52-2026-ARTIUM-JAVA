@@ -26,6 +26,8 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -240,6 +242,17 @@ public class MesOeuvresController {
             editImageButton.setDisable(false);
         }
 
+        if (editMode) {
+            // En mode modification, on autorise le changement de fichier,
+            // mais le bouton d'edition avancee est totalement retire.
+            editImageButton.setDisable(true);
+            editImageButton.setVisible(false);
+            editImageButton.setManaged(false);
+            if (imagePathHolder[0] != null && !imagePathHolder[0].isBlank()) {
+                selectedFileLabel.setText("Image actuelle (edition desactivee)");
+            }
+        }
+
         editImageButton.setOnAction(event -> {
             if (imagePathHolder[0] != null) {
                 ImageEditorController editor = new ImageEditorController(popupStage, imagePathHolder[0]);
@@ -294,7 +307,9 @@ public class MesOeuvresController {
             }
             imagePathHolder[0] = file.getAbsolutePath();
             selectedFileLabel.setText(file.getName());
-            editImageButton.setDisable(false);
+            if (!editMode) {
+                editImageButton.setDisable(false);
+            }
             clearPopupError(imageError);
         });
 
@@ -312,6 +327,27 @@ public class MesOeuvresController {
         } catch (Exception e) {
             showPopupError(collectionError, "Erreur chargement collections: " + e.getMessage());
         }
+
+        Label visibilityLabel = new Label("Visibilité");
+        visibilityLabel.getStyleClass().add("popup-field-label");
+
+        ToggleGroup visibilityGroup = new ToggleGroup();
+        ToggleButton publicToggle = new ToggleButton("Public");
+        publicToggle.setToggleGroup(visibilityGroup);
+        publicToggle.getStyleClass().addAll("visibility-toggle", "visibility-toggle-public");
+
+        ToggleButton privateToggle = new ToggleButton("Privée");
+        privateToggle.setToggleGroup(visibilityGroup);
+        privateToggle.getStyleClass().addAll("visibility-toggle", "visibility-toggle-private");
+
+        publicToggle.setSelected(true);
+        if (editMode && existingOeuvre.getType() != null && "privee".equalsIgnoreCase(existingOeuvre.getType().trim())) {
+            privateToggle.setSelected(true);
+        }
+
+        HBox visibilityRow = new HBox(10, publicToggle, privateToggle);
+        visibilityRow.setAlignment(Pos.CENTER_LEFT);
+        visibilityRow.getStyleClass().add("visibility-toggle-row");
 
         Button cancelButton = new Button("Fermer");
         cancelButton.getStyleClass().add("popup-close-button");
@@ -333,6 +369,7 @@ public class MesOeuvresController {
             String titre = safeText(titreField.getText());
             String description = safeText(descriptionArea.getText());
             CollectionOeuvre selectedCollection = collectionCombo.getValue();
+            boolean isPrivate = privateToggle.isSelected();
 
             boolean hasError = false;
             if (!validateTitreField(titreField, titreError)) {
@@ -348,7 +385,7 @@ public class MesOeuvresController {
             } else {
                 clearFieldError(collectionError, collectionCombo);
             }
-            if (imagePathHolder[0] == null || imagePathHolder[0].isBlank()) {
+            if (!editMode && (imagePathHolder[0] == null || imagePathHolder[0].isBlank())) {
                 showPopupError(imageError, "L'image est obligatoire.");
                 hasError = true;
             }
@@ -366,7 +403,7 @@ public class MesOeuvresController {
                 oeuvre.setCollectionId(selectedCollection.getId());
                 oeuvre.setImage(imagePathHolder[0]);
                 oeuvre.setDateCreation(editMode && existingOeuvre.getDateCreation() != null ? existingOeuvre.getDateCreation() : LocalDate.now());
-                oeuvre.setType(resolveTypeFromSpecialite(artistSpecialite));
+                oeuvre.setType(resolveTypeFromVisibility(isPrivate, artistSpecialite));
                 if (editMode) {
                     oeuvreService.update(oeuvre);
                     if (!previousImagePath.equals(safeText(imagePathHolder[0]))) {
@@ -405,6 +442,8 @@ public class MesOeuvresController {
                 collectionLabel,
                 collectionCombo,
                 collectionError,
+                visibilityLabel,
+                visibilityRow,
                 imageLabel,
                 imageRow,
                 imageError,
@@ -1044,6 +1083,10 @@ public class MesOeuvresController {
             case "auteur" -> "Livre";
             default -> "Oeuvre";
         };
+    }
+
+    private String resolveTypeFromVisibility(boolean isPrivate, String specialite) {
+        return isPrivate ? "Privee" : resolveTypeFromSpecialite(specialite);
     }
 
     private void applyFilters() {

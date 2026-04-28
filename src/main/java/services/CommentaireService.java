@@ -59,6 +59,15 @@ public class CommentaireService implements services.Iservice<Commentaire> {
                                 preparedStatement.setInt(3, commentaire.getUserId());
                                 preparedStatement.setDate(4, commentDate);
                                 preparedStatement.executeUpdate();
+
+                                // Vérifier si trending après ajout de commentaire
+                                try {
+                                    OeuvreService oeuvreService = new OeuvreService();
+                                    oeuvreService.checkTrendingAndNotify(commentaire.getOeuvreId());
+                                } catch (Exception e) {
+                                    System.err.println("Erreur lors de la vérification trending: " + e.getMessage());
+                                }
+
                                 return;
                             } catch (SQLException ignored) {
                                 // Essayer prochaine combinaison table/colonnes.

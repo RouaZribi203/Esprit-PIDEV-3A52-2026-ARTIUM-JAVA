@@ -158,6 +158,16 @@ public class LikeService implements Iservice<LikeEntity>{
                 }
             }
 
+            // Vérifier si trending après ajout de like
+            if (newState) {
+                try {
+                    OeuvreService oeuvreService = new OeuvreService();
+                    oeuvreService.checkTrendingAndNotify(oeuvreId);
+                } catch (Exception e) {
+                    System.err.println("Erreur lors de la vérification trending: " + e.getMessage());
+                }
+            }
+
             return newState;
         } catch (SQLException e) {
             throw new SQLDataException(e.getMessage());
@@ -211,6 +221,15 @@ public class LikeService implements Iservice<LikeEntity>{
             preparedStatement.setInt(1, userId);
             preparedStatement.setInt(2, oeuvreId);
             preparedStatement.executeUpdate();
+
+            // Vérifier si trending après ajout de favori
+            try {
+                OeuvreService oeuvreService = new OeuvreService();
+                oeuvreService.checkTrendingAndNotify(oeuvreId);
+            } catch (Exception e) {
+                System.err.println("Erreur lors de la vérification trending: " + e.getMessage());
+            }
+
             return true;
         } catch (SQLException e) {
             throw new SQLDataException(e.getMessage());

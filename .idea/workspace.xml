@@ -6,6 +6,13 @@
   <component name="ChangeListManager">
     <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="start of editing">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Test/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Test/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/MesOeuvresController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/MesOeuvresController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/CommentaireService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/CommentaireService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/LikeService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/LikeService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/OeuvreService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/OeuvreService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/artist-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/artist-theme.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -99,6 +106,40 @@
     ]
   }
 }</component>
+  <component name="RunManager" selected="Application.MainFX">
+    <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="test.Main" />
+      <module name="Esprit-PIDEV-3A52-2026-ARTIUM-JAVA" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="test.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="MainFX" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="controllers.MainFX" />
+      <module name="Esprit-PIDEV-3A52-2026-ARTIUM-JAVA" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="controllers.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.MainFX" />
+        <item itemvalue="Application.Main" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -128,6 +169,8 @@
       <workItem from="1776773562120" duration="633000" />
       <workItem from="1776803086292" duration="4010000" />
       <workItem from="1776881992405" duration="21712000" />
+      <workItem from="1776931324086" duration="5772000" />
+      <workItem from="1777316904870" duration="10719000" />
     </task>
     <task id="LOCAL-00001" summary="corrections de blob">
       <option name="closed" value="true" />
