@@ -13,6 +13,7 @@ import javafx.scene.layout.StackPane;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Objects;
+import services.EmailService;
 
 public class AmateurMainController {
 
@@ -72,6 +73,14 @@ public class AmateurMainController {
 
     public void onTicketPurchased(Ticket ticket) {
         this.pendingPurchasedTicket = ticket;
+        
+        // Envoi de l'email en arrière-plan
+        User connectedUser = MainFX.getAuthenticatedUser();
+        if (connectedUser != null && connectedUser.getEmail() != null) {
+            EmailService emailService = new EmailService();
+            emailService.sendTicketEmailAsync(connectedUser.getEmail(), selectedEvent, ticket);
+        }
+
         onNavigate("payment-success");
     }
 
