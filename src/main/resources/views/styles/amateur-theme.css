@@ -998,6 +998,102 @@
     -fx-cursor: hand;
 }
 
+/* Image Editor Styles */
+.editor-root {
+    -fx-background-color: white;
+}
+
+.editor-section-header {
+    -fx-font-size: 12px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #94a3b8;
+    -fx-letter-spacing: 1.5px;
+}
+
+.filter-pill {
+    -fx-background-radius: 12;
+    -fx-padding: 10 22;
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #475569;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-transition: all 0.2s;
+}
+
+.filter-pill:hover {
+    -fx-background-color: #e2e8f0;
+    -fx-text-fill: #1e293b;
+}
+
+.tool-button {
+    -fx-background-radius: 12;
+    -fx-padding: 12;
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #475569;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.tool-button:hover {
+    -fx-background-color: #e2e8f0;
+}
+
+.btn-apply {
+    -fx-background-color: #3f44d4;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 12 35;
+    -fx-background-radius: 12;
+    -fx-cursor: hand;
+    -fx-font-size: 14px;
+}
+
+.btn-apply:hover {
+    -fx-background-color: #3539b5;
+    -fx-effect: dropshadow(gaussian, rgba(63, 68, 212, 0.2), 10, 0, 0, 4);
+}
+
+.btn-cancel {
+    -fx-background-color: transparent;
+    -fx-text-fill: #f87171;
+    -fx-font-weight: bold;
+    -fx-padding: 12 30;
+    -fx-cursor: hand;
+    -fx-font-size: 14px;
+}
+
+.btn-cancel:hover {
+    -fx-text-fill: #ef4444;
+    -fx-background-color: #fef2f2;
+    -fx-background-radius: 12;
+}
+
+.modern-slider {
+    -fx-cursor: hand;
+}
+
+.modern-slider .track {
+    -fx-background-color: #f1f5f9;
+    -fx-background-radius: 5;
+    -fx-pref-height: 6;
+}
+
+.modern-slider .thumb {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-border-color: #3f44d4;
+    -fx-border-width: 2;
+    -fx-pref-width: 18;
+    -fx-pref-height: 18;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);
+}
+
+.modern-slider:hover .thumb {
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
+
 .oeuvre-post-comment-menu-trigger:hover {
     -fx-background-color: #eef2f8;
     -fx-background-radius: 6;

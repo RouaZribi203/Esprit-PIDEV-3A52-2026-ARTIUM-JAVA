@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="qrcodev2" />
+    <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="qrcodev2">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/ImageEditorController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/ImageEditorController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -162,6 +166,7 @@
       <workItem from="1776881992405" duration="21712000" />
       <workItem from="1776931324086" duration="5772000" />
       <workItem from="1777316904870" duration="17470000" />
+      <workItem from="1777382924937" duration="2678000" />
     </task>
     <task id="LOCAL-00001" summary="corrections de blob">
       <option name="closed" value="true" />
