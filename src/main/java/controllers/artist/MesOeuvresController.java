@@ -933,7 +933,7 @@ public class MesOeuvresController {
         editItem.setGraphic(createColoredIcon("M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z", 0.58, "#6b7280"));
         editItem.setOnAction(event -> showOeuvrePopup(oeuvre));
 
-        MenuItem qrItem = new MenuItem("Générer QR code");
+        MenuItem qrItem = new MenuItem("QR code");
         qrItem.getStyleClass().add("collection-menu-qr");
         qrItem.setGraphic(createColoredIcon(
                 "M3 3h8v8H3V3zm2 2v4h4V5H5zm8 0h8v8h-8V5zm2 2v4h4V7h-4zM3 13h8v8H3v-8zm2 2v4h4v-4H5zm10 0h2v2h-2v-2zm2 2h2v2h-2v-2zm2-2h2v2h-2v-2zm-4 4h2v2h-2v-2zm4 0h2v2h-2v-2z",

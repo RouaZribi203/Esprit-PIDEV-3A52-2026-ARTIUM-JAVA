@@ -36,7 +36,12 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.SVGPath;
 import utils.UserSession;
-
+import com.google.zxing.*;
+import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
+import com.google.zxing.common.HybridBinarizer;
+import javafx.stage.FileChooser;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -65,6 +70,9 @@ public class FeedController {
 	@FXML
 	private Label emptyStateLabel;
 
+	@FXML
+	private Button qrCodeSearchButton;
+
 	private final OeuvreService oeuvreService = new OeuvreService();
 	private final OeuvreCollectionService oeuvreCollectionService = new OeuvreCollectionService();
 	private final CommentaireService commentaireService = new CommentaireService();
@@ -77,12 +85,21 @@ public class FeedController {
 	private final Map<Integer, User> artistById = new HashMap<>();
 	private final Map<Integer, VBox> oeuvrePostMap = new HashMap<>();
 	private String currentRouteFilter = "feed";
+	private Integer qrSearchedOeuvreId = null;
+	private boolean isInternalUpdate = false;
+
+	private PauseTransition searchDebounce = new PauseTransition(Duration.millis(300));
 
 	@FXML
 	public void initialize() {
 		currentUserId = UserSession.getCurrentUserId();
 		if (searchField != null) {
-			searchField.textProperty().addListener((obs, oldValue, newValue) -> applySearch());
+			searchDebounce.setOnFinished(e -> applySearch());
+			searchField.textProperty().addListener((obs, oldValue, newValue) -> {
+				if (!isInternalUpdate) {
+					searchDebounce.playFromStart();
+				}
+			});
 		}
 		loadOeuvres();
 	}
@@ -91,6 +108,71 @@ public class FeedController {
 		currentUserId = UserSession.getCurrentUserId();
 		currentRouteFilter = route == null ? "feed" : route;
 		loadOeuvres();
+	}
+
+	@FXML
+	private void onQrCodeSearchClick() {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Choisir une image de QR Code");
+		fileChooser.getExtensionFilters().addAll(
+				new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp")
+		);
+
+		File selectedFile = fileChooser.showOpenDialog(qrCodeSearchButton.getScene().getWindow());
+		if (selectedFile != null) {
+			try {
+				BufferedImage bufferedImage = ImageIO.read(selectedFile);
+				LuminanceSource source = new BufferedImageLuminanceSource(bufferedImage);
+				BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
+				
+				Result result = new MultiFormatReader().decode(bitmap);
+				String decodedText = result.getText();
+				
+				try {
+					int oeuvreId = Integer.parseInt(decodedText);
+					searchByOeuvreId(oeuvreId);
+				} catch (NumberFormatException e) {
+					showError("Format QR Code invalide", "Le QR code ne contient pas un ID d'œuvre valide.");
+				}
+			} catch (NotFoundException e) {
+				showError("QR Code non trouvé", "Aucun QR code n'a pu être détecté dans cette image.");
+			} catch (Exception e) {
+				showError("Erreur de lecture", "Une erreur est survenue lors de la lecture de l'image : " + e.getMessage());
+			}
+		}
+	}
+
+	private void searchByOeuvreId(int oeuvreId) {
+		try {
+			Oeuvre oeuvre = oeuvreService.getOeuvreById(oeuvreId);
+			if (oeuvre != null) {
+				qrSearchedOeuvreId = oeuvreId;
+				
+				// On vide la barre de recherche si elle contenait quelque chose
+				if (searchField != null && !searchField.getText().isEmpty()) {
+					isInternalUpdate = true;
+					searchField.clear();
+					isInternalUpdate = false;
+				}
+				
+				// On force l'affichage de cette oeuvre unique sans modifier la barre de recherche
+				List<Oeuvre> singleResult = new ArrayList<>();
+				singleResult.add(oeuvre);
+				renderOeuvres(singleResult);
+			} else {
+				showError("Œuvre non trouvée", "Aucune œuvre ne correspond à l'ID " + oeuvreId);
+			}
+		} catch (Exception e) {
+			showError("Erreur", "Erreur lors de la récupération de l'œuvre: " + e.getMessage());
+		}
+	}
+
+	private void showError(String title, String content) {
+		Alert alert = new Alert(Alert.AlertType.ERROR);
+		alert.setTitle(title);
+		alert.setHeaderText(null);
+		alert.setContentText(content);
+		alert.showAndWait();
 	}
 
 	private void loadOeuvres() {
@@ -126,31 +208,11 @@ public class FeedController {
 
 		emptyStateLabel.setVisible(false);
 
-		int delay = 0;
+		// Simple rendering without flash effects or delays
 		for (Oeuvre oeuvre : oeuvres) {
 			VBox post = buildPostCard(oeuvre);
 			oeuvrePostMap.put(oeuvre.getId(), post);
-			post.setOpacity(0);
-			post.setScaleX(0.98);
-			post.setScaleY(0.98);
 			oeuvresContainer.getChildren().add(post);
-
-			FadeTransition ft = new FadeTransition(Duration.seconds(0.6), post);
-			ft.setFromValue(0);
-			ft.setToValue(1);
-			ft.setDelay(Duration.millis(delay));
-
-			ScaleTransition st = new ScaleTransition(Duration.seconds(0.6), post);
-			st.setFromX(0.98);
-			st.setFromY(0.98);
-			st.setToX(1.0);
-			st.setToY(1.0);
-			st.setDelay(Duration.millis(delay));
-			
-			ft.play();
-			st.play();
-
-			delay += 120; // Stagger effect
 		}
 	}
 
@@ -186,6 +248,7 @@ public class FeedController {
 				boolean favoriByCurrentUser = isFavoriByCurrentUser(updatedOeuvre);
 
 				// Rebuild statsRow (index 5)
+				boolean isPrivate = "privee".equalsIgnoreCase(safeText(updatedOeuvre.getType()));
 				HBox statsRow = new HBox(14);
 				statsRow.getStyleClass().add("oeuvre-post-stats");
 				statsRow.getChildren().addAll(
@@ -195,7 +258,8 @@ public class FeedController {
 								likedByCurrentUser,
 								() -> onToggleLike(updatedOeuvre),
 								"oeuvre-post-like-active",
-								"#dc2626"
+								"#dc2626",
+								isPrivate
 						),
 						buildStatChip("M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z", comments.size()),
 						buildReactionButton(
@@ -204,7 +268,8 @@ public class FeedController {
 								favoriByCurrentUser,
 								() -> onToggleFavori(updatedOeuvre),
 								"oeuvre-post-favori-active",
-								"#eab308"
+								"#eab308",
+								isPrivate
 						)
 				);
 
@@ -342,6 +407,7 @@ public class FeedController {
 		boolean likedByCurrentUser = isLikedByCurrentUser(oeuvre);
 		boolean favoriByCurrentUser = isFavoriByCurrentUser(oeuvre);
 
+		boolean isPrivate = "privee".equalsIgnoreCase(safeText(oeuvre.getType()));
 		HBox statsRow = new HBox(14);
 		statsRow.getStyleClass().add("oeuvre-post-stats");
 		statsRow.getChildren().addAll(
@@ -351,7 +417,8 @@ public class FeedController {
 						likedByCurrentUser,
 						() -> onToggleLike(oeuvre),
 						"oeuvre-post-like-active",
-						"#dc2626"
+						"#dc2626",
+						isPrivate
 				),
 				buildStatChip("M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z", comments.size()),
 				buildReactionButton(
@@ -360,7 +427,8 @@ public class FeedController {
 						favoriByCurrentUser,
 						() -> onToggleFavori(oeuvre),
 						"oeuvre-post-favori-active",
-						"#eab308"
+						"#eab308",
+						isPrivate
 				)
 		);
 
@@ -389,7 +457,8 @@ public class FeedController {
 									 boolean active,
 									 Runnable action,
 									 String activeStyleClass,
-									 String activeColor) {
+									 String activeColor,
+									 boolean isPrivate) {
 		Button button = new Button();
 		button.getStyleClass().addAll("oeuvre-post-stat-chip", "oeuvre-post-stat-button");
 		if (active) {
@@ -412,7 +481,7 @@ public class FeedController {
 		button.setContentDisplay(javafx.scene.control.ContentDisplay.GRAPHIC_ONLY);
 		button.setOnAction(event -> action.run());
 
-		if (!isCurrentUserAmateur()) {
+		if (!isCurrentUserAmateur() || isPrivate) {
 			button.setDisable(true);
 		}
 
@@ -538,22 +607,31 @@ public class FeedController {
 	}
 
 	private VBox buildCommentsPreview(Oeuvre oeuvre, List<Commentaire> comments) {
-		VBox commentsBox = new VBox(8);
-		commentsBox.getStyleClass().add("oeuvre-post-comments-box");
+		VBox commentsBox = new VBox(12);
+		commentsBox.getStyleClass().add("oeuvre-post-comments-section");
 
 		Label title = new Label("Commentaires");
 		title.getStyleClass().add("oeuvre-post-comments-title");
 		commentsBox.getChildren().add(title);
 
+		boolean isPrivate = "privee".equalsIgnoreCase(safeText(oeuvre.getType()));
+
 		if (comments == null || comments.isEmpty()) {
 			Label emptyLabel = new Label("Aucun commentaire pour le moment.");
 			emptyLabel.getStyleClass().add("oeuvre-post-comments-empty");
 			commentsBox.getChildren().add(emptyLabel);
-			commentsBox.getChildren().add(buildCommentComposer(oeuvre));
+			if (!isPrivate) {
+				commentsBox.getChildren().add(buildCommentComposer(oeuvre));
+			} else {
+				Label privateNote = new Label("L'ajout de commentaires est désactivés pour cette œuvre privée.");
+				privateNote.getStyleClass().add("oeuvre-post-comment-date");
+				privateNote.setPadding(new Insets(5, 0, 5, 0));
+				commentsBox.getChildren().add(privateNote);
+			}
 			return commentsBox;
 		}
 
-		VBox listContainer = new VBox(8);
+		VBox listContainer = new VBox(10);
 		commentsBox.getChildren().add(listContainer);
 
 		int displayCount = Math.min(3, comments.size());
@@ -602,7 +680,14 @@ public class FeedController {
 			commentsBox.getChildren().add(btnStack);
 		}
 
-		commentsBox.getChildren().add(buildCommentComposer(oeuvre));
+		if (!isPrivate) {
+			commentsBox.getChildren().add(buildCommentComposer(oeuvre));
+		} else {
+			Label privateNote = new Label("Les commentaires sont désactivés pour cette œuvre privée.");
+			privateNote.getStyleClass().add("oeuvre-post-comment-date");
+			privateNote.setPadding(new Insets(5, 0, 5, 0));
+			commentsBox.getChildren().add(privateNote);
+		}
 
 		return commentsBox;
 	}
@@ -1089,6 +1174,9 @@ public class FeedController {
 	}
 
 	private void applySearch() {
+		if (isInternalUpdate) return;
+		
+		qrSearchedOeuvreId = null; // Reset QR search when user types manually
 		List<Oeuvre> source = isRecommendationRoute(currentRouteFilter) ? recommendedOeuvres : allOeuvres;
 		List<Oeuvre> filtered = new ArrayList<>();
 		String keyword = searchField == null ? "" : safeText(searchField.getText()).toLowerCase(Locale.ROOT);
@@ -1132,6 +1220,9 @@ public class FeedController {
 	}
 
 	private boolean matchesRouteFilter(Oeuvre oeuvre) {
+		if (oeuvre != null && qrSearchedOeuvreId != null && qrSearchedOeuvreId.equals(oeuvre.getId())) {
+			return true;
+		}
 		String type = safeText(oeuvre == null ? "" : oeuvre.getType()).toLowerCase(Locale.ROOT);
 		return switch (currentRouteFilter) {
 			case "favoris" -> isFavoriByCurrentUser(oeuvre);

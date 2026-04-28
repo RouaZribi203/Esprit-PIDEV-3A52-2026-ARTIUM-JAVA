@@ -4,11 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="sms">
+    <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="qrcodev1">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/FeedController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/FeedController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/MesOeuvresController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/MesOeuvresController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/services/OeuvreService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/OeuvreService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/Feed.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/Feed.fxml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" afterDir="false" />
     </list>
@@ -168,7 +167,7 @@
       <workItem from="1776803086292" duration="4010000" />
       <workItem from="1776881992405" duration="21712000" />
       <workItem from="1776931324086" duration="5772000" />
-      <workItem from="1777316904870" duration="13171000" />
+      <workItem from="1777316904870" duration="17286000" />
     </task>
     <task id="LOCAL-00001" summary="corrections de blob">
       <option name="closed" value="true" />
@@ -250,7 +249,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777335947237</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="qrcodev1">
+      <option name="closed" value="true" />
+      <created>1777338507483</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1777338507483</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -278,7 +285,8 @@
     <MESSAGE value="filte fav et likes" />
     <MESSAGE value="start of editing" />
     <MESSAGE value="sms" />
-    <option name="LAST_COMMIT_MESSAGE" value="sms" />
+    <MESSAGE value="qrcodev1" />
+    <option name="LAST_COMMIT_MESSAGE" value="qrcodev1" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
