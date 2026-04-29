@@ -6,11 +6,24 @@
   <component name="ChangeListManager">
     <list default="true" id="e20e467d-5201-4944-9b74-f6885d3873a6" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationCardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationCardController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/pages/livres.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/pages/livres.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/pages/musiques.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/pages/musiques.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/pages/oeuvres.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/pages/oeuvres.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/pages/reclamations.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/pages/reclamations.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/AdminMusiquesController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/AdminMusiquesController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/LivreFormController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/LivreFormController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/BibliofrontController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/BibliofrontController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/BookReaderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/BookReaderController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/EventDetailController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/EventDetailController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/MusicfrontController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/MusicfrontController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/PaymentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/PaymentController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/ReclamationsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/ReclamationsController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/BibliothequArtisteController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/BibliothequArtisteController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/MusiquesController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/MusiquesController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/ProfileHeaderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/ProfileHeaderController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/entities/Livre.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/entities/Livre.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/entities/Playlist.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/entities/Playlist.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/entities/Ticket.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/entities/Ticket.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/JdbcLivreService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/JdbcLivreService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/MusiqueService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/MusiqueService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/PlaylistService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/PlaylistService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/TicketService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/TicketService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -22,6 +35,7 @@
       <entry key="_C:/Users/Khalil/Desktop/Studies/Semestre 2/Pi Dev/Java" value="3CQjREuTdyPll5iLI0085BcoON4" />
       <entry key="_C:/Users/MSI/Desktop/dev" value="3CXD8IQNwLgaNQCfH5Ff8PStoGT" />
       <entry key="_C:/Users/lenovo/IdeaProjects/ProjetArtJava" value="3CBOsOPT2jv5fiXn9rY3ITlYjez" />
+      <entry key="_C:/Work/3eme/Semestre2/PI_Dev/JAVA/Esprit-PIDEV-3A52-2026-ARTIUM-JAVA" value="3Cj0IdXlpDxnEwKin6ReZE4hGMp" />
       <entry key="_C:/Work/3ème année/Semestre 2/PI Dev/JAVA/Esprit-PIDEV-3A52-2026-ARTIUM-JAVA" value="3CQnF4FbS7xxx2MRkkkZgPbv0gP" />
     </persistenceIdMap>
   </component>
@@ -30,8 +44,8 @@
   </component>
   <component name="CopilotUserSelectedModel">
     <selectedModels>
-      <entry key="chat-panel" value="Auto" />
       <entry key="agent-panel" value="Auto" />
+      <entry key="chat-panel" value="Auto" />
     </selectedModels>
   </component>
   <component name="FileTemplateManagerImpl">
@@ -43,6 +57,25 @@
       </list>
     </option>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;RouaZribi203&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/RouaZribi203/Esprit-PIDEV-3A52-2026-ARTIUM-JAVA.git&quot;,
+    &quot;accountId&quot;: &quot;f45857b0-6c9d-49a9-931f-b16b9863e6de&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
+  <component name="ProjectId" id="3CBOsOPT2jv5fiXn9rY3ITlYjez" />
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="1" id="Add" />
   </component>
@@ -50,52 +83,46 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.Main.executor": "Run",
-    "Application.MainFX.executor": "Run",
-    "Maven.Artium [org.openjfx:javafx-maven-plugin:0.0.8:run].executor": "Run",
-    "Maven.Esprit-PIDEV-3A52-2026-ARTIUM-JAVA [org.openjfx:javafx-maven-plugin:0.0.8:jlink].executor": "Run",
-    "Maven.Esprit-PIDEV-3A52-2026-ARTIUM-JAVA [org.openjfx:javafx-maven-plugin:0.0.8:run].executor": "Run",
-    "Maven.ProjetArtJava [org.openjfx:javafx-maven-plugin:0.0.8:run].executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "git-widget-placeholder": "main",
-    "junie.onboarding.icon.badge.shown": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/Khalil/Desktop/Studies/Semestre 2/Pi Dev/Java/src/main/resources/views/styles",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "onboarding.tips.debug.path": "C:/Users/lenovo/IdeaProjects/ProjetArtJava/src/main/java/org/example/Main.java",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "preferences.JavaFX",
-    "to.speed.mode.migration.done": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
+    &quot;Application.MainFX.executor&quot;: &quot;Run&quot;,
+    &quot;Maven.Artium [org.openjfx:javafx-maven-plugin:0.0.8:run].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.Esprit-PIDEV-3A52-2026-ARTIUM-JAVA [org.openjfx:javafx-maven-plugin:0.0.8:jlink].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.Esprit-PIDEV-3A52-2026-ARTIUM-JAVA [org.openjfx:javafx-maven-plugin:0.0.8:run].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.ProjetArtJava [org.openjfx:javafx-maven-plugin:0.0.8:run].executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;onboarding.tips.debug.path&quot;: &quot;C:/Users/lenovo/IdeaProjects/ProjetArtJava/src/main/java/org/example/Main.java&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.JavaFX&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
   "keyToStringList": {
     "DatabaseDriversLRU": [
       "mysql"
     ]
   }
-}]]></component>
-  <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\Khalil\Desktop\Studies\Semestre 2\Pi Dev\Java\src\main\resources\views\styles" />
-    </key>
-  </component>
+}</component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.26199.169" />
-        <option value="bundled-js-predefined-d6986cc7102b-9c94529fcfe0-JavaScript-IU-252.26199.169" />
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.28539.33" />
+        <option value="bundled-js-predefined-d6986cc7102b-a71380e98a7c-JavaScript-IU-252.28539.33" />
       </set>
     </attachedChunks>
   </component>
@@ -116,6 +143,22 @@
       <workItem from="1776514744207" duration="5785000" />
       <workItem from="1776522849192" duration="6633000" />
       <workItem from="1776530552927" duration="6585000" />
+      <workItem from="1776883585378" duration="6020000" />
+      <workItem from="1776890997791" duration="234000" />
+      <workItem from="1776933465888" duration="3639000" />
+      <workItem from="1777028312034" duration="534000" />
+      <workItem from="1777028983726" duration="346000" />
+      <workItem from="1777029388128" duration="2604000" />
+      <workItem from="1777036554665" duration="3699000" />
+      <workItem from="1777042370696" duration="2385000" />
+      <workItem from="1777048789524" duration="284000" />
+      <workItem from="1777049087960" duration="117000" />
+      <workItem from="1777049218462" duration="28000" />
+      <workItem from="1777049278154" duration="46000" />
+      <workItem from="1777049333749" duration="344000" />
+      <workItem from="1777053136200" duration="4482000" />
+      <workItem from="1777281541887" duration="32657000" />
+      <workItem from="1777452443184" duration="4841000" />
     </task>
     <task id="LOCAL-00001" summary="corrections de blob">
       <option name="closed" value="true" />

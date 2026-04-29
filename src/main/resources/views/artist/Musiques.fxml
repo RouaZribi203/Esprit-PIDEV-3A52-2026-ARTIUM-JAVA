@@ -43,17 +43,6 @@
             <Label fx:id="emptyListLabel" styleClass="users-empty-state" text="Aucune musique disponible pour le moment." wrapText="true" />
         </VBox>
 
-        <VBox spacing="8.0" styleClass="music-player-card">
-            <Label styleClass="music-player-title" text="Lecture en cours" />
-            <Label fx:id="nowPlayingTitleLabel" styleClass="music-player-now" text="Selectionnez une musique" wrapText="true" />
-            <Label fx:id="nowPlayingMetaLabel" styleClass="music-player-meta" text="Genre: -" />
-            <HBox alignment="CENTER_LEFT" spacing="10.0">
-                <Button mnemonicParsing="false" onAction="#handlePreviousTrack" styleClass="secondary-action-button" text="Prev" />
-                <Button fx:id="playPauseButton" mnemonicParsing="false" onAction="#handlePlayPause" styleClass="primary-action-button" text="Play" />
-                <Button mnemonicParsing="false" onAction="#handleNextTrack" styleClass="secondary-action-button" text="Next" />
-                <Label fx:id="playerStatusLabel" styleClass="section-subtitle" text="Pret" />
-            </HBox>
-        </VBox>
 
     </VBox>
 

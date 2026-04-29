@@ -33,7 +33,7 @@
         </ScrollPane>
     </center>
     <bottom>
-        <fx:include fx:id="miniAudioPlayerInclude" source="MiniAudioPlayer.fxml"/>
+        <fx:include fx:id="globalPlayerInclude" source="../components/GlobalPlayer.fxml"/>
     </bottom>
 </BorderPane>
 

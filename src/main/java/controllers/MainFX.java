@@ -18,6 +18,7 @@ public class MainFX extends Application {
 
     private static Stage primaryStage;
     private static User authenticatedUser;
+    private static final String GLOBAL_PLAYER_STYLESHEET = "/views/styles/global-player.css";
 
     public static void switchToAuthLandingView() {
         authenticatedUser = null;

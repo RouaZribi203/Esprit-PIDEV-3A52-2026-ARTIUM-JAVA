@@ -122,6 +122,30 @@ Valeurs actuellement configurees dans le code:
 
 Si besoin, adaptez ces valeurs a votre environnement local.
 
+## Configuration OpenRouter pour les paroles IA
+
+Le module amateur de generation de paroles lit automatiquement un fichier local:
+
+- `config/openrouter.properties`
+
+Exemple:
+
+```properties
+openrouter.apiKey=VOTRE_CLE_OPENROUTER
+# openrouter.model=inclusionai/ling-2.6-1t:free
+```
+
+Si vous preferez, vous pouvez aussi utiliser:
+
+- la variable d'environnement `OPENROUTER_API_KEY`
+- la propriete JVM `-Dopenrouter.apiKey=...`
+
+Priorite de lecture:
+
+1. `config/openrouter.properties`
+2. propriete JVM `openrouter.apiKey` / `openrouter.model`
+3. variables d'environnement `OPENROUTER_API_KEY` / `OPENROUTER_MODEL`
+
 ## Lancement du projet
 
 Depuis la racine du projet:

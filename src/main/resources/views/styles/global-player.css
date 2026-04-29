@@ -1,0 +1,253 @@
+/*
+   Global Player visual theme
+   NOTE: progress/volume slider rules are intentionally left untouched.
+*/
+
+.global-player-bar {
+    -fx-background-color: linear-gradient(to bottom, #141a26, #0e1320);
+    -fx-border-color: rgba(255,255,255,0.06) transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+    -fx-effect: dropshadow(gaussian, rgba(7, 11, 22, 0.40), 14, 0.20, 0, -2);
+}
+
+.global-player-cover-frame {
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #2c2250, #1a2745);
+    -fx-background-radius: 12;
+    -fx-border-color: rgba(143, 172, 255, 0.22);
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+}
+
+.global-player-title {
+    -fx-text-fill: #eef3ff;
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-text-overrun: ellipsis;
+}
+
+.global-player-artist {
+    -fx-text-fill: #9cafcc;
+    -fx-font-size: 11px;
+    -fx-text-overrun: ellipsis;
+}
+
+.global-player-button {
+    -fx-background-color: rgba(140, 160, 255, 0.08);
+    -fx-text-fill: #d9e6ff;
+    -fx-background-radius: 999;
+    -fx-border-color: rgba(140, 160, 255, 0.20);
+    -fx-border-radius: 999;
+    -fx-cursor: hand;
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-opacity: 0.95;
+}
+
+.global-player-button:hover {
+    -fx-background-color: rgba(127,92,230,0.24);
+    -fx-border-color: rgba(127,92,230,0.45);
+    -fx-text-fill: #f3f6ff;
+}
+
+.global-player-button:pressed {
+    -fx-background-color: rgba(61,59,194,0.34);
+}
+
+.global-player-playpause {
+    -fx-background-color: linear-gradient(to bottom, #7f5ce6, #3d3bc2);
+    -fx-text-fill: #ffffff;
+    -fx-background-radius: 999;
+    -fx-border-color: rgba(214, 224, 255, 0.28);
+    -fx-border-radius: 999;
+    -fx-border-width: 1;
+    -fx-font-size: 18px;
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+    -fx-opacity: 1.0;
+    -fx-effect: dropshadow(gaussian, rgba(96, 91, 230, 0.50), 16, 0.35, 0, 2);
+}
+
+.global-player-playpause:hover {
+    -fx-background-color: linear-gradient(to bottom, #8d6df2, #4b49cf);
+    -fx-effect: dropshadow(gaussian, rgba(96, 91, 230, 0.62), 22, 0.42, 0, 2);
+}
+
+.global-player-playpause:pressed {
+    -fx-background-color: linear-gradient(to bottom, #7052d6, #3533ad);
+}
+
+.global-player-time {
+    -fx-text-fill: #aab9d4;
+    -fx-font-size: 11px;
+}
+
+/* Progress slider */
+.global-player-bar .slider .track {
+    -fx-background-color: rgba(255,255,255,0.10);
+    -fx-pref-height: 3;
+    -fx-background-radius: 40;
+}
+
+.global-player-bar .slider .thumb {
+    -fx-background-color: #e8dcff;
+    -fx-pref-width: 12;
+    -fx-pref-height: 12;
+    -fx-background-radius: 999;
+    -fx-padding: 0;
+    -fx-effect: dropshadow(gaussian, rgba(192,132,252,0.80), 10, 0.6, 0, 0);
+}
+
+.global-player-bar .slider .thumb:hover {
+    -fx-background-color: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(192,132,252,1.0), 16, 0.8, 0, 0);
+    -fx-scale-x: 1.2;
+    -fx-scale-y: 1.2;
+}
+
+/* Volume slider — slightly dimmer thumb to distinguish from progress */
+.global-player-volume-box .slider .track {
+    -fx-background-color: rgba(255,255,255,0.10);
+    -fx-pref-height: 3;
+    -fx-background-radius: 9;
+}
+
+.global-player-volume-box .slider .thumb {
+    -fx-background-color: #c0b8d8;
+    -fx-pref-width: 10;
+    -fx-pref-height: 10;
+    -fx-background-radius: 999;
+    -fx-padding: 0;
+}
+
+.global-player-volume-box .slider .thumb:hover {
+    -fx-background-color: #ffffff;
+    -fx-scale-x: 1.2;
+    -fx-scale-y: 1.2;
+}
+
+.global-player-meta {
+    -fx-text-fill: #98add8;
+    -fx-font-size: 11px;
+    -fx-text-overrun: ellipsis;
+}
+
+.global-player-status {
+    -fx-background-color: rgba(127,92,230,0.20);
+    -fx-text-fill: #dacfff;
+    -fx-background-radius: 999;
+    -fx-border-color: rgba(127,92,230,0.46);
+    -fx-border-radius: 999;
+    -fx-border-width: 1;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-text-overrun: ellipsis;
+}
+
+/* Admin light root override (keep same aesthetic family) */
+.app-root .global-player-bar {
+    -fx-background-color: linear-gradient(to bottom, #f8faff, #eef3fc);
+    -fx-border-color: rgba(31, 41, 55, 0.06) transparent transparent transparent;
+    -fx-effect: dropshadow(gaussian, rgba(26, 36, 56, 0.12), 10, 0.18, 0, -1);
+}
+
+.app-root .global-player-cover-frame {
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #ecf2ff, #dde7ff);
+    -fx-border-color: rgba(61,59,194,0.18);
+}
+
+.app-root .global-player-title {
+    -fx-text-fill: #1f2d53;
+}
+
+.app-root .global-player-artist,
+.app-root .global-player-time {
+    -fx-text-fill: #607598;
+}
+
+.app-root .global-player-button {
+    -fx-background-color: rgba(61,59,194,0.08);
+    -fx-border-color: rgba(61,59,194,0.20);
+    -fx-text-fill: #334460;
+}
+
+.app-root .global-player-button:hover {
+    -fx-background-color: rgba(61,59,194,0.18);
+    -fx-border-color: rgba(61,59,194,0.30);
+    -fx-text-fill: #222f4c;
+}
+
+.app-root .global-player-playpause {
+    -fx-background-color: linear-gradient(to bottom, #5753d9, #3d3bc2);
+    -fx-border-color: rgba(255,255,255,0.45);
+}
+
+.app-root .global-player-meta {
+    -fx-text-fill: #4a5fba;
+}
+
+.app-root .global-player-status {
+    -fx-background-color: rgba(61,59,194,0.12);
+    -fx-text-fill: #3d3bc2;
+    -fx-border-color: rgba(61,59,194,0.25);
+}
+
+/* Lyrics Panel */
+.global-player-lyrics-panel {
+    -fx-background-color: linear-gradient(to bottom, #111520, #141a26);
+    -fx-border-color: rgba(255,255,255,0.06) transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+}
+
+.global-player-lyrics-status {
+    -fx-text-fill: #aab9d4;
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+}
+
+.global-player-lyrics-area {
+    -fx-control-inner-background: #000000 !important;
+    -fx-background-color: #000000 !important;
+    -fx-text-fill: #ffffff !important;
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+    -fx-font-size: 14px;
+    -fx-border-color: rgba(143, 172, 255, 0.22);
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 10, 0.2, 0, 2);
+}
+
+.global-player-lyrics-area .content,
+.global-player-lyrics-area .viewport {
+    -fx-background-color: #000000 !important;
+}
+
+.app-root .global-player-lyrics-area,
+.app-root .global-player-lyrics-area:focused {
+    -fx-control-inner-background: #000000 !important;
+    -fx-background-color: #000000 !important;
+    -fx-text-fill: #ffffff !important;
+}
+
+.app-root .global-player-lyrics-area .content,
+.app-root .global-player-lyrics-area .viewport {
+    -fx-background-color: #000000 !important;
+}
+
+.global-player-button-secondary {
+    -fx-background-color: rgba(140, 160, 255, 0.12);
+    -fx-text-fill: #d9e6ff;
+    -fx-background-radius: 8;
+    -fx-border-color: rgba(140, 160, 255, 0.3);
+    -fx-border-radius: 8;
+    -fx-cursor: hand;
+    -fx-font-weight: bold;
+    -fx-padding: 6 12 6 12;
+    -fx-transition: background-color 0.2s, border-color 0.2s;
+}
+
+.global-player-button-secondary:hover {
+    -fx-background-color: rgba(127,92,230,0.3);
+    -fx-border-color: rgba(127,92,230,0.5);
+    -fx-text-fill: #ffffff;
+}

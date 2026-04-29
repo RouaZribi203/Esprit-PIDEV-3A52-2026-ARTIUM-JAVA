@@ -20,22 +20,25 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.geometry.Side;
-import javafx.scene.media.Media;
 import javafx.scene.media.MediaException;
-import javafx.scene.media.MediaPlayer;
 import javafx.stage.FileChooser;
+import services.GlobalMediaPlayerService;
+import utils.ImageUrlUtils;
 import utils.MyDatabase;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -44,12 +47,20 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 public class MusiquesController {
+    private static final String XAMPP_IMAGE_DIR = "C:\\xampp\\htdocs\\img";
+    private static final double TRACK_CARD_WIDTH = 170;
+    private static final double PLAYLIST_CARD_WIDTH = 180;
+    private static final double TRACK_COVER_SIZE = 150;
+    private static final double PLAYLIST_COVER_WIDTH = 160;
+    private static final double PLAYLIST_COVER_HEIGHT = 110;
 
     @FXML
     private TextField titreField;
@@ -134,17 +145,18 @@ public class MusiquesController {
 
     private final MusiqueService musiqueService = new MusiqueService();
     private final PlaylistService playlistService = new PlaylistService();
+    private final GlobalMediaPlayerService globalMediaPlayer = GlobalMediaPlayerService.getInstance();
     private final ObservableList<Musique> allTracks = FXCollections.observableArrayList();
     private final ObservableList<Musique> visibleTracks = FXCollections.observableArrayList();
     private final ObservableList<Playlist> allPlaylists = FXCollections.observableArrayList();
     private final ObservableList<Playlist> visiblePlaylists = FXCollections.observableArrayList();
+    private final Map<Integer, String> trackArtistNames = new HashMap<>();
     private final ObservableList<String> genres = FXCollections.observableArrayList(
             "Rock",
             "Pop",
             "Jazz",
             "Classique"
     );
-    private MediaPlayer mediaPlayer;
     private int currentTrackIndex = -1;
     private static final Set<String> PLAYABLE_EXTENSIONS = new HashSet<>(Arrays.asList("mp3", "m4a", "wav"));
     private static final Set<String> IMAGE_EXTENSIONS = new HashSet<>(Arrays.asList("png", "jpg", "jpeg"));
@@ -189,9 +201,22 @@ public class MusiquesController {
             sortPlaylistComboBox.getSelectionModel().selectFirst();
             sortPlaylistComboBox.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> filterPlaylists(playlistSearchField != null ? playlistSearchField.getText() : null));
         }
+
+        configureGridSizing();
         
         refreshMusiquesList();
         refreshPlaylistsList();
+    }
+
+    private void configureGridSizing() {
+        if (musiqueGrid != null) {
+            musiqueGrid.setPrefTileWidth(TRACK_CARD_WIDTH);
+            musiqueGrid.setTileAlignment(javafx.geometry.Pos.TOP_LEFT);
+        }
+        if (playlistGrid != null) {
+            playlistGrid.setPrefTileWidth(PLAYLIST_CARD_WIDTH);
+            playlistGrid.setTileAlignment(javafx.geometry.Pos.TOP_LEFT);
+        }
     }
 
     @FXML
@@ -226,27 +251,11 @@ public class MusiquesController {
 
     @FXML
     private void handlePlayPause() {
-        if (mediaPlayer == null) {
-            int selectedIndex = currentTrackIndex;
-            if (selectedIndex < 0 && !visibleTracks.isEmpty()) {
-                selectedIndex = 0;
-            }
-            if (selectedIndex >= 0) {
-                playTrackAtIndex(selectedIndex, true);
-            }
+        if (globalMediaPlayer.getCurrentTrack() == null && !visibleTracks.isEmpty()) {
+            playTrackAtIndex(0, true);
             return;
         }
-
-        MediaPlayer.Status status = mediaPlayer.getStatus();
-        if (status == MediaPlayer.Status.PLAYING) {
-            mediaPlayer.pause();
-            playPauseButton.setText("Play");
-            playerStatusLabel.setText("En pause");
-        } else {
-            mediaPlayer.play();
-            playPauseButton.setText("Pause");
-            playerStatusLabel.setText("Lecture en cours");
-        }
+        globalMediaPlayer.togglePlayPause();
     }
 
     @FXML
@@ -254,8 +263,7 @@ public class MusiquesController {
         if (visibleTracks.isEmpty()) {
             return;
         }
-        int targetIndex = currentTrackIndex <= 0 ? visibleTracks.size() - 1 : currentTrackIndex - 1;
-        playTrackAtIndex(targetIndex, true);
+        globalMediaPlayer.playPrevious();
     }
 
     @FXML
@@ -263,8 +271,7 @@ public class MusiquesController {
         if (visibleTracks.isEmpty()) {
             return;
         }
-        int targetIndex = currentTrackIndex >= visibleTracks.size() - 1 ? 0 : currentTrackIndex + 1;
-        playTrackAtIndex(targetIndex, true);
+        globalMediaPlayer.playNext();
     }
 
     @FXML
@@ -526,10 +533,12 @@ public class MusiquesController {
         try {
             List<Musique> musiques = musiqueService.getAll();
             allTracks.setAll(musiques);
+            loadTrackArtistNames(musiques);
             filterTracks(searchField != null ? searchField.getText() : null);
         } catch (SQLDataException e) {
             allTracks.clear();
             visibleTracks.clear();
+            trackArtistNames.clear();
             renderTrackGrid();
             emptyListLabel.setText("Impossible de charger les musiques: " + e.getMessage());
             emptyListLabel.setVisible(true);
@@ -592,38 +601,61 @@ public class MusiquesController {
         }
 
         Musique selectedTrack = visibleTracks.get(index);
-        String source = toMediaSource(selectedTrack.getAudio());
-        if (source == null) {
-            playerStatusLabel.setText("Fichier audio introuvable");
+        currentTrackIndex = index;
+        renderTrackGrid();
+
+        String artistName = resolveTrackArtistName(selectedTrack);
+        globalMediaPlayer.playTrack(selectedTrack, visibleTracks, index, artistName);
+    }
+
+    private String resolveTrackArtistName(Musique track) {
+        if (track == null || track.getId() == null) {
+            return "Artiste inconnu";
+        }
+        return trackArtistNames.getOrDefault(track.getId(), "Artiste inconnu");
+    }
+
+    private void loadTrackArtistNames(List<Musique> tracks) {
+        trackArtistNames.clear();
+        if (tracks == null || tracks.isEmpty()) {
             return;
         }
 
-        stopPlayer();
-        try {
-            Media media = new Media(source);
-            mediaPlayer = new MediaPlayer(media);
-            currentTrackIndex = index;
-            renderTrackGrid();
-            updateNowPlayingLabels(selectedTrack);
+        List<Integer> ids = tracks.stream()
+                .map(Musique::getId)
+                .filter(id -> id != null)
+                .toList();
+        if (ids.isEmpty()) {
+            return;
+        }
 
-            mediaPlayer.setOnReady(() -> {
-                if (autoPlay) {
-                    mediaPlayer.play();
-                    playPauseButton.setText("Pause");
-                    playerStatusLabel.setText("Lecture en cours");
-                } else {
-                    playPauseButton.setText("Play");
-                    playerStatusLabel.setText("Pret");
+        String placeholders = String.join(",", java.util.Collections.nCopies(ids.size(), "?"));
+        String sql = "SELECT o.id AS oeuvre_id, u.prenom, u.nom "
+                + "FROM oeuvre o "
+                + "LEFT JOIN collections c ON c.id = o.collection_id "
+                + "LEFT JOIN `user` u ON u.id = c.artiste_id "
+                + "WHERE o.id IN (" + placeholders + ")";
+
+        Connection connection = MyDatabase.getInstance().getConnection();
+        if (connection == null) {
+            return;
+        }
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            for (int i = 0; i < ids.size(); i++) {
+                statement.setInt(i + 1, ids.get(i));
+            }
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    int oeuvreId = resultSet.getInt("oeuvre_id");
+                    String prenom = resultSet.getString("prenom");
+                    String nom = resultSet.getString("nom");
+                    String fullName = ((prenom != null ? prenom : "") + " " + (nom != null ? nom : "")).trim();
+                    trackArtistNames.put(oeuvreId, fullName.isEmpty() ? "Artiste inconnu" : fullName);
                 }
-            });
-            mediaPlayer.setOnEndOfMedia(this::handleNextTrack);
-            mediaPlayer.setOnError(() -> playerStatusLabel.setText(describeMediaError(mediaPlayer.getError())));
-        } catch (MediaException mediaException) {
-            playPauseButton.setText("Play");
-            playerStatusLabel.setText(describeMediaError(mediaException));
-        } catch (RuntimeException runtimeException) {
-            playPauseButton.setText("Play");
-            playerStatusLabel.setText("Impossible de lire ce fichier audio");
+            }
+        } catch (SQLException ignored) {
+            // Keep fallback label if relation/tables are unavailable in this environment.
         }
     }
 
@@ -644,8 +676,28 @@ public class MusiquesController {
     private void updateNowPlayingLabels(Musique musique) {
         String titre = musique.getTitre() != null ? musique.getTitre() : "Sans titre";
         String genre = musique.getGenre() != null ? musique.getGenre() : "-";
-        nowPlayingTitleLabel.setText(titre);
-        nowPlayingMetaLabel.setText("Genre: " + genre);
+        setNowPlayingText(titre, "Genre: " + genre);
+    }
+
+    private void setNowPlayingText(String title, String meta) {
+        if (nowPlayingTitleLabel != null) {
+            nowPlayingTitleLabel.setText(title);
+        }
+        if (nowPlayingMetaLabel != null) {
+            nowPlayingMetaLabel.setText(meta);
+        }
+    }
+
+    private void setPlayerStatusText(String status) {
+        if (playerStatusLabel != null) {
+            playerStatusLabel.setText(status);
+        }
+    }
+
+    private void setPlayPauseButtonText(String text) {
+        if (playPauseButton != null) {
+            playPauseButton.setText(text);
+        }
     }
 
     private String toMediaSource(String audioPath) {
@@ -716,14 +768,6 @@ public class MusiquesController {
         return null;
     }
 
-    private void stopPlayer() {
-        if (mediaPlayer != null) {
-            mediaPlayer.stop();
-            mediaPlayer.dispose();
-            mediaPlayer = null;
-        }
-    }
-
     private void renderTrackGrid() {
         musiqueGrid.getChildren().clear();
         for (int i = 0; i < visibleTracks.size(); i++) {
@@ -742,10 +786,10 @@ public class MusiquesController {
             if (currentTrackIndex >= 0 && currentTrackIndex < visibleTracks.size()) {
                 Musique current = visibleTracks.get(currentTrackIndex);
                 if (current.getId() != null && current.getId().equals(musique.getId())) {
-                    stopPlayer();
+                    globalMediaPlayer.stop();
                     currentTrackIndex = -1;
-                    playPauseButton.setText("Play");
-                    playerStatusLabel.setText("Pret");
+                    setPlayPauseButtonText("Play");
+                    setPlayerStatusText("Pret");
                 }
             }
 
@@ -779,8 +823,9 @@ public class MusiquesController {
 
     private VBox createTrackCard(Musique musique, int index) {
         VBox card = new VBox(6);
-        card.setPrefWidth(170);
-        card.setMaxWidth(170);
+        card.setMinWidth(TRACK_CARD_WIDTH);
+        card.setPrefWidth(TRACK_CARD_WIDTH);
+        card.setMaxWidth(TRACK_CARD_WIDTH);
         card.getStyleClass().add("music-track-card");
         if (index == currentTrackIndex) {
             card.getStyleClass().add("music-track-card-active");
@@ -839,8 +884,7 @@ public class MusiquesController {
     }
 
     private Node buildCoverNode(String imageSource) {
-        StackPane placeholder = new StackPane();
-        placeholder.setPrefSize(150, 150);
+        StackPane placeholder = createCoverContainer(TRACK_COVER_SIZE, TRACK_COVER_SIZE);
         placeholder.getStyleClass().add("music-cover-placeholder");
 
         if (imageSource == null || imageSource.isBlank()) {
@@ -851,13 +895,8 @@ public class MusiquesController {
         }
 
         try {
-            Image image;
-            if (imageSource.startsWith("http://") || imageSource.startsWith("https://") || imageSource.startsWith("file:")) {
-                image = new Image(imageSource, true);
-            } else {
-                image = new Image(new File(imageSource).toURI().toString(), true);
-            }
-            if (image.isError()) {
+            Image image = loadImageSafely(imageSource);
+            if (image == null) {
                 Label noImageLabel = new Label("No cover");
                 noImageLabel.getStyleClass().add("music-cover-placeholder-text");
                 placeholder.getChildren().add(noImageLabel);
@@ -865,13 +904,15 @@ public class MusiquesController {
             }
 
             ImageView imageView = new ImageView(image);
-            imageView.setFitWidth(150);
-            imageView.setFitHeight(150);
+            imageView.setFitWidth(TRACK_COVER_SIZE);
+            imageView.setFitHeight(TRACK_COVER_SIZE);
             imageView.setPreserveRatio(false);
+            imageView.setSmooth(true);
             imageView.getStyleClass().add("music-cover-image");
 
-            StackPane coverWrap = new StackPane(imageView);
+            StackPane coverWrap = createCoverContainer(TRACK_COVER_SIZE, TRACK_COVER_SIZE);
             coverWrap.getStyleClass().add("music-cover-placeholder");
+            coverWrap.getChildren().add(imageView);
             return coverWrap;
         } catch (Exception ex) {
             Label noImageLabel = new Label("No cover");
@@ -893,11 +934,10 @@ public class MusiquesController {
 
         if (visibleTracks.isEmpty()) {
             currentTrackIndex = -1;
-            stopPlayer();
-            nowPlayingTitleLabel.setText("Selectionnez une musique");
-            nowPlayingMetaLabel.setText("Genre: -");
-            playerStatusLabel.setText("Pret");
-            playPauseButton.setText("Play");
+            globalMediaPlayer.stop();
+            setNowPlayingText("Selectionnez une musique", "Genre: -");
+            setPlayerStatusText("Pret");
+            setPlayPauseButtonText("Play");
         } else if (currentTrackIndex >= visibleTracks.size()) {
             currentTrackIndex = -1;
         }
@@ -1013,8 +1053,9 @@ public class MusiquesController {
 
     private VBox createPlaylistCard(Playlist playlist) {
         VBox card = new VBox(6);
-        card.setPrefWidth(180);
-        card.setMaxWidth(180);
+        card.setMinWidth(PLAYLIST_CARD_WIDTH);
+        card.setPrefWidth(PLAYLIST_CARD_WIDTH);
+        card.setMaxWidth(PLAYLIST_CARD_WIDTH);
         card.getStyleClass().add("music-track-card");
 
         Node coverNode = buildPlaylistCoverNode(playlist.getImage());
@@ -1037,8 +1078,7 @@ public class MusiquesController {
     }
 
     private Node buildPlaylistCoverNode(String imageSource) {
-        StackPane placeholder = new StackPane();
-        placeholder.setPrefSize(160, 110);
+        StackPane placeholder = createCoverContainer(PLAYLIST_COVER_WIDTH, PLAYLIST_COVER_HEIGHT);
         placeholder.getStyleClass().add("music-cover-placeholder");
 
         if (imageSource == null || imageSource.isBlank()) {
@@ -1049,13 +1089,8 @@ public class MusiquesController {
         }
 
         try {
-            Image image;
-            if (imageSource.startsWith("http://") || imageSource.startsWith("https://") || imageSource.startsWith("file:")) {
-                image = new Image(imageSource, true);
-            } else {
-                image = new Image(new File(imageSource).toURI().toString(), true);
-            }
-            if (image.isError()) {
+            Image image = loadImageSafely(imageSource);
+            if (image == null) {
                 Label noImageLabel = new Label("Playlist");
                 noImageLabel.getStyleClass().add("music-cover-placeholder-text");
                 placeholder.getChildren().add(noImageLabel);
@@ -1063,13 +1098,15 @@ public class MusiquesController {
             }
 
             ImageView imageView = new ImageView(image);
-            imageView.setFitWidth(160);
-            imageView.setFitHeight(110);
+            imageView.setFitWidth(PLAYLIST_COVER_WIDTH);
+            imageView.setFitHeight(PLAYLIST_COVER_HEIGHT);
             imageView.setPreserveRatio(false);
+            imageView.setSmooth(true);
             imageView.getStyleClass().add("music-cover-image");
 
-            StackPane coverWrap = new StackPane(imageView);
+            StackPane coverWrap = createCoverContainer(PLAYLIST_COVER_WIDTH, PLAYLIST_COVER_HEIGHT);
             coverWrap.getStyleClass().add("music-cover-placeholder");
+            coverWrap.getChildren().add(imageView);
             return coverWrap;
         } catch (Exception ex) {
             Label noImageLabel = new Label("Playlist");
@@ -1084,6 +1121,103 @@ public class MusiquesController {
             return "Playlist sans nom";
         }
         return playlist.getNom();
+    }
+
+    private StackPane createCoverContainer(double width, double height) {
+        StackPane container = new StackPane();
+        container.setMinSize(width, height);
+        container.setPrefSize(width, height);
+        container.setMaxSize(width, height);
+
+        Rectangle clip = new Rectangle(width, height);
+        container.setClip(clip);
+        return container;
+    }
+
+    private Image loadImageSafely(String imageSource) {
+        if (imageSource == null || imageSource.isBlank()) {
+            return null;
+        }
+
+        try {
+            String trimmed = imageSource.trim();
+
+            // Prefer local resolution first for known web paths so UI does not depend on localhost web server availability.
+            File localImage = resolveLocalImageFile(trimmed);
+            if (localImage != null && localImage.exists() && localImage.isFile()) {
+                Image local = new Image(localImage.toURI().toString(), false);
+                if (!local.isError()) {
+                    return local;
+                }
+            }
+
+            if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+                Image remoteImage = new Image(trimmed, true);
+                return remoteImage.isError() ? null : remoteImage;
+            }
+
+            return null;
+        } catch (RuntimeException ex) {
+            return null;
+        }
+    }
+
+    private File resolveLocalImageFile(String source) {
+        if (source == null || source.isBlank()) {
+            return null;
+        }
+
+        String trimmed = source.trim();
+        if (trimmed.length() > 1 && trimmed.startsWith("\"") && trimmed.endsWith("\"")) {
+            trimmed = trimmed.substring(1, trimmed.length() - 1);
+        }
+        if (trimmed.startsWith("/") && trimmed.length() > 2 && trimmed.charAt(2) == ':') {
+            trimmed = trimmed.substring(1);
+        }
+
+        if (trimmed.startsWith(ImageUrlUtils.IMAGE_BASE_URL)) {
+            String fileName = trimmed.substring(ImageUrlUtils.IMAGE_BASE_URL.length()).trim();
+            return fileName.isEmpty() ? null : new File(XAMPP_IMAGE_DIR, fileName);
+        }
+
+        if (trimmed.startsWith("/img/") || trimmed.startsWith("/htdocs/img/")) {
+            String fileName = extractFileName(trimmed);
+            return fileName.isEmpty() ? null : new File(XAMPP_IMAGE_DIR, fileName);
+        }
+
+        if (trimmed.startsWith("file:")) {
+            try {
+                return new File(new URI(trimmed));
+            } catch (Exception ignored) {
+                String rawPath = trimmed.substring("file:".length());
+                if (rawPath.startsWith("//")) {
+                    rawPath = rawPath.substring(2);
+                }
+                if (rawPath.startsWith("/") && rawPath.length() > 2 && rawPath.charAt(2) == ':') {
+                    rawPath = rawPath.substring(1);
+                }
+                return new File(rawPath);
+            }
+        }
+
+        return new File(trimmed);
+    }
+
+    private String extractFileName(String value) {
+        String normalized = value.replace('\\', '/');
+        int queryIndex = normalized.indexOf('?');
+        if (queryIndex >= 0) {
+            normalized = normalized.substring(0, queryIndex);
+        }
+        int fragmentIndex = normalized.indexOf('#');
+        if (fragmentIndex >= 0) {
+            normalized = normalized.substring(0, fragmentIndex);
+        }
+        while (normalized.endsWith("/")) {
+            normalized = normalized.substring(0, normalized.length() - 1);
+        }
+        int lastSlash = normalized.lastIndexOf('/');
+        return (lastSlash >= 0 ? normalized.substring(lastSlash + 1) : normalized).trim();
     }
 
     public static final class CollectionChoice {

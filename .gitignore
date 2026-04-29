@@ -43,6 +43,9 @@ config/stripe.local.properties
 config/mail.local.properties
 config/ollama.local.properties
 
+### Local app secrets ###
+config/openrouter.properties
+
 ### Mac OS ###
 .DS_Store
 

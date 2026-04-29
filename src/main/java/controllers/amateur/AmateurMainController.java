@@ -45,7 +45,10 @@ public class AmateurMainController {
 
         User connectedUser = MainFX.getAuthenticatedUser();
         if (connectedUser != null) {
+            navbarIncludeController.setUser(connectedUser);
             sidebarIncludeController.setUser(connectedUser);
+        } else {
+            navbarIncludeController.setUser(null);
         }
 
         sidebarIncludeController.setNavigationHandler(this::onNavigate);
@@ -57,8 +60,8 @@ public class AmateurMainController {
     private void onNavigate(String route) {
         navbarIncludeController.setActiveRoute(route);
         sidebarIncludeController.setActiveItem(route);
-        miniAudioPlayerIncludeController.setVisibleForRoute(route);
-        Object controller = loadAmateurView(resolveRoute(route));
+
+        Object controller = loadAmateurView(route, resolveRoute(route));
         configureLoadedController(controller);
     }
 

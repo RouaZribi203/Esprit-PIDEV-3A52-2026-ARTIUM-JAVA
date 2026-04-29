@@ -1561,3 +1561,23 @@
     -fx-background-color: #0ea5e9;
     -fx-effect: dropshadow(gaussian, rgba(56, 189, 248, 0.4), 8, 0, 0, 2);
 }
+
+.app-root.dark-mode .context-menu .menu-item.avatar-dropdown-item > .label {
+    -fx-text-fill: #dce6fb;
+}
+
+.app-root.dark-mode .context-menu .menu-item.avatar-dropdown-item:focused,
+.app-root.dark-mode .context-menu .menu-item.avatar-dropdown-item:hover {
+    -fx-background-color: #334562;
+}
+
+.app-root.dark-mode .context-menu .menu-item#logoutMenuItem > .label {
+    -fx-text-fill: #ff9fb2;
+}
+
+.app-root.dark-mode .context-menu .menu-item#logoutMenuItem:focused,
+.app-root.dark-mode .context-menu .menu-item#logoutMenuItem:hover {
+    -fx-background-color: #553343;
+}
+
+
