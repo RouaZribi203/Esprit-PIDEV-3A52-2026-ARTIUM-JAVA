@@ -3,12 +3,16 @@ package controllers.amateur;
 import entities.Evenement;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.layout.FlowPane;
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
+import javafx.scene.layout.GridPane;
 import services.EvenementService;
+import services.EventAiSearchService;
 
 import java.io.IOException;
 import java.sql.SQLDataException;
@@ -16,10 +20,12 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
-import controllers.amateur.EventCardController;
 
 public class EventsfrontController {
 
@@ -42,69 +48,83 @@ public class EventsfrontController {
 	private ToggleButton conferenceTabButton;
 
 	@FXML
-	private FlowPane eventsFlowPane;
+	private GridPane eventsGridPane;
 
 	@FXML
 	private Label emptyStateLabel;
 
 	private final EvenementService evenementService = new EvenementService();
+	private final EventAiSearchService aiSearchService = new EventAiSearchService();
 	private final List<Evenement> allEvents = new ArrayList<>();
+	private final AtomicLong searchSequence = new AtomicLong(0L);
+	private final ExecutorService searchExecutor = Executors.newSingleThreadExecutor(runnable -> {
+		Thread thread = new Thread(runnable, "event-ai-search");
+		thread.setDaemon(true);
+		return thread;
+	});
+	private final PauseTransition searchDebounce = new PauseTransition(Duration.millis(280));
 	private String selectedCategory = "Tous";
 	private Consumer<Evenement> detailNavigationHandler;
 
 	@FXML
 	public void initialize() {
+		searchDebounce.setOnFinished(event -> triggerSearch(searchField.getText()));
+		searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+			searchDebounce.stop();
+			searchDebounce.playFromStart();
+		});
+		searchField.setOnAction(event -> triggerSearch(searchField.getText()));
+
 		refreshEvents();
-		onAllTabClick();
 	}
 
 	public void setDetailNavigationHandler(Consumer<Evenement> detailNavigationHandler) {
 		this.detailNavigationHandler = detailNavigationHandler;
 		// Cards are first rendered during initialize(), before parent injects navigation handler.
-		// Re-apply filters so every visible card receives the click callback.
+		// Re-run the search so every visible card receives the click callback.
 		if (!allEvents.isEmpty()) {
-			applyFilters();
+			triggerSearch(searchField.getText());
 		}
 	}
 
 	@FXML
 	private void onSearchClick() {
-		applyFilters();
+		triggerSearch(searchField.getText());
 	}
 
 	@FXML
 	private void onAllTabClick() {
 		selectedCategory = "Tous";
 		setActiveTab(allTabButton);
-		applyFilters();
+		triggerSearch(searchField.getText());
 	}
 
 	@FXML
 	private void onExpositionTabClick() {
 		selectedCategory = "Exposition";
 		setActiveTab(expositionTabButton);
-		applyFilters();
+		triggerSearch(searchField.getText());
 	}
 
 	@FXML
 	private void onConcertTabClick() {
 		selectedCategory = "Concert";
 		setActiveTab(concertTabButton);
-		applyFilters();
+		triggerSearch(searchField.getText());
 	}
 
 	@FXML
 	private void onSpectacleTabClick() {
 		selectedCategory = "Spectacle";
 		setActiveTab(spectacleTabButton);
-		applyFilters();
+		triggerSearch(searchField.getText());
 	}
 
 	@FXML
 	private void onConferenceTabClick() {
 		selectedCategory = "Conférence";
 		setActiveTab(conferenceTabButton);
-		applyFilters();
+		triggerSearch(searchField.getText());
 	}
 
 	private void refreshEvents() {
@@ -112,6 +132,7 @@ public class EventsfrontController {
 			allEvents.clear();
 			allEvents.addAll(evenementService.getAll());
 			allEvents.sort(Comparator.comparing(Evenement::getDateDebut, Comparator.nullsLast(Comparator.naturalOrder())).reversed());
+			triggerSearch(searchField.getText());
 		} catch (SQLDataException e) {
 			emptyStateLabel.setText("Impossible de charger les evenements.");
 			emptyStateLabel.setVisible(true);
@@ -119,15 +140,43 @@ public class EventsfrontController {
 		}
 	}
 
-	private void applyFilters() {
-		String search = searchField.getText() == null ? "" : searchField.getText().trim().toLowerCase();
+	private void triggerSearch(String rawQuery) {
+		String query = rawQuery == null ? "" : rawQuery.trim();
+		long sequence = searchSequence.incrementAndGet();
 
-		List<Evenement> filtered = allEvents.stream()
+		CompletableFuture
+				.supplyAsync(() -> searchEvents(query), searchExecutor)
+				.thenAccept(results -> Platform.runLater(() -> {
+					if (sequence != searchSequence.get()) {
+						return;
+					}
+					renderCards(results);
+				}))
+				.exceptionally(ex -> {
+					Platform.runLater(() -> {
+						if (sequence != searchSequence.get()) {
+							return;
+						}
+						emptyStateLabel.setText("La recherche IA est temporairement indisponible.");
+						emptyStateLabel.setVisible(true);
+						emptyStateLabel.setManaged(true);
+					});
+					return null;
+				});
+	}
+
+	private List<EventAiSearchService.RankedEvent> searchEvents(String query) {
+		List<Evenement> scopedEvents = allEvents.stream()
 				.filter(event -> matchesCategory(event, selectedCategory))
-				.filter(event -> matchesSearch(event, search))
 				.collect(Collectors.toList());
 
-		renderCards(filtered);
+		if (query.isBlank()) {
+			return scopedEvents.stream()
+					.map(event -> new EventAiSearchService.RankedEvent(event, Double.NaN))
+					.collect(Collectors.toList());
+		}
+
+		return aiSearchService.rankEvents(scopedEvents, query);
 	}
 
 	private boolean matchesCategory(Evenement event, String category) {
@@ -137,29 +186,27 @@ public class EventsfrontController {
 		return category.equalsIgnoreCase(safe(event.getType()));
 	}
 
-	private boolean matchesSearch(Evenement event, String search) {
-		if (search.isEmpty()) {
-			return true;
-		}
+	private void renderCards(List<EventAiSearchService.RankedEvent> rankedEvents) {
+		eventsGridPane.getChildren().clear();
 
-		return contains(event.getTitre(), search)
-				|| contains(event.getDescription(), search)
-				|| contains(event.getType(), search)
-				|| contains(event.getStatut(), search)
-				|| contains(event.getPrixTicket() == null ? null : String.valueOf(event.getPrixTicket()), search);
-	}
-
-	private void renderCards(List<Evenement> events) {
-		eventsFlowPane.getChildren().clear();
-
-		for (Evenement event : events) {
+        int row = 0;
+        int col = 0;
+		for (EventAiSearchService.RankedEvent rankedEvent : rankedEvents) {
+			Evenement event = rankedEvent.event();
 			try {
 				FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(getClass().getResource("/views/amateur/components/event-card.fxml")));
 				Parent card = loader.load();
-				controllers.amateur.EventCardController controller = loader.getController();
+				EventCardController controller = loader.getController();
 				controller.setData(event);
+				controller.setScore(rankedEvent.scoreOutOf10());
 				controller.setDetailHandler(detailNavigationHandler);
-				eventsFlowPane.getChildren().add(card);
+				
+                eventsGridPane.add(card, col, row);
+                col++;
+                if (col == 3) {
+                    col = 0;
+                    row++;
+                }
 			} catch (IOException e) {
 				emptyStateLabel.setText("Erreur lors de l'affichage des evenements.");
 				emptyStateLabel.setVisible(true);
@@ -168,7 +215,7 @@ public class EventsfrontController {
 			}
 		}
 
-		boolean empty = events.isEmpty();
+		boolean empty = rankedEvents.isEmpty();
 		emptyStateLabel.setVisible(empty);
 		emptyStateLabel.setManaged(empty);
 	}

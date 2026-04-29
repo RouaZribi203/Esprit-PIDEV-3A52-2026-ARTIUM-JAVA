@@ -2,6 +2,8 @@ package controllers.amateur;
 
 import controllers.MainFX;
 import entities.User;
+import entities.Evenement;
+import entities.Ticket;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -11,6 +13,7 @@ import javafx.scene.layout.StackPane;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Objects;
+import services.EmailServiceEvent;
 
 public class AmateurMainController {
 
@@ -30,6 +33,9 @@ public class AmateurMainController {
 
     @FXML
     private MiniAudioPlayerController miniAudioPlayerIncludeController;
+
+    private Evenement selectedEvent;
+    private Ticket pendingPurchasedTicket;
 
     @FXML
     public void initialize() {
@@ -52,7 +58,26 @@ public class AmateurMainController {
         navbarIncludeController.setActiveRoute(route);
         sidebarIncludeController.setActiveItem(route);
         miniAudioPlayerIncludeController.setVisibleForRoute(route);
-        loadAmateurView(resolveRoute(route));
+        Object controller = loadAmateurView(resolveRoute(route));
+        configureLoadedController(controller);
+    }
+
+    public void openEventDetail(Evenement event) {
+        this.selectedEvent = event;
+        onNavigate("event-detail");
+    }
+
+    public void onTicketPurchased(Ticket ticket) {
+        this.pendingPurchasedTicket = ticket;
+
+        // Envoi de l'email en arrière-plan
+        User connectedUser = MainFX.getAuthenticatedUser();
+        if (connectedUser != null && connectedUser.getEmail() != null) {
+            EmailServiceEvent emailService = new EmailServiceEvent();
+            emailService.sendTicketEmailAsync(connectedUser.getEmail(), selectedEvent, ticket);
+        }
+
+        onNavigate("payment-success");
     }
 
     private String resolveRoute(String route) {
@@ -70,6 +95,8 @@ public class AmateurMainController {
                 return "/views/amateur/Evenements.fxml";
             case "event-detail":
                 return "/views/amateur/EventDetail.fxml";
+            case "payment-form":
+                return "/views/amateur/PaymentForm.fxml";
             case "payment-success":
                 return "/views/amateur/PaymentSuccess.fxml";
             case "bibliotheque":
@@ -107,7 +134,7 @@ public class AmateurMainController {
         }
     }
 
-    private void loadAmateurView(String fxmlPath) {
+    private Object loadAmateurView(String fxmlPath) {
         try {
             URL resource = Objects.requireNonNull(getClass().getResource(fxmlPath), "FXML not found: " + fxmlPath);
             FXMLLoader loader = new FXMLLoader(resource);
@@ -121,9 +148,34 @@ public class AmateurMainController {
             }
 
             amateurContentArea.getChildren().setAll(page);
+            return controller;
         } catch (IOException e) {
             throw new IllegalStateException("Failed to load amateur page: " + fxmlPath, e);
         }
     }
+
+    private void configureLoadedController(Object controller) {
+        if (controller instanceof EventsfrontController eventsController) {
+            eventsController.setDetailNavigationHandler(this::openEventDetail);
+        } else if (controller instanceof EventDetailController detailController) {
+            detailController.setEvent(selectedEvent);
+            detailController.setPurchaseHandler(this::onTicketPurchased);
+            detailController.setPayHandler(ev -> {
+                this.selectedEvent = ev;
+                onNavigate("payment-form");
+            });
+            detailController.setBackHandler(() -> onNavigate("evenements"));
+        } else if (controller instanceof PaymentFormController formController) {
+            formController.setEvent(selectedEvent);
+            formController.setSuccessHandler(this::onTicketPurchased);
+            formController.setCancelHandler(() -> onNavigate("event-detail"));
+        } else if (controller instanceof PaymentController paymentController) {
+            paymentController.setTicket(pendingPurchasedTicket);
+            paymentController.setBackToEventHandler(() -> onNavigate("event-detail"));
+            paymentController.setBackToEventsHandler(() -> onNavigate("evenements"));
+            pendingPurchasedTicket = null;
+        }
+    }
 }
+
 

@@ -15,6 +15,8 @@ public class EvenementArtisteCardController {
         void onEdit(Evenement evenement);
 
         void onDelete(Evenement evenement);
+
+        void onCancel(Evenement evenement);
     }
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -26,10 +28,16 @@ public class EvenementArtisteCardController {
     private Label titreLabel;
 
     @FXML
-    private Label dateTypeLabel;
+    private Label dateLabel;
 
     @FXML
-    private Label statusMetaLabel;
+    private Label categoryLabel;
+
+    @FXML
+    private Label statusLabel;
+
+    @FXML
+    private Label placesLabel;
 
     @FXML
     private Label descriptionLabel;
@@ -42,8 +50,14 @@ public class EvenementArtisteCardController {
         this.actionHandler = actionHandler;
 
         titreLabel.setText(textOrDefault(evenement.getTitre(), "Evenement sans titre"));
-        dateTypeLabel.setText(formatMainMeta(evenement));
-        statusMetaLabel.setText(formatSecondaryMeta(evenement));
+        dateLabel.setText(evenement.getDateDebut() == null ? "Non définie" : DATE_FORMATTER.format(evenement.getDateDebut()));
+        categoryLabel.setText(textOrDefault(evenement.getType(), "Type non précisé"));
+        
+        String statut = textOrDefault(evenement.getStatut(), "A venir");
+        statusLabel.setText(statut);
+        applyStatusStyle(statut);
+        
+        placesLabel.setText(evenement.getCapaciteMax() == null ? "-" : String.valueOf(evenement.getCapaciteMax()) + " places");
         descriptionLabel.setText(textOrDefault(evenement.getDescription(), "Aucune description"));
         applyImage(evenement.getImageCouverture());
     }
@@ -56,22 +70,28 @@ public class EvenementArtisteCardController {
     }
 
     @FXML
+    private void onCancelClick() {
+        if (actionHandler != null && evenement != null) {
+            actionHandler.onCancel(evenement);
+        }
+    }
+
+    @FXML
     private void onDeleteClick() {
         if (actionHandler != null && evenement != null) {
             actionHandler.onDelete(evenement);
         }
     }
 
-    private String formatMainMeta(Evenement evenement) {
-        String date = evenement.getDateDebut() == null ? "Date non definie" : DATE_FORMATTER.format(evenement.getDateDebut());
-        String type = textOrDefault(evenement.getType(), "Type non precise");
-        return date + "  |  " + type;
-    }
-
-    private String formatSecondaryMeta(Evenement evenement) {
-        String statut = textOrDefault(evenement.getStatut(), "A venir");
-        String capacite = evenement.getCapaciteMax() == null ? "-" : String.valueOf(evenement.getCapaciteMax());
-        return "Statut: " + statut + "  |  Places: " + capacite;
+    private void applyStatusStyle(String status) {
+        String normalized = status == null ? "" : status.trim().toLowerCase();
+        if (normalized.contains("annul")) {
+            statusLabel.setStyle("-fx-background-color: #ffedd5; -fx-text-fill: #ea580c; -fx-padding: 3px 10px; -fx-background-radius: 12px; -fx-font-weight: bold; -fx-font-size: 12px;");
+        } else if (normalized.contains("termin")) {
+            statusLabel.setStyle("-fx-background-color: #d1fae5; -fx-text-fill: #059669; -fx-padding: 3px 10px; -fx-background-radius: 12px; -fx-font-weight: bold; -fx-font-size: 12px;");
+        } else {
+            statusLabel.setStyle("-fx-background-color: #dbeafe; -fx-text-fill: #2563eb; -fx-padding: 3px 10px; -fx-background-radius: 12px; -fx-font-weight: bold; -fx-font-size: 12px;");
+        }
     }
 
     private void applyImage(String imageSource) {

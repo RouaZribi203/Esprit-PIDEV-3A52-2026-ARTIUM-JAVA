@@ -13,6 +13,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import org.controlsfx.control.RangeSlider;
 import services.EvenementService;
 
 import java.io.IOException;
@@ -40,25 +41,43 @@ public class EvenementsController {
     @FXML
     private Label emptyStateLabel;
 
+    @FXML
+    private RangeSlider capaciteRangeSlider;
+
+    @FXML
+    private RangeSlider prixRangeSlider;
+
+    @FXML
+    private Label capaciteRangeLabel;
+
+    @FXML
+    private Label prixRangeLabel;
+
     private final EvenementService evenementService = new EvenementService();
     private final List<Evenement> allEvenements = new ArrayList<>();
 
     @FXML
     public void initialize() {
         filtreComboBox.getItems().addAll(
-                "ID (A-Z)",
-                "ID (Z-A)",
                 "Titre (A-Z)",
                 "Titre (Z-A)",
                 "Date debut (plus recente)",
                 "Date debut (plus ancienne)",
                 "Capacite (croissante)",
-                "Capacite (decroissante)"
+                "Capacite (decroissante)",
+                "Prix (croissant)",
+                "Prix (decroissant)"
         );
-        filtreComboBox.setValue("ID (Z-A)");
+        filtreComboBox.setValue("Titre (A-Z)");
+
+        configureRangeSliders();
 
         rechercheField.textProperty().addListener((observable, oldValue, newValue) -> applySearchAndFilter());
         filtreComboBox.valueProperty().addListener((observable, oldValue, newValue) -> applySearchAndFilter());
+        capaciteRangeSlider.lowValueProperty().addListener((observable, oldValue, newValue) -> applySearchAndFilter());
+        capaciteRangeSlider.highValueProperty().addListener((observable, oldValue, newValue) -> applySearchAndFilter());
+        prixRangeSlider.lowValueProperty().addListener((observable, oldValue, newValue) -> applySearchAndFilter());
+        prixRangeSlider.highValueProperty().addListener((observable, oldValue, newValue) -> applySearchAndFilter());
 
         refreshEvenements();
     }
@@ -75,9 +94,17 @@ public class EvenementsController {
 
     private void applySearchAndFilter() {
         String search = rechercheField.getText() == null ? "" : rechercheField.getText().trim().toLowerCase();
+        int capaciteMin = (int) Math.round(capaciteRangeSlider.getLowValue());
+        int capaciteMax = (int) Math.round(capaciteRangeSlider.getHighValue());
+        double prixMin = prixRangeSlider.getLowValue();
+        double prixMax = prixRangeSlider.getHighValue();
+
+        updateRangeLabels(capaciteMin, capaciteMax, prixMin, prixMax);
 
         List<Evenement> filtered = allEvenements.stream()
                 .filter(evenement -> matchesSearch(evenement, search))
+                .filter(evenement -> matchesCapacity(evenement, capaciteMin, capaciteMax))
+                .filter(evenement -> matchesPrice(evenement, prixMin, prixMax))
                 .sorted(buildComparator(filtreComboBox.getValue()))
                 .collect(Collectors.toList());
 
@@ -108,8 +135,50 @@ public class EvenementsController {
             case "Date debut (plus ancienne)" -> Comparator.comparing(EvenementsController::safeDateTime);
             case "Capacite (croissante)" -> Comparator.comparing(evenement -> evenement.getCapaciteMax() == null ? 0 : evenement.getCapaciteMax());
             case "Capacite (decroissante)" -> Comparator.comparing((Evenement evenement) -> evenement.getCapaciteMax() == null ? 0 : evenement.getCapaciteMax()).reversed();
+            case "Prix (croissant)" -> Comparator.comparing(evenement -> evenement.getPrixTicket() == null ? 0D : evenement.getPrixTicket());
+            case "Prix (decroissant)" -> Comparator.comparing((Evenement evenement) -> evenement.getPrixTicket() == null ? 0D : evenement.getPrixTicket()).reversed();
             default -> Comparator.comparing((Evenement evenement) -> evenement.getId() == null ? 0 : evenement.getId()).reversed();
         };
+    }
+
+    private void configureRangeSliders() {
+        capaciteRangeSlider.setMin(0);
+        capaciteRangeSlider.setMax(1000);
+        capaciteRangeSlider.setLowValue(0);
+        capaciteRangeSlider.setHighValue(1000);
+        capaciteRangeSlider.setMajorTickUnit(100);
+        capaciteRangeSlider.setMinorTickCount(0);
+        capaciteRangeSlider.setSnapToTicks(false);
+
+        prixRangeSlider.setMin(0);
+        prixRangeSlider.setMax(500);
+        prixRangeSlider.setLowValue(0);
+        prixRangeSlider.setHighValue(500);
+        prixRangeSlider.setMajorTickUnit(50);
+        prixRangeSlider.setMinorTickCount(0);
+        prixRangeSlider.setSnapToTicks(false);
+
+        updateRangeLabels(0, 1000, 0, 500);
+    }
+
+    private void updateRangeLabels(int capaciteMin, int capaciteMax, double prixMin, double prixMax) {
+        capaciteRangeLabel.setText("Capacite: " + capaciteMin + " - " + capaciteMax);
+        prixRangeLabel.setText("Prix: " + formatPrice(prixMin) + " - " + formatPrice(prixMax) + " DT");
+    }
+
+    private String formatPrice(double value) {
+        long rounded = Math.round(value);
+        return String.valueOf(rounded);
+    }
+
+    private boolean matchesCapacity(Evenement evenement, int min, int max) {
+        int capacite = evenement.getCapaciteMax() == null ? 0 : evenement.getCapaciteMax();
+        return capacite >= min && capacite <= max;
+    }
+
+    private boolean matchesPrice(Evenement evenement, double min, double max) {
+        double prix = evenement.getPrixTicket() == null ? 0D : evenement.getPrixTicket();
+        return prix >= min && prix <= max;
     }
 
     private void renderCards(List<Evenement> evenements) {
@@ -173,7 +242,7 @@ public class EvenementsController {
     }
 
     private void applyAlertTheme(Alert alert) {
-        URL stylesheet = getClass().getResource("/views/styles/dashboard.css");
+        URL stylesheet = getClass().getResource("/views/styles/dashboardevent.css");
         if (stylesheet != null) {
             alert.getDialogPane().getStylesheets().add(stylesheet.toExternalForm());
         }
@@ -200,6 +269,5 @@ public class EvenementsController {
         return evenement.getDateDebut() == null ? LocalDateTime.MIN : evenement.getDateDebut();
     }
 }
-
 
 

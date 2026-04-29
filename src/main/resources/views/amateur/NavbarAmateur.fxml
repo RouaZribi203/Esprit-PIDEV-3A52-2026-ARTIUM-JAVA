@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
@@ -29,12 +29,18 @@
         </items>
     </MenuButton>
 
-    <Button fx:id="bibliothequeButton" mnemonicParsing="false" onAction="#onBibliothequeClick" prefHeight="36.0" styleClass="amateur-nav-link" text="Bibliothèque" />
-    <Button fx:id="musiqueButton" mnemonicParsing="false" onAction="#onMusiqueClick" prefHeight="36.0" styleClass="amateur-nav-link" text="Musique" />
+    <Button fx:id="bibliothequeButton" mnemonicParsing="false" prefHeight="36.0" styleClass="amateur-nav-link" text="Bibliothèque" />
+    <Button fx:id="musiqueButton" mnemonicParsing="false" prefHeight="36.0" styleClass="amateur-nav-link" text="Musique" />
 
     <Region HBox.hgrow="ALWAYS" />
 
-    <Button fx:id="notificationsButton" mnemonicParsing="false" onAction="#onNotificationsClick" prefHeight="34.0" prefWidth="34.0" styleClass="amateur-icon-button" text="🔔" />
+    <MenuButton fx:id="notificationsButton" mnemonicParsing="false" onAction="#onNotificationsClick" prefHeight="34.0" styleClass="notifications-menu-button" text="🔔">
+        <items>
+            <MenuItem mnemonicParsing="false" styleClass="notifications-header" text="Notifications" />
+            <SeparatorMenuItem />
+            <MenuItem mnemonicParsing="false" text="Aucune notification pour le moment." />
+        </items>
+    </MenuButton>
 
     <MenuButton fx:id="userMenuButton" mnemonicParsing="false" prefHeight="36.0" styleClass="avatar-menu" text="Compte">
         <items>

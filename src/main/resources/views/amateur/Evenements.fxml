@@ -7,52 +7,51 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane styleClass="amateur-events-page" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.amateur.EventsfrontController">
+<BorderPane style="-fx-background-color: #f3f4f6;" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.amateur.EventsfrontController">
     <top>
-        <VBox spacing="10.0" styleClass="amateur-events-hero">
-            <padding>
-                <Insets bottom="20.0" left="24.0" right="24.0" top="24.0" />
-            </padding>
-            <HBox alignment="CENTER_LEFT" spacing="10.0">
-                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
-                    <Label styleClass="page-title" text="Découvrir Evènements" />
-                    <Label styleClass="page-subtitle" text="Explorez les evenements disponibles et trouvez celui qui vous plait." />
+        <VBox spacing="20.0" style="-fx-background-color: #ffffff; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2); -fx-padding: 30px 40px 20px 40px;">
+            <HBox alignment="CENTER_LEFT" spacing="16.0">
+                <VBox spacing="6.0" HBox.hgrow="ALWAYS">
+                    <Label text="Découvrir les Évènements" style="-fx-font-size: 32px; -fx-font-weight: 900; -fx-text-fill: #111827;" />
+                    <Label text="Explorez les évènements disponibles et trouvez celui qui vous plaît." style="-fx-font-size: 15px; -fx-text-fill: #6b7280;" />
                 </VBox>
-                <Button mnemonicParsing="false" styleClass="amateur-primary-pill" text="Event idea AI powered" />
             </HBox>
 
-            <HBox spacing="8.0">
-                <TextField fx:id="searchField" promptText="Rechercher par titre ou description" styleClass="amateur-search-field" HBox.hgrow="ALWAYS" />
-                <Button mnemonicParsing="false" onAction="#onSearchClick" styleClass="amateur-search-button" text="Search" />
+            <HBox spacing="12.0" alignment="CENTER_LEFT">
+                <Label text="✨ Event Idea AI Powered" style="-fx-text-fill: #8b5cf6; -fx-font-weight: bold; -fx-font-size: 15px; -fx-padding: 0 16px 0 0;" />
+                <TextField fx:id="searchField" promptText="Rechercher par titre ou description..." style="-fx-background-color: #f9fafb; -fx-border-color: #e5e7eb; -fx-border-radius: 8px; -fx-background-radius: 8px; -fx-padding: 12px 16px; -fx-font-size: 14px; -fx-text-fill: #1f2937;" HBox.hgrow="ALWAYS" />
+                <Button mnemonicParsing="false" onAction="#onSearchClick" text="Rechercher" style="-fx-background-color: #1f2937; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 12px 24px; -fx-background-radius: 8px; -fx-cursor: hand;" />
             </HBox>
 
-            <HBox spacing="18.0" styleClass="amateur-category-tabs">
-                <ToggleButton fx:id="allTabButton" mnemonicParsing="false" onAction="#onAllTabClick" styleClass="amateur-tab-button" text="Tous" />
-                <ToggleButton fx:id="expositionTabButton" mnemonicParsing="false" onAction="#onExpositionTabClick" styleClass="amateur-tab-button" text="Exposition" />
-                <ToggleButton fx:id="concertTabButton" mnemonicParsing="false" onAction="#onConcertTabClick" styleClass="amateur-tab-button" text="Concert" />
-                <ToggleButton fx:id="spectacleTabButton" mnemonicParsing="false" onAction="#onSpectacleTabClick" styleClass="amateur-tab-button" text="Spectacle" />
-                <ToggleButton fx:id="conferenceTabButton" mnemonicParsing="false" onAction="#onConferenceTabClick" styleClass="amateur-tab-button" text="Conférence" />
+            <HBox spacing="12.0" style="-fx-padding: 10px 0 0 0;">
+                <ToggleButton fx:id="allTabButton" mnemonicParsing="false" onAction="#onAllTabClick" text="Tous" styleClass="amateur-tab-button" />
+                <ToggleButton fx:id="expositionTabButton" mnemonicParsing="false" onAction="#onExpositionTabClick" text="Exposition" styleClass="amateur-tab-button" />
+                <ToggleButton fx:id="concertTabButton" mnemonicParsing="false" onAction="#onConcertTabClick" text="Concert" styleClass="amateur-tab-button" />
+                <ToggleButton fx:id="spectacleTabButton" mnemonicParsing="false" onAction="#onSpectacleTabClick" text="Spectacle" styleClass="amateur-tab-button" />
+                <ToggleButton fx:id="conferenceTabButton" mnemonicParsing="false" onAction="#onConferenceTabClick" text="Conférence" styleClass="amateur-tab-button" />
             </HBox>
         </VBox>
     </top>
     <center>
-        <VBox spacing="14.0" styleClass="amateur-events-body">
-            <padding>
-                <Insets bottom="24.0" left="24.0" right="24.0" top="0.0" />
-            </padding>
+        <VBox spacing="16.0" style="-fx-padding: 30px 40px 40px 40px;">
+            <Label fx:id="emptyStateLabel" text="Aucun évènement disponible." style="-fx-font-size: 16px; -fx-text-fill: #6b7280; -fx-font-style: italic;" visible="false" />
 
-            <Label fx:id="emptyStateLabel" styleClass="section-subtitle" text="Aucun evenement disponible." visible="false" />
-
-            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="amateur-events-scroll" VBox.vgrow="ALWAYS">
-                <FlowPane fx:id="eventsFlowPane" hgap="16.0" prefWrapLength="780.0" styleClass="amateur-events-flow" vgap="16.0">
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent; -fx-background: transparent;" VBox.vgrow="ALWAYS">
+                <GridPane fx:id="eventsGridPane" hgap="24.0" vgap="24.0" maxWidth="Infinity">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="33.333" hgrow="ALWAYS" />
+                        <ColumnConstraints percentWidth="33.333" hgrow="ALWAYS" />
+                        <ColumnConstraints percentWidth="33.333" hgrow="ALWAYS" />
+                    </columnConstraints>
                     <padding>
-                        <Insets bottom="8.0" left="2.0" right="2.0" top="8.0" />
+                        <Insets bottom="10.0" left="4.0" right="4.0" top="10.0" />
                     </padding>
-                </FlowPane>
+                </GridPane>
             </ScrollPane>
         </VBox>
     </center>

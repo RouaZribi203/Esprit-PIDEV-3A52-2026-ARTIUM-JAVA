@@ -37,13 +37,15 @@ build/
 # Local SMTP secrets
 smtp.properties
 
+### Local config (secrets) ###
+config/qr-api.local.properties
+config/stripe.local.properties
+config/mail.local.properties
+config/ollama.local.properties
+
 ### Mac OS ###
 .DS_Store
 /src/main/resources/config.properties
 
 # Vosk model (trop lourd)
 src/main/resources/vosk-model-fr/
-
-config/stripe.local.properties
-config/qr-api.local.properties
-config/mail.local.properties

@@ -225,7 +225,7 @@ public class GaleriesController {
     }
 
     private void applyAlertTheme(Alert alert) {
-        URL stylesheet = getClass().getResource("/views/styles/dashboard.css");
+        URL stylesheet = getClass().getResource("/views/styles/dashboardevent.css");
         if (stylesheet != null) {
             alert.getDialogPane().getStylesheets().add(stylesheet.toExternalForm());
         }

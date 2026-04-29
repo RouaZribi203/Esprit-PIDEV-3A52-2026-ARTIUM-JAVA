@@ -20,6 +20,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 public class EvenementArtisteFormController {
 
@@ -71,6 +72,8 @@ public class EvenementArtisteFormController {
     private Evenement originalEvenement;
     private Evenement resultEvenement;
     private String selectedImagePath;
+    private Function<Evenement, Boolean> saveHandler;
+    private Runnable cancelHandler;
 
     @FXML
     public void initialize() {
@@ -84,6 +87,14 @@ public class EvenementArtisteFormController {
 
     public void setDialogStage(Stage dialogStage) {
         this.dialogStage = dialogStage;
+    }
+
+    public void setSaveHandler(Function<Evenement, Boolean> saveHandler) {
+        this.saveHandler = saveHandler;
+    }
+
+    public void setCancelHandler(Runnable cancelHandler) {
+        this.cancelHandler = cancelHandler;
     }
 
     public void setEvenement(Evenement evenement) {
@@ -132,6 +143,10 @@ public class EvenementArtisteFormController {
 
     public Evenement getResultEvenement() {
         return resultEvenement;
+    }
+
+    public void setExternalValidationError(String message) {
+        showValidationError(message);
     }
 
     @FXML
@@ -184,6 +199,11 @@ public class EvenementArtisteFormController {
 
         LocalDateTime dateDebutDateTime = LocalDateTime.of(dateDebut, heureDebut);
         LocalDateTime dateFinDateTime = LocalDateTime.of(dateFin, heureFin);
+
+        if (originalEvenement == null && dateDebut.isBefore(LocalDate.now().plusDays(3))) {
+            showValidationError("La date de debut doit etre au moins 3 jours apres aujourd'hui.");
+            return;
+        }
 
         if (dateFinDateTime.isBefore(dateDebutDateTime)) {
             showValidationError("La date fin doit etre apres la date debut.");
@@ -239,12 +259,18 @@ public class EvenementArtisteFormController {
         evenement.setStatut(computeStatut(dateDebutDateTime, dateFinDateTime));
 
         resultEvenement = evenement;
-        closeDialog();
+        boolean saved = saveHandler == null || Boolean.TRUE.equals(saveHandler.apply(evenement));
+        if (saved) {
+            closeDialog();
+        }
     }
 
     @FXML
     private void onCancelClick() {
         resultEvenement = null;
+        if (cancelHandler != null) {
+            cancelHandler.run();
+        }
         closeDialog();
     }
 
@@ -305,7 +331,7 @@ public class EvenementArtisteFormController {
         if (now.isAfter(fin)) {
             return "Termine";
         }
-        return "En cours";
+        return "À venir";
     }
 
     private String formatTime(LocalDateTime dateTime) {
