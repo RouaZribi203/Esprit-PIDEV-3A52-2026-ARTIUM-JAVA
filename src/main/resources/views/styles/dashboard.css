@@ -3,13 +3,13 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 .app-root {
-    -fx-font-family: "Segoe UI", "SF Pro Display", Arial, sans-serif;
-    -fx-background-color: #f0f4fb;
+    -fx-font-family: "Inter", "Segoe UI", "SF Pro Display", Arial, sans-serif;
+    -fx-background-color: #FAFAFC; /* Fond de galerie d'art clair */
 }
 
 .content-area,
 .page-root {
-    -fx-background-color: #f0f4fb;
+    -fx-background-color: #FAFAFC;
 }
 
 /* ── Sidebar ─────────────────────────────────────────────────────── */
@@ -79,10 +79,10 @@
 
 /* ── Navbar ──────────────────────────────────────────────────────── */
 .navbar {
-    -fx-background-color: rgba(255, 255, 255, 0.97);
-    -fx-border-color: rgba(210, 220, 238, 0.85);
+    -fx-background-color: rgba(250, 250, 252, 0.85); /* Translucide */
+    -fx-border-color: rgba(39, 60, 149, 0.08);
     -fx-border-width: 0 0 1 0;
-    -fx-effect: dropshadow(gaussian, rgba(15, 28, 46, 0.07), 10, 0, 0, 3);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.03), 15, 0, 0, 4);
 }
 
 /* Bouton sidebar toggle ─────────────────────────────────────────── */
@@ -238,32 +238,34 @@
 .page-title {
     -fx-font-size: 42px;
     -fx-font-weight: 800;
-    -fx-text-fill: #0f1c2e;
+    -fx-text-fill: #273c95; /* Bleu Royal */
+    -fx-font-family: "Georgia", serif; /* Touche artistique éditoriale */
 }
 
 .page-subtitle {
     -fx-font-size: 16px;
-    -fx-text-fill: #7a8fa8;
+    -fx-text-fill: #64748b;
     -fx-font-weight: 500;
 }
 
 /* ── Stat Cards ──────────────────────────────────────────────────── */
 .dashboard-card {
-    -fx-background-color: white;
-    -fx-background-radius: 18;
-    -fx-border-color: rgba(210, 222, 240, 0.75);
-    -fx-border-radius: 18;
-    -fx-border-width: 1.2;
-    -fx-effect: dropshadow(gaussian, rgba(15, 28, 46, 0.11), 18, 0.10, 0, 5);
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 24;
+    -fx-border-color: rgba(39, 60, 149, 0.08); /* Bordure très fine */
+    -fx-border-radius: 24;
+    -fx-border-width: 1;
+    -fx-effect: none; /* Suppression de l'ombre pour un effet 100% plat et léger */
     -fx-min-width: 160;
     -fx-pref-width: 185;
     -fx-alignment: CENTER;
-    -fx-padding: 16 12 16 12;
+    -fx-padding: 24 16 24 16;
 }
 
 .dashboard-card:hover {
-    -fx-effect: dropshadow(gaussian, rgba(15, 28, 46, 0.17), 30, 0.14, 0, 9);
-    -fx-border-color: rgba(91, 86, 232, 0.35);
+    -fx-effect: dropshadow(gaussian, rgba(39, 60, 149, 0.05), 15, 0.1, 0, 4); /* Ombre à peine perceptible au survol */
+    -fx-border-color: rgba(56, 189, 248, 0.5); /* Accent Cyan */
+    -fx-translate-y: -1; /* Élévation très douce */
 }
 
 .icon-circle {
@@ -300,10 +302,10 @@
 .list-card {
     -fx-background-color: white;
     -fx-background-radius: 18;
-    -fx-border-color: rgba(210, 222, 240, 0.75);
+    -fx-border-color: rgba(39, 60, 149, 0.08);
     -fx-border-radius: 18;
-    -fx-border-width: 1.2;
-    -fx-effect: dropshadow(gaussian, rgba(15, 28, 46, 0.11), 18, 0.10, 0, 5);
+    -fx-border-width: 1;
+    -fx-effect: none; /* Ultra plat et léger */
 }
 
 .section-title {
@@ -319,7 +321,7 @@
 
 /* ── Dashboard scroll principal ──────────────────────────────────── */
 .dashboard-scroll {
-    -fx-background: #f0f4fb;
+    -fx-background: transparent;
     -fx-background-color: transparent;
     -fx-border-color: transparent;
     -fx-focus-color: transparent;
@@ -347,16 +349,17 @@
 }
 
 .dashboard-line-chart .chart-series-line {
-    -fx-stroke: #3730d4;
-    -fx-stroke-width: 2.5px;
-    -fx-effect: dropshadow(gaussian, rgba(55, 48, 212, 0.35), 10, 0.2, 0, 3);
+    -fx-stroke: #38bdf8; /* Cyan vibrant de la marque */
+    -fx-stroke-width: 3px;
+    -fx-effect: dropshadow(gaussian, rgba(56, 189, 248, 0.45), 12, 0.2, 0, 4);
 }
 
 .dashboard-line-chart .chart-line-symbol {
-    -fx-background-color: #3730d4, white;
+    -fx-background-color: #273c95, white; /* Bordure Bleu Royal, intérieur blanc */
     -fx-background-insets: 0, 2;
     -fx-background-radius: 999;
     -fx-padding: 5px;
+    -fx-effect: dropshadow(gaussian, rgba(39, 60, 149, 0.3), 5, 0, 0, 2);
 }
 
 .dashboard-line-chart .axis-label {
@@ -377,6 +380,13 @@
 .dashboard-pie .chart-legend {
     -fx-background-color: transparent;
 }
+
+/* Couleurs pastelles pour la répartition des rôles (Art Gallery feel) */
+.dashboard-pie .default-color0.chart-pie { -fx-pie-color: #bfdbfe; } /* Bleu pastel doux */
+.dashboard-pie .default-color1.chart-pie { -fx-pie-color: #fbcfe8; } /* Rose pastel doux */
+.dashboard-pie .default-color2.chart-pie { -fx-pie-color: #a5f3fc; } /* Cyan pastel doux */
+.dashboard-pie .default-color3.chart-pie { -fx-pie-color: #e9d5ff; } /* Violet pastel doux */
+.dashboard-pie .default-color4.chart-pie { -fx-pie-color: #fed7aa; } /* Pêche pastel douce */
 
 /* ── Badges section ──────────────────────────────────────────────── */
 .dash-section-badge {
@@ -402,16 +412,17 @@
 .dash-section-card {
     -fx-background-color: white;
     -fx-background-radius: 18;
-    -fx-border-color: rgba(210, 222, 240, 0.75);
+    -fx-border-color: rgba(39, 60, 149, 0.08);
     -fx-border-radius: 18;
-    -fx-border-width: 1.2;
-    -fx-effect: dropshadow(gaussian, rgba(15, 28, 46, 0.11), 18, 0.10, 0, 5);
+    -fx-border-width: 1;
+    -fx-effect: none; /* Aspect plat, léger pour l'œil */
 }
 
 /* ════════════════════════════════════════════════════════════════════
-   SCROLLPANE — SUPPRESSION TOTALE DU CADRE NATIF
+   SCROLLPANE — SCROLL INVISIBLE POUR UNE INTERFACE PURE
    ════════════════════════════════════════════════════════════════════ */
-.dash-clean-scroll {
+.dash-clean-scroll,
+.scroll-pane {
     -fx-background-color: transparent;
     -fx-background: transparent;
     -fx-border-color: transparent;
@@ -422,45 +433,31 @@
     -fx-faint-focus-color: transparent;
 }
 
-.dash-clean-scroll > .viewport {
+.dash-clean-scroll > .viewport,
+.scroll-pane > .viewport {
     -fx-background-color: transparent;
 }
 
-/* Scrollbar verticale fine et discrète */
-.dash-clean-scroll > .scroll-bar:vertical {
-    -fx-background-color: transparent;
-    -fx-pref-width: 4px;
+/* Rendre toutes les barres de défilement complètement invisibles */
+.scroll-bar:horizontal, 
+.scroll-bar:vertical {
+    -fx-opacity: 0;
+    -fx-pref-width: 0;
+    -fx-max-width: 0;
+    -fx-pref-height: 0;
+    -fx-max-height: 0;
+    -fx-padding: 0;
 }
 
-.dash-clean-scroll > .scroll-bar:vertical .thumb {
-    -fx-background-color: rgba(91, 86, 232, 0.20);
-    -fx-background-radius: 999;
-}
-
-.dash-clean-scroll > .scroll-bar:vertical .thumb:hover {
-    -fx-background-color: rgba(91, 86, 232, 0.38);
-}
-
-.dash-clean-scroll > .scroll-bar:vertical .track,
-.dash-clean-scroll > .scroll-bar:vertical .increment-button,
-.dash-clean-scroll > .scroll-bar:vertical .decrement-button,
-.dash-clean-scroll > .scroll-bar:vertical .increment-arrow,
-.dash-clean-scroll > .scroll-bar:vertical .decrement-arrow {
+.scroll-bar:horizontal .track,
+.scroll-bar:horizontal .thumb,
+.scroll-bar:vertical .track,
+.scroll-bar:vertical .thumb {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
-    -fx-padding: 0;
-    -fx-pref-height: 0;
-    -fx-min-height: 0;
 }
 
-/* Scrollbar horizontale cachée */
-.dash-clean-scroll > .scroll-bar:horizontal {
-    -fx-pref-height: 0;
-    -fx-min-height: 0;
-    -fx-opacity: 0;
-}
-
-.dash-clean-scroll > .corner {
+.scroll-pane > .corner {
     -fx-background-color: transparent;
 }
 
@@ -602,17 +599,19 @@
 
 /* ── Boutons ─────────────────────────────────────────────────────── */
 .primary-action-button {
-    -fx-background-color: linear-gradient(to bottom, #5b56e8, #3730d4);
+    -fx-background-color: linear-gradient(to right, #273c95, #38bdf8); /* Dégradé Bleu Royal vers Cyan */
     -fx-text-fill: white;
     -fx-font-weight: 800;
     -fx-background-radius: 12;
     -fx-padding: 11 20 11 20;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(55, 48, 212, 0.28), 22, 0.18, 0, 6);
+    -fx-effect: dropshadow(gaussian, rgba(39, 60, 149, 0.3), 15, 0.1, 0, 4);
 }
 
 .primary-action-button:hover {
-    -fx-background-color: linear-gradient(to bottom, #6c68ed, #4338ca);
+    -fx-background-color: linear-gradient(to right, #314aab, #5bc8f9);
+    -fx-effect: dropshadow(gaussian, rgba(39, 60, 149, 0.4), 20, 0.2, 0, 6);
+    -fx-translate-y: -1;
 }
 
 .primary-action-button:pressed {
@@ -751,29 +750,28 @@
 /* ── User cards ──────────────────────────────────────────────────── */
 .users-panel {
     -fx-background-color: white;
-    -fx-background-radius: 22;
-    -fx-border-color: rgba(210, 222, 240, 0.80);
-    -fx-border-radius: 22;
-    -fx-border-width: 1.2;
-    -fx-effect: dropshadow(gaussian, rgba(15, 28, 46, 0.17), 30, 0.14, 0, 9);
+    -fx-background-radius: 24;
+    -fx-border-color: rgba(39, 60, 149, 0.08);
+    -fx-border-radius: 24;
+    -fx-border-width: 1;
+    -fx-effect: none; /* Pas d'ombre = moins de lourdeur visuelle */
 }
 
 .user-card {
-    -fx-background-color: linear-gradient(to bottom,
-    rgba(255,255,255,0.99) 0%,
-    rgba(246,249,255,0.97) 100%);
-    -fx-background-radius: 18;
-    -fx-border-color: rgba(218, 228, 242, 0.92);
-    -fx-border-radius: 18;
-    -fx-padding: 18;
-    -fx-effect: dropshadow(gaussian, rgba(15, 28, 46, 0.11), 18, 0.10, 0, 5);
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 20;
+    -fx-border-color: rgba(39, 60, 149, 0.08);
+    -fx-border-radius: 20;
+    -fx-padding: 20;
+    -fx-effect: none; /* Design plat (Flat) */
     -fx-pref-width: 360;
     -fx-min-height: 250;
 }
 
 .user-card:hover {
-    -fx-effect: dropshadow(gaussian, rgba(15, 28, 46, 0.17), 30, 0.14, 0, 9);
-    -fx-border-color: rgba(91, 86, 232, 0.28);
+    -fx-effect: dropshadow(gaussian, rgba(39, 60, 149, 0.05), 15, 0.1, 0, 4);
+    -fx-border-color: rgba(56, 189, 248, 0.4); /* Accent Cyan */
+    -fx-translate-y: -1;
 }
 
 .user-avatar {
@@ -1460,4 +1458,56 @@
     -fx-font-size: 12px;
     -fx-font-weight: 700;
     -fx-text-fill: #4338ca;
+}
+
+/* ═════════ GLOBAL SEARCH ═════════ */
+.global-search-container {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 20;
+    -fx-border-color: rgba(39, 60, 149, 0.08);
+    -fx-border-radius: 20;
+    -fx-padding: 2;
+}
+
+.global-search-container:focused-within {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #38bdf8;
+    -fx-effect: dropshadow(gaussian, rgba(56, 189, 248, 0.2), 10, 0, 0, 0);
+}
+
+.global-search-field {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-font-size: 13px;
+    -fx-text-fill: #0f172a;
+    -fx-prompt-text-fill: #94a3b8;
+    -fx-padding: 6 0 6 0;
+}
+
+.global-search-field:focused {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.global-search-popup {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-color: rgba(39, 60, 149, 0.08);
+    -fx-border-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(39, 60, 149, 0.1), 15, 0, 0, 8);
+    -fx-padding: 8;
+}
+
+.global-search-popup .menu-item {
+    -fx-padding: 8 16;
+    -fx-background-radius: 8;
+}
+
+.global-search-popup .menu-item:hover, .global-search-popup .menu-item:focused {
+    -fx-background-color: #f1f5f9;
+}
+
+.global-search-popup .menu-item .label {
+    -fx-text-fill: #0f172a;
+    -fx-font-size: 13px;
 }

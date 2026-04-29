@@ -11,6 +11,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
 <HBox alignment="CENTER_LEFT" prefHeight="66.0" spacing="12.0"
       styleClass="navbar"
       xmlns="http://javafx.com/javafx/20.0.2"
@@ -26,7 +27,17 @@
             prefHeight="38.0" prefWidth="38.0"
             styleClass="icon-button"
             text="☰"/>
+    <!-- ── Espace fixe pour aligner la recherche à gauche ── -->
+    <Region prefWidth="30.0"/>
+    
+    <!-- ── Global Search ── -->
+    <HBox alignment="CENTER" styleClass="global-search-container" prefWidth="400">
+        <Label text="🔍" style="-fx-text-fill: #94a3b8; -fx-font-size: 14px; -fx-padding: 0 10 0 15;"/>
+        <TextField fx:id="globalSearchField" promptText="Rechercher utilisateurs, œuvres, galeries..." HBox.hgrow="ALWAYS" styleClass="global-search-field"/>
+    </HBox>
+
     <Region HBox.hgrow="ALWAYS"/>
+    
     <!-- ── Menu avatar ── -->
     <MenuButton fx:id="userMenuButton"
                 contentDisplay="GRAPHIC_ONLY"
