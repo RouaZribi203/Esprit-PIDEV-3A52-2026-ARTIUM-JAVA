@@ -31,9 +31,6 @@ public class AmateurMainController {
     @FXML
     private SidebarAmateurController sidebarIncludeController;
 
-    @FXML
-    private MiniAudioPlayerController miniAudioPlayerIncludeController;
-
     private Evenement selectedEvent;
     private Ticket pendingPurchasedTicket;
 
@@ -45,14 +42,10 @@ public class AmateurMainController {
 
         User connectedUser = MainFX.getAuthenticatedUser();
         if (connectedUser != null) {
-            navbarIncludeController.setUser(connectedUser);
             sidebarIncludeController.setUser(connectedUser);
-        } else {
-            navbarIncludeController.setUser(null);
         }
 
         sidebarIncludeController.setNavigationHandler(this::onNavigate);
-        miniAudioPlayerIncludeController.setNavigationHandler(this::onNavigate);
 
         onNavigate("feed");
     }
@@ -60,8 +53,7 @@ public class AmateurMainController {
     private void onNavigate(String route) {
         navbarIncludeController.setActiveRoute(route);
         sidebarIncludeController.setActiveItem(route);
-
-        Object controller = loadAmateurView(route, resolveRoute(route));
+        Object controller = loadAmateurView(resolveRoute(route));
         configureLoadedController(controller);
     }
 
@@ -180,5 +172,4 @@ public class AmateurMainController {
         }
     }
 }
-
 
