@@ -1,4 +1,4 @@
-package Services;
+package services;
 
 import entities.User;
 import entities.UserReport;
@@ -67,13 +67,13 @@ public class UserReportService {
 
     // ── Services ──────────────────────────────────────────────────────────────
     private final UserService userService;
-    private final Services.GroqAiService groqAiService;
+    private final services.GroqAiService groqAiService;
 
     public UserReportService() {
-        this(new UserService(), new Services.GroqAiService());
+        this(new UserService(), new services.GroqAiService());
     }
 
-    public UserReportService(UserService userService, Services.GroqAiService groqAiService) {
+    public UserReportService(UserService userService, services.GroqAiService groqAiService) {
         this.userService   = userService;
         this.groqAiService = groqAiService;
     }

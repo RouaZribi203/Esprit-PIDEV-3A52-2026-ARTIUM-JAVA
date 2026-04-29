@@ -6,7 +6,15 @@
   <component name="ChangeListManager">
     <list default="true" id="e20e467d-5201-4944-9b74-f6885d3873a6" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Test/UserReportDemo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Test/UserReportDemo.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/DashboardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/DashboardController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/AmateurMainController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/AmateurMainController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/DashboardService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/DashboardService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/EmailService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/EmailService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/GroqAiService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/GroqAiService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/UserReportService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/UserReportService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/UserService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/VoiceCommandService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/VoiceCommandService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -167,5 +175,16 @@
     </task>
     <option name="localTasksCounter" value="3" />
     <servers />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/services/UserService.java</url>
+          <line>29</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

@@ -1,6 +1,6 @@
 package Test;
 
-import Services.UserReportService;
+import services.UserReportService;
 import entities.User;
 import entities.UserReport;
 

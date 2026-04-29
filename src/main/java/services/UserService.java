@@ -221,7 +221,7 @@ public class UserService implements Iservice<User> {
         storeResetCode(normalizedEmail, pendingReset);
 
         try {
-            Services.EmailService.sendPasswordResetCode(user.getEmail(), resetCode, expiresAt);
+            services.EmailService.sendPasswordResetCode(user.getEmail(), resetCode, expiresAt);
         } catch (RuntimeException e) {
             clearResetCode(normalizedEmail);
             throw new SQLDataException(e.getMessage());

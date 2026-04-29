@@ -76,39 +76,21 @@ public class AmateurMainController {
     }
 
     private String resolveRoute(String route) {
-        switch (route) {
-            case "feed":
-            case "feed-peintures":
-            case "feed-sculptures":
-            case "feed-photos":
-                return "/views/amateur/Feed.fxml";
-            case "feed-recommandations":
-                return "/views/amateur/FeedReco.fxml";
-            case "favoris":
-                return "/views/amateur/Favoris.fxml";
-            case "evenements":
-                return "/views/amateur/Evenements.fxml";
-            case "event-detail":
-                return "/views/amateur/EventDetail.fxml";
-            case "payment-form":
-                return "/views/amateur/PaymentForm.fxml";
-            case "payment-success":
-                return "/views/amateur/PaymentSuccess.fxml";
-            case "bibliotheque":
-                return "/views/amateur/Bibliotheque.fxml";
-            case "book-reader":
-                return "/views/amateur/BookReader.fxml";
-            case "musique":
-                return "/views/amateur/Musique.fxml";
-            case "reclamations":
-                return "/views/amateur/Reclamations.fxml";
-            case "reclamation-detail":
-                return "/views/amateur/ReclamationDetail.fxml";
-            case "edit-profile":
-                return "/views/amateur/EditProfile.fxml";
-            default:
-                return "/views/amateur/Feed.fxml";
-        }
+        return switch (route) {
+            case "feed-recommandations" -> "/views/amateur/FeedReco.fxml";
+            case "favoris" -> "/views/amateur/Favoris.fxml";
+            case "evenements" -> "/views/amateur/Evenements.fxml";
+            case "event-detail" -> "/views/amateur/EventDetail.fxml";
+            case "payment-form" -> "/views/amateur/PaymentForm.fxml";
+            case "payment-success" -> "/views/amateur/PaymentSuccess.fxml";
+            case "bibliotheque" -> "/views/amateur/Bibliotheque.fxml";
+            case "book-reader" -> "/views/amateur/BookReader.fxml";
+            case "musique" -> "/views/amateur/Musique.fxml";
+            case "reclamations" -> "/views/amateur/Reclamations.fxml";
+            case "reclamation-detail" -> "/views/amateur/ReclamationDetail.fxml";
+            case "edit-profile" -> "/views/amateur/EditProfile.fxml";
+            default -> "/views/amateur/Feed.fxml";
+        };
     }
 
     private void applyTheme(boolean darkMode) {

@@ -1,4 +1,4 @@
-package Services;
+package services;
 
 import javafx.application.Platform;
 import org.vosk.LogLevel;

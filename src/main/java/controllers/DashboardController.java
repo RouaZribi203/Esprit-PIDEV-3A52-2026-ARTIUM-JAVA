@@ -1,9 +1,9 @@
 package controllers;
 
-import Services.DashboardService;
-import Services.GroqAiService;
-import Services.UserReportService;
-import Services.VoiceCommandService;
+import services.DashboardService;
+import services.GroqAiService;
+import services.UserReportService;
+import services.VoiceCommandService;
 import components.CalendarPane;
 import components.StatCard;
 import entities.UserReport;
