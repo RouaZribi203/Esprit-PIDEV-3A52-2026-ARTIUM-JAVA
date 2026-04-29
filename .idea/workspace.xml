@@ -4,27 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="correction blob oeuvre livre">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/AdminMusiquesController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/AdminMusiquesController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/LivreFormController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/LivreFormController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/BibliofrontController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/BibliofrontController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/BookReaderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/BookReaderController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/EventDetailController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/EventDetailController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/MusicfrontController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/MusicfrontController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/PaymentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/PaymentController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/ReclamationsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/ReclamationsController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/BibliothequArtisteController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/BibliothequArtisteController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/MusiquesController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/MusiquesController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/ProfileHeaderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/ProfileHeaderController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/entities/Livre.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/entities/Livre.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/entities/Playlist.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/entities/Playlist.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/entities/Ticket.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/entities/Ticket.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/services/JdbcLivreService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/JdbcLivreService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/services/MusiqueService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/MusiqueService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/services/PlaylistService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/PlaylistService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/services/TicketService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/TicketService.java" afterDir="false" />
-    </list>
+    <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="correction blob oeuvre livre" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -110,9 +90,9 @@
     &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "mysql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;mysql&quot;
     ]
   }
 }</component>
@@ -261,6 +241,9 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName=".env" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">

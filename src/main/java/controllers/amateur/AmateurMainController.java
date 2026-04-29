@@ -133,7 +133,7 @@ public class AmateurMainController {
                 });
             }
 
-            if ("book-reader".equals(route)) {
+            if (fxmlPath.endsWith("BookReader.fxml")) {
                 rootPane.setTop(null);
                 rootPane.setBottom(null);
                 rootPane.setCenter(page);
