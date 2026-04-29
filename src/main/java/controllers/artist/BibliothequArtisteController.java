@@ -116,6 +116,9 @@ public class BibliothequArtisteController {
     private Button chooseImageButton;
 
     @FXML
+    private Button generateImageButton;
+
+    @FXML
     private Label formTitleLabel;
 
     private Livre selected;
@@ -240,8 +243,8 @@ public class BibliothequArtisteController {
 
     private VBox createBookCard(Livre livre) {
         ImageView imageView = new ImageView();
-        imageView.setFitWidth(216);
-        imageView.setFitHeight(100);
+        imageView.setFitWidth(254);
+        imageView.setFitHeight(180);
         imageView.setPreserveRatio(true);
         imageView.setSmooth(true);
         if (livre.getImage() != null && !livre.getImage().isBlank()) {
@@ -263,25 +266,28 @@ public class BibliothequArtisteController {
         prix.setAlignment(javafx.geometry.Pos.CENTER);
         prix.setMaxWidth(Double.MAX_VALUE);
 
-        Button detailsBtn = new Button("Détails");
-        detailsBtn.setStyle("-fx-background-color: #6b7280; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 5 10; -fx-font-size: 11px;");
+        Button detailsBtn = new Button("Voir détails");
+        detailsBtn.setStyle("-fx-background-color: #f1f5f9; -fx-text-fill: #475569; -fx-background-radius: 6; -fx-padding: 6 10; -fx-font-size: 11px; -fx-font-weight: bold;");
+        detailsBtn.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE);
         detailsBtn.setOnAction(e -> showBookDetails(livre));
 
         Button modifyBtn = new Button("Modifier");
-        modifyBtn.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 5 10; -fx-font-size: 11px;");
+        modifyBtn.setStyle("-fx-background-color: #eff6ff; -fx-text-fill: #2563eb; -fx-background-radius: 6; -fx-padding: 6 10; -fx-font-size: 11px; -fx-font-weight: bold;");
+        modifyBtn.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE);
         modifyBtn.setOnAction(e -> showFormDialog(livre));
 
         Button deleteBtn = new Button("Supprimer");
-        deleteBtn.setStyle("-fx-background-color: #ef4444; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 5 10; -fx-font-size: 11px;");
+        deleteBtn.setStyle("-fx-background-color: #fef2f2; -fx-text-fill: #ef4444; -fx-background-radius: 6; -fx-padding: 6 10; -fx-font-size: 11px; -fx-font-weight: bold;");
+        deleteBtn.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE);
         deleteBtn.setOnAction(e -> deleteBook(livre));
 
-        HBox buttons = new HBox(5, detailsBtn, modifyBtn, deleteBtn);
+        HBox buttons = new HBox(8, detailsBtn, modifyBtn, deleteBtn);
         buttons.setAlignment(javafx.geometry.Pos.CENTER);
 
         VBox card = new VBox(10, imageView, title, categorie, prix, buttons);
         card.setAlignment(javafx.geometry.Pos.TOP_CENTER);
-        card.setStyle("-fx-padding: 12; -fx-background-color: white; -fx-border-color: #e5e7eb; -fx-border-radius: 10; -fx-background-radius: 10; -fx-pref-width: 240;");
-        VBox.setVgrow(imageView, Priority.NEVER);
+        card.setStyle("-fx-padding: 8; -fx-background-color: white; -fx-border-color: #e5e7eb; -fx-border-radius: 10; -fx-background-radius: 10; -fx-pref-width: 270;");
+        VBox.setVgrow(imageView, Priority.ALWAYS);
 
         return card;
     }
@@ -571,6 +577,11 @@ public class BibliothequArtisteController {
             selectedImagePath = file.getAbsolutePath();
             bookImageView.setImage(toImage(selectedImagePath));
         }
+    }
+
+    @FXML
+    private void onGenerateImage() {
+        // To be implemented
     }
 
     @FXML

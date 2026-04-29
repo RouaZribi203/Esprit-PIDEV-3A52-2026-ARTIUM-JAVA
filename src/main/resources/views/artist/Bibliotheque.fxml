@@ -56,12 +56,13 @@
                             </columnConstraints>
 
                             <Label text="Image" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="field-label" />
-                            <HBox spacing="12.0" GridPane.rowIndex="0" GridPane.columnIndex="1">
+                            <HBox spacing="12.0" GridPane.rowIndex="0" GridPane.columnIndex="1" alignment="CENTER_LEFT">
                                 <StackPane styleClass="image-preview-container">
                                     <Rectangle width="90.0" height="60.0" styleClass="image-placeholder" />
                                     <ImageView fx:id="bookImageView" fitWidth="90.0" fitHeight="60.0" preserveRatio="true" />
                                 </StackPane>
                                 <Button fx:id="chooseImageButton" mnemonicParsing="false" onAction="#onChooseImage" text="Parcourir" styleClass="secondary-button" />
+                                <Button fx:id="generateImageButton" mnemonicParsing="false" onAction="#onGenerateImage" text="Génération image 🎨" styleClass="secondary-button" />
                             </HBox>
 
                             <Label text="Titre *" GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="field-label" />

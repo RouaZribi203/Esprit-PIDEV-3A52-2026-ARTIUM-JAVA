@@ -5,12 +5,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="correction blob oeuvre livre">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BEFORE_AFTER_COMPARISON.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/COMPLETION_SUMMARY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCUMENTATION_INDEX.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MASTER_CHECKLIST.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/QUICK_START.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/LivreFormController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/LivreFormController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/controllers/LivresController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/LivresController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/AmateurMainController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/AmateurMainController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/BibliofrontController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/BibliofrontController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/BookReaderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/BookReaderController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/BibliothequArtisteController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/BibliothequArtisteController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/BookReader.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/BookReader.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/artist/Bibliotheque.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/artist/Bibliotheque.fxml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/views/pages/LivreForm.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/pages/LivreForm.fxml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/views/pages/livres.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/pages/livres.fxml" afterDir="false" />
     </list>
@@ -33,8 +43,8 @@
   </component>
   <component name="CopilotUserSelectedModel">
     <selectedModels>
-      <entry key="chat-panel" value="Gemini 2.5 Pro" />
-      <entry key="agent-panel" value="Gemini 2.5 Pro" />
+      <entry key="chat-panel" value="Claude Haiku 4.5" />
+      <entry key="agent-panel" value="Claude Haiku 4.5" />
     </selectedModels>
   </component>
   <component name="FileTemplateManagerImpl">
@@ -43,6 +53,7 @@
         <option value="Class" />
         <option value="Interface" />
         <option value="FxmlFile" />
+        <option value="CSS File" />
       </list>
     </option>
   </component>
@@ -58,7 +69,7 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/RouaZribi203/Esprit-PIDEV-3A52-2026-ARTIUM-JAVA.git&quot;,
-    &quot;accountId&quot;: &quot;f45857b0-6c9d-49a9-931f-b16b9863e6de&quot;
+    &quot;accountId&quot;: &quot;b1fe0a9c-d405-47bb-a70e-90ed74732a69&quot;
   }
 }</component>
   <component name="ProjectColorInfo">{
@@ -88,6 +99,7 @@
     "git-widget-placeholder": "gestion__bibliotheque",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
+    "list.type.of.created.stylesheet": "CSS",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -110,8 +122,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.26199.169" />
-        <option value="bundled-js-predefined-d6986cc7102b-9c94529fcfe0-JavaScript-IU-252.26199.169" />
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.25557.131" />
+        <option value="bundled-js-predefined-d6986cc7102b-b598e85cdad2-JavaScript-IU-252.25557.131" />
       </set>
     </attachedChunks>
   </component>
@@ -132,6 +144,8 @@
       <workItem from="1776514744207" duration="5785000" />
       <workItem from="1776522849192" duration="6633000" />
       <workItem from="1776530552927" duration="6585000" />
+      <workItem from="1776975173251" duration="3159000" />
+      <workItem from="1777052668685" duration="41855000" />
     </task>
     <task id="LOCAL-00001" summary="corrections de blob">
       <option name="closed" value="true" />

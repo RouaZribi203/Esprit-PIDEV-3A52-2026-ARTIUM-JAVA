@@ -1,51 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.layout.Region?>
 
-<BorderPane xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.amateur.BookReaderController" style="-fx-background-color: #0f172a;">
-    <top>
-        <HBox alignment="CENTER_LEFT" spacing="20.0" style="-fx-background-color: #1e293b; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 2);">
-            <padding>
-                <Insets bottom="12.0" left="24.0" right="24.0" top="12.0" />
-            </padding>
-            <Button mnemonicParsing="false" onAction="#onBack" style="-fx-background-color: transparent; -fx-text-fill: #94a3b8; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand; -fx-border-color: #475569; -fx-border-radius: 8; -fx-padding: 8 16;" text="← Retour" />
-            <VBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
-                <Label fx:id="titleLabel" style="-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;" text="Chargement du livre..." />
-                <Label fx:id="subtitleLabel" style="-fx-text-fill: #94a3b8; -fx-font-size: 12px;" text="Veuillez patienter pendant le rendu du PDF" />
-            </VBox>
-            <HBox alignment="CENTER_RIGHT" spacing="10.0">
-                <Label fx:id="pageLabel" style="-fx-text-fill: #3b82f6; -fx-font-size: 14px; -fx-font-weight: bold;" text="Page 0 / 0" />
-            </HBox>
-        </HBox>
-    </top>
-    <center>
-        <StackPane style="-fx-background-color: #0f172a;">
-            <padding><Insets top="20" right="20" bottom="20" left="20" /></padding>
-            <ScrollPane fitToWidth="true" fitToHeight="true" pannable="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;">
-                <StackPane alignment="CENTER">
-                    <ImageView fx:id="pageImageView" pickOnBounds="true" preserveRatio="true">
-                        <style>
-                            -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 20, 0, 0, 0);
-                        </style>
-                    </ImageView>
-                </StackPane>
-            </ScrollPane>
+<StackPane
+        fx:id="rootPane"
+        xmlns="http://javafx.com/javafx/20.0.2"
+        xmlns:fx="http://javafx.com/fxml/1"
+        fx:controller="controllers.amateur.BookReaderController"
+        style="-fx-background-color: black; -fx-padding: 0;">
+
+    <HBox fx:id="bookContainer" alignment="CENTER" spacing="0" StackPane.alignment="CENTER">
+
+        <!-- Left Page Area -->
+        <StackPane fx:id="leftPageArea" onMouseClicked="#onLeftPageClick" HBox.hgrow="ALWAYS">
+            <StackPane fx:id="leftPageWrapper" alignment="CENTER">
+                <ImageView fx:id="leftPageImage" pickOnBounds="true" preserveRatio="true"/>
+                <Label fx:id="leftPageNumber" visible="false"/>
+            </StackPane>
         </StackPane>
-    </center>
-    <bottom>
-        <HBox alignment="CENTER" spacing="30.0" style="-fx-background-color: #1e293b; -fx-padding: 15;">
-            <Button fx:id="prevButton" mnemonicParsing="false" onAction="#onPrev" style="-fx-background-color: #334155; -fx-text-fill: white; -fx-background-radius: 30; -fx-padding: 10 30; -fx-font-size: 14px; -fx-cursor: hand; -fx-font-weight: bold;" text="← Précédent" />
-            <Button fx:id="nextButton" mnemonicParsing="false" onAction="#onNext" style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 30; -fx-padding: 10 30; -fx-font-size: 14px; -fx-cursor: hand; -fx-font-weight: bold;" text="Suivant →" />
-        </HBox>
-    </bottom>
-</BorderPane>
+
+        <!-- Right Page Area -->
+        <StackPane fx:id="rightPageArea" onMouseClicked="#onRightPageClick" HBox.hgrow="ALWAYS">
+            <StackPane fx:id="rightPageWrapper" alignment="CENTER">
+                <ImageView fx:id="rightPageImage" pickOnBounds="true" preserveRatio="true"/>
+                <Label fx:id="rightPageNumber" visible="false"/>
+            </StackPane>
+        </StackPane>
+
+    </HBox>
+
+    <!-- Invisible elements required by controller bindings -->
+    <StackPane fx:id="bookmarkRibbon" visible="false" managed="false"/>
+    <StackPane fx:id="controlsOverlay" visible="false" managed="false"/>
+    <StackPane fx:id="loadingOverlay" visible="false" managed="false" style="-fx-background-color: transparent;"/>
+    <Label fx:id="titleLabel" visible="false" managed="false"/>
+    <Label fx:id="pageLabel" visible="false" managed="false"/>
+    <Button fx:id="prevButton" visible="false" managed="false"/>
+    <Button fx:id="nextButton" visible="false" managed="false"/>
+    <Button fx:id="bookmarkButton" visible="false" managed="false"/>
+    <Button fx:id="exitButton" visible="false" managed="false"/>
+
+</StackPane>

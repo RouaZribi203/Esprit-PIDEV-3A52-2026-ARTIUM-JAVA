@@ -34,10 +34,18 @@ public class AmateurMainController {
     @FXML
     private MiniAudioPlayerController miniAudioPlayerIncludeController;
 
+    private Node originalTop;
+    private Node originalBottom;
+    private Node originalCenter;
+
     private Evenement selectedEvent;
 
     @FXML
     public void initialize() {
+        originalTop = rootPane.getTop();
+        originalBottom = rootPane.getBottom();
+        originalCenter = rootPane.getCenter();
+        
         applyStylesheet();
         navbarIncludeController.setNavigationHandler(this::onNavigate);
         navbarIncludeController.setThemeHandler(this::applyTheme);
@@ -121,7 +129,19 @@ public class AmateurMainController {
                 feedController.setRouteFilter(route);
             }
 
-            amateurContentArea.getChildren().setAll(page);
+            if ("book-reader".equals(route)) {
+                rootPane.setTop(null);
+                rootPane.setBottom(null);
+                rootPane.setCenter(page);
+            } else {
+                if (rootPane.getCenter() != originalCenter) {
+                    rootPane.setTop(originalTop);
+                    rootPane.setBottom(originalBottom);
+                    rootPane.setCenter(originalCenter);
+                }
+                amateurContentArea.getChildren().setAll(page);
+            }
+
             return controller;
         } catch (IOException e) {
             throw new IllegalStateException("Failed to load amateur page: " + fxmlPath, e);
@@ -144,6 +164,9 @@ public class AmateurMainController {
             if (selectedLivre != null) {
                 readerController.setLivre(selectedLivre);
                 readerController.setBackHandler(() -> onNavigate("bibliotheque"));
+            }
+            if (rootPane.getScene() != null && rootPane.getScene().getWindow() instanceof javafx.stage.Stage stage) {
+                readerController.setStage(stage);
             }
         }
     }

@@ -15,10 +15,13 @@
 <VBox spacing="16.0" styleClass="popup-form-container" style="-fx-padding: 24; -fx-background-color: linear-gradient(to bottom, #ffffff, #f9fafb);" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.LivreFormController">
 
     <!-- Header -->
-    <VBox spacing="4.0" style="-fx-padding: 0 0 16 0; -fx-border-color: #e5e7eb; -fx-border-width: 0 0 1 0;">
-        <Label fx:id="formTitleLabel" styleClass="form-title" text="Ajouter un livre" style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #1e3a8a;" />
-        <Label styleClass="form-subtitle" text="Renseignez les détails du livre pour enrichir la bibliothèque" style="-fx-font-size: 13; -fx-text-fill: #6b7280;" />
-    </VBox>
+    <HBox alignment="CENTER_LEFT" spacing="10.0" style="-fx-padding: 0 0 16 0; -fx-border-color: #e5e7eb; -fx-border-width: 0 0 1 0;">
+        <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+            <Label fx:id="formTitleLabel" styleClass="form-title" text="Ajouter un livre" style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #1e3a8a;" />
+            <Label styleClass="form-subtitle" text="Renseignez les détails du livre pour enrichir la bibliothèque" style="-fx-font-size: 13; -fx-text-fill: #6b7280;" />
+        </VBox>
+        <Button fx:id="autoFillButton" mnemonicParsing="false" onAction="#onAutoFillClick" style="-fx-padding: 10 20; -fx-font-size: 12; -fx-background-color: #f59e0b; -fx-text-fill: white; -fx-border-radius: 6; -fx-background-radius: 6; -fx-cursor: hand; -fx-font-weight: bold;" text="✨ Générer automatiquement" />
+    </HBox>
 
     <!-- Main Form Content -->
     <VBox spacing="16.0">
