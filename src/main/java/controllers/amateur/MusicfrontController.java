@@ -396,6 +396,17 @@ public class MusicfrontController {
 		playlist.setDescription(description.isEmpty() ? null : description);
 		playlist.setDateCreation(editMode && editingPlaylistDateCreation != null ? editingPlaylistDateCreation : java.time.LocalDate.now());
 
+		if (editMode) {
+			Playlist existing = allPlaylists.stream()
+					.filter(p -> p.getId() != null && p.getId().equals(editingPlaylistId))
+					.findFirst()
+					.orElse(null);
+			if (existing != null) {
+				playlist.setMusiques(existing.getMusiques());
+				playlist.setUserId(existing.getUserId());
+			}
+		}
+
 		if (!imagePath.isEmpty()) {
 			playlist.setImage(imagePath);
 		} else if (editMode) {
