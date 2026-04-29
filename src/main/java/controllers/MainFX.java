@@ -1,6 +1,8 @@
 package controllers;
 
+import Services.UserService;
 import entities.User;
+import utils.SessionManager;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -10,6 +12,8 @@ import utils.SessionManager;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Objects;
+import java.sql.SQLDataException;
 
 public class MainFX extends Application {
 
@@ -18,7 +22,7 @@ public class MainFX extends Application {
 
     public static void switchToAuthLandingView() {
         authenticatedUser = null;
-        switchScene("/views/auth/Landing.fxml", "/views/styles/auth.css", "Artium | Accueil");
+        switchScene("/views/auth/Landing.fxml", "/views/styles/auth.css", "Artium");
     }
 
     public static void switchToLoginView() {
@@ -77,13 +81,22 @@ public class MainFX extends Application {
         try {
             FXMLLoader loader = new FXMLLoader(MainFX.class.getResource(fxmlPath));
             Parent root = loader.load();
+            Scene scene = primaryStage.getScene();
+            if (scene == null) {
+                scene = new Scene(root);
+                primaryStage.setScene(scene);
+            } else {
+                scene.setRoot(root);
+            }
+            URL stylesheet = Objects.requireNonNull(MainFX.class.getResource(stylesheetPath), "Missing stylesheet");
+            scene.getStylesheets().setAll(stylesheet.toExternalForm());
             Scene scene = new Scene(root);
             URL stylesheet = MainFX.class.getResource(stylesheetPath);
             if (stylesheet != null) {
                 scene.getStylesheets().add(stylesheet.toExternalForm());
             }
             primaryStage.setTitle(title);
-            primaryStage.setScene(scene);
+            primaryStage.setMaximized(true);
             primaryStage.show();
         } catch (IOException e) {
             throw new IllegalStateException("Failed to switch scene: " + fxmlPath, e);
@@ -102,7 +115,42 @@ public class MainFX extends Application {
         // Taille minimale globale pour garder le layout lisible, sans figer la taille des scenes.
         primaryStage.setMinWidth(1100);
         primaryStage.setMinHeight(650);
-        switchToAuthLandingView();
+        primaryStage.setMaximized(true);
+
+        try {
+            new UserService().ensureDefaultAdminAccount();
+        } catch (SQLDataException e) {
+            System.err.println("Impossible d'initialiser le compte admin par défaut: " + e.getMessage());
+        }
+
+        // Vérifier si une session persistante existe
+        User sessionUser = SessionManager.getCurrentUser();
+        if (sessionUser != null && sessionUser.getId() != null) {
+            // Utilisateur connecté, rediriger vers le dashboard approprié
+            authenticatedUser = sessionUser;
+            redirectToUserDashboard(sessionUser);
+        } else {
+            // Aucune session, afficher la page d'accueil
+            switchToAuthLandingView();
+        }
+    }
+
+    private void redirectToUserDashboard(User user) {
+        String role = user.getRole() == null ? "" : user.getRole().trim().toLowerCase();
+        switch (role) {
+            case "amateur":
+                switchToAmateurView(user);
+                break;
+            case "artiste":
+            case "artist":
+                switchToArtistView(user);
+                break;
+            case "admin":
+                switchToAdminView(user);
+                break;
+            default:
+                switchToAuthLandingView();
+        }
     }
 
     private User createDevUser(int id, String prenom, String nom, String role, String Mdp) {

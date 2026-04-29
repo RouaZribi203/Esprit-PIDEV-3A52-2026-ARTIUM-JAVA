@@ -2,11 +2,17 @@ package controllers;
 
 import services.UserService;
 import entities.User;
+import utils.CardAnimator;
 import javafx.animation.FadeTransition;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.Image;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
@@ -16,9 +22,11 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
+import utils.ArtisticBackground;
 import utils.InputValidator;
 
 import java.io.File;
@@ -49,6 +57,9 @@ public class InscriptionController {
 	@FXML private VBox stepOnePane;
 	@FXML private VBox stepTwoPane;
 	@FXML private VBox stepThreePane;
+	@FXML private StackPane landingShell;
+	@FXML private VBox landingHero;
+	@FXML private VBox signupCard;
 	@FXML private Label stepOneBadge;
 	@FXML private Label stepTwoBadge;
 	@FXML private Label stepThreeBadge;
@@ -102,9 +113,17 @@ public class InscriptionController {
 			updateRoleHints();
 			updateLiveValidationMessage();
 		});
-		setupLiveValidation();
 		updateRoleHints();
 		showStep(1, false);
+
+        if (landingShell != null) {
+            ArtisticBackground.attach(landingShell, 20); // 20 touches pour l'inscription
+        }
+
+		javafx.application.Platform.runLater(() -> {
+			if (landingHero != null) CardAnimator.animateFadeSlideUp(landingHero, 40);
+			if (signupCard != null) CardAnimator.animateFadeSlideUp(signupCard, 120);
+		});
 	}
 
 	@FXML
@@ -156,16 +175,63 @@ public class InscriptionController {
 		User user = buildUser();
 		try {
 			userService.add(user);
-			Alert alert = new Alert(Alert.AlertType.INFORMATION);
-			alert.setTitle("Inscription confirmée");
-			alert.setHeaderText("Votre compte a été enregistré");
-			alert.setContentText("Les données ont été sauvegardées avec succès.");
-			alert.showAndWait();
+			showSuccessAlert();
 			clearForm();
 			MainFX.switchToLoginView();
 		} catch (SQLDataException e) {
 			setMessage("Erreur de sauvegarde: " + e.getMessage(), true);
 		}
+	}
+
+	private void showSuccessAlert() {
+		Alert alert = new Alert(Alert.AlertType.INFORMATION);
+		alert.setTitle("Inscription confirmée");
+		alert.setHeaderText(null);
+
+		// Créer le contenu personnalisé avec le style du thème
+		VBox contentBox = new VBox();
+		contentBox.setSpacing(12);
+		contentBox.setPadding(new Insets(20, 10, 20, 10));
+		contentBox.setStyle("-fx-background-color: rgba(255, 255, 255, 0.94); -fx-background-radius: 12;");
+
+		Label titleLabel = new Label("✓ Inscription réussie !");
+		titleLabel.setStyle("-fx-font-size: 18; -fx-font-weight: 700; -fx-text-fill: #0f172a;");
+
+		Label descriptionLabel = new Label("Votre compte a été créé avec succès.");
+		descriptionLabel.setStyle("-fx-font-size: 14; -fx-text-fill: #475569; -fx-font-weight: 600; -fx-wrap-text: true;");
+
+		Label messageLabel = new Label("Votre compte est en attente d'activation par l'admin avant la première connexion.");
+		messageLabel.setStyle("-fx-font-size: 13; -fx-text-fill: #667085; -fx-wrap-text: true;");
+
+		VBox successIndicator = new VBox();
+		successIndicator.setStyle("-fx-background-color: linear-gradient(to right, #22c55e, #16a34a); -fx-background-radius: 8; -fx-padding: 10;");
+		successIndicator.setPrefHeight(4);
+		successIndicator.setMaxHeight(4);
+
+		contentBox.getChildren().addAll(titleLabel, descriptionLabel, messageLabel, successIndicator);
+
+		alert.getDialogPane().setContent(contentBox);
+		alert.getDialogPane().setStyle(
+			"-fx-background-color: linear-gradient(to bottom right, rgba(255, 255, 255, 0.96), rgba(241, 247, 255, 0.96)); " +
+			"-fx-border-color: rgba(148, 163, 184, 0.2); " +
+			"-fx-border-width: 1; " +
+			"-fx-padding: 0; " +
+			"-fx-background-radius: 20;"
+		);
+
+		Button okButton = (Button) alert.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK);
+		okButton.setStyle(
+			"-fx-background-color: linear-gradient(to right, #1fc4d7, #4f7cff); " +
+			"-fx-text-fill: white; " +
+			"-fx-font-weight: 700; " +
+			"-fx-padding: 10 20; " +
+			"-fx-background-radius: 12; " +
+			"-fx-cursor: hand; " +
+			"-fx-font-size: 13;"
+		);
+		okButton.setText("Continuer");
+
+		alert.showAndWait();
 	}
 
 	private boolean validateCurrentStep() {
@@ -247,7 +313,8 @@ public class InscriptionController {
 		stepTwoPane.setVisible(step == 2); stepTwoPane.setManaged(step == 2);
 		stepThreePane.setVisible(step == 3); stepThreePane.setManaged(step == 3);
 		if (animate) {
-			fadeIn(step == 1 ? stepOnePane : step == 2 ? stepTwoPane : stepThreePane);
+			Node activePane = step == 1 ? stepOnePane : step == 2 ? stepTwoPane : stepThreePane;
+			CardAnimator.animateFadeSlideUp(activePane, 0);
 		}
 		previousButton.setText(step == 1 ? "Retour à l'accueil" : "Précédent");
 		nextButton.setVisible(step < 3); nextButton.setManaged(step < 3);
@@ -407,6 +474,7 @@ public class InscriptionController {
 		draftUser.setPhotoProfil(selectedPhotoPath);
         draftUser.setStatut("Activé");
 		draftUser.setDateInscription(LocalDate.now());
+		draftUser.setStatut(ROLE_ADMIN.equalsIgnoreCase(getSelectedRole()) ? "Activé" : "Bloqué");
 		return draftUser;
 	}
 
@@ -423,11 +491,7 @@ public class InscriptionController {
 	}
 
 	private void fadeIn(Node node) {
-		node.setOpacity(0.0);
-		FadeTransition transition = new FadeTransition(Duration.millis(180), node);
-		transition.setFromValue(0.0);
-		transition.setToValue(1.0);
-		transition.play();
+		// Not used anymore, replaced by CardAnimator
 	}
 
 	private void setMessage(String message, boolean error) {

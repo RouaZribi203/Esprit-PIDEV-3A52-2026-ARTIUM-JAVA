@@ -63,7 +63,7 @@ public class SidebarArtisteController {
         }
 
         try {
-            Image image = new Image(toImageUrl(imagePath), true);
+            Image image = new Image(toImageUrl(imagePath), false); // chargement synchrone
             if (image.isError()) {
                 clearProfileImage();
                 return;
@@ -78,13 +78,7 @@ public class SidebarArtisteController {
     }
 
     private void installCircularClip() {
-        Circle clip = new Circle();
-        profileImageView.layoutBoundsProperty().addListener((obs, oldBounds, newBounds) -> {
-            double radius = Math.min(newBounds.getWidth(), newBounds.getHeight()) / 2.0;
-            clip.setRadius(radius);
-            clip.setCenterX(newBounds.getWidth() / 2.0);
-            clip.setCenterY(newBounds.getHeight() / 2.0);
-        });
+        Circle clip = new Circle(29, 29, 29);
         profileImageView.setClip(clip);
     }
 

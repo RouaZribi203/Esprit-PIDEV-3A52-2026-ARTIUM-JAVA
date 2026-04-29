@@ -202,6 +202,12 @@ public class SidebarController {
         }
     }
 
+    @FXML
+    private void onLogoutClick() {
+        utils.SessionManager.clearSession();
+        controllers.MainFX.switchToAuthLandingView();
+    }
+
     private void setSubMenuVisibility(VBox subMenu, boolean visible) {
         subMenu.setVisible(visible);
         subMenu.setManaged(visible);

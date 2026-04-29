@@ -12,13 +12,22 @@
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane styleClass="auth-root" stylesheets="@../styles/auth.css" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/20.0.2" fx:controller="controllers.AuthLandingController">
+<BorderPane xmlns:fx="http://javafx.com/fxml/1"
+			fx:controller="controllers.AuthLandingController"
+			stylesheets="@../styles/auth.css"
+			styleClass="auth-root">
+
+	<!-- Top Bar Minimaliste -->
 	<top>
 		<HBox alignment="CENTER_LEFT" spacing="12" styleClass="auth-topbar auth-topbar-glass">
+		<HBox fx:id="topbar" spacing="12" alignment="CENTER_LEFT" styleClass="auth-topbar">
 			<padding>
 				<Insets bottom="14" left="18" right="18" top="14" />
+				<Insets top="20" right="40" bottom="20" left="40"/>
 			</padding>
 			<StackPane styleClass="auth-mini-logo-wrap">
 				<ImageView cache="true" fitWidth="112" preserveRatio="true" smooth="true" styleClass="auth-mini-logo">
+				<ImageView fitWidth="120" preserveRatio="true" smooth="true" cache="true" styleClass="auth-hero-logo">
 					<image>
 						<Image url="@../images/logo2.png" />
 					</image>
@@ -27,10 +36,24 @@
 			<Region HBox.hgrow="ALWAYS" />
 			<Button onAction="#onLoginClick" styleClass="auth-topbar-ghost" text="Se connecter" />
 			<Button onAction="#onCreateAccount" styleClass="auth-topbar-primary" text="Créer un compte" />
+			<Region HBox.hgrow="ALWAYS"/>
+			<Button text="Se connecter" onAction="#onLoginClick" styleClass="auth-link-button"/>
+			<Button text="Créer un compte" onAction="#onCreateAccount" styleClass="auth-secondary-button"/>
 		</HBox>
 	</top>
 
 	<center>
+		<StackPane fx:id="landingShell">
+			<!-- Asymmetrical Gallery Layout -->
+			<HBox fx:id="landingCard" spacing="100" alignment="CENTER" maxWidth="1200">
+				<padding>
+					<Insets top="40" right="80" bottom="80" left="80"/>
+				</padding>
+
+				<!-- Left Editorial Hero -->
+				<VBox fx:id="landingHero" spacing="40" alignment="CENTER_LEFT" prefWidth="450" HBox.hgrow="ALWAYS" styleClass="auth-glass-card">
+					<StackPane alignment="CENTER_LEFT" styleClass="auth-hero-logo-wrap">
+						<ImageView fitWidth="180" preserveRatio="true" smooth="true" cache="true" styleClass="auth-hero-logo">
 		<StackPane styleClass="auth-landing-shell auth-landing-shell-fluid">
 			<HBox alignment="CENTER" spacing="0" styleClass="auth-landing-card auth-landing-card-fluid">
 				<VBox alignment="CENTER_LEFT" maxWidth="Infinity" prefWidth="565" spacing="20" styleClass="auth-landing-hero auth-landing-hero-fluid" HBox.hgrow="ALWAYS">
@@ -44,6 +67,15 @@
 							</image>
 						</ImageView>
 					</StackPane>
+					<VBox spacing="10">
+						<Label text="L'Art," wrapText="true" styleClass="auth-hero-title"/>
+						<Label text="Sans Artifices." wrapText="true" styleClass="auth-hero-title"/>
+					</VBox>
+					<Label text="Rejoignez la galerie Artium. Un espace d'expression minimaliste, pensé pour sublimer la création sous toutes ses formes." wrapText="true" styleClass="auth-hero-text"/>
+					<HBox spacing="20" styleClass="auth-chip-row">
+						<Label text="Galerie" styleClass="auth-chip"/>
+						<Label text="Exposition" styleClass="auth-chip"/>
+						<Label text="Connexion" styleClass="auth-chip"/>
 					<Label styleClass="auth-panel-kicker" text="Plateforme artistique" />
 					<Label styleClass="auth-hero-title auth-landing-title" text="Donnez vie a votre univers creatif" wrapText="true" />
 					<Label styleClass="auth-hero-text auth-landing-text" text="Explorez un espace où la créativité s’exprime librement, où chaque œuvre reflète une vision unique et où l’art prend vie à travers des styles modernes et inspirants." wrapText="true" />
@@ -54,6 +86,17 @@
 					</HBox>
 				</VBox>
 
+				<!-- Right Actions -->
+				<VBox fx:id="landingPanel" spacing="40" alignment="CENTER_LEFT" prefWidth="450" HBox.hgrow="NEVER" styleClass="auth-glass-card">
+					<VBox spacing="8">
+						<Label text="Bienvenue" styleClass="auth-panel-kicker"/>
+						<Label text="L'Expérience Artium" wrapText="true" styleClass="auth-title"/>
+						<Label text="Connectez-vous pour retrouver votre sélection ou créez un profil pour exposer." wrapText="true" styleClass="auth-subtitle"/>
+					</VBox>
+
+					<VBox spacing="20">
+                        <Button text="Se connecter →" onAction="#onLoginClick" styleClass="auth-primary-button" maxWidth="Infinity"/>
+                        <Button text="Créer une exposition" onAction="#onCreateAccount" styleClass="auth-secondary-button" maxWidth="Infinity"/>
 				<VBox alignment="CENTER_LEFT" maxWidth="Infinity" prefWidth="565" spacing="16" styleClass="auth-landing-panel auth-landing-panel-fluid auth-panel-block" HBox.hgrow="ALWAYS">
 					<padding>
 						<Insets bottom="48" left="44" right="44" top="48" />

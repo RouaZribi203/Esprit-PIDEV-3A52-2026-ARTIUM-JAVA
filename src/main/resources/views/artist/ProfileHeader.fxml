@@ -9,6 +9,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Tooltip?>
 
 <VBox spacing="0.0" styleClass="profile-card" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.artist.ProfileHeaderController">
     <StackPane prefHeight="190.0" styleClass="profile-cover">
@@ -31,7 +32,7 @@
                 <Label fx:id="metaLabel" styleClass="profile-meta" text="Specialite - Ville - Inscrit le" />
             </VBox>
 
-            <Button mnemonicParsing="false" onAction="#onEditProfileClick" styleClass="edit-profile-button" text="Edit profile" />
+            <Button mnemonicParsing="false" onAction="#onEditProfileClick" styleClass="edit-profile-button" text="✏ Modifier profil" />
         </HBox>
     </VBox>
 

@@ -5,6 +5,7 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
@@ -25,7 +26,11 @@
             <Button mnemonicParsing="false" onAction="#onAddUser" styleClass="primary-action-button" text="Ajouter amateur" />
         </HBox>
 
-        <TextField fx:id="searchField" HBox.hgrow="ALWAYS" promptText="Rechercher amateur (nom, email, ville)" styleClass="table-search" />
+        <HBox alignment="CENTER_LEFT" spacing="14.0">
+            <TextField fx:id="searchField" HBox.hgrow="ALWAYS" promptText="Rechercher amateur (nom, email, ville)" styleClass="table-search" />
+            <Label text="Trier par:" style="-fx-font-weight: 700; -fx-text-fill: #4a5f7f; -fx-font-size: 13px;" />
+            <ComboBox fx:id="sortComboBox" prefWidth="220.0" styleClass="table-search" />
+        </HBox>
 
         <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="users-scroll" VBox.vgrow="ALWAYS">
             <content>

@@ -34,5 +34,12 @@ build/
 ### VS Code ###
 .vscode/
 
+# Local SMTP secrets
+smtp.properties
+
 ### Mac OS ###
 .DS_Store
+/src/main/resources/config.properties
+
+# Vosk model (trop lourd)
+src/main/resources/vosk-model-fr/

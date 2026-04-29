@@ -15,9 +15,14 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Base64;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import java.util.regex.Pattern;
@@ -31,18 +36,89 @@ public class UserService implements Iservice<User> {
     private static final String[] ID_COLUMNS = {"id", "id_user"};
     private static final String[] SPECIALITE_COLUMNS = {"specialite", "specailite"};
     private static final String[] CENTRE_INTERET_COLUMNS = {"centre_interet", "centre_iteret"};
+    private static final String[] RESET_TOKEN_COLUMNS = {"reset_token", "resetToken"};
+    private static final String[] RESET_TOKEN_EXPIRES_COLUMNS = {"reset_token_expires", "resetTokenExpires"};
+    private static final Duration RESET_TOKEN_TTL = Duration.ofMinutes(15);
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
+    private static final String ADMIN_EMAIL = "admin@artium.local";
+    private static final String ADMIN_PASSWORD = "Admin@1234";
+    private static final String ADMIN_NOM = "Administrateur";
+    private static final String ADMIN_PRENOM = "Système";
+    private static final LocalDate ADMIN_DATE_NAISSANCE = LocalDate.of(1990, 1, 1);
+    private static final String ADMIN_NUM_TEL = "93604970";
+    private static final String ADMIN_VILLE = "Tunis";
+    private static final String ADMIN_BIOGRAPHIE = "Compte administrateur principal de la plateforme.";
+    private static final String ADMIN_STATUT = "Activé ✅ ";
+    private static final String BLOCKED_STATUT = "Bloqué";
+    private static final String BLOCKED_LOGIN_MESSAGE = "Votre compte est bloqué en attente d'activation par l'admin.";
 
     private final Connection connection;
     private final String idColumn;
     private final String specialiteColumn;
     private final String centreInteretColumn;
+    private final String resetTokenColumn;
+    private final String resetTokenExpiresColumn;
+    private final Map<String, PendingReset> pendingResetCodes = new ConcurrentHashMap<>();
+    private final SecureRandom secureRandom = new SecureRandom();
 
     public UserService() {
         this.connection = MyDatabase.getInstance().getConnection();
         this.idColumn = resolveExistingColumn(ID_COLUMNS);
         this.specialiteColumn = resolveExistingColumn(SPECIALITE_COLUMNS);
         this.centreInteretColumn = resolveExistingColumn(CENTRE_INTERET_COLUMNS);
+        this.resetTokenColumn = resolveExistingColumn(RESET_TOKEN_COLUMNS);
+        this.resetTokenExpiresColumn = resolveExistingColumn(RESET_TOKEN_EXPIRES_COLUMNS);
+    }
+
+    public void ensureDefaultAdminAccount() throws SQLDataException {
+        ensureConnection();
+        validateSchemaColumns();
+
+        User existingAdmin = findUserByEmail(ADMIN_EMAIL);
+        if (existingAdmin != null) {
+            return;
+        }
+
+        User admin = new User();
+        admin.setNom(ADMIN_NOM);
+        admin.setPrenom(ADMIN_PRENOM);
+        admin.setDateNaissance(ADMIN_DATE_NAISSANCE);
+        admin.setEmail(ADMIN_EMAIL);
+        admin.setMdp(ADMIN_PASSWORD);
+        admin.setRole("Admin");
+        admin.setStatut(ADMIN_STATUT);
+        admin.setDateInscription(LocalDate.now());
+        admin.setNumTel(ADMIN_NUM_TEL);
+        admin.setVille(ADMIN_VILLE);
+        admin.setBiographie(ADMIN_BIOGRAPHIE);
+        admin.setSpecialite(null);
+        admin.setCentreInteret(null);
+        admin.setPhotoReferencePath(null);
+        admin.setPhotoProfil(null);
+
+        admin.setMdp(hashPassword(admin.getMdp()));
+
+        String insertUserSql = getInsertUserSql();
+        try (PreparedStatement ps = connection.prepareStatement(insertUserSql)) {
+            ps.setString(1, admin.getNom());
+            ps.setString(2, admin.getPrenom());
+            ps.setDate(3, Date.valueOf(admin.getDateNaissance()));
+            ps.setString(4, admin.getEmail());
+            ps.setString(5, admin.getMdp());
+            ps.setString(6, admin.getRole());
+            ps.setString(7, admin.getStatut());
+            ps.setDate(8, Date.valueOf(admin.getDateInscription()));
+            ps.setString(9, admin.getNumTel());
+            ps.setString(10, admin.getVille());
+            ps.setString(11, admin.getBiographie());
+            ps.setString(12, admin.getSpecialite());
+            ps.setString(13, admin.getCentreInteret());
+            ps.setString(14, admin.getPhotoReferencePath());
+            ps.setString(15, admin.getPhotoProfil());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new SQLDataException("Initialisation du compte admin impossible: " + e.getMessage());
+        }
     }
 
     @Override
@@ -56,6 +132,7 @@ public class UserService implements Iservice<User> {
         user.setRole(normalizedRole);
         normalizeImageFields(user);
         applyRoleRules(user, normalizedRole);
+        applyDefaultStatusOnCreation(user, normalizedRole);
         validateRequiredFields(user);
         validateSchemaColumns();
 
@@ -102,8 +179,11 @@ public class UserService implements Iservice<User> {
                 if (!matchesPassword(rawPassword, storedPassword)) {
                     throw new SQLDataException("Adresse e-mail ou mot de passe incorrect.");
                 }
-
-                return mapUser(rs);
+                User authenticatedUser = mapUser(rs);
+                if (isBlockedStatus(authenticatedUser.getStatut())) {
+                    throw new SQLDataException(BLOCKED_LOGIN_MESSAGE);
+                }
+                return authenticatedUser;
             }
         } catch (SQLDataException e) {
             throw e;
@@ -119,6 +199,72 @@ public class UserService implements Iservice<User> {
         if (isBlank(newPassword) || newPassword.length() < 8) {
             throw new SQLDataException("Le mot de passe doit contenir au moins 8 caractères.");
         }
+        updatePasswordByEmail(email, newPassword);
+    }
+
+    public void requestPasswordResetCode(String email) throws SQLDataException {
+        if (isBlank(email) || !EMAIL_PATTERN.matcher(email.trim()).matches()) {
+            throw new SQLDataException("Veuillez saisir une adresse e-mail valide.");
+        }
+
+        ensureConnection();
+        User user = findUserByEmail(email);
+        if (user == null) {
+            throw new SQLDataException("Aucun compte trouvé avec cette adresse e-mail.");
+        }
+
+        String normalizedEmail = normalizeEmail(email);
+        String resetCode = generateResetCode();
+        LocalDateTime expiresAt = LocalDateTime.now().plus(RESET_TOKEN_TTL);
+        PendingReset pendingReset = new PendingReset(resetCode, expiresAt);
+
+        storeResetCode(normalizedEmail, pendingReset);
+
+        try {
+            EmailService.sendPasswordResetCode(user.getEmail(), resetCode, expiresAt);
+        } catch (RuntimeException e) {
+            clearResetCode(normalizedEmail);
+            throw new SQLDataException(e.getMessage());
+        }
+    }
+
+    public void resetPasswordWithCode(String email, String resetCode, String newPassword) throws SQLDataException {
+        if (isBlank(email) || !EMAIL_PATTERN.matcher(email.trim()).matches()) {
+            throw new SQLDataException("Veuillez saisir une adresse e-mail valide.");
+        }
+        if (isBlank(resetCode)) {
+            throw new SQLDataException("Veuillez saisir le code reçu par e-mail.");
+        }
+        if (isBlank(newPassword) || newPassword.length() < 8) {
+            throw new SQLDataException("Le mot de passe doit contenir au moins 8 caractères.");
+        }
+
+        ensureConnection();
+        String normalizedEmail = normalizeEmail(email);
+        PendingReset pendingReset = loadResetCode(normalizedEmail);
+        if (pendingReset == null) {
+            throw new SQLDataException("Aucun code de réinitialisation valide trouvé. Demandez un nouveau code.");
+        }
+        if (pendingReset.isExpired()) {
+            clearResetCode(normalizedEmail);
+            throw new SQLDataException("Le code de réinitialisation a expiré. Demandez un nouveau code.");
+        }
+        if (!pendingReset.code.equals(resetCode.trim())) {
+            throw new SQLDataException("Le code de réinitialisation est incorrect.");
+        }
+
+        updatePasswordByEmail(email, newPassword);
+        clearResetCode(normalizedEmail);
+    }
+
+    private String getInsertUserSql() {
+        return "INSERT INTO `user` " +
+                "(`nom`, `prenom`, `date_naissance`, `email`, `mdp`, `role`, `statut`, `date_inscription`, " +
+                "`num_tel`, `ville`, `biographie`, `" + specialiteColumn + "`, `" + centreInteretColumn + "`, `photo_reference_path`, `photo_profil`) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    }
+
+    private void updatePasswordByEmail(String email, String newPassword) throws SQLDataException {
         ensureConnection();
 
         String updateSql = "UPDATE `user` SET `mdp` = ? WHERE LOWER(TRIM(`email`)) = LOWER(TRIM(?))";
@@ -136,11 +282,100 @@ public class UserService implements Iservice<User> {
         }
     }
 
-    private String getInsertUserSql() {
-        return "INSERT INTO `user` " +
-                "(`nom`, `prenom`, `date_naissance`, `email`, `mdp`, `role`, `statut`, `date_inscription`, " +
-                "`num_tel`, `ville`, `biographie`, `" + specialiteColumn + "`, `" + centreInteretColumn + "`, `photo_reference_path`, `photo_profil`) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private User findUserByEmail(String email) throws SQLDataException {
+        String sql = "SELECT * FROM `user` WHERE LOWER(TRIM(`email`)) = LOWER(TRIM(?)) LIMIT 1";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, email.trim());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapUser(rs);
+                }
+            }
+        } catch (SQLException e) {
+            throw new SQLDataException("Recherche utilisateur impossible: " + e.getMessage());
+        }
+        return null;
+    }
+
+    private void storeResetCode(String normalizedEmail, PendingReset pendingReset) throws SQLDataException {
+        if (hasResetTokenColumns()) {
+            String sql = "UPDATE `user` SET `" + resetTokenColumn + "` = ?, `" + resetTokenExpiresColumn + "` = ? " +
+                    "WHERE LOWER(TRIM(`email`)) = LOWER(TRIM(?))";
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setString(1, pendingReset.code);
+                ps.setObject(2, java.sql.Timestamp.valueOf(pendingReset.expiresAt));
+                ps.setString(3, normalizedEmail);
+                int affectedRows = ps.executeUpdate();
+                if (affectedRows == 0) {
+                    throw new SQLDataException("Aucun compte trouvé avec cette adresse e-mail.");
+                }
+                return;
+            } catch (SQLException e) {
+                throw new SQLDataException("Sauvegarde du code impossible: " + e.getMessage());
+            }
+        }
+
+        pendingResetCodes.put(normalizedEmail, pendingReset);
+    }
+
+    private PendingReset loadResetCode(String normalizedEmail) throws SQLDataException {
+        PendingReset cached = pendingResetCodes.get(normalizedEmail);
+        if (cached != null) {
+            return cached;
+        }
+
+        if (!hasResetTokenColumns()) {
+            return null;
+        }
+
+        String sql = "SELECT `" + resetTokenColumn + "`, `" + resetTokenExpiresColumn + "` FROM `user` " +
+                "WHERE LOWER(TRIM(`email`)) = LOWER(TRIM(?)) LIMIT 1";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, normalizedEmail);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    return null;
+                }
+                String storedCode = rs.getString(1);
+                java.sql.Timestamp expiresAt = rs.getTimestamp(2);
+                if (isBlank(storedCode) || expiresAt == null) {
+                    return null;
+                }
+                return new PendingReset(storedCode, expiresAt.toLocalDateTime());
+            }
+        } catch (SQLException e) {
+            throw new SQLDataException("Lecture du code impossible: " + e.getMessage());
+        }
+    }
+
+    private void clearResetCode(String normalizedEmail) throws SQLDataException {
+        pendingResetCodes.remove(normalizedEmail);
+
+        if (!hasResetTokenColumns()) {
+            return;
+        }
+
+        String sql = "UPDATE `user` SET `" + resetTokenColumn + "` = NULL, `" + resetTokenExpiresColumn + "` = NULL " +
+                "WHERE LOWER(TRIM(`email`)) = LOWER(TRIM(?))";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, normalizedEmail);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new SQLDataException("Suppression du code impossible: " + e.getMessage());
+        }
+    }
+
+    private boolean hasResetTokenColumns() {
+        return resetTokenColumn != null && resetTokenExpiresColumn != null;
+    }
+
+    private String generateResetCode() {
+        int code = secureRandom.nextInt(1_000_000);
+        return String.format("%06d", code);
+    }
+
+    private String normalizeEmail(String email) {
+        return email == null ? "" : email.trim().toLowerCase();
     }
 
     private User mapUser(ResultSet rs) throws SQLException {
@@ -183,15 +418,9 @@ public class UserService implements Iservice<User> {
             throw new SQLDataException("Role invalide.");
         }
 
-        if ("admin".equalsIgnoreCase(role.trim())) {
-            return "Admin";
-        }
-        if ("amateur".equalsIgnoreCase(role.trim())) {
-            return "Amateur";
-        }
-        if ("artiste".equalsIgnoreCase(role.trim())) {
-            return "Artiste";
-        }
+        if ("admin".equalsIgnoreCase(role.trim())) return "Admin";
+        if ("amateur".equalsIgnoreCase(role.trim())) return "Amateur";
+        if ("artiste".equalsIgnoreCase(role.trim())) return "Artiste";
         throw new SQLDataException("Role non supporte: " + role);
     }
 
@@ -201,7 +430,6 @@ public class UserService implements Iservice<User> {
             user.setCentreInteret(null);
             return;
         }
-
         if ("Amateur".equals(role)) {
             user.setSpecialite(null);
             if (isBlank(user.getCentreInteret())) {
@@ -209,13 +437,28 @@ public class UserService implements Iservice<User> {
             }
             return;
         }
-
         if ("Artiste".equals(role)) {
             user.setCentreInteret(null);
             if (isBlank(user.getSpecialite())) {
                 throw new SQLDataException("Un artiste doit choisir une specialite.");
             }
         }
+    }
+
+    private void applyDefaultStatusOnCreation(User user, String role) {
+        if ("Amateur".equals(role) || "Artiste".equals(role)) {
+            user.setStatut(BLOCKED_STATUT);
+            return;
+        }
+        if (isBlank(user.getStatut())) {
+            user.setStatut(ADMIN_STATUT);
+        }
+    }
+
+    private boolean isBlockedStatus(String statut) {
+        if (isBlank(statut)) return false;
+        String n = statut.trim().toLowerCase();
+        return "bloque".equals(n) || "bloqué".equals(n) || "blocked".equals(n);
     }
 
     private void validateSchemaColumns() throws SQLDataException {
@@ -229,16 +472,11 @@ public class UserService implements Iservice<User> {
     }
 
     private String resolveExistingColumn(String[] candidates) {
-        if (connection == null) {
-            return null;
-        }
-
+        if (connection == null) return null;
         try {
             DatabaseMetaData metaData = connection.getMetaData();
             for (String candidate : candidates) {
-                if (columnExists(metaData, "user", candidate)) {
-                    return candidate;
-                }
+                if (columnExists(metaData, "user", candidate)) return candidate;
             }
         } catch (SQLException ignored) {
             return null;
@@ -254,7 +492,6 @@ public class UserService implements Iservice<User> {
 
     private void validateRequiredFields(User user) throws SQLDataException {
         List<String> missingFields = new ArrayList<>();
-
         if (isBlank(user.getNom())) missingFields.add("nom");
         if (isBlank(user.getPrenom())) missingFields.add("prenom");
         if (user.getDateNaissance() == null) missingFields.add("date_naissance");
@@ -291,18 +528,11 @@ public class UserService implements Iservice<User> {
     }
 
     private boolean matchesPassword(String rawPassword, String storedPassword) throws SQLDataException {
-        if (isBlank(storedPassword)) {
-            return false;
-        }
-
-        if (!storedPassword.startsWith("pbkdf2_sha256$")) {
-            return rawPassword.equals(storedPassword);
-        }
+        if (isBlank(storedPassword)) return false;
+        if (!storedPassword.startsWith("pbkdf2_sha256$")) return rawPassword.equals(storedPassword);
 
         String[] parts = storedPassword.split("\\$");
-        if (parts.length != 4) {
-            return false;
-        }
+        if (parts.length != 4) return false;
 
         try {
             int iterations = Integer.parseInt(parts[1]);
@@ -411,6 +641,59 @@ public class UserService implements Iservice<User> {
         return users;
     }
 
+    public void activateBlockedUser(User user) throws SQLDataException {
+        if (user == null || user.getId() == null) {
+            throw new SQLDataException("Activation impossible: identifiant utilisateur manquant.");
+        }
+        ensureConnection();
+        ensureIdColumn();
+
+        if (!isBlockedStatus(user.getStatut())) {
+            throw new SQLDataException("Seuls les comptes bloqués peuvent être activés.");
+        }
+
+        String sql = "UPDATE `user` SET `statut` = ? WHERE `" + idColumn + "` = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, ADMIN_STATUT);
+            ps.setInt(2, user.getId());
+            int affectedRows = ps.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLDataException("Aucun utilisateur activé (id introuvable).");
+            }
+        } catch (SQLDataException e) {
+            throw e;
+        } catch (SQLException e) {
+            throw new SQLDataException("Activation utilisateur impossible: " + e.getMessage());
+        }
+    }
+
+    // ✅ AJOUT — bloquer un compte activé
+    public void blockUser(User user) throws SQLDataException {
+        if (user == null || user.getId() == null) {
+            throw new SQLDataException("Blocage impossible: identifiant utilisateur manquant.");
+        }
+        ensureConnection();
+        ensureIdColumn();
+
+        if (isBlockedStatus(user.getStatut())) {
+            throw new SQLDataException("Ce compte est déjà bloqué.");
+        }
+
+        String sql = "UPDATE `user` SET `statut` = ? WHERE `" + idColumn + "` = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, BLOCKED_STATUT);
+            ps.setInt(2, user.getId());
+            int affectedRows = ps.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLDataException("Aucun utilisateur bloqué (id introuvable).");
+            }
+        } catch (SQLDataException e) {
+            throw e;
+        } catch (SQLException e) {
+            throw new SQLDataException("Blocage utilisateur impossible: " + e.getMessage());
+        }
+    }
+
     @Override
     public List<User> getAll() throws SQLDataException {
         ensureConnection();
@@ -473,11 +756,66 @@ public class UserService implements Iservice<User> {
             throw new SQLDataException("Colonne identifiant utilisateur introuvable (id/id_user).");
         }
     }
+
+    private static final class PendingReset {
+        private final String code;
+        private final LocalDateTime expiresAt;
+
+        private PendingReset(String code, LocalDateTime expiresAt) {
+            this.code = code;
+            this.expiresAt = expiresAt;
+        }
+
+        private boolean isExpired() {
+            return LocalDateTime.now().isAfter(expiresAt);
+        }
+    }
+
+    public User findByEmail(String email) throws SQLDataException {
+        return findUserByEmail(email);
+    }
+
+    public User findOrCreateGoogleUser(String email, String name, String googleId) throws SQLDataException {
+        ensureConnection();
+
+        User existing = findUserByEmail(email);
+        if (existing != null) {
+            if (isBlockedStatus(existing.getStatut())) {
+                throw new SQLDataException(BLOCKED_LOGIN_MESSAGE);
+            }
+            return existing;
+        }
+
+        String nom    = name.contains(" ") ? name.substring(0, name.lastIndexOf(" "))  : name;
+        String prenom = name.contains(" ") ? name.substring(name.lastIndexOf(" ") + 1) : "-";
+
+        String sql = "INSERT INTO `user` " +
+                "(`nom`, `prenom`, `date_naissance`, `email`, `mdp`, `role`, `statut`, `date_inscription`, " +
+                "`num_tel`, `ville`, `biographie`, `" + specialiteColumn + "`, `" + centreInteretColumn + "`, " +
+                "`photo_reference_path`, `photo_profil`) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1,  nom);
+            ps.setString(2,  prenom);
+            ps.setDate(3,    Date.valueOf(LocalDate.of(2000, 1, 1)));
+            ps.setString(4,  email);
+            ps.setString(5,  "google_oauth_" + googleId);
+            ps.setString(6,  "Amateur");
+            ps.setString(7,  ADMIN_STATUT);
+            ps.setDate(8,    Date.valueOf(LocalDate.now()));
+            ps.setString(9,  "00000000");
+            ps.setString(10, "Non défini");
+            ps.setString(11, "Compte créé via Google");
+            ps.setNull(12,   java.sql.Types.VARCHAR);
+            ps.setString(13, "Art général");
+            ps.setNull(14,   java.sql.Types.VARCHAR);
+            ps.setNull(15,   java.sql.Types.VARCHAR);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new SQLDataException("Création compte Google impossible: " + e.getMessage());
+        }
+
+        return findUserByEmail(email);
+    }
 }
-
-
-
-
-
-
-

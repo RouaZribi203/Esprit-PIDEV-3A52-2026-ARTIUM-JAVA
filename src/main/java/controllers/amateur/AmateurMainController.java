@@ -120,6 +120,16 @@ public class AmateurMainController {
                 feedController.setRouteFilter(route);
             }
 
+            FXMLLoader loader = new FXMLLoader(resource);
+            Node page = loader.load();
+
+            Object controller = loader.getController();
+            if (controller instanceof EditProfileController) {
+                ((EditProfileController) controller).setOnProfileUpdated(() -> {
+                    sidebarIncludeController.setUser(MainFX.getAuthenticatedUser());
+                });
+            }
+
             amateurContentArea.getChildren().setAll(page);
             return controller;
         } catch (IOException e) {

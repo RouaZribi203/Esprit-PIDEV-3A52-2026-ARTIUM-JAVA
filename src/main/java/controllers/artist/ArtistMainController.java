@@ -5,6 +5,10 @@ import entities.User;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 
@@ -52,6 +56,10 @@ public class ArtistMainController {
     }
 
     private void onNavigate(String route) {
+        if ("edit-profile".equals(route)) {
+            showEditProfilePopup();
+            return;
+        }
         profileHeaderIncludeController.setActiveTab(route);
         loadArtistView(resolveRoute(route));
     }
@@ -91,10 +99,36 @@ public class ArtistMainController {
     private void loadArtistView(String fxmlPath) {
         try {
             URL resource = Objects.requireNonNull(getClass().getResource(fxmlPath), "FXML not found: " + fxmlPath);
-            Node page = FXMLLoader.load(resource);
+            FXMLLoader loader = new FXMLLoader(resource);
+            Node page = loader.load();
             artistContentArea.getChildren().setAll(page);
         } catch (IOException e) {
             throw new IllegalStateException("Failed to load artist page: " + fxmlPath, e);
+        }
+    }
+
+    private void showEditProfilePopup() {
+        try {
+            URL resource = Objects.requireNonNull(getClass().getResource("/views/artist/EditProfileArtiste.fxml"));
+            FXMLLoader loader = new FXMLLoader(resource);
+            Parent root = loader.load();
+
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Modifier Profil");
+            dialogStage.initModality(Modality.APPLICATION_MODAL);
+            dialogStage.setScene(new Scene(root, 600, 750));
+            dialogStage.setResizable(false);
+
+            EditProfileArtisteController controller = loader.getController();
+            controller.setDialogStage(dialogStage);
+            controller.setOnProfileUpdated(() -> {
+                profileHeaderIncludeController.setUser(MainFX.getAuthenticatedUser());
+                sidebarArtisteIncludeController.setUser(MainFX.getAuthenticatedUser());
+            });
+
+            dialogStage.showAndWait();
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to load edit profile popup", e);
         }
     }
 }

@@ -1,520 +1,309 @@
-/* Base */
-.auth-root {
-	-fx-font-family: "Segoe UI", "Inter", "Arial";
-	-fx-background-color: linear-gradient(to bottom right, #e6eeff 0%, #eef4ff 40%, #e7f1ff 100%);
+/* Cache les barres de défilement tout en gardant le scroll actif */
+.scroll-bar:horizontal, 
+.scroll-bar:vertical {
+    -fx-opacity: 0;
+    -fx-pref-width: 0;
+    -fx-max-width: 0;
+    -fx-pref-height: 0;
+    -fx-max-height: 0;
+    -fx-padding: 0;
+}
+.scroll-bar:horizontal .track,
+.scroll-bar:horizontal .thumb,
+.scroll-bar:vertical .track,
+.scroll-bar:vertical .thumb {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+.scroll-pane > .corner {
+    -fx-background-color: transparent;
 }
 
+/* =========================================================================
+   ARTIUM : LIGHT GALLERY MINIMALIST DESIGN (Auth & Landing)
+   ========================================================================= */
+
+/* --- ROOT & CANVAS --- */
+.auth-root {
+    -fx-font-family: "Inter", "Segoe UI", "Helvetica", sans-serif;
+    -fx-background-color: #FAFAFC; /* Toile très légèrement grisée pour adoucir */
+}
+
+/* On supprime toutes les boîtes, ombres et bordures classiques */
 .auth-landing-shell,
 .auth-signup-shell {
-	-fx-padding: 24;
+    -fx-padding: 0;
 }
 
 .auth-card,
-.auth-landing-card {
-	-fx-background-color: rgba(255, 255, 255, 0.9);
-	-fx-background-radius: 24;
-	-fx-border-radius: 24;
-	-fx-border-color: rgba(148, 163, 184, 0.2);
-	-fx-border-width: 1;
-	-fx-effect: dropshadow(gaussian, rgba(30, 41, 59, 0.18), 30, 0.2, 0, 14);
+.auth-landing-card,
+.auth-landing-card-fluid,
+.auth-signup-card {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-effect: none;
 }
 
-/* Top bar */
-.auth-topbar {
-	-fx-background-color: rgba(255, 255, 255, 0.88);
-	-fx-border-color: rgba(99, 102, 241, 0.12);
-	-fx-border-width: 0 0 1 0;
+/* --- GLASSMORPHISM CARDS --- */
+.auth-glass-card {
+    -fx-background-color: rgba(255, 255, 255, 0.50); /* Transparence idéale (50%) */
+    -fx-background-radius: 24;
+    -fx-border-radius: 24;
+    -fx-border-color: rgba(255, 255, 255, 0.5); /* Reflet ajusté */
+    -fx-border-width: 1.5;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.06), 20, 0.1, 0, 8);
+    -fx-padding: 40;
 }
 
-.auth-topbar-glass {
-	-fx-background-color: rgba(255, 255, 255, 0.74);
-	-fx-border-color: rgba(148, 163, 184, 0.2);
-	-fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.12), 18, 0.12, 0, 4);
-}
-
-.auth-mini-logo-wrap {
-	-fx-background-color: rgba(79, 70, 229, 0.14);
-	-fx-padding: 6 10;
-	-fx-background-radius: 999;
-	-fx-border-radius: 999;
-	-fx-border-color: rgba(79, 70, 229, 0.22);
-}
-
-.auth-mini-logo {
-	-fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.2), 10, 0.14, 0, 2);
-}
-
-.auth-brand-mini,
-.auth-brand {
-	-fx-text-fill: #243b7a;
-	-fx-font-weight: 800;
-}
-
-.auth-brand-mini {
-	-fx-font-size: 19px;
-}
-
-.auth-topbar-link,
-.auth-topbar-ghost,
-.auth-topbar-primary {
-	-fx-background-radius: 999;
-	-fx-padding: 9 16;
-	-fx-font-weight: 700;
-	-fx-cursor: hand;
-}
-
-.auth-topbar-link {
-	-fx-background-color: transparent;
-	-fx-text-fill: #334155;
-}
-
-.auth-topbar-ghost {
-	-fx-background-color: transparent;
-	-fx-text-fill: #4f46e5;
-	-fx-border-color: #c7d2fe;
-	-fx-border-radius: 999;
-	-fx-border-width: 1;
-}
-
-.auth-topbar-primary,
-.auth-primary-button {
-	-fx-background-color: linear-gradient(to right, #1fc4d7, #4f7cff);
-	-fx-text-fill: white;
-	-fx-background-radius: 14;
-	-fx-font-weight: 700;
-	-fx-padding: 12 20;
-	-fx-cursor: hand;
-	-fx-effect: dropshadow(gaussian, rgba(37, 99, 235, 0.3), 18, 0.22, 0, 5);
-}
-
-.auth-topbar-primary:hover,
-.auth-primary-button:hover {
-	-fx-background-color: linear-gradient(to right, #10bcd2, #3f6cf0);
-}
-
-.auth-primary-button:pressed,
-.auth-topbar-primary:pressed {
-	-fx-background-color: linear-gradient(to right, #0ea5b7, #345bd6);
-}
-
-/* Landing hero */
-
-.auth-landing-shell-fluid {
-	-fx-padding: 30;
-}
-
-.auth-landing-card-fluid {
-	-fx-background-color: rgba(255, 255, 255, 0.88);
-	-fx-background-radius: 30;
-	-fx-border-radius: 30;
-	-fx-border-color: rgba(148, 163, 184, 0.22);
-	-fx-border-width: 1;
-	-fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.2), 38, 0.22, 0, 14);
-}
-
+.auth-landing-hero-fluid,
 .auth-landing-hero,
 .auth-signup-hero {
-	-fx-background-color: linear-gradient(to bottom right, #273c95 0%, #5164d9 60%, #7382ff 100%);
-	-fx-background-radius: 24 0 0 24;
+    -fx-background-color: transparent;
 }
 
-.auth-landing-hero-fluid {
-	-fx-background-color: linear-gradient(to bottom right, #1d4ed8 0%, #2563eb 45%, #38bdf8 100%);
-	-fx-background-radius: 30 0 0 30;
+/* --- TYPOGRAPHY (EDITORIAL STYLE) --- */
+.auth-title,
+.auth-panel-title,
+.auth-login-title,
+.auth-landing-title,
+.auth-hero-title {
+    -fx-font-family: "Georgia", "Times New Roman", serif;
+    -fx-font-size: 36px; /* Plus petit pour moins de hauteur */
+    -fx-text-fill: #273c95; /* Deep Royal Blue from logo */
+    -fx-font-weight: normal;
+    -fx-line-spacing: 0.1em;
 }
 
-.auth-hero-logo-wrap {
-	-fx-background-color: rgba(255, 255, 255, 0.16);
-	-fx-padding: 14 18;
-	-fx-background-radius: 22;
-	-fx-border-radius: 22;
-	-fx-border-color: rgba(255, 255, 255, 0.26);
-}
-
-.auth-hero-logo {
-	-fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.2), 18, 0.16, 0, 6);
-}
-
-.auth-landing-title {
-	-fx-font-size: 42px;
-	-fx-font-weight: 900;
-	-fx-text-fill: #ffffff;
-}
-
-.auth-landing-text {
-	-fx-font-size: 15px;
-	-fx-text-fill: rgba(255, 255, 255, 0.92);
-	-fx-line-spacing: 0.55em;
-}
-
-.auth-panel-block {
-	-fx-spacing: 16;
-}
-
-.auth-landing-panel,
-.auth-signup-card {
-	-fx-background-radius: 0 24 24 0;
-}
-
-.auth-login-shell {
-	-fx-padding: 24;
-}
-
-.auth-login-card {
-	-fx-background-radius: 0 24 24 0;
-}
-
-.auth-login-card-fluid {
-	-fx-background-color: linear-gradient(to bottom right, rgba(255, 255, 255, 0.94), rgba(241, 247, 255, 0.94));
-	-fx-background-radius: 0 30 30 0;
-	-fx-border-color: rgba(148, 163, 184, 0.2);
-	-fx-border-width: 1;
-	-fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.16), 32, 0.2, 0, 12);
-}
-
-.auth-login-title {
-	-fx-font-size: 32px;
-}
-
-.auth-login-subtitle {
-	-fx-text-fill: #475569;
-}
-
-.auth-login-actions {
-	-fx-padding: 4 0 0 0;
-}
-
-.auth-login-footer {
-	-fx-padding: 2 0 0 0;
-}
-
-.auth-remember-checkbox {
-	-fx-text-fill: #475569;
-	-fx-font-weight: 600;
-}
-
-.auth-remember-checkbox .box {
-	-fx-background-color: white;
-	-fx-border-color: #cbd5e1;
-	-fx-border-radius: 5;
-	-fx-background-radius: 5;
-}
-
-.auth-landing-panel-fluid {
-	-fx-background-color: linear-gradient(to bottom right, rgba(255, 255, 255, 0.92), rgba(241, 245, 255, 0.92));
-	-fx-background-radius: 0 30 30 0;
-}
-
-.auth-landing-panel-title {
-	-fx-font-size: 34px;
-	-fx-font-weight: 800;
-	-fx-text-fill: #0f172a;
-}
-
-.auth-landing-panel-text {
-	-fx-font-size: 14px;
-	-fx-text-fill: #475569;
-	-fx-line-spacing: 0.5em;
-}
-
-.auth-hero-title,
-.auth-title {
-	-fx-text-fill: #ffffff;
-	-fx-font-size: 32px;
-	-fx-font-weight: 800;
-	-fx-line-spacing: 0.2em;
-}
-
-.auth-hero-text,
 .auth-subtitle,
 .auth-panel-text,
-.auth-helper-text,
-.auth-message {
-	-fx-font-size: 13px;
-	-fx-line-spacing: 0.5em;
-}
-
-.auth-hero-text,
-.auth-panel-text,
-.auth-helper-text {
-	-fx-text-fill: #667085;
+.auth-login-subtitle,
+.auth-landing-text,
+.auth-hero-text {
+    -fx-font-size: 16px;
+    -fx-text-fill: #666666;
+    -fx-font-weight: 300;
+    -fx-line-spacing: 0.5em;
 }
 
 .auth-panel-kicker,
 .auth-section-title {
-	-fx-text-fill: #4f46e5;
-	-fx-font-size: 13px;
-	-fx-font-weight: 800;
+    -fx-text-fill: #5164d9; /* Accent Blue */
+    -fx-font-size: 14px;
+    -fx-font-weight: 800;
+    -fx-letter-spacing: 0.2em; /* Ne marche pas tjrs en FX, mais intention là */
 }
 
-.auth-panel-title,
-.auth-title {
-	-fx-text-fill: #111827;
+/* --- LOGO EXPOSITION --- */
+.auth-hero-logo-wrap {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-border-color: transparent;
+}
+.auth-hero-logo {
+    -fx-effect: none;
 }
 
-.auth-chip-row {
-	-fx-padding: 2 0 0 0;
-}
-
-.auth-chip {
-	-fx-background-color: rgba(255, 255, 255, 0.32);
-	-fx-text-fill: #0f2454;
-	-fx-background-radius: 999;
-	-fx-padding: 8 14;
-	-fx-font-size: 12px;
-	-fx-font-weight: 700;
-	-fx-border-color: rgba(255, 255, 255, 0.45);
-	-fx-border-width: 1;
-	-fx-border-radius: 999;
-}
-
-/* Form */
-.auth-stepper {
-	-fx-padding: 2 0 4 0;
-}
-
-.auth-step-badge {
-	-fx-min-width: 34;
-	-fx-min-height: 34;
-	-fx-alignment: center;
-	-fx-background-color: #e5e7eb;
-	-fx-text-fill: #6b7280;
-	-fx-font-weight: 800;
-	-fx-background-radius: 999;
-}
-
-.auth-step-badge.active {
-	-fx-background-color: #4f46e5;
-	-fx-text-fill: white;
-}
-
-.auth-step-badge.done {
-	-fx-background-color: #22c55e;
-	-fx-text-fill: white;
-}
-
+/* --- FORM FIELDS (MINIMALIST) --- */
 .auth-field-label {
-	-fx-text-fill: #334155;
-	-fx-font-size: 13px;
-	-fx-font-weight: 700;
+    -fx-text-fill: #999999;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-text-transform: uppercase;
 }
 
 .auth-input {
-	-fx-background-color: rgba(255, 255, 255, 0.96);
-	-fx-background-radius: 22;
-	-fx-border-radius: 22;
-	-fx-border-color: #cbd5e1;
-	-fx-border-width: 1;
-	-fx-padding: 12 14;
-	-fx-font-size: 14px;
-}
-
-.combo-box-base.auth-input {
-	-fx-background-color: white;
-	-fx-background-radius: 22;
-	-fx-border-radius: 22;
-	-fx-border-color: #cbd5e1;
-	-fx-border-width: 1;
-	-fx-font-size: 14px;
-}
-
-.combo-box-base.auth-input:focused {
-	-fx-border-color: #4f46e5;
-	-fx-effect: dropshadow(gaussian, rgba(79, 70, 229, 0.18), 14, 0.15, 0, 0);
-}
-
-.combo-box-base.auth-input > .list-cell {
-	-fx-padding: 11 14;
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-border-color: transparent transparent #D1D5DB transparent; /* Border bottom only */
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 12 0 12 0; /* Padding seulement haut/bas */
+    -fx-font-size: 16px;
+    -fx-text-fill: #273c95;
 }
 
 .auth-input:focused {
-	-fx-border-color: #3b82f6;
-	-fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.2), 16, 0.16, 0, 0);
+    -fx-border-color: transparent transparent #273c95 transparent;
+    -fx-border-width: 0 0 2 0;
+    -fx-effect: none;
+}
+
+.combo-box-base.auth-input {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent #D1D5DB transparent;
+    -fx-border-width: 0 0 1 0;
+}
+.combo-box-base.auth-input:focused {
+    -fx-border-color: transparent transparent #273c95 transparent;
+    -fx-border-width: 0 0 2 0;
+    -fx-effect: none;
 }
 
 .auth-textarea {
-	-fx-pref-row-count: 4;
+    -fx-pref-row-count: 3;
+    -fx-border-color: #D1D5DB;
+    -fx-border-width: 1;
+    -fx-padding: 12;
+}
+.auth-textarea:focused {
+    -fx-border-color: #273c95;
+    -fx-border-width: 2;
 }
 
-.auth-role-toggle,
-.auth-secondary-button,
-.auth-link-button {
-	-fx-cursor: hand;
+/* --- BUTTONS (ARTISTIC) --- */
+.auth-primary-button {
+    -fx-background-color: #273c95; /* Deep Royal Blue */
+    -fx-text-fill: #FFFFFF;
+    -fx-background-radius: 6; /* Slightly rounded for softness */
+    -fx-font-family: "Inter", sans-serif;
+    -fx-font-weight: 700;
+    -fx-font-size: 14px;
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(39, 60, 149, 0.2), 10, 0.1, 0, 4);
 }
 
-.auth-role-toggle {
-	-fx-background-color: #eef4ff;
-	-fx-text-fill: #334155;
-	-fx-background-radius: 999;
-	-fx-border-radius: 999;
-	-fx-border-color: #dbe7ff;
-	-fx-border-width: 1;
-	-fx-font-weight: 700;
-	-fx-padding: 10 16;
-}
-
-.auth-role-toggle:selected {
-	-fx-background-color: linear-gradient(to right, #2f6cf4, #4f46e5);
-	-fx-text-fill: white;
+.auth-primary-button:hover {
+    -fx-background-color: linear-gradient(to right, #5164d9, #38bdf8); /* Vibrant blue gradient */
+    -fx-text-fill: #FFFFFF;
+    -fx-effect: dropshadow(gaussian, rgba(81, 100, 217, 0.3), 14, 0.15, 0, 5);
 }
 
 .auth-secondary-button {
-	-fx-background-color: rgba(255, 255, 255, 0.72);
-	-fx-text-fill: #334155;
-	-fx-font-weight: 700;
-	-fx-background-radius: 14;
-	-fx-border-color: #bfccff;
-	-fx-border-width: 1.2;
-	-fx-border-radius: 14;
-	-fx-padding: 12 18;
+    -fx-background-color: transparent;
+    -fx-text-fill: #273c95;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-border-color: #273c95;
+    -fx-border-width: 1.5;
+    -fx-padding: 10 20;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+}
+.auth-secondary-button:hover {
+    -fx-background-color: #273c95;
+    -fx-text-fill: #FFFFFF;
 }
 
-.auth-secondary-button:hover,
-.auth-topbar-link:hover,
-.auth-link-button:hover {
-	-fx-background-color: #eef2ff;
+.auth-google-button {
+    -fx-background-color: #FFFFFF;
+    -fx-text-fill: #273c95;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-border-color: #D1D5DB;
+    -fx-border-width: 1.5;
+    -fx-padding: 10 20;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 8, 0, 0, 2);
+}
+.auth-google-button:hover {
+    -fx-border-color: #273c95;
+    -fx-background-color: #FAFAFC;
 }
 
 .auth-link-button {
-	-fx-background-color: transparent;
-	-fx-text-fill: #365fd9;
-	-fx-font-weight: 700;
-	-fx-padding: 0;
+    -fx-background-color: transparent;
+    -fx-text-fill: #5164d9;
+    -fx-font-weight: 600;
+    -fx-padding: 0;
+}
+.auth-link-button:hover {
+    -fx-text-fill: #38bdf8;
 }
 
-.auth-photo-preview {
-	-fx-min-width: 150;
-	-fx-min-height: 150;
-	-fx-background-color: #cbd5e1;
-	-fx-background-radius: 18;
-	-fx-border-radius: 18;
-	-fx-border-color: rgba(255,255,255,0.55);
-	-fx-border-width: 1;
+/* --- STEPPER (Minimalist Dots or Numbers) --- */
+.auth-step-badge {
+    -fx-min-width: 30;
+    -fx-min-height: 30;
+    -fx-alignment: center;
+    -fx-background-color: transparent;
+    -fx-border-color: #DDDDDD;
+    -fx-border-radius: 999;
+    -fx-text-fill: #999999;
+    -fx-font-weight: 600;
+}
+.auth-step-badge.active {
+    -fx-border-color: #273c95;
+    -fx-border-width: 2;
+    -fx-text-fill: #273c95;
+}
+.auth-step-badge.done {
+    -fx-border-color: #273c95;
+    -fx-background-color: #273c95;
+    -fx-text-fill: #FFFFFF;
 }
 
-.auth-photo-placeholder {
-	-fx-text-fill: white;
-	-fx-font-weight: 700;
-	-fx-opacity: 0.85;
-}
-
-.auth-message {
-	-fx-min-height: 20;
-	-fx-font-weight: 600;
-}
-
-.auth-message.error {
-	-fx-text-fill: #dc2626;
-}
-
-.auth-message.success {
-	-fx-text-fill: #16a34a;
-}
-
-.auth-or-divider {
-	-fx-alignment: center;
-	-fx-spacing: 10;
-	-fx-padding: 2 0;
-}
-
+/* --- OR DIVIDER --- */
 .auth-or-line {
-	-fx-background-color: rgba(148, 163, 184, 0.45);
-	-fx-pref-height: 1;
-	-fx-max-height: 1;
+    -fx-background-color: #EEEEEE;
+    -fx-pref-height: 1;
 }
-
 .auth-or-label {
-	-fx-text-fill: #64748b;
-	-fx-font-size: 12px;
-	-fx-font-weight: 700;
-	-fx-padding: 0 4;
+    -fx-text-fill: #999999;
+    -fx-font-style: italic;
+    -fx-font-family: "Georgia", serif;
 }
 
-.auth-alt-actions {
-	-fx-spacing: 10;
+/* --- MESSAGES --- */
+.auth-message {
+    -fx-min-height: 20;
+    -fx-font-weight: 400;
+    -fx-font-size: 13px;
+}
+.auth-message.error {
+    -fx-text-fill: #FF3366;
+}
+.auth-message.success {
+    -fx-text-fill: #00CC66;
 }
 
-.auth-alt-button {
-	-fx-background-radius: 16;
-	-fx-text-fill: white;
-	-fx-font-weight: 800;
-	-fx-cursor: hand;
-	-fx-padding: 12 18;
-	-fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.2), 14, 0.16, 0, 4);
+/* --- CHIPS (Minimal) --- */
+.auth-chip {
+    -fx-background-color: transparent;
+    -fx-text-fill: #000000;
+    -fx-padding: 4 0;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-border-color: transparent transparent #000000 transparent;
+    -fx-border-width: 0 0 1 0;
 }
 
-.auth-alt-button.is-faceid {
-	-fx-background-color: linear-gradient(to right, #5b6def, #7c3aed);
-}
-
-.auth-alt-button.is-qr {
-	-fx-background-color: linear-gradient(to right, #ff9f1c, #ff7a18);
-}
-
-.auth-alt-button.is-fingerprint {
-	-fx-background-color: linear-gradient(to right, #22c55e, #14b8a6);
-}
-
-.auth-alt-button:hover {
-	-fx-opacity: 0.92;
-}
-
-.auth-alt-button:pressed {
-	-fx-opacity: 0.84;
-}
-
-.auth-login-links {
-	-fx-alignment: center;
-	-fx-spacing: 6;
-}
-
-.auth-login-links .label {
-	-fx-text-fill: #64748b;
-	-fx-font-size: 13px;
-}
-
-.auth-input,
-.combo-box-base.auth-input,
-.text-area.auth-input {
-	-fx-prompt-text-fill: #8aa0c7;
-}
-
-.auth-root.dark-mode {
-	-fx-background-color: linear-gradient(to bottom right, #0f172a 0%, #111827 52%, #1e293b 100%);
-}
-
-.auth-root.dark-mode .auth-card,
-.auth-root.dark-mode .auth-landing-card,
-.auth-root.dark-mode .auth-signup-card,
-.auth-root.dark-mode .auth-login-card-fluid,
-.auth-root.dark-mode .auth-landing-panel-fluid {
-	-fx-background-color: rgba(17, 24, 39, 0.78);
-	-fx-border-color: rgba(148, 163, 184, 0.2);
-}
-
-.auth-root.dark-mode .auth-panel-title,
-.auth-root.dark-mode .auth-login-title,
-.auth-root.dark-mode .auth-field-label {
-	-fx-text-fill: #e2e8f0;
-}
-
-.auth-root.dark-mode .auth-panel-text,
-.auth-root.dark-mode .auth-subtitle,
-.auth-root.dark-mode .auth-helper-text,
-.auth-root.dark-mode .auth-login-links .label {
-	-fx-text-fill: #94a3b8;
-}
-
-.auth-signup-card {
-	-fx-background-color: rgba(255, 255, 255, 0.94);
-	-fx-border-color: rgba(148, 163, 184, 0.2);
-	-fx-border-width: 1;
-}
-
+/* --- SCROLLPANE --- */
 .auth-scroll,
 .auth-scroll > .viewport {
-	-fx-background-color: transparent;
+    -fx-background-color: transparent;
 }
 
+/* --- ROLE TOGGLE --- */
+.auth-role-toggle {
+    -fx-background-color: transparent;
+    -fx-text-fill: #999999;
+    -fx-font-size: 18px;
+    -fx-font-family: "Georgia", serif;
+    -fx-padding: 0 16 8 0;
+    -fx-border-color: transparent;
+    -fx-cursor: hand;
+}
+.auth-role-toggle:selected {
+    -fx-text-fill: #273c95;
+    -fx-border-color: transparent transparent #5164d9 transparent;
+    -fx-border-width: 0 0 2 0;
+    -fx-background-color: transparent;
+}
 
-
+/* --- PHOTO PREVIEW --- */
+.auth-photo-preview {
+    -fx-min-width: 120;
+    -fx-min-height: 120;
+    -fx-background-color: #F8F8F8;
+    -fx-border-color: #DDDDDD;
+}
+.auth-photo-placeholder {
+    -fx-text-fill: #999999;
+    -fx-font-family: "Inter", sans-serif;
+}
