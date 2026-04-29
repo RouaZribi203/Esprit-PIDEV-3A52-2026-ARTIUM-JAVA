@@ -464,50 +464,50 @@
 }
 
 .music-card {
-    -fx-background-color: #212529;
+    -fx-background-color: #ffffff;
     -fx-background-radius: 12;
-    -fx-border-color: #343a40;
+    -fx-border-color: #e2e8f0;
     -fx-border-radius: 12;
     -fx-padding: 12;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.2, 0, 4);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 10, 0.2, 0, 4);
 }
 
 .music-card:hover {
-    -fx-background-color: #2a2e33;
-    -fx-border-color: #495057;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 16, 0.3, 0, 6);
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #cbd5e1;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 16, 0.3, 0, 6);
 }
 
 .music-card-active {
-    -fx-border-color: #198754;
-    -fx-background-color: #1c2621;
+    -fx-border-color: #3b82f6;
+    -fx-background-color: #eff6ff;
 }
 
 .music-card-title {
-    -fx-text-fill: #ffffff;
+    -fx-text-fill: #1e293b;
     -fx-font-size: 14px;
     -fx-font-weight: 700;
 }
 
 .music-card-meta {
-    -fx-text-fill: #adb5bd;
+    -fx-text-fill: #64748b;
     -fx-font-size: 12px;
 }
 
 .music-card-button {
     -fx-background-color: transparent;
-    -fx-border-color: #495057;
+    -fx-border-color: #cbd5e1;
     -fx-border-radius: 6;
-    -fx-text-fill: #e9ecef;
+    -fx-text-fill: #334155;
     -fx-font-size: 11px;
     -fx-padding: 4 8;
     -fx-cursor: hand;
 }
 
 .music-card-button:hover {
-    -fx-background-color: #343a40;
-    -fx-border-color: #6c757d;
+    -fx-background-color: #f1f5f9;
+    -fx-border-color: #94a3b8;
 }
 
 .amateur-root .tab-pane {

@@ -150,7 +150,7 @@ public class MusicfrontController {
 	private Label playlistSongsEmptyLabel;
 
 	@FXML
-	private VBox playlistSongsBox;
+	private TilePane playlistSongsBox;
 
 	@FXML
 	private TilePane playlistGrid;
@@ -916,49 +916,73 @@ public class MusicfrontController {
 				playlistSongsEmptyLabel.setManaged(empty);
 			}
 			for (Musique track : musiques) {
-				HBox row = new HBox(8);
-				Label name = new Label(track.getTitre() != null ? track.getTitre() : "Sans titre");
-				name.setStyle("-fx-text-fill: white; -fx-font-weight: 700;");
-				Button playBtn = new Button("Play");
-				playBtn.setOnAction(event -> playTrackFromPlaylist(track));
-
-				Button removeBtn = new Button("Retirer");
-				removeBtn.setOnAction(event -> {
-					event.consume();
-					if (selectedPlaylistId == null || track == null || track.getId() == null) {
-						setPlaylistFeedback("Impossible de retirer la musique (identifiants manquants).", false);
-						return;
-					}
-
-					Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-					confirm.setTitle("Retirer de la playlist");
-					confirm.setHeaderText("Retirer \"" + (track.getTitre() != null ? track.getTitre() : "cette musique") + "\" ?");
-					confirm.setContentText("Confirmer la suppression de cette musique de la playlist.");
-					java.util.Optional<ButtonType> result = confirm.showAndWait();
-					if (result.isEmpty() || result.get() != ButtonType.OK) {
-						return;
-					}
-
-					try {
-						playlistService.removeMusiqueFromPlaylist(selectedPlaylistId, track.getId());
-						// Refresh the playlist details view
-						Playlist refreshed = findPlaylistById(selectedPlaylistId);
-						if (refreshed != null) {
-							showPlaylistDetails(refreshed);
-						} else {
-							hidePlaylistDetails();
-						}
-						refreshPlaylists();
-						setPlaylistFeedback("Musique retirée de la playlist.", true);
-					} catch (SQLDataException ex) {
-						setPlaylistFeedback("Erreur lors du retrait: " + ex.getMessage(), false);
-					}
-				});
-
-				row.getChildren().addAll(name, playBtn, removeBtn);
-				playlistSongsBox.getChildren().add(row);
+				playlistSongsBox.getChildren().add(createPlaylistTrackCard(track));
 			}
 		}
+	}
+
+	private VBox createPlaylistTrackCard(Musique track) {
+		VBox card = new VBox(6);
+		card.setMinWidth(TRACK_CARD_WIDTH);
+		card.setPrefWidth(TRACK_CARD_WIDTH);
+		card.setMaxWidth(TRACK_CARD_WIDTH);
+		card.getStyleClass().add("music-card");
+
+		Node coverNode = buildCoverNode(track.getImage());
+
+		String titre = track.getTitre() != null ? track.getTitre() : "Sans titre";
+		Label titleLabel = new Label(titre);
+		titleLabel.setWrapText(true);
+		titleLabel.getStyleClass().add("music-card-title");
+
+		String genre = track.getGenre() != null ? track.getGenre() : "-";
+		Label metaLabel = new Label("Genre: " + genre);
+		metaLabel.getStyleClass().add("music-card-meta");
+
+		Button playBtn = new Button("Play");
+		playBtn.getStyleClass().add("music-card-button");
+		playBtn.setOnAction(event -> {
+			event.consume();
+			playTrackFromPlaylist(track);
+		});
+
+		Button removeBtn = new Button("Retirer");
+		removeBtn.getStyleClass().add("music-card-button");
+		removeBtn.setStyle("-fx-text-fill: #ef4444; -fx-border-color: rgba(239, 68, 68, 0.3);");
+		removeBtn.setOnAction(event -> {
+			event.consume();
+			if (selectedPlaylistId == null || track == null || track.getId() == null) {
+				setPlaylistFeedback("Impossible de retirer la musique (identifiants manquants).", false);
+				return;
+			}
+
+			Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+			confirm.setTitle("Retirer de la playlist");
+			confirm.setHeaderText("Retirer \"" + (track.getTitre() != null ? track.getTitre() : "cette musique") + "\" ?");
+			confirm.setContentText("Confirmer la suppression de cette musique de la playlist.");
+			java.util.Optional<ButtonType> result = confirm.showAndWait();
+			if (result.isEmpty() || result.get() != ButtonType.OK) {
+				return;
+			}
+
+			try {
+				playlistService.removeMusiqueFromPlaylist(selectedPlaylistId, track.getId());
+				Playlist refreshed = findPlaylistById(selectedPlaylistId);
+				if (refreshed != null) {
+					showPlaylistDetails(refreshed);
+				} else {
+					hidePlaylistDetails();
+				}
+				refreshPlaylists();
+				setPlaylistFeedback("Musique retirée de la playlist.", true);
+			} catch (SQLDataException ex) {
+				setPlaylistFeedback("Erreur lors du retrait: " + ex.getMessage(), false);
+			}
+		});
+
+		HBox actionsRow = new HBox(8, playBtn, removeBtn);
+		card.getChildren().addAll(coverNode, titleLabel, metaLabel, actionsRow);
+		return card;
 	}
 
 	private java.util.List<Musique> fetchPlaylistTracks(Playlist playlist) {
@@ -1283,13 +1307,6 @@ public class MusicfrontController {
 		Label metaLabel = new Label("Genre: " + genre);
 		metaLabel.getStyleClass().add("music-card-meta");
 
-		Button generateLyricsButton = new Button("Paroles IA");
-		generateLyricsButton.getStyleClass().add("music-card-button");
-		generateLyricsButton.setOnAction(event -> {
-			event.consume();
-			requestLyricsForTrack(musique);
-		});
-
 		Button addToPlaylistButton = new Button("+ Playlist");
 		addToPlaylistButton.getStyleClass().add("music-card-button");
 		addToPlaylistButton.setOnAction(event -> {
@@ -1331,7 +1348,7 @@ public class MusicfrontController {
 			}
 		});
 
-		HBox actionsRow = new HBox(8, addToPlaylistButton, generateLyricsButton);
+		HBox actionsRow = new HBox(8, addToPlaylistButton);
 
 		card.getChildren().addAll(coverNode, titleLabel, metaLabel, actionsRow);
 		card.setOnMouseClicked(event -> playTrackAtIndex(index));
