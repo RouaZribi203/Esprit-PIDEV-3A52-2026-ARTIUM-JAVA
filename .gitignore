@@ -45,6 +45,9 @@ config/ollama.local.properties
 
 ### Mac OS ###
 .DS_Store
+
+### Configuration Files ###
+config.properties
 /src/main/resources/config.properties
 
 # Vosk model (trop lourd)

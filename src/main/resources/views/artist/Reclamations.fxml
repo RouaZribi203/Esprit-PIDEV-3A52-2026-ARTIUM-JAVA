@@ -46,7 +46,16 @@
                                 <TextArea fx:id="descriptionArea" promptText="Décrivez votre problème en détail..." prefRowCount="8" wrapText="true" maxWidth="1.7976931348623157E308" styleClass="input-control" VBox.vgrow="ALWAYS" />
                             </VBox>
 
-                            <Label fx:id="sendValidationLabel" managed="false" visible="false" wrapText="true" styleClass="form-validation-error" />
+                            <VBox spacing="6.0">
+                                <Label styleClass="form-label" text="Piece jointe (image ou PDF)" />
+                                <HBox spacing="8.0" alignment="CENTER_LEFT">
+                                    <Button fx:id="chooseAttachmentButton" text="Choisir un fichier" onAction="#onChooseAttachment" styleClass="btn-secondary" />
+                                    <Button fx:id="clearAttachmentButton" text="Retirer" onAction="#onClearAttachment" styleClass="btn-secondary" />
+                                    <Label fx:id="selectedAttachmentLabel" text="Aucun fichier selectionne" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
+                                </HBox>
+                            </VBox>
+
+                            <Label fx:id="sendValidationLabel" managed="false" visible="false" wrapText="true" styleClass="form-validation-error" style="-fx-text-fill: #dc2626; -fx-font-size: 12px;" />
 
                             <HBox spacing="10.0" alignment="CENTER_RIGHT">
                                 <Button fx:id="resetButton" text="Réinitialiser" onAction="#onReset" styleClass="btn-secondary" />
@@ -62,9 +71,19 @@
                             <Label styleClass="form-title" text="Mes Réclamations" />
 
                             <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                <Button fx:id="typeFilterAll" text="Tous les types" onAction="#onTypeFilterAll" styleClass="type-filter-btn,type-filter-active" />
+                                <Button fx:id="typeFilterPayment" text="Paiement" onAction="#onTypeFilterPayment" styleClass="type-filter-btn" />
+                                <Button fx:id="typeFilterWork" text="Oeuvre" onAction="#onTypeFilterWork" styleClass="type-filter-btn" />
+                                <Button fx:id="typeFilterEvent" text="Evenement" onAction="#onTypeFilterEvent" styleClass="type-filter-btn" />
+                                <Button fx:id="typeFilterAccount" text="Compte" onAction="#onTypeFilterAccount" styleClass="type-filter-btn" />
+                            </HBox>
+
+                            <HBox spacing="10.0" alignment="CENTER_LEFT">
                                 <TextField fx:id="mySearchField" promptText="Rechercher une reclamation..." HBox.hgrow="ALWAYS" styleClass="input-control" />
                                 <ComboBox fx:id="myStatutFilter" promptText="Filtrer par statut" prefWidth="230" styleClass="input-control" />
                             </HBox>
+
+
 
                             <!-- Placeholder: structure prête pour une liste filtrée + détails/réponses -->
                             <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS" styleClass="artist-scroll">

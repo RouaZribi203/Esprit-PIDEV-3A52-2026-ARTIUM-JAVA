@@ -1,5 +1,5 @@
 /* Cache les barres de défilement tout en gardant le scroll actif */
-.scroll-bar:horizontal, 
+.scroll-bar:horizontal,
 .scroll-bar:vertical {
     -fx-opacity: 0;
     -fx-pref-width: 0;
@@ -298,8 +298,8 @@
     -fx-border-color: #bcc6d8;
 }
 
-.avatar-menu > .arrow-button,
-.avatar-menu > .arrow-button > .arrow {
+.avatar-menu>.arrow-button,
+.avatar-menu>.arrow-button>.arrow {
     -fx-padding: 0;
     -fx-background-insets: 0;
     -fx-background-color: transparent;
@@ -311,7 +311,7 @@
     -fx-padding: 9 14 9 14;
 }
 
-.context-menu .menu-item.avatar-dropdown-item > .label {
+.context-menu .menu-item.avatar-dropdown-item>.label {
     -fx-text-fill: #243146;
     -fx-font-size: 13px;
     -fx-font-weight: 700;
@@ -322,7 +322,7 @@
     -fx-background-color: #eef2ff;
 }
 
-.context-menu .menu-item#logoutMenuItem > .label {
+.context-menu .menu-item#logoutMenuItem>.label {
     -fx-text-fill: #a6324a;
 }
 
@@ -337,7 +337,7 @@
 }
 
 .artist-scroll,
-.artist-scroll > .viewport {
+.artist-scroll>.viewport {
     -fx-background-color: transparent;
 }
 
@@ -688,7 +688,7 @@
 }
 
 .artist-events-scroll,
-.artist-events-scroll > .viewport {
+.artist-events-scroll>.viewport {
     -fx-background-color: transparent;
 }
 
@@ -936,7 +936,7 @@
 }
 
 .oeuvres-feed-scroll,
-.oeuvres-feed-scroll > .viewport {
+.oeuvres-feed-scroll>.viewport {
     -fx-background-color: transparent;
 }
 
@@ -1047,7 +1047,7 @@
 }
 
 .oeuvres-feed-scroll,
-.oeuvres-feed-scroll > .viewport {
+.oeuvres-feed-scroll>.viewport {
     -fx-background-color: transparent;
 }
 
@@ -1066,7 +1066,7 @@
 }
 
 .oeuvres-feed-scroll,
-.oeuvres-feed-scroll > .viewport {
+.oeuvres-feed-scroll>.viewport {
     -fx-background-color: transparent;
 }
 
@@ -1444,7 +1444,7 @@
     -fx-background-radius: 16;
     -fx-border-color: #e5e7eb;
     -fx-border-radius: 16;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 15, 0, 0, 4);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 15, 0, 0, 4);
 }
 
 .form-header {
@@ -1610,7 +1610,7 @@
     -fx-background-color: transparent;
 }
 
-.cards-scroll > .viewport {
+.cards-scroll>.viewport {
     -fx-background-color: transparent;
 }
 
@@ -1620,7 +1620,7 @@
     -fx-border-width: 0;
 }
 
-.form-scroll > .viewport {
+.form-scroll>.viewport {
     -fx-background-color: transparent;
 }
 
@@ -1742,7 +1742,7 @@
 }
 
 .users-scroll,
-.users-scroll > .viewport,
+.users-scroll>.viewport,
 .users-cards-grid {
     -fx-background-color: transparent;
 }
@@ -1823,4 +1823,3 @@
 .music-actions-menu .menu-item.music-actions-delete:hover {
     -fx-background-color: #fff1f2;
 }
-

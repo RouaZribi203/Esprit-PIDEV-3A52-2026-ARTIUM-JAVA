@@ -86,9 +86,14 @@
 }
 
 .form-validation-error {
-    -fx-text-fill: #c62828;
+    -fx-text-fill: #dc2626;
     -fx-font-size: 12px;
-    -fx-font-weight: 700;
+    -fx-font-weight: 500;
+    -fx-padding: 4 0 0 0;
+}
+
+Label.form-validation-error {
+    -fx-text-fill: #dc2626;
 }
 
 /* TextArea: forcer le fond/bordure sur le contenu interne */
@@ -127,6 +132,27 @@
 
 .btn-secondary:hover {
     -fx-background-color: #f3f4f6;
+}
+
+.type-filter-btn {
+    -fx-background-color: #e9ecef;
+    -fx-text-fill: #243146;
+    -fx-border-color: #cfd5dc;
+    -fx-border-radius: 999;
+    -fx-background-radius: 999;
+    -fx-font-weight: 700;
+    -fx-padding: 8 18;
+    -fx-cursor: hand;
+}
+
+.type-filter-btn:hover {
+    -fx-background-color: #dde2e8;
+}
+
+.type-filter-btn.type-filter-active {
+    -fx-background-color: #d9d8ff;
+    -fx-text-fill: #2f2ccf;
+    -fx-border-color: #a9b1ff;
 }
 
 /* -------- Etat vide / infos -------- */

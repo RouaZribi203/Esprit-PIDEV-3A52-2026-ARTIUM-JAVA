@@ -17,8 +17,10 @@ import javafx.scene.layout.VBox;
 import javafx.geometry.Pos;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.FileChooser;
 import utils.UserSession;
 
+import java.io.File;
 import java.net.URL;
 import java.sql.SQLDataException;
 import java.text.Normalizer;
@@ -29,6 +31,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import java.awt.Desktop;
 
 /**
  * Amateur reclamations page: same behavior as the artist reclamation page
@@ -46,6 +51,11 @@ public class ReclamationsController implements Initializable {
 	@FXML
 	private TextArea descriptionArea;
 
+	@FXML
+	private Label sendValidationLabel;
+	@FXML
+	private Label selectedAttachmentLabel;
+
 	// My reclamations tab
 	@FXML
 	private VBox myReclamationsContainer;
@@ -58,12 +68,27 @@ public class ReclamationsController implements Initializable {
 
 	@FXML
 	private ComboBox<String> myStatutFilter;
+	@FXML
+	private Button typeFilterAll;
+	@FXML
+	private Button typeFilterPayment;
+	@FXML
+	private Button typeFilterWork;
+	@FXML
+	private Button typeFilterEvent;
+	@FXML
+	private Button typeFilterAccount;
 
 	private final ReclamationService reclamationService = new ReclamationService();
 	private final List<Reclamation> myAll = new ArrayList<>();
 	private Integer currentUserId;
 
 	private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.FRENCH);
+	private static final int MIN_DESCRIPTION_LEN = 10;
+	private static final int MAX_DESCRIPTION_LEN = 500;
+	private static final long MAX_ATTACHMENT_SIZE_BYTES = 5 * 1024 * 1024;
+	private String selectedTypeFilter = null;
+	private File selectedAttachmentFile;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -94,6 +119,14 @@ public class ReclamationsController implements Initializable {
 		if (mySearchField != null) {
 			mySearchField.textProperty().addListener((obs, o, n) -> applyMyFilters());
 		}
+		if (typeCombo != null) {
+			typeCombo.valueProperty().addListener((obs, o, n) -> clearSendValidation());
+		}
+		if (descriptionArea != null) {
+			descriptionArea.textProperty().addListener((obs, o, n) -> clearSendValidation());
+		}
+		clearAttachmentSelection();
+		updateTypeFilterButtons(typeFilterAll);
 
 		refreshMyReclamations();
 	}
@@ -106,25 +139,68 @@ public class ReclamationsController implements Initializable {
 		if (descriptionArea != null) {
 			descriptionArea.clear();
 		}
+		clearAttachmentSelection();
+		clearSendValidation();
+	}
+
+	@FXML
+	private void onChooseAttachment(ActionEvent event) {
+		FileChooser chooser = new FileChooser();
+		chooser.setTitle("Choisir une piece jointe");
+		chooser.getExtensionFilters().add(
+				new FileChooser.ExtensionFilter("Images et PDF", "*.png", "*.jpg", "*.jpeg", "*.pdf")
+		);
+
+		File chosen = chooser.showOpenDialog(descriptionArea == null || descriptionArea.getScene() == null
+				? null
+				: descriptionArea.getScene().getWindow());
+		if (chosen == null) {
+			return;
+		}
+
+		String error = validateAttachment(chosen);
+		if (error != null) {
+			showSendValidation(error);
+			return;
+		}
+
+		selectedAttachmentFile = chosen;
+		updateAttachmentLabel();
+		clearSendValidation();
+	}
+
+	@FXML
+	private void onClearAttachment(ActionEvent event) {
+		clearAttachmentSelection();
+		clearSendValidation();
 	}
 
 	@FXML
 	private void onSend(ActionEvent event) {
+		clearSendValidation();
 		String type = typeCombo == null ? null : typeCombo.getValue();
-		String description = descriptionArea == null || descriptionArea.getText() == null ? "" : descriptionArea.getText().trim();
-		String descriptionNoSpaces = description.replaceAll("\\s+", "");
+		String descriptionRaw = descriptionArea == null || descriptionArea.getText() == null ? "" : descriptionArea.getText();
+		String description = descriptionRaw.trim();
 
 		if (type == null || type.isBlank()) {
-			showWarning("Champs obligatoire", "Veuillez sélectionner un type.");
+			showSendValidation("Veuillez selectionner un type.");
 			return;
 		}
-		if (description.isBlank()) {
-			showWarning("Champs obligatoire", "Veuillez saisir une description.");
+		if (isBlankOrTooShort(description)) {
+			showSendValidation("La reclamation doit contenir au moins " + MIN_DESCRIPTION_LEN + " caracteres.");
 			return;
 		}
-		if (descriptionNoSpaces.length() < 10) {
-			showWarning("Description trop courte", "La réclamation doit contenir au moins 10 caractères.");
+		if (isTooLong(descriptionRaw)) {
+			showSendValidation("La description ne peut pas depasser " + MAX_DESCRIPTION_LEN + " caracteres.");
 			return;
+		}
+
+		if (selectedAttachmentFile != null) {
+			String attachmentError = validateAttachment(selectedAttachmentFile);
+			if (attachmentError != null) {
+				showSendValidation(attachmentError);
+				return;
+			}
 		}
 
 		if (currentUserId == null) {
@@ -140,13 +216,24 @@ public class ReclamationsController implements Initializable {
 		r.setStatut("Non traite");
 		r.setDateCreation(now);
 		r.setUpdatedAt(now);
-		r.setFileName(null);
+		r.setFileName(selectedAttachmentFile == null ? null : selectedAttachmentFile.getAbsolutePath());
 		r.setUserId(userId);
 
 		try {
 			reclamationService.add(r);
+			
+			// Envoi d'un email à l'administrateur
+			entities.User currentUser = utils.UserSession.getCurrentUser();
+			String userName = currentUser != null ? currentUser.getPrenom() + " " + currentUser.getNom() : "Inconnu (ID: " + userId + ")";
+			String emailSubject = "Nouvelle réclamation (" + type + ")";
+			String emailContent = "L'utilisateur " + userName + " a soumis une nouvelle réclamation.\n\n"
+					+ "Type: " + type + "\n"
+					+ "Description: \n" + description;
+			utils.EmailUtil.sendEmailToAdmin(emailSubject, emailContent);
+			
 			showInfo("Réclamation envoyée", "Votre réclamation a été envoyée avec succès.");
 			onReset(event);
+			clearSendValidation();
 			refreshMyReclamations();
 
 			// Switch to "Mes Réclamations" after send
@@ -202,6 +289,10 @@ public class ReclamationsController implements Initializable {
 					if (statutSelNorm.contains("traite") && !statutSelNorm.contains("non")) return isTraite;
 					if (statutSelNorm.contains("non")) return isNon;
 					return true;
+				})
+				.filter(r -> {
+					if (selectedTypeFilter == null) return true;
+					return normalize(r.getType()).equals(normalize(selectedTypeFilter));
 				})
 				.sorted((a, b) -> {
 					int ia = a.getId() == null ? 0 : a.getId();
@@ -274,11 +365,13 @@ public class ReclamationsController implements Initializable {
 	private void initCardMenu(Button dotsButton, Reclamation r) {
 		ContextMenu menu = new ContextMenu();
 
+		MenuItem viewDetails = new MenuItem("Voir détails");
 		MenuItem viewReplies = new MenuItem("Voir réponses");
 		MenuItem edit = new MenuItem("Modifier");
 		MenuItem delete = new MenuItem("Supprimer");
-		menu.getItems().addAll(viewReplies, edit, new SeparatorMenuItem(), delete);
+		menu.getItems().addAll(viewDetails, viewReplies, edit, new SeparatorMenuItem(), delete);
 
+		viewDetails.setOnAction(e -> onViewDetails(r));
 		viewReplies.setOnAction(e -> onViewReplies(r));
 		edit.setOnAction(e -> onEditReclamation(r));
 		delete.setOnAction(e -> onDeleteReclamation(r));
@@ -312,27 +405,247 @@ public class ReclamationsController implements Initializable {
 		}
 	}
 
-	private void onEditReclamation(Reclamation r) {
-		TextArea area = new TextArea(r.getTexte() == null ? "" : r.getTexte());
-		area.setWrapText(true);
-		area.setPrefRowCount(8);
+	private void onViewDetails(Reclamation r) {
+		Dialog<ButtonType> dialog = new Dialog<>();
+		dialog.setTitle("Détails de la réclamation");
+		dialog.setHeaderText("Réclamation #" + (r.getId() == null ? "-" : r.getId()));
 
+		VBox content = new VBox(10);
+		content.setPadding(new javafx.geometry.Insets(15));
+		content.setStyle("-fx-border-color: #e0e0e0; -fx-border-radius: 5;");
+
+		// ID
+		HBox idBox = createDetailRow("ID", String.valueOf(r.getId() == null ? "-" : r.getId()));
+		content.getChildren().add(idBox);
+
+		// Type
+		HBox typeBox = createDetailRow("Type", r.getType() == null ? "-" : r.getType());
+		content.getChildren().add(typeBox);
+
+		// Statut
+		HBox statutBox = createDetailRow("Statut", r.getStatut() == null ? "-" : r.getStatut());
+		content.getChildren().add(statutBox);
+
+		// Date création
+		String dateCreation = r.getDateCreation() == null ? "-" : r.getDateCreation().format(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm", Locale.FRENCH));
+		HBox dateCreationBox = createDetailRow("Date de création", dateCreation);
+		content.getChildren().add(dateCreationBox);
+
+		// Date mise à jour
+		String dateUpdate = r.getUpdatedAt() == null ? "-" : r.getUpdatedAt().format(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm", Locale.FRENCH));
+		HBox dateUpdateBox = createDetailRow("Dernière modification", dateUpdate);
+		content.getChildren().add(dateUpdateBox);
+
+		// Fichier joint avec visualisation
+		if (r.getFileName() != null && !r.getFileName().isBlank()) {
+			File attachmentFile = new File(r.getFileName());
+			if (attachmentFile.exists()) {
+				VBox fileBox = new VBox(5);
+				Label fileLabel = new Label("Pièce jointe");
+				fileLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 12;");
+				fileBox.getChildren().add(fileLabel);
+
+				String fileName = attachmentFile.getName().toLowerCase(Locale.ROOT);
+				
+				// Pour les images : affichage direct
+				if (fileName.endsWith(".png") || fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) {
+					try {
+						Image image = new Image(attachmentFile.toURI().toString());
+						ImageView imageView = new ImageView(image);
+						imageView.setPreserveRatio(true);
+						imageView.setFitWidth(300);
+						imageView.setFitHeight(300);
+						fileBox.getChildren().add(imageView);
+					} catch (Exception e) {
+						fileBox.getChildren().add(new Label("Erreur lors du chargement de l'image"));
+					}
+				} 
+				// Pour les PDFs : bouton d'ouverture
+				else if (fileName.endsWith(".pdf")) {
+					HBox pdfBox = new HBox(10);
+					Label pdfNameLabel = new Label(attachmentFile.getName());
+					pdfNameLabel.setStyle("-fx-text-fill: #333;");
+					
+					Button openButton = new Button("Ouvrir le PDF");
+					openButton.setStyle("-fx-padding: 8; -fx-font-size: 11;");
+					openButton.setOnAction(e -> openFile(attachmentFile));
+					
+					pdfBox.getChildren().addAll(pdfNameLabel, openButton);
+					fileBox.getChildren().add(pdfBox);
+				}
+				
+				content.getChildren().add(fileBox);
+			} else {
+				HBox fileBox = createDetailRow("Pièce jointe", "Fichier non trouvé : " + r.getFileName());
+				content.getChildren().add(fileBox);
+			}
+		} else {
+			HBox fileBox = createDetailRow("Pièce jointe", "Aucun");
+			content.getChildren().add(fileBox);
+		}
+
+		// Description (full text)
+		VBox descBox = new VBox(5);
+		Label descLabel = new Label("Description");
+		descLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 12;");
+		TextArea descArea = new TextArea(r.getTexte() == null ? "" : r.getTexte());
+		descArea.setWrapText(true);
+		descArea.setPrefRowCount(6);
+		descArea.setEditable(false);
+		descArea.setStyle("-fx-control-inner-background: #f5f5f5; -fx-text-fill: #333;");
+		descBox.getChildren().addAll(descLabel, descArea);
+		VBox.setVgrow(descArea, Priority.ALWAYS);
+		content.getChildren().add(descBox);
+
+		ScrollPane scrollPane = new ScrollPane(content);
+		scrollPane.setFitToWidth(true);
+		scrollPane.setPrefHeight(500);
+
+		dialog.getDialogPane().setContent(scrollPane);
+		dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+		dialog.showAndWait();
+	}
+
+	private void openFile(File file) {
+		try {
+			if (Desktop.isDesktopSupported()) {
+				Desktop.getDesktop().open(file);
+			} else {
+				showError("Erreur", "Impossible d'ouvrir le fichier sur ce système.");
+			}
+		} catch (Exception e) {
+			showError("Erreur", "Impossible d'ouvrir le fichier: " + e.getMessage());
+		}
+	}
+
+	private HBox createDetailRow(String label, String value) {
+		HBox box = new HBox(10);
+		box.setStyle("-fx-padding: 8; -fx-border-color: #f0f0f0; -fx-border-width: 0 0 1 0;");
+
+		Label labelNode = new Label(label + ":");
+		labelNode.setStyle("-fx-font-weight: bold; -fx-min-width: 150; -fx-text-fill: #666;");
+		Label valueNode = new Label(value == null ? "-" : value);
+		valueNode.setStyle("-fx-text-fill: #333; -fx-wrap-text: true;");
+		valueNode.setWrapText(true);
+
+		box.getChildren().addAll(labelNode, valueNode);
+		HBox.setHgrow(valueNode, Priority.ALWAYS);
+		return box;
+	}
+
+	private void onEditReclamation(Reclamation r) {
 		Dialog<ButtonType> dialog = new Dialog<>();
 		dialog.setTitle("Modifier réclamation");
-		dialog.setHeaderText("Modifier la description");
-		dialog.getDialogPane().setContent(area);
+		dialog.setHeaderText("Modifier la réclamation #" + (r.getId() == null ? "-" : r.getId()));
+
+		VBox content = new VBox(10);
+		content.setPadding(new javafx.geometry.Insets(15));
+
+		// Description
+		VBox descBox = new VBox(5);
+		Label descLabel = new Label("Description");
+		descLabel.setStyle("-fx-font-weight: bold;");
+		TextArea descArea = new TextArea(r.getTexte() == null ? "" : r.getTexte());
+		descArea.setWrapText(true);
+		descArea.setPrefRowCount(8);
+		descArea.setStyle("-fx-font-size: 12;");
+		descBox.getChildren().addAll(descLabel, descArea);
+		VBox.setVgrow(descArea, Priority.ALWAYS);
+		content.getChildren().add(descBox);
+
+		// Séparateur visuel
+		Separator separator = new Separator();
+		content.getChildren().add(separator);
+
+		// Pièce jointe
+		VBox attachmentBox = new VBox(8);
+		Label attachmentLabel = new Label("Pièce jointe (image ou PDF)");
+		attachmentLabel.setStyle("-fx-font-weight: bold;");
+
+		File currentAttachment = r.getFileName() != null && !r.getFileName().isBlank() ? new File(r.getFileName()) : null;
+		Label selectedAttachmentLabel = new Label(
+			currentAttachment != null && currentAttachment.exists()
+				? "Fichier actuel: " + currentAttachment.getName()
+				: "Aucun fichier"
+		);
+		selectedAttachmentLabel.setStyle("-fx-text-fill: #666;");
+
+		HBox attachmentButtonBox = new HBox(8);
+		attachmentButtonBox.setAlignment(Pos.CENTER_LEFT);
+
+		Button chooseButton = new Button("Choisir/Modifier un fichier");
+		chooseButton.setStyle("-fx-padding: 8;");
+
+		Button removeButton = new Button("Retirer la pièce jointe");
+		removeButton.setStyle("-fx-padding: 8;");
+		removeButton.setDisable(currentAttachment == null || !currentAttachment.exists());
+
+		// État pour le fichier sélectionné lors de l'édition
+		final File[] editingAttachmentFile = {currentAttachment};
+
+		chooseButton.setOnAction(e -> {
+			FileChooser chooser = new FileChooser();
+			chooser.setTitle("Choisir une pièce jointe");
+			chooser.getExtensionFilters().add(
+				new FileChooser.ExtensionFilter("Images et PDF", "*.png", "*.jpg", "*.jpeg", "*.pdf")
+			);
+			
+			File chosen = chooser.showOpenDialog(dialog.getOwner());
+			if (chosen != null) {
+				String error = validateAttachment(chosen);
+				if (error != null) {
+					showWarning("Fichier invalide", error);
+				} else {
+					editingAttachmentFile[0] = chosen;
+					selectedAttachmentLabel.setText("Nouveau fichier: " + chosen.getName());
+					removeButton.setDisable(false);
+				}
+			}
+		});
+
+		removeButton.setOnAction(e -> {
+			editingAttachmentFile[0] = null;
+			selectedAttachmentLabel.setText("Aucun fichier");
+			removeButton.setDisable(true);
+		});
+
+		attachmentButtonBox.getChildren().addAll(chooseButton, removeButton);
+		attachmentBox.getChildren().addAll(attachmentLabel, selectedAttachmentLabel, attachmentButtonBox);
+		content.getChildren().add(attachmentBox);
+
+		ScrollPane scrollPane = new ScrollPane(content);
+		scrollPane.setFitToWidth(true);
+		scrollPane.setPrefHeight(400);
+
+		dialog.getDialogPane().setContent(scrollPane);
 		dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
 
 		dialog.showAndWait().ifPresent(bt -> {
 			if (bt != ButtonType.OK) return;
-			String newText = area.getText() == null ? "" : area.getText().trim();
+
+			String newTextRaw = descArea.getText() == null ? "" : descArea.getText();
+			String newText = newTextRaw.trim();
 			String noSpaces = newText.replaceAll("\\s+", "");
-			if (newText.isBlank() || noSpaces.length() < 10) {
+			if (newText.isBlank() || noSpaces.length() < MIN_DESCRIPTION_LEN) {
 				showWarning("Modification refusée", "Veuillez saisir une description d'au moins 10 caractères.");
 				return;
 			}
+			if (isTooLong(newTextRaw)) {
+				showWarning("Modification refusée", "La description ne peut pas depasser " + MAX_DESCRIPTION_LEN + " caracteres.");
+				return;
+			}
+
+			if (editingAttachmentFile[0] != null) {
+				String attachmentError = validateAttachment(editingAttachmentFile[0]);
+				if (attachmentError != null) {
+					showWarning("Fichier invalide", attachmentError);
+					return;
+				}
+			}
+
 			try {
 				r.setTexte(newText);
+				r.setFileName(editingAttachmentFile[0] == null ? null : editingAttachmentFile[0].getAbsolutePath());
 				r.setUpdatedAt(LocalDateTime.now());
 				reclamationService.update(r);
 				refreshMyReclamations();
@@ -419,6 +732,120 @@ public class ReclamationsController implements Initializable {
 		a.setHeaderText(header);
 		a.setContentText(message);
 		a.showAndWait();
+	}
+
+	private static boolean isBlankOrTooShort(String value) {
+		String v = value == null ? "" : value.trim();
+		if (v.isEmpty()) return true;
+		// on compte les caractères hors espaces pour éviter "          "
+		String noSpaces = v.replaceAll("\\s+", "");
+		return noSpaces.length() < MIN_DESCRIPTION_LEN;
+	}
+
+	private static boolean isTooLong(String value) {
+		String v = value == null ? "" : value.trim();
+		return v.length() > MAX_DESCRIPTION_LEN;
+	}
+
+	private void showSendValidation(String message) {
+		if (sendValidationLabel == null) {
+			showWarning("Attention", message);
+			return;
+		}
+		sendValidationLabel.setText(message);
+		sendValidationLabel.setVisible(true);
+		sendValidationLabel.setManaged(true);
+	}
+
+	@FXML
+	private void onTypeFilterAll(ActionEvent event) {
+		selectedTypeFilter = null;
+		updateTypeFilterButtons(typeFilterAll);
+		applyMyFilters();
+	}
+
+	@FXML
+	private void onTypeFilterPayment(ActionEvent event) {
+		selectedTypeFilter = "Paiement";
+		updateTypeFilterButtons(typeFilterPayment);
+		applyMyFilters();
+	}
+
+	@FXML
+	private void onTypeFilterWork(ActionEvent event) {
+		selectedTypeFilter = "Oeuvre";
+		updateTypeFilterButtons(typeFilterWork);
+		applyMyFilters();
+	}
+
+	@FXML
+	private void onTypeFilterEvent(ActionEvent event) {
+		selectedTypeFilter = "Evenement";
+		updateTypeFilterButtons(typeFilterEvent);
+		applyMyFilters();
+	}
+
+	@FXML
+	private void onTypeFilterAccount(ActionEvent event) {
+		selectedTypeFilter = "Compte";
+		updateTypeFilterButtons(typeFilterAccount);
+		applyMyFilters();
+	}
+
+	private void updateTypeFilterButtons(Button activeButton) {
+		if (typeFilterAll != null) typeFilterAll.getStyleClass().remove("type-filter-active");
+		if (typeFilterPayment != null) typeFilterPayment.getStyleClass().remove("type-filter-active");
+		if (typeFilterWork != null) typeFilterWork.getStyleClass().remove("type-filter-active");
+		if (typeFilterEvent != null) typeFilterEvent.getStyleClass().remove("type-filter-active");
+		if (typeFilterAccount != null) typeFilterAccount.getStyleClass().remove("type-filter-active");
+
+		if (activeButton != null && !activeButton.getStyleClass().contains("type-filter-active")) {
+			activeButton.getStyleClass().add("type-filter-active");
+		}
+	}
+
+	private void clearSendValidation() {
+		if (sendValidationLabel == null) {
+			return;
+		}
+		sendValidationLabel.setText("");
+		sendValidationLabel.setVisible(false);
+		sendValidationLabel.setManaged(false);
+	}
+
+	private void clearAttachmentSelection() {
+		selectedAttachmentFile = null;
+		updateAttachmentLabel();
+	}
+
+	private void updateAttachmentLabel() {
+		if (selectedAttachmentLabel == null) {
+			return;
+		}
+		selectedAttachmentLabel.setText(selectedAttachmentFile == null
+				? "Aucun fichier selectionne"
+				: selectedAttachmentFile.getName());
+	}
+
+	private String validateAttachment(File file) {
+		if (file == null) {
+			return null;
+		}
+		if (!file.exists() || !file.isFile()) {
+			return "Le fichier selectionne est introuvable.";
+		}
+		String fileName = file.getName().toLowerCase(Locale.ROOT);
+		boolean allowed = fileName.endsWith(".png")
+				|| fileName.endsWith(".jpg")
+				|| fileName.endsWith(".jpeg")
+				|| fileName.endsWith(".pdf");
+		if (!allowed) {
+			return "Formats autorises: PNG, JPG, JPEG, PDF.";
+		}
+		if (file.length() > MAX_ATTACHMENT_SIZE_BYTES) {
+			return "Le fichier ne doit pas depasser 5 Mo.";
+		}
+		return null;
 	}
 }
 

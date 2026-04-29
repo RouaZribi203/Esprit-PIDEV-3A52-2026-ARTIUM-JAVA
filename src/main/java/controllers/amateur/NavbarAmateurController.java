@@ -314,6 +314,7 @@ public class NavbarAmateurController {
         } catch (IOException e) {
             throw new IllegalStateException("Failed to switch scene: " + fxmlPath, e);
         }
-
     }*/
 }
+
+
