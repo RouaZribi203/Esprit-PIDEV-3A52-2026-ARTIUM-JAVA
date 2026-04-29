@@ -43,6 +43,7 @@
 
         <HBox alignment="CENTER_LEFT" spacing="10.0">
             <TextField fx:id="searchField" promptText="Rechercher reclamation (texte, utilisateur)" HBox.hgrow="ALWAYS" styleClass="reclamation-search-field" />
+            <ComboBox fx:id="dateFilter" promptText="Toutes les dates" prefWidth="180" styleClass="reclamation-filter-combo" />
             <ComboBox fx:id="statutFilter" promptText="Tous les statuts" prefWidth="180" styleClass="reclamation-filter-combo" />
         </HBox>
 

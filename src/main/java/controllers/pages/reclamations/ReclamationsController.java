@@ -1,7 +1,9 @@
 package controllers.pages.reclamations;
 
 import services.ReclamationService;
+import services.UserService;
 import entities.Reclamation;
+import entities.User;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -20,6 +22,7 @@ public class ReclamationsController {
 
     @FXML private TextField searchField;
     @FXML private ComboBox<String> statutFilter;
+    @FXML private ComboBox<String> dateFilter;
 
     @FXML private ToggleGroup typeTabsGroup;
     @FXML private ToggleButton tabAll;
@@ -37,6 +40,7 @@ public class ReclamationsController {
 
     private final ReclamationService reclamationService = new ReclamationService();
     private final services.ReponseService reponseService = new services.ReponseService();
+    private final services.UserService userService = new services.UserService();
 
     private final List<Reclamation> all = new ArrayList<>();
 
@@ -46,6 +50,12 @@ public class ReclamationsController {
     public void initialize() {
         statutFilter.getItems().setAll("Tous", "Traitée", "Non traitée");
         statutFilter.getSelectionModel().selectFirst();
+        
+        if (dateFilter != null) {
+            dateFilter.getItems().setAll("Toutes les dates", "Aujourd'hui", "Ce mois", "Cette année");
+            dateFilter.getSelectionModel().selectFirst();
+            dateFilter.valueProperty().addListener((obs, o, n) -> applySearchAndFilter());
+        }
 
         searchField.textProperty().addListener((obs, o, n) -> applySearchAndFilter());
         statutFilter.valueProperty().addListener((obs, o, n) -> applySearchAndFilter());
@@ -91,11 +101,13 @@ public class ReclamationsController {
         String q = safe(searchField.getText()).trim().toLowerCase(Locale.ROOT);
         String selectedStatut = statutFilter.getValue();
         String selectedType = getSelectedType();
+        String selectedDate = dateFilter != null ? dateFilter.getValue() : "Toutes les dates";
 
         List<Reclamation> filtered = all.stream()
                 .filter(r -> matchesQuery(r, q))
                 .filter(r -> matchesStatut(r, selectedStatut))
                 .filter(r -> matchesType(r, selectedType))
+                .filter(r -> matchesDate(r, selectedDate))
                 .sorted(Comparator.comparing((Reclamation r) -> r.getId() == null ? 0 : r.getId()).reversed())
                 .collect(Collectors.toList());
 
@@ -202,14 +214,44 @@ public class ReclamationsController {
         return normalize(r.getType()).contains(normalize(selected));
     }
 
+    private boolean matchesDate(Reclamation r, String selected) {
+        if (selected == null || selected.equals("Toutes les dates")) return true;
+        if (r.getDateCreation() == null) return false;
+
+        java.time.LocalDate dateCreation = r.getDateCreation().toLocalDate();
+        java.time.LocalDate now = java.time.LocalDate.now();
+
+        switch (selected) {
+            case "Aujourd'hui":
+                return dateCreation.isEqual(now);
+            case "Ce mois":
+                return dateCreation.getYear() == now.getYear() && dateCreation.getMonthValue() == now.getMonthValue();
+            case "Cette année":
+                return dateCreation.getYear() == now.getYear();
+            default:
+                return true;
+        }
+    }
+
     private String buildDateText(Reclamation r) {
         return r.getDateCreation() != null ? r.getDateCreation().format(DATE_FMT) : "";
     }
 
     private String buildUserText(Reclamation r) {
-        // pas de UserService dans le projet -> affichage fallback
-        return r.getUserId() != null ? "User #" + r.getUserId() : "-";
-    }
+        UserService userService = new UserService();
+
+        User user = null;
+
+        try {
+            user = userService.getById(r.getUserId());
+        } catch (SQLDataException e) {
+            e.printStackTrace();
+        }
+
+        return (user != null && user.getNom() != null)
+                ? user.getNom() + " " + user.getPrenom()
+                : "-";
+            }
 
     private boolean contains(String value, String search) {
         return value != null && value.toLowerCase(Locale.ROOT).contains(search);

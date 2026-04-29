@@ -28,9 +28,9 @@ public class UserService implements Iservice<User> {
     private static final int HASH_ITERATIONS = 65536;
     private static final int HASH_LENGTH = 256;
     private static final int SALT_LENGTH = 16;
-    private static final String[] ID_COLUMNS = {"id", "id_user"};
-    private static final String[] SPECIALITE_COLUMNS = {"specialite", "specailite"};
-    private static final String[] CENTRE_INTERET_COLUMNS = {"centre_interet", "centre_iteret"};
+    private static final String[] ID_COLUMNS = { "id", "id_user" };
+    private static final String[] SPECIALITE_COLUMNS = { "specialite", "specailite" };
+    private static final String[] CENTRE_INTERET_COLUMNS = { "centre_interet", "centre_iteret" };
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
     private final Connection connection;
@@ -139,7 +139,8 @@ public class UserService implements Iservice<User> {
     private String getInsertUserSql() {
         return "INSERT INTO `user` " +
                 "(`nom`, `prenom`, `date_naissance`, `email`, `mdp`, `role`, `statut`, `date_inscription`, " +
-                "`num_tel`, `ville`, `biographie`, `" + specialiteColumn + "`, `" + centreInteretColumn + "`, `photo_reference_path`, `photo_profil`) " +
+                "`num_tel`, `ville`, `biographie`, `" + specialiteColumn + "`, `" + centreInteretColumn
+                + "`, `photo_reference_path`, `photo_profil`) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     }
 
@@ -158,7 +159,8 @@ public class UserService implements Iservice<User> {
         user.setMdp(rs.getString("mdp"));
         user.setRole(rs.getString("role"));
         user.setStatut(rs.getString("statut"));
-        user.setDateInscription(rs.getDate("date_inscription") == null ? null : rs.getDate("date_inscription").toLocalDate());
+        user.setDateInscription(
+                rs.getDate("date_inscription") == null ? null : rs.getDate("date_inscription").toLocalDate());
         user.setNumTel(rs.getString("num_tel"));
         user.setVille(rs.getString("ville"));
         user.setBiographie(rs.getString("biographie"));
@@ -220,11 +222,14 @@ public class UserService implements Iservice<User> {
 
     private void validateSchemaColumns() throws SQLDataException {
         List<String> missingSchemaColumns = new ArrayList<>();
-        if (specialiteColumn == null) missingSchemaColumns.add("specialite/specailite");
-        if (centreInteretColumn == null) missingSchemaColumns.add("centre_interet/centre_iteret");
+        if (specialiteColumn == null)
+            missingSchemaColumns.add("specialite/specailite");
+        if (centreInteretColumn == null)
+            missingSchemaColumns.add("centre_interet/centre_iteret");
 
         if (!missingSchemaColumns.isEmpty()) {
-            throw new SQLDataException("Colonnes introuvables dans table user: " + String.join(", ", missingSchemaColumns));
+            throw new SQLDataException(
+                    "Colonnes introuvables dans table user: " + String.join(", ", missingSchemaColumns));
         }
     }
 
@@ -255,16 +260,26 @@ public class UserService implements Iservice<User> {
     private void validateRequiredFields(User user) throws SQLDataException {
         List<String> missingFields = new ArrayList<>();
 
-        if (isBlank(user.getNom())) missingFields.add("nom");
-        if (isBlank(user.getPrenom())) missingFields.add("prenom");
-        if (user.getDateNaissance() == null) missingFields.add("date_naissance");
-        if (isBlank(user.getEmail())) missingFields.add("email");
-        if (isBlank(user.getMdp())) missingFields.add("mdp");
-        if (isBlank(user.getRole())) missingFields.add("role");
-        if (isBlank(user.getStatut())) missingFields.add("statut");
-        if (user.getDateInscription() == null) missingFields.add("date_inscription");
-        if (isBlank(user.getNumTel())) missingFields.add("num_tel");
-        if (isBlank(user.getVille())) missingFields.add("ville");
+        if (isBlank(user.getNom()))
+            missingFields.add("nom");
+        if (isBlank(user.getPrenom()))
+            missingFields.add("prenom");
+        if (user.getDateNaissance() == null)
+            missingFields.add("date_naissance");
+        if (isBlank(user.getEmail()))
+            missingFields.add("email");
+        if (isBlank(user.getMdp()))
+            missingFields.add("mdp");
+        if (isBlank(user.getRole()))
+            missingFields.add("role");
+        if (isBlank(user.getStatut()))
+            missingFields.add("statut");
+        if (user.getDateInscription() == null)
+            missingFields.add("date_inscription");
+        if (isBlank(user.getNumTel()))
+            missingFields.add("num_tel");
+        if (isBlank(user.getVille()))
+            missingFields.add("ville");
 
         if (!missingFields.isEmpty()) {
             throw new SQLDataException("Champs obligatoires manquants: " + String.join(", ", missingFields));
@@ -416,8 +431,9 @@ public class UserService implements Iservice<User> {
         ensureConnection();
 
         List<User> users = new ArrayList<>();
-        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM `user` ORDER BY `date_inscription` DESC");
-             ResultSet rs = ps.executeQuery()) {
+        try (PreparedStatement ps = connection
+                .prepareStatement("SELECT * FROM `user` ORDER BY `date_inscription` DESC");
+                ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 users.add(mapUser(rs));
             }
@@ -447,15 +463,24 @@ public class UserService implements Iservice<User> {
 
     private void validateRequiredFieldsForUpdate(User user) throws SQLDataException {
         List<String> missingFields = new ArrayList<>();
-        if (isBlank(user.getNom())) missingFields.add("nom");
-        if (isBlank(user.getPrenom())) missingFields.add("prenom");
-        if (user.getDateNaissance() == null) missingFields.add("date_naissance");
-        if (isBlank(user.getEmail())) missingFields.add("email");
-        if (isBlank(user.getRole())) missingFields.add("role");
-        if (isBlank(user.getStatut())) missingFields.add("statut");
-        if (user.getDateInscription() == null) missingFields.add("date_inscription");
-        if (isBlank(user.getNumTel())) missingFields.add("num_tel");
-        if (isBlank(user.getVille())) missingFields.add("ville");
+        if (isBlank(user.getNom()))
+            missingFields.add("nom");
+        if (isBlank(user.getPrenom()))
+            missingFields.add("prenom");
+        if (user.getDateNaissance() == null)
+            missingFields.add("date_naissance");
+        if (isBlank(user.getEmail()))
+            missingFields.add("email");
+        if (isBlank(user.getRole()))
+            missingFields.add("role");
+        if (isBlank(user.getStatut()))
+            missingFields.add("statut");
+        if (user.getDateInscription() == null)
+            missingFields.add("date_inscription");
+        if (isBlank(user.getNumTel()))
+            missingFields.add("num_tel");
+        if (isBlank(user.getVille()))
+            missingFields.add("ville");
 
         if (!missingFields.isEmpty()) {
             throw new SQLDataException("Champs obligatoires manquants: " + String.join(", ", missingFields));
@@ -474,10 +499,3 @@ public class UserService implements Iservice<User> {
         }
     }
 }
-
-
-
-
-
-
-

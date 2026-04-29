@@ -5,18 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="correction blob oeuvre livre">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/MainFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/MainFX.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/NavbarAmateurController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/NavbarAmateurController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/ReclamationsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/ReclamationsController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/NavbarArtisteController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/NavbarArtisteController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/ReclamationsArtisteController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/ReclamationsArtisteController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationReplyDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationReplyDialogController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/services/OpenRouterReclamationReplyService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/OpenRouterReclamationReplyService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/artist-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/artist-theme.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationsController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/UserService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/pages/reclamations.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/pages/reclamations.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -158,7 +150,8 @@
       <workItem from="1776522849192" duration="6633000" />
       <workItem from="1776530552927" duration="6585000" />
       <workItem from="1776849339454" duration="5882000" />
-      <workItem from="1777397814161" duration="14034000" />
+      <workItem from="1777397814161" duration="16700000" />
+      <workItem from="1777454898749" duration="421000" />
     </task>
     <task id="LOCAL-00001" summary="corrections de blob">
       <option name="closed" value="true" />
