@@ -2,8 +2,10 @@ package controllers;
 
 import entities.CollectionOeuvre;
 import entities.Livre;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -13,9 +15,14 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
+import services.BookAutoFillService;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class LivreFormController {
 
@@ -49,10 +56,14 @@ public class LivreFormController {
     @FXML
     private Label validationErrorLabel;
 
+    @FXML
+    private Button autoFillButton;
+
     private Livre originalLivre;
     private Livre resultLivre;
     private String selectedImagePath;
     private String selectedPdfPath;
+    private final BookAutoFillService autoFillService = new BookAutoFillService();
 
     @FXML
     public void initialize() {
@@ -71,7 +82,7 @@ public class LivreFormController {
                 if (empty || item == null) {
                     setText(null);
                 } else {
-                    setText(item.getId() + " - " + item.getTitre());
+                    setText(item.getTitre());
                 }
             }
         });
@@ -131,6 +142,66 @@ public class LivreFormController {
 
     public Livre getResultLivre() {
         return resultLivre;
+    }
+
+    @FXML
+    private void onAutoFillClick() {
+        if (selectedPdfPath == null || selectedPdfPath.isEmpty()) {
+            showValidationError("Veuillez d'abord sélectionner un fichier PDF.");
+            return;
+        }
+
+        autoFillButton.setDisable(true);
+        autoFillButton.setText("✨ Analyse en cours...");
+        clearValidationError();
+
+        CompletableFuture.runAsync(() -> {
+            try {
+                File pdfFile = new File(selectedPdfPath);
+                String pdfText;
+                try (PDDocument document = PDDocument.load(pdfFile)) {
+                    PDFTextStripper stripper = new PDFTextStripper();
+                    // Extract only first 5 pages to avoid token limits and for faster processing
+                    stripper.setStartPage(1);
+                    stripper.setEndPage(Math.min(5, document.getNumberOfPages()));
+                    pdfText = stripper.getText(document);
+                }
+
+                autoFillService.extractBookData(pdfText)
+                    .thenAccept(data -> Platform.runLater(() -> {
+                        if (data.title != null && !data.title.isEmpty()) titreField.setText(data.title);
+                        if (data.category != null && !data.category.isEmpty()) categorieField.setText(data.category);
+                        if (data.description != null && !data.description.isEmpty()) descriptionArea.setText(data.description);
+                        
+                        autoFillButton.setDisable(false);
+                        autoFillButton.setText("✨ Générer automatiquement");
+                        showInfo("Succès", "Les informations du livre ont été extraites avec succès !");
+                    }))
+                    .exceptionally(ex -> {
+                        Platform.runLater(() -> {
+                            autoFillButton.setDisable(false);
+                            autoFillButton.setText("✨ Générer automatiquement");
+                            showValidationError("Erreur lors de l'auto-remplissage : " + ex.getMessage());
+                        });
+                        return null;
+                    });
+
+            } catch (IOException e) {
+                Platform.runLater(() -> {
+                    autoFillButton.setDisable(false);
+                    autoFillButton.setText("✨ Générer automatiquement");
+                    showValidationError("Erreur lors de la lecture du PDF : " + e.getMessage());
+                });
+            }
+        });
+    }
+
+    private void showInfo(String title, String content) {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
     @FXML

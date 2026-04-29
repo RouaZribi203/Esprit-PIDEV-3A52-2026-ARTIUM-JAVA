@@ -1,45 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.layout.Region?>
 
-<BorderPane xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.amateur.BookReaderController" style="-fx-background-color: #1e293b;">
-    <top>
-        <VBox alignment="CENTER" spacing="8.0" style="-fx-background-color: #0f172a;">
-            <padding>
-                <Insets bottom="16.0" left="24.0" right="24.0" top="16.0" />
-            </padding>
-            <Label fx:id="titleLabel" style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;" text="Lecteur de livre" />
-            <Label fx:id="subtitleLabel" style="-fx-text-fill: #94a3b8; -fx-font-size: 13px;" text="Lecture en cours." wrapText="true" />
-        </VBox>
-    </top>
-    <center>
-        <ScrollPane fitToWidth="true" fitToHeight="true" pannable="true" style="-fx-background-color: #1e293b;" BorderPane.alignment="CENTER">
-            <StackPane alignment="CENTER" style="-fx-background-color: #334155; -fx-padding: 20;">
-                <ImageView fx:id="pageImageView" smooth="true" pickOnBounds="true" preserveRatio="false" />
+<StackPane
+        fx:id="rootPane"
+        xmlns="http://javafx.com/javafx/20.0.2"
+        xmlns:fx="http://javafx.com/fxml/1"
+        fx:controller="controllers.amateur.BookReaderController"
+        style="-fx-background-color: black; -fx-padding: 0;">
+
+    <HBox fx:id="bookContainer" alignment="CENTER" spacing="0" StackPane.alignment="CENTER">
+
+        <!-- Left Page Area -->
+        <StackPane fx:id="leftPageArea" onMouseClicked="#onLeftPageClick" HBox.hgrow="ALWAYS">
+            <StackPane fx:id="leftPageWrapper" alignment="CENTER">
+                <ImageView fx:id="leftPageImage" pickOnBounds="true" preserveRatio="true"/>
+                <Label fx:id="leftPageNumber" visible="false"/>
             </StackPane>
-        </ScrollPane>
-    </center>
-    <bottom>
-        <VBox alignment="CENTER" spacing="12.0" style="-fx-background-color: #0f172a;">
-            <padding>
-                <Insets bottom="20.0" left="24.0" right="24.0" top="16.0" />
-            </padding>
-            <HBox spacing="16.0" alignment="CENTER">
-                <Button fx:id="prevButton" mnemonicParsing="false" onAction="#onPrev" style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 10 24; -fx-font-size: 14px; -fx-cursor: hand;" text="◄ Précédent" />
-                <Region prefWidth="40.0" />
-                <Button fx:id="nextButton" mnemonicParsing="false" onAction="#onNext" style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 10 24; -fx-font-size: 14px; -fx-cursor: hand;" text="Suivant ►" />
-            </HBox>
-            <Label fx:id="pageLabel" alignment="CENTER" style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;" text="Page 0 / 0" />
-        </VBox>
-    </bottom>
-</BorderPane>
+        </StackPane>
+
+        <!-- Right Page Area -->
+        <StackPane fx:id="rightPageArea" onMouseClicked="#onRightPageClick" HBox.hgrow="ALWAYS">
+            <StackPane fx:id="rightPageWrapper" alignment="CENTER">
+                <ImageView fx:id="rightPageImage" pickOnBounds="true" preserveRatio="true"/>
+                <Label fx:id="rightPageNumber" visible="false"/>
+            </StackPane>
+        </StackPane>
+
+    </HBox>
+
+    <!-- Invisible elements required by controller bindings -->
+    <StackPane fx:id="bookmarkRibbon" visible="false" managed="false"/>
+    <StackPane fx:id="controlsOverlay" visible="false" managed="false"/>
+    <StackPane fx:id="loadingOverlay" visible="false" managed="false" style="-fx-background-color: transparent;"/>
+    <Label fx:id="titleLabel" visible="false" managed="false"/>
+    <Label fx:id="pageLabel" visible="false" managed="false"/>
+    <Button fx:id="prevButton" visible="false" managed="false"/>
+    <Button fx:id="nextButton" visible="false" managed="false"/>
+    <Button fx:id="bookmarkButton" visible="false" managed="false"/>
+    <Button fx:id="exitButton" visible="false" managed="false"/>
+
+</StackPane>

@@ -7,6 +7,7 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.TilePane?>
@@ -19,29 +20,47 @@
             <padding>
                 <Insets bottom="20.0" left="24.0" right="24.0" top="24.0" />
             </padding>
-            <Label styleClass="page-title" text="Bibliothèque numérique" />
-            <HBox spacing="10.0">
-                <TextField fx:id="searchField" HBox.hgrow="ALWAYS" promptText="Titre ou catégorie" />
-                <Button mnemonicParsing="false" onAction="#onSearch" text="Recherche" />
-                <Button mnemonicParsing="false" onAction="#onRefresh" text="Rafraîchir" />
-                <ToggleButton fx:id="filterRentedToggle" mnemonicParsing="false" text="Mes locations" />
+            <HBox spacing="20.0" alignment="CENTER_LEFT">
+                <Label styleClass="page-title" text="Bibliothèque numérique" />
+                <HBox spacing="12.0" HBox.hgrow="ALWAYS" alignment="CENTER_RIGHT">
+                    <Label fx:id="badge1Icon" text="📚" style="-fx-font-size: 16; -fx-padding: 6 12; -fx-background-color: #eff6ff; -fx-border-color: #10b981; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: #10b981; -fx-font-weight: bold; -fx-cursor: hand;" />
+                    <Label fx:id="badge1Text" text="Livres numériques" style="-fx-font-size: 13; -fx-padding: 6 12; -fx-background-color: #eff6ff; -fx-border-color: #10b981; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: #10b981; -fx-font-weight: bold; -fx-cursor: hand;" />
+                    <Label fx:id="badge2Icon" text="⚡" style="-fx-font-size: 16; -fx-padding: 6 12; -fx-background-color: #fef3c7; -fx-border-color: #f59e0b; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: #f59e0b; -fx-font-weight: bold; -fx-cursor: hand;" />
+                    <Label fx:id="badge2Text" text="Accès immédiat" style="-fx-font-size: 13; -fx-padding: 6 12; -fx-background-color: #fef3c7; -fx-border-color: #f59e0b; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: #f59e0b; -fx-font-weight: bold; -fx-cursor: hand;" />
+                    <Label fx:id="badge3Icon" text="📖" style="-fx-font-size: 16; -fx-padding: 6 12; -fx-background-color: #dbeafe; -fx-border-color: #3b82f6; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: #3b82f6; -fx-font-weight: bold; -fx-cursor: hand;" />
+                    <Label fx:id="badge3Text" text="Louer &amp; Lire" style="-fx-font-size: 13; -fx-padding: 6 12; -fx-background-color: #dbeafe; -fx-border-color: #3b82f6; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: #3b82f6; -fx-font-weight: bold; -fx-cursor: hand;" />
+                </HBox>
             </HBox>
-            <HBox spacing="8.0">
-                <Label styleClass="badge-pill" text="Livres numériques" />
-                <Label styleClass="badge-pill" text="Accès immédiat" />
-                <Label styleClass="badge-pill" text="Louer &amp; Lire" />
+            <HBox spacing="10.0">
+                <TextField fx:id="searchField" HBox.hgrow="ALWAYS" promptText="Rechercher par titre, catégorie ou auteur" style="-fx-background-color: white; -fx-border-color: #3b82f6; -fx-border-radius: 5; -fx-background-radius: 5;" />
+                <Button mnemonicParsing="false" onAction="#onSearch" text="Recherche" style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-background-radius: 5;" />
+                <Button mnemonicParsing="false" onAction="#onRefresh" text="Rafraîchir" style="-fx-background-color: #f59e0b; -fx-text-fill: white; -fx-background-radius: 5;" />
+                <ToggleButton fx:id="filterRentedToggle" mnemonicParsing="false" text="Mes locations" style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 5;" />
+            </HBox>
+            <HBox spacing="10.0">
+                <VBox spacing="5.0">
+                    <Label text="Filtrer par auteur" style="-fx-font-size: 12; -fx-text-fill: #374151;" />
+                    <ComboBox fx:id="authorCombo" promptText="Tous les auteurs" style="-fx-background-color: white; -fx-border-color: #10b981; -fx-border-radius: 5; -fx-background-radius: 5;" />
+                </VBox>
+                <VBox spacing="5.0">
+                    <Label text="Trier par prix" style="-fx-font-size: 12; -fx-text-fill: #374151;" />
+                    <ComboBox fx:id="priceSortCombo" promptText="Aucun tri par prix" style="-fx-background-color: white; -fx-border-color: #3b82f6; -fx-border-radius: 5; -fx-background-radius: 5;" />
+                </VBox>
             </HBox>
         </VBox>
     </top>
     <center>
-        <VBox spacing="14.0" styleClass="amateur-page-card">
+        <VBox spacing="20.0" styleClass="amateur-page-card">
             <padding>
                 <Insets bottom="24.0" left="24.0" right="24.0" top="16.0" />
             </padding>
-            <Label styleClass="page-subtitle" text="Liste des livres disponibles." />
+            <VBox alignment="CENTER">
+                <Label text="📚 Liste des livres disponibles" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #1f2937; -fx-padding: 10;" />
+                <Label text="Découvrez notre collection de livres numériques" style="-fx-font-size: 12; -fx-text-fill: #6b7280; -fx-padding: 0 10 10 10;" />
+            </VBox>
             <ScrollPane fx:id="cardsScroll" VBox.vgrow="ALWAYS" fitToWidth="true" style="-fx-background-color: transparent;">
                 <content>
-                    <TilePane fx:id="cardsTile" prefTileWidth="220.0" hgap="16.0" vgap="16.0" />
+                    <TilePane fx:id="cardsTile" prefTileWidth="220.0" hgap="20.0" vgap="20.0" alignment="CENTER" />
                 </content>
             </ScrollPane>
         </VBox>
