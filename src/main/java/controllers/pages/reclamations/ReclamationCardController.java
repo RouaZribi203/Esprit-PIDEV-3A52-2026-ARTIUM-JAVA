@@ -119,7 +119,7 @@ public class ReclamationCardController {
             URL dialogCss = getClass().getResource("/views/styles/reclamation-reply-dialog.css");
             if (dialogCss != null) scene.getStylesheets().add(dialogCss.toExternalForm());
 
-            URL appCss = getClass().getResource("/views/styles/dashboard.css");
+            URL appCss = getClass().getResource("/views/styles/dashboardreclam.css");
             if (appCss != null) scene.getStylesheets().add(appCss.toExternalForm());
             stage.setScene(scene);
             stage.showAndWait();

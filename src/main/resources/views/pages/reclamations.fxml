@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox spacing="14.0" styleClass="page-root" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.pages.reclamations.ReclamationsController">
+<VBox spacing="14.0" styleClass="page-root" stylesheets="@../styles/dashboardevent.css" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.pages.reclamations.ReclamationsController">
     <padding>
         <Insets bottom="18.0" left="18.0" right="18.0" top="16.0" />
     </padding>

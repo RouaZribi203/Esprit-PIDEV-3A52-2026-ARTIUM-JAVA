@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.TilePane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox spacing="16.0" styleClass="page-root" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.LivresController">
+<VBox spacing="16.0" styleClass="page-root" stylesheets="@../styles/dashboardevent.css" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.LivresController">
     <padding><Insets bottom="24.0" left="28.0" right="24.0" top="28.0" /></padding>
 
     <HBox alignment="CENTER_LEFT" spacing="20.0">
