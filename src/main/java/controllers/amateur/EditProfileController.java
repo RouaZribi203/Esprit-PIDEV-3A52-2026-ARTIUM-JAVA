@@ -166,6 +166,26 @@ public class EditProfileController {
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
+
+        // Appliquer le design Artium
+        try {
+            DialogPane dialogPane = alert.getDialogPane();
+            String cssPath = getClass().getResource("/views/styles/dashboard.css").toExternalForm();
+            dialogPane.getStylesheets().add(cssPath);
+            dialogPane.getStyleClass().add("artium-alert");
+        } catch (Exception e) {
+            System.err.println("Impossible de charger le style de l'alerte : " + e.getMessage());
+        }
+
         alert.showAndWait();
+    }
+
+    @FXML
+    private void handleCancel() {
+        // Annuler les modifications et remettre les champs à leur état initial
+        if (connectedUser != null) {
+            prefillForm();
+            showAlert("Annulation", "Vos modifications ont été annulées.");
+        }
     }
 }

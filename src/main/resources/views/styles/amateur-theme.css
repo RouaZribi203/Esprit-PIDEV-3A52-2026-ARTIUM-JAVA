@@ -1,3 +1,24 @@
+/* Cache les barres de défilement tout en gardant le scroll actif */
+.scroll-bar:horizontal, 
+.scroll-bar:vertical {
+    -fx-opacity: 0;
+    -fx-pref-width: 0;
+    -fx-max-width: 0;
+    -fx-pref-height: 0;
+    -fx-max-height: 0;
+    -fx-padding: 0;
+}
+.scroll-bar:horizontal .track,
+.scroll-bar:horizontal .thumb,
+.scroll-bar:vertical .track,
+.scroll-bar:vertical .thumb {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+.scroll-pane > .corner {
+    -fx-background-color: transparent;
+}
+
 /* Amateur front-office theme placeholders */
 .amateur-root {
     -fx-background-color: #eaf3ff;

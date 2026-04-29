@@ -296,6 +296,7 @@
                         <!-- BOUTONS -->
                         <HBox spacing="12" alignment="CENTER_LEFT">
                             <Button text="Annuler"
+                                    onAction="#handleCancel"
                                     style="-fx-background-color: white;
                                            -fx-text-fill: #5B3DE8;
                                            -fx-font-size: 13px;

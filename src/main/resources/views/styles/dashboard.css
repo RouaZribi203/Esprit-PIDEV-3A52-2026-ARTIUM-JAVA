@@ -1511,3 +1511,53 @@
     -fx-text-fill: #0f172a;
     -fx-font-size: 13px;
 }
+
+/* ═════════ ARTIUM ALERTS ═════════ */
+.artium-alert {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 1;
+}
+
+.artium-alert .dialog-pane {
+    -fx-background-color: #ffffff;
+}
+
+.artium-alert > *.button-bar > *.container {
+    -fx-background-color: #f8fafc;
+    -fx-padding: 10 20 10 20;
+    -fx-border-color: #e2e8f0 transparent transparent transparent;
+    -fx-border-width: 1;
+}
+
+.artium-alert > *.label.content {
+    -fx-font-size: 14px;
+    -fx-text-fill: #1e293b;
+    -fx-padding: 20 20 20 10;
+}
+
+.artium-alert .header-panel {
+    -fx-background-color: #ffffff;
+    -fx-padding: 15;
+}
+
+.artium-alert .header-panel .label {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #273c95;
+}
+
+.artium-alert > *.button-bar > *.container > *.button {
+    -fx-background-color: #38bdf8;
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 8 20 8 20;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+.artium-alert > *.button-bar > *.container > *.button:hover {
+    -fx-background-color: #0ea5e9;
+    -fx-effect: dropshadow(gaussian, rgba(56, 189, 248, 0.4), 8, 0, 0, 2);
+}
