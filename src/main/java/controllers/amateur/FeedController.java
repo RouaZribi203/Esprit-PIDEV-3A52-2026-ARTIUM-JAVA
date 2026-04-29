@@ -1,6 +1,8 @@
 package controllers.amateur;
 
 import services.CommentaireService;
+import services.LikeService;
+import services.OeuvreRecommendationService;
 import services.OeuvreCollectionService;
 import services.OeuvreService;
 import entities.CollectionOeuvre;
@@ -8,8 +10,16 @@ import entities.Commentaire;
 import entities.Oeuvre;
 import entities.User;
 import javafx.fxml.FXML;
+import javafx.animation.FadeTransition;
+import javafx.animation.PauseTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.SequentialTransition;
+import javafx.geometry.Insets;
 import javafx.geometry.Side;
 import javafx.geometry.Pos;
+import javafx.util.Duration;
+import javafx.scene.shape.Circle;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
@@ -26,7 +36,12 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.SVGPath;
 import utils.UserSession;
-
+import com.google.zxing.*;
+import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
+import com.google.zxing.common.HybridBinarizer;
+import javafx.stage.FileChooser;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -39,6 +54,7 @@ import java.util.Optional;
 
 public class FeedController {
 
+	private static final int COMMENT_MAX_LENGTH = 250;
 	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.FRANCE);
 	private static final DateTimeFormatter COMMENT_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.FRANCE);
 	private static final double POST_IMAGE_MAX_WIDTH = 700;
@@ -49,33 +65,126 @@ public class FeedController {
 	private VBox oeuvresContainer;
 
 	@FXML
+	private TextField searchField;
+
+	@FXML
 	private Label emptyStateLabel;
+
+	@FXML
+	private Button qrCodeSearchButton;
 
 	private final OeuvreService oeuvreService = new OeuvreService();
 	private final OeuvreCollectionService oeuvreCollectionService = new OeuvreCollectionService();
 	private final CommentaireService commentaireService = new CommentaireService();
+	private final LikeService likeService = new LikeService();
+	private final OeuvreRecommendationService oeuvreRecommendationService = new OeuvreRecommendationService();
 	private final List<Oeuvre> allOeuvres = new ArrayList<>();
+	private final List<Oeuvre> recommendedOeuvres = new ArrayList<>();
 	private final Map<Integer, String> collectionHashtagById = new HashMap<>();
 	private final Map<Integer, CollectionOeuvre> collectionById = new HashMap<>();
 	private final Map<Integer, User> artistById = new HashMap<>();
+	private final Map<Integer, VBox> oeuvrePostMap = new HashMap<>();
 	private String currentRouteFilter = "feed";
+	private Integer qrSearchedOeuvreId = null;
+	private boolean isInternalUpdate = false;
+
+	private PauseTransition searchDebounce = new PauseTransition(Duration.millis(300));
 
 	@FXML
 	public void initialize() {
 		currentUserId = UserSession.getCurrentUserId();
+		if (searchField != null) {
+			searchDebounce.setOnFinished(e -> applySearch());
+			searchField.textProperty().addListener((obs, oldValue, newValue) -> {
+				if (!isInternalUpdate) {
+					searchDebounce.playFromStart();
+				}
+			});
+		}
 		loadOeuvres();
 	}
 
 	public void setRouteFilter(String route) {
+		currentUserId = UserSession.getCurrentUserId();
 		currentRouteFilter = route == null ? "feed" : route;
-		applySearch();
+		loadOeuvres();
+	}
+
+	@FXML
+	private void onQrCodeSearchClick() {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Choisir une image de QR Code");
+		fileChooser.getExtensionFilters().addAll(
+				new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp")
+		);
+
+		File selectedFile = fileChooser.showOpenDialog(qrCodeSearchButton.getScene().getWindow());
+		if (selectedFile != null) {
+			try {
+				BufferedImage bufferedImage = ImageIO.read(selectedFile);
+				LuminanceSource source = new BufferedImageLuminanceSource(bufferedImage);
+				BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
+				
+				Result result = new MultiFormatReader().decode(bitmap);
+				String decodedText = result.getText();
+				
+				try {
+					int oeuvreId = Integer.parseInt(decodedText);
+					searchByOeuvreId(oeuvreId);
+				} catch (NumberFormatException e) {
+					showError("Format QR Code invalide", "Le QR code ne contient pas un ID d'œuvre valide.");
+				}
+			} catch (NotFoundException e) {
+				showError("QR Code non trouvé", "Aucun QR code n'a pu être détecté dans cette image.");
+			} catch (Exception e) {
+				showError("Erreur de lecture", "Une erreur est survenue lors de la lecture de l'image : " + e.getMessage());
+			}
+		}
+	}
+
+	private void searchByOeuvreId(int oeuvreId) {
+		try {
+			Oeuvre oeuvre = oeuvreService.getOeuvreById(oeuvreId);
+			if (oeuvre != null) {
+				qrSearchedOeuvreId = oeuvreId;
+				
+				// On vide la barre de recherche si elle contenait quelque chose
+				if (searchField != null && !searchField.getText().isEmpty()) {
+					isInternalUpdate = true;
+					searchField.clear();
+					isInternalUpdate = false;
+				}
+				
+				// On force l'affichage de cette oeuvre unique sans modifier la barre de recherche
+				List<Oeuvre> singleResult = new ArrayList<>();
+				singleResult.add(oeuvre);
+				renderOeuvres(singleResult);
+			} else {
+				showError("Œuvre non trouvée", "Aucune œuvre ne correspond à l'ID " + oeuvreId);
+			}
+		} catch (Exception e) {
+			showError("Erreur", "Erreur lors de la récupération de l'œuvre: " + e.getMessage());
+		}
+	}
+
+	private void showError(String title, String content) {
+		Alert alert = new Alert(Alert.AlertType.ERROR);
+		alert.setTitle(title);
+		alert.setHeaderText(null);
+		alert.setContentText(content);
+		alert.showAndWait();
 	}
 
 	private void loadOeuvres() {
 		try {
 			allOeuvres.clear();
-			allOeuvres.addAll(oeuvreService.getAll());
-			renderOeuvres(allOeuvres);
+			allOeuvres.addAll(oeuvreService.getAllAmteur());
+			recommendedOeuvres.clear();
+			if (isRecommendationRoute(currentRouteFilter)) {
+				User currentUser = UserSession.getCurrentUser();
+				recommendedOeuvres.addAll(oeuvreRecommendationService.getRecommendedOeuvresByImage(currentUser, 5));
+			}
+			applySearch();
 		} catch (Exception e) {
 			oeuvresContainer.getChildren().clear();
 			emptyStateLabel.setText("Erreur chargement oeuvres: " + e.getMessage());
@@ -85,17 +194,136 @@ public class FeedController {
 
 	private void renderOeuvres(List<Oeuvre> oeuvres) {
 		oeuvresContainer.getChildren().clear();
+		oeuvrePostMap.clear();
 
 		if (oeuvres.isEmpty()) {
-			emptyStateLabel.setText("Aucune oeuvre trouvee.");
+			if ("favoris".equals(currentRouteFilter)) {
+				emptyStateLabel.setText("Aucune oeuvre en favoris.");
+			} else {
+				emptyStateLabel.setText("Aucune oeuvre trouvee.");
+			}
 			emptyStateLabel.setVisible(true);
 			return;
 		}
 
 		emptyStateLabel.setVisible(false);
+
+		// Simple rendering without flash effects or delays
 		for (Oeuvre oeuvre : oeuvres) {
-			oeuvresContainer.getChildren().add(buildPostCard(oeuvre));
+			VBox post = buildPostCard(oeuvre);
+			oeuvrePostMap.put(oeuvre.getId(), post);
+			oeuvresContainer.getChildren().add(post);
 		}
+	}
+
+	private void refreshOeuvrePost(Integer oeuvreId) {
+		if (oeuvreId == null) return;
+		
+		javafx.application.Platform.runLater(() -> {
+			VBox card = oeuvrePostMap.get(oeuvreId);
+			if (card == null) {
+				loadOeuvres();
+				return;
+			}
+
+			try {
+				Oeuvre updatedOeuvre = oeuvreService.getById(oeuvreId);
+				if (updatedOeuvre == null) {
+					removePostCard(oeuvreId, card);
+					updateEmptyStateIfNeeded();
+					return;
+				}
+
+				if (!matchesRouteFilter(updatedOeuvre)) {
+					removePostCard(oeuvreId, card);
+					updateEmptyStateIfNeeded();
+					return;
+				}
+
+				// Re-fetch data for stats and comments
+				List<Commentaire> comments = loadCommentsForOeuvre(updatedOeuvre);
+				int likesCount = getLikesCount(updatedOeuvre);
+				int favorisCount = getFavorisCount(updatedOeuvre);
+				boolean likedByCurrentUser = isLikedByCurrentUser(updatedOeuvre);
+				boolean favoriByCurrentUser = isFavoriByCurrentUser(updatedOeuvre);
+
+				// Rebuild statsRow (index 5)
+				boolean isPrivate = "privee".equalsIgnoreCase(safeText(updatedOeuvre.getType()));
+				HBox statsRow = new HBox(14);
+				statsRow.getStyleClass().add("oeuvre-post-stats");
+				statsRow.getChildren().addAll(
+						buildReactionButton(
+								"M12.1 18.55 10.55 17.14C5.4 12.47 2 9.39 2 5.6 2 2.52 4.42 0 7.5 0c1.74 0 3.41.81 4.5 2.09C13.09.81 14.76 0 16.5 0 19.58 0 22 2.52 22 5.6c0 3.79-3.4 6.87-8.55 11.55z",
+								likesCount,
+								likedByCurrentUser,
+								() -> onToggleLike(updatedOeuvre),
+								"oeuvre-post-like-active",
+								"#dc2626",
+								isPrivate
+						),
+						buildStatChip("M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z", comments.size()),
+						buildReactionButton(
+								"M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z",
+								favorisCount,
+								favoriByCurrentUser,
+								() -> onToggleFavori(updatedOeuvre),
+								"oeuvre-post-favori-active",
+								"#eab308",
+								isPrivate
+						)
+				);
+
+				// Rebuild commentsPreviewBox (index 6)
+				VBox commentsPreviewBox = buildCommentsPreview(updatedOeuvre, comments);
+
+				// Replace only these two to avoid image flicker ("white out")
+				if (card.getChildren().size() >= 7) {
+					card.getChildren().set(5, statsRow);
+					card.getChildren().set(6, commentsPreviewBox);
+				} else {
+					// Fallback if structure changed
+					VBox newFullCard = buildPostCard(updatedOeuvre);
+					int index = oeuvresContainer.getChildren().indexOf(card);
+					if (index >= 0) {
+						oeuvresContainer.getChildren().set(index, newFullCard);
+						oeuvrePostMap.put(oeuvreId, newFullCard);
+					}
+				}
+			} catch (Exception e) {
+				loadOeuvres();
+			}
+		});
+	}
+
+	private void removePostCard(Integer oeuvreId, VBox card) {
+		if (card == null) {
+			oeuvrePostMap.remove(oeuvreId);
+			return;
+		}
+
+		int index = oeuvresContainer.getChildren().indexOf(card);
+		if (index >= 0) {
+			oeuvresContainer.getChildren().remove(index);
+		}
+		oeuvrePostMap.remove(oeuvreId);
+	}
+
+	private void updateEmptyStateIfNeeded() {
+		if (!oeuvresContainer.getChildren().isEmpty()) {
+			emptyStateLabel.setVisible(false);
+			return;
+		}
+
+		if ("favoris".equals(currentRouteFilter)
+				|| "favoris-peintures".equals(currentRouteFilter)
+				|| "favoris-sculptures".equals(currentRouteFilter)
+				|| "favoris-photos".equals(currentRouteFilter)
+				|| "favoris-recommandations".equals(currentRouteFilter)) {
+			emptyStateLabel.setText("Aucune oeuvre en favoris.");
+		} else {
+			emptyStateLabel.setText("Aucune oeuvre trouvee.");
+		}
+		emptyStateLabel.setVisible(true);
 	}
 
 	private VBox buildPostCard(Oeuvre oeuvre) {
@@ -174,13 +402,34 @@ public class FeedController {
 		}
 
 		List<Commentaire> comments = loadCommentsForOeuvre(oeuvre);
+		int likesCount = getLikesCount(oeuvre);
+		int favorisCount = getFavorisCount(oeuvre);
+		boolean likedByCurrentUser = isLikedByCurrentUser(oeuvre);
+		boolean favoriByCurrentUser = isFavoriByCurrentUser(oeuvre);
 
+		boolean isPrivate = "privee".equalsIgnoreCase(safeText(oeuvre.getType()));
 		HBox statsRow = new HBox(14);
 		statsRow.getStyleClass().add("oeuvre-post-stats");
 		statsRow.getChildren().addAll(
-				buildStatChip("M12.1 18.55 10.55 17.14C5.4 12.47 2 9.39 2 5.6 2 2.52 4.42 0 7.5 0c1.74 0 3.41.81 4.5 2.09C13.09.81 14.76 0 16.5 0 19.58 0 22 2.52 22 5.6c0 3.79-3.4 6.87-8.55 11.55z", 0),
+				buildReactionButton(
+						"M12.1 18.55 10.55 17.14C5.4 12.47 2 9.39 2 5.6 2 2.52 4.42 0 7.5 0c1.74 0 3.41.81 4.5 2.09C13.09.81 14.76 0 16.5 0 19.58 0 22 2.52 22 5.6c0 3.79-3.4 6.87-8.55 11.55z",
+						likesCount,
+						likedByCurrentUser,
+						() -> onToggleLike(oeuvre),
+						"oeuvre-post-like-active",
+						"#dc2626",
+						isPrivate
+				),
 				buildStatChip("M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z", comments.size()),
-				buildStatChip("M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z", 0)
+				buildReactionButton(
+						"M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z",
+						favorisCount,
+						favoriByCurrentUser,
+						() -> onToggleFavori(oeuvre),
+						"oeuvre-post-favori-active",
+						"#eab308",
+						isPrivate
+				)
 		);
 
 		VBox commentsPreviewBox = buildCommentsPreview(oeuvre, comments);
@@ -203,6 +452,130 @@ public class FeedController {
 		return statChip;
 	}
 
+	private Button buildReactionButton(String iconPath,
+									 int count,
+									 boolean active,
+									 Runnable action,
+									 String activeStyleClass,
+									 String activeColor,
+									 boolean isPrivate) {
+		Button button = new Button();
+		button.getStyleClass().addAll("oeuvre-post-stat-chip", "oeuvre-post-stat-button");
+		if (active) {
+			button.getStyleClass().add(activeStyleClass);
+		}
+
+		String iconColor = active ? activeColor : "#6b7280";
+		SVGPath icon = createColoredIcon(iconPath, 0.55, iconColor);
+		icon.getStyleClass().add("oeuvre-post-stat-icon");
+
+		Label countLabel = new Label(String.valueOf(Math.max(0, count)));
+		countLabel.getStyleClass().add("oeuvre-post-stat-count");
+		if (active) {
+			countLabel.setStyle("-fx-text-fill: " + iconColor + ";");
+		}
+
+		HBox content = new HBox(6, icon, countLabel);
+		content.setAlignment(Pos.CENTER_LEFT);
+		button.setGraphic(content);
+		button.setContentDisplay(javafx.scene.control.ContentDisplay.GRAPHIC_ONLY);
+		button.setOnAction(event -> action.run());
+
+		if (!isCurrentUserAmateur() || isPrivate) {
+			button.setDisable(true);
+		}
+
+		return button;
+	}
+
+	private boolean isCurrentUserAmateur() {
+		User current = UserSession.getCurrentUser();
+		if (current == null || current.getRole() == null) {
+			return false;
+		}
+		return "amateur".equalsIgnoreCase(current.getRole().trim());
+	}
+
+	private int getLikesCount(Oeuvre oeuvre) {
+		if (oeuvre == null || oeuvre.getId() == null) {
+			return 0;
+		}
+		return likeService.countLikesByOeuvre(oeuvre.getId());
+	}
+
+	private int getFavorisCount(Oeuvre oeuvre) {
+		if (oeuvre == null || oeuvre.getId() == null) {
+			return 0;
+		}
+		return likeService.countFavorisByOeuvre(oeuvre.getId());
+	}
+
+	private boolean isLikedByCurrentUser(Oeuvre oeuvre) {
+		if (oeuvre == null || oeuvre.getId() == null || currentUserId == null) {
+			return false;
+		}
+		return likeService.isLiked(currentUserId, oeuvre.getId());
+	}
+
+	private boolean isFavoriByCurrentUser(Oeuvre oeuvre) {
+		if (oeuvre == null || oeuvre.getId() == null || currentUserId == null) {
+			return false;
+		}
+		return likeService.isFavori(currentUserId, oeuvre.getId());
+	}
+
+	private void onToggleLike(Oeuvre oeuvre) {
+		if (!canReact(oeuvre)) {
+			return;
+		}
+		try {
+			likeService.toggleLike(currentUserId, oeuvre.getId());
+			refreshOeuvrePost(oeuvre.getId());
+		} catch (Exception e) {
+			showReactionError(e);
+		}
+	}
+
+	private void onToggleFavori(Oeuvre oeuvre) {
+		if (!canReact(oeuvre)) {
+			return;
+		}
+		try {
+			likeService.toggleFavori(currentUserId, oeuvre.getId());
+			refreshOeuvrePost(oeuvre.getId());
+		} catch (Exception e) {
+			showReactionError(e);
+		}
+	}
+
+	private boolean canReact(Oeuvre oeuvre) {
+		currentUserId = UserSession.getCurrentUserId();
+		if (currentUserId == null || oeuvre == null || oeuvre.getId() == null) {
+			showReactionMessage("Veuillez vous connecter pour interagir.");
+			return false;
+		}
+		if (!isCurrentUserAmateur()) {
+			showReactionMessage("Cette action est reservee au profil amateur.");
+			return false;
+		}
+		return true;
+	}
+
+	private void showReactionError(Exception e) {
+		String message = e == null || e.getMessage() == null || e.getMessage().isBlank()
+				? "Action impossible pour le moment."
+				: e.getMessage();
+		showReactionMessage(message);
+	}
+
+	private void showReactionMessage(String message) {
+		Alert alert = new Alert(Alert.AlertType.INFORMATION);
+		alert.setTitle("Information");
+		alert.setHeaderText(null);
+		alert.setContentText(message);
+		alert.showAndWait();
+	}
+
 	private List<Commentaire> loadCommentsForOeuvre(Oeuvre oeuvre) {
 		if (oeuvre == null || oeuvre.getId() == null) {
 			return new ArrayList<>();
@@ -216,34 +589,105 @@ public class FeedController {
 		}
 	}
 
+	private HBox buildLoadingDots() {
+		HBox dots = new HBox(4);
+		dots.setAlignment(Pos.CENTER);
+		for (int i = 0; i < 3; i++) {
+			Circle dot = new Circle(3, i == 0 ? javafx.scene.paint.Color.valueOf("#3f44d4") : javafx.scene.paint.Color.valueOf("#94a3b8"));
+			FadeTransition ft = new FadeTransition(Duration.seconds(0.5), dot);
+			ft.setFromValue(1.0);
+			ft.setToValue(0.3);
+			ft.setCycleCount(javafx.animation.Animation.INDEFINITE);
+			ft.setAutoReverse(true);
+			ft.setDelay(Duration.seconds(i * 0.15));
+			dots.getChildren().add(dot);
+			ft.play();
+		}
+		return dots;
+	}
+
 	private VBox buildCommentsPreview(Oeuvre oeuvre, List<Commentaire> comments) {
-		VBox commentsBox = new VBox(8);
-		commentsBox.getStyleClass().add("oeuvre-post-comments-box");
+		VBox commentsBox = new VBox(12);
+		commentsBox.getStyleClass().add("oeuvre-post-comments-section");
 
 		Label title = new Label("Commentaires");
 		title.getStyleClass().add("oeuvre-post-comments-title");
 		commentsBox.getChildren().add(title);
 
+		boolean isPrivate = "privee".equalsIgnoreCase(safeText(oeuvre.getType()));
+
 		if (comments == null || comments.isEmpty()) {
 			Label emptyLabel = new Label("Aucun commentaire pour le moment.");
 			emptyLabel.getStyleClass().add("oeuvre-post-comments-empty");
 			commentsBox.getChildren().add(emptyLabel);
-			commentsBox.getChildren().add(buildCommentComposer(oeuvre));
+			if (!isPrivate) {
+				commentsBox.getChildren().add(buildCommentComposer(oeuvre));
+			} else {
+				Label privateNote = new Label("L'ajout de commentaires est désactivés pour cette œuvre privée.");
+				privateNote.getStyleClass().add("oeuvre-post-comment-date");
+				privateNote.setPadding(new Insets(5, 0, 5, 0));
+				commentsBox.getChildren().add(privateNote);
+			}
 			return commentsBox;
 		}
 
+		VBox listContainer = new VBox(10);
+		commentsBox.getChildren().add(listContainer);
+
 		int displayCount = Math.min(3, comments.size());
 		for (int i = 0; i < displayCount; i++) {
-			commentsBox.getChildren().add(buildCommentRow(comments.get(i)));
+			listContainer.getChildren().add(buildCommentRow(comments.get(i)));
 		}
 
 		if (comments.size() > 3) {
-			Label moreLabel = new Label("+" + (comments.size() - 3) + " autres commentaires");
-			moreLabel.getStyleClass().add("oeuvre-post-comments-more");
-			commentsBox.getChildren().add(moreLabel);
+			StackPane btnStack = new StackPane();
+			Button showMoreBtn = new Button("Afficher plus (" + (comments.size() - 3) + ")");
+			showMoreBtn.getStyleClass().add("oeuvre-post-comments-more-btn");
+			showMoreBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #3f44d4; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 0; -fx-font-size: 12px;");
+			
+			HBox loadingDots = buildLoadingDots();
+			loadingDots.setVisible(false);
+			loadingDots.setManaged(false);
+
+			showMoreBtn.setOnAction(event -> {
+				showMoreBtn.setVisible(false);
+				showMoreBtn.setManaged(false);
+				loadingDots.setVisible(true);
+				loadingDots.setManaged(true);
+				
+				PauseTransition pause = new PauseTransition(Duration.seconds(1.2));
+				pause.setOnFinished(e -> {
+					int subDelay = 0;
+					for (int i = 3; i < comments.size(); i++) {
+						Node row = buildCommentRow(comments.get(i));
+						row.setOpacity(0);
+						listContainer.getChildren().add(row);
+						
+						FadeTransition ft = new FadeTransition(Duration.seconds(0.4), row);
+						ft.setFromValue(0);
+						ft.setToValue(1);
+						ft.setDelay(Duration.millis(subDelay));
+						ft.play();
+						
+						subDelay += 80;
+					}
+					commentsBox.getChildren().remove(btnStack);
+				});
+				pause.play();
+			});
+			
+			btnStack.getChildren().addAll(showMoreBtn, loadingDots);
+			commentsBox.getChildren().add(btnStack);
 		}
 
-		commentsBox.getChildren().add(buildCommentComposer(oeuvre));
+		if (!isPrivate) {
+			commentsBox.getChildren().add(buildCommentComposer(oeuvre));
+		} else {
+			Label privateNote = new Label("Les commentaires sont désactivés pour cette œuvre privée.");
+			privateNote.getStyleClass().add("oeuvre-post-comment-date");
+			privateNote.setPadding(new Insets(5, 0, 5, 0));
+			commentsBox.getChildren().add(privateNote);
+		}
 
 		return commentsBox;
 	}
@@ -258,7 +702,18 @@ public class FeedController {
 		TextField commentField = new TextField();
 		commentField.setPromptText("Ecrire un commentaire...");
 		commentField.getStyleClass().add("oeuvre-post-comment-input");
+		// Add right padding to make room for the counter inside the field on the right
+		commentField.setStyle("-fx-padding: 7 50 7 12;"); 
 		HBox.setHgrow(commentField, Priority.ALWAYS);
+
+		Label charCounter = new Label("0/" + COMMENT_MAX_LENGTH);
+		charCounter.setStyle("-fx-font-size: 9px; -fx-text-fill: #64748b; -fx-font-weight: bold;");
+		StackPane.setAlignment(charCounter, Pos.CENTER_RIGHT);
+		StackPane.setMargin(charCounter, new Insets(0, 12, 0, 0));
+		charCounter.setMouseTransparent(true); // Let clicks pass through to the textfield
+
+		StackPane inputStack = new StackPane(commentField, charCounter);
+		HBox.setHgrow(inputStack, Priority.ALWAYS);
 
 		Button publishButton = new Button("Publier");
 		publishButton.getStyleClass().add("oeuvre-post-comment-submit");
@@ -271,8 +726,16 @@ public class FeedController {
 
 		commentField.textProperty().addListener((obs, oldValue, newValue) -> {
 			String value = safeText(newValue);
-			publishButton.setDisable(value.isEmpty());
-			if (!value.isEmpty()) {
+			if (value.length() > COMMENT_MAX_LENGTH) {
+				commentField.setText(oldValue);
+				return;
+			}
+			
+			int len = value.length();
+			charCounter.setText(len + "/" + COMMENT_MAX_LENGTH);
+			publishButton.setDisable(value.trim().isEmpty());
+			
+			if (!value.trim().isEmpty()) {
 				errorLabel.setText("");
 				errorLabel.setManaged(false);
 				errorLabel.setVisible(false);
@@ -282,7 +745,7 @@ public class FeedController {
 		publishButton.setOnAction(event -> submitComment(oeuvre, commentField, errorLabel));
 		commentField.setOnAction(event -> submitComment(oeuvre, commentField, errorLabel));
 
-		row.getChildren().addAll(commentField, publishButton);
+		row.getChildren().addAll(inputStack, publishButton);
 		composerBox.getChildren().addAll(row, errorLabel);
 		return composerBox;
 	}
@@ -294,9 +757,14 @@ public class FeedController {
 			return;
 		}
 
-		String text = safeText(commentField.getText());
+		String text = safeText(commentField.getText()).trim();
 		if (text.isEmpty()) {
-			showCommentError(errorLabel, "Le commentaire est vide.");
+			showCommentError(errorLabel, "Le commentaire ne peut pas être vide.");
+			return;
+		}
+
+		if (text.length() > COMMENT_MAX_LENGTH) {
+			showCommentError(errorLabel, "Commentaire trop long (max " + COMMENT_MAX_LENGTH + ").");
 			return;
 		}
 
@@ -314,7 +782,7 @@ public class FeedController {
 			commentaireService.add(commentaire);
 
 			commentField.clear();
-			loadOeuvres();
+			refreshOeuvrePost(oeuvre.getId());
 		} catch (Exception e) {
 			showCommentError(errorLabel, e.getMessage() == null ? "Publication impossible." : e.getMessage());
 		}
@@ -419,7 +887,18 @@ public class FeedController {
 	private void activateInlineEdit(Commentaire comment, Label textLabel, VBox body, Label dateLabel) {
 		TextField editField = new TextField(fallback(comment.getTexte(), ""));
 		editField.getStyleClass().add("oeuvre-post-comment-edit-input");
+		// Add right padding for counter inside
+		editField.setStyle("-fx-padding: 6 50 6 10;");
 		HBox.setHgrow(editField, Priority.ALWAYS);
+
+		Label charCounter = new Label(editField.getText().length() + "/" + COMMENT_MAX_LENGTH);
+		charCounter.setStyle("-fx-font-size: 9px; -fx-text-fill: #64748b; -fx-font-weight: bold;");
+		charCounter.setMouseTransparent(true);
+
+		StackPane editStack = new StackPane(editField, charCounter);
+		StackPane.setAlignment(charCounter, Pos.CENTER_RIGHT);
+		StackPane.setMargin(charCounter, new Insets(0, 10, 0, 0));
+		HBox.setHgrow(editStack, Priority.ALWAYS);
 
 		Button saveButton = new Button("Enregistrer");
 		saveButton.getStyleClass().addAll("oeuvre-post-comment-action", "oeuvre-post-comment-action-save");
@@ -427,9 +906,19 @@ public class FeedController {
 		Button cancelButton = new Button("Annuler");
 		cancelButton.getStyleClass().addAll("oeuvre-post-comment-action", "oeuvre-post-comment-action-cancel");
 
-		HBox editRow = new HBox(8, editField, saveButton, cancelButton);
+		HBox editRow = new HBox(8, editStack, saveButton, cancelButton);
 		editRow.setAlignment(Pos.CENTER_LEFT);
 		editRow.getStyleClass().add("oeuvre-post-comment-edit-row");
+
+		editField.textProperty().addListener((obs, oldValue, newValue) -> {
+			String val = safeText(newValue);
+			if (val.length() > COMMENT_MAX_LENGTH) {
+				editField.setText(oldValue);
+				return;
+			}
+			charCounter.setText(val.length() + "/" + COMMENT_MAX_LENGTH);
+			saveButton.setDisable(val.trim().isEmpty());
+		});
 
 		int textIndex = body.getChildren().indexOf(textLabel);
 		if (textIndex >= 0) {
@@ -444,9 +933,13 @@ public class FeedController {
 		};
 
 		Runnable saveEdit = () -> {
-			String updatedText = safeText(editField.getText());
+			String updatedText = safeText(editField.getText()).trim();
 			if (updatedText.isEmpty()) {
 				cancelEdit.run();
+				return;
+			}
+			
+			if (updatedText.length() > COMMENT_MAX_LENGTH) {
 				return;
 			}
 
@@ -488,7 +981,7 @@ public class FeedController {
 
 		try {
 			commentaireService.delete(comment);
-			loadOeuvres();
+			refreshOeuvrePost(comment.getOeuvreId());
 		} catch (Exception e) {
 			Alert error = new Alert(Alert.AlertType.ERROR);
 			error.setTitle("Erreur");
@@ -681,10 +1174,15 @@ public class FeedController {
 	}
 
 	private void applySearch() {
+		if (isInternalUpdate) return;
+		
+		qrSearchedOeuvreId = null; // Reset QR search when user types manually
+		List<Oeuvre> source = isRecommendationRoute(currentRouteFilter) ? recommendedOeuvres : allOeuvres;
 		List<Oeuvre> filtered = new ArrayList<>();
+		String keyword = searchField == null ? "" : safeText(searchField.getText()).toLowerCase(Locale.ROOT);
 
-		for (Oeuvre oeuvre : allOeuvres) {
-			boolean keywordOk = true;
+		for (Oeuvre oeuvre : source) {
+			boolean keywordOk = matchesSearch(oeuvre, keyword);
 			boolean routeOk = matchesRouteFilter(oeuvre);
 
 			if (keywordOk && routeOk) {
@@ -695,16 +1193,53 @@ public class FeedController {
 		renderOeuvres(filtered);
 	}
 
+	private boolean matchesSearch(Oeuvre oeuvre, String keyword) {
+		if (keyword == null || keyword.isBlank() || oeuvre == null) {
+			return true;
+		}
+
+		String title = safeText(oeuvre.getTitre()).toLowerCase(Locale.ROOT);
+		if (title.contains(keyword)) {
+			return true;
+		}
+
+		String collectionTitle = "";
+		try {
+			CollectionOeuvre collection = getCollectionById(oeuvre.getCollectionId());
+			collectionTitle = collection == null ? "" : safeText(collection.getTitre()).toLowerCase(Locale.ROOT);
+		} catch (Exception ignored) {
+			collectionTitle = "";
+		}
+		if (collectionTitle.contains(keyword)) {
+			return true;
+		}
+
+		User artist = loadArtistForOeuvre(oeuvre);
+		String artistName = buildArtistName(artist).toLowerCase(Locale.ROOT);
+		return artistName.contains(keyword);
+	}
+
 	private boolean matchesRouteFilter(Oeuvre oeuvre) {
+		if (oeuvre != null && qrSearchedOeuvreId != null && qrSearchedOeuvreId.equals(oeuvre.getId())) {
+			return true;
+		}
 		String type = safeText(oeuvre == null ? "" : oeuvre.getType()).toLowerCase(Locale.ROOT);
 		return switch (currentRouteFilter) {
+			case "favoris" -> isFavoriByCurrentUser(oeuvre);
+			case "favoris-peintures" -> isFavoriByCurrentUser(oeuvre) && type.contains("peint");
+			case "favoris-sculptures" -> isFavoriByCurrentUser(oeuvre) && type.contains("sculpt");
+			case "favoris-photos" -> isFavoriByCurrentUser(oeuvre) && type.contains("photo");
 			case "feed-peintures" -> type.contains("peint");
 			case "feed-sculptures" -> type.contains("sculpt");
 			case "feed-photos" -> type.contains("photo");
-			case "feed-recommandations" -> !loadCommentsForOeuvre(oeuvre).isEmpty();
+			case "feed-recommandations", "favoris-recommandations" -> true;
 			case "feed" -> true;
 			default -> true;
 		};
+	}
+
+	private boolean isRecommendationRoute(String route) {
+		return "feed-recommandations".equals(route) || "favoris-recommandations".equals(route);
 	}
 }
 

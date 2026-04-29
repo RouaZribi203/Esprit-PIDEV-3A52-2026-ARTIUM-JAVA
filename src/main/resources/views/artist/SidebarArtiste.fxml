@@ -41,11 +41,11 @@
         </padding>
         <Label styleClass="card-title" text="Statistiques" />
 
-        <HBox alignment="CENTER_LEFT" spacing="8.0"><Label styleClass="card-text" text="Oeuvres ajoutees" /><Region HBox.hgrow="ALWAYS" /><Label styleClass="badge-primary" text="0" /></HBox>
-        <HBox alignment="CENTER_LEFT" spacing="8.0"><Label styleClass="card-text" text="Reclamations faites" /><Region HBox.hgrow="ALWAYS" /><Label styleClass="badge-warning" text="0" /></HBox>
-        <HBox alignment="CENTER_LEFT" spacing="8.0"><Label styleClass="card-text" text="Evenements crees" /><Region HBox.hgrow="ALWAYS" /><Label styleClass="badge-info" text="0" /></HBox>
-        <HBox alignment="CENTER_LEFT" spacing="8.0"><Label styleClass="card-text" text="Commentaires recus" /><Region HBox.hgrow="ALWAYS" /><Label styleClass="badge-success" text="0" /></HBox>
-        <HBox alignment="CENTER_LEFT" spacing="8.0"><Label styleClass="card-text" text="Likes recus" /><Region HBox.hgrow="ALWAYS" /><Label styleClass="badge-danger" text="0" /></HBox>
+        <HBox alignment="CENTER_LEFT" spacing="8.0"><Label styleClass="card-text" text="Oeuvres ajoutees" /><Region HBox.hgrow="ALWAYS" /><Label fx:id="oeuvresCountLabel" styleClass="badge-primary" text="0" /></HBox>
+        <HBox alignment="CENTER_LEFT" spacing="8.0"><Label styleClass="card-text" text="Reclamations faites" /><Region HBox.hgrow="ALWAYS" /><Label fx:id="reclamationsCountLabel" styleClass="badge-warning" text="0" /></HBox>
+        <HBox alignment="CENTER_LEFT" spacing="8.0"><Label styleClass="card-text" text="Evenements crees" /><Region HBox.hgrow="ALWAYS" /><Label fx:id="evenementsCountLabel" styleClass="badge-info" text="0" /></HBox>
+        <HBox alignment="CENTER_LEFT" spacing="8.0"><Label styleClass="card-text" text="Commentaires recus" /><Region HBox.hgrow="ALWAYS" /><Label fx:id="commentsCountLabel" styleClass="badge-success" text="0" /></HBox>
+        <HBox alignment="CENTER_LEFT" spacing="8.0"><Label styleClass="card-text" text="Likes recus" /><Region HBox.hgrow="ALWAYS" /><Label fx:id="likesCountLabel" styleClass="badge-danger" text="0" /></HBox>
     </VBox>
 </VBox>
 

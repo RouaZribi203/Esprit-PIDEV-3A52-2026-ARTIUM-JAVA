@@ -55,3 +55,8 @@ config.properties
 
 # Vosk model (trop lourd)
 src/main/resources/vosk-model-fr/
+
+
+### Environment Variables ###
+.env
+

@@ -51,6 +51,8 @@ public class NavbarAmateurController {
     private final NotificationService notificationService = new NotificationService();
     private Consumer<String> navigationHandler;
     private Consumer<Boolean> themeHandler;
+    private String currentRoute = "feed";
+    private String oeuvreSectionContext = "feed";
 
     @FXML
     public void initialize() {
@@ -89,45 +91,47 @@ public class NavbarAmateurController {
     }
 
     public void setActiveRoute(String route) {
-        if (oeuvresButton == null) {
-            return;
-        }
-
+        currentRoute = route == null ? "feed" : route;
+        oeuvreSectionContext = currentRoute.startsWith("favoris") ? "favoris" : "feed";
         oeuvresButton.getStyleClass().remove("active");
+        oeuvresButton.getStyleClass().remove("active-feed");
+        oeuvresButton.getStyleClass().remove("active-favoris");
         bibliothequeButton.getStyleClass().remove("active");
         musiqueButton.getStyleClass().remove("active");
 
-        if (route.startsWith("feed")) {
+        if (currentRoute.startsWith("feed") || currentRoute.startsWith("favoris")) {
             oeuvresButton.getStyleClass().add("active");
-        } else if ("bibliotheque".equals(route) || "book-reader".equals(route)) {
+            oeuvresButton.getStyleClass().add("favoris".equals(oeuvreSectionContext) ? "active-favoris" : "active-feed");
+        } else if ("bibliotheque".equals(currentRoute) || "book-reader".equals(currentRoute)) {
             bibliothequeButton.getStyleClass().add("active");
-        } else if ("musique".equals(route)) {
+        } else if ("musique".equals(currentRoute)) {
             musiqueButton.getStyleClass().add("active");
         }
     }
 
     @FXML
     private void onFeedClick() {
-        navigate("feed");
+        navigate(resolveOeuvreRoute("feed", "favoris"));
     }
 
     @FXML
     private void onFeedPeinturesClick() {
-        navigate("feed-peintures");
+        navigate(resolveOeuvreRoute("feed-peintures", "favoris-peintures"));
     }
 
     @FXML
     private void onFeedSculpturesClick() {
-        navigate("feed-sculptures");
+        navigate(resolveOeuvreRoute("feed-sculptures", "favoris-sculptures"));
     }
 
     @FXML
     private void onFeedPhotosClick() {
-        navigate("feed-photos");
+        navigate(resolveOeuvreRoute("feed-photos", "favoris-photos"));
     }
 
     @FXML
     private void onFeedRecommendationsClick() {
+        // Recommendations always open the feed context so the Fil d'actualite section stays active.
         navigate("feed-recommandations");
     }
 
@@ -287,6 +291,13 @@ public class NavbarAmateurController {
         if (navigationHandler != null) {
             navigationHandler.accept(route);
         }
+    }
+
+    private String resolveOeuvreRoute(String feedRoute, String favorisRoute) {
+        if ("favoris".equals(oeuvreSectionContext)) {
+            return favorisRoute;
+        }
+        return feedRoute;
     }
 
     User resolveCurrentUser() {

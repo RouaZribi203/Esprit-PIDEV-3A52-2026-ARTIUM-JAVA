@@ -4,8 +4,13 @@ import entities.Commentaire;
 import entities.Oeuvre;
 import entities.User;
 import services.CommentaireService;
+import services.LikeService;
 import services.OeuvreService;
+import javafx.animation.FadeTransition;
+import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -17,7 +22,9 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.SVGPath;
+import javafx.util.Duration;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -37,6 +44,7 @@ public class OeuvreDetailsPopupController {
 
     private final OeuvreService oeuvreService = new OeuvreService();
     private final CommentaireService commentaireService = new CommentaireService();
+    private final LikeService likeService = new LikeService();
     private Oeuvre currentOeuvre;
     private List<Commentaire> currentComments = new ArrayList<>();
 
@@ -109,21 +117,22 @@ public class OeuvreDetailsPopupController {
             imageView.setImage(postImage.getImage());
         }
 
-        List<Commentaire> comments = oeuvre.getComments();
-        currentComments = comments == null ? new ArrayList<>() : new ArrayList<>(comments);
+        currentComments = loadCommentsForOeuvre(oeuvre);
 
         int commentCount = currentComments.size();
+        int likeCount = getLikeCount(oeuvre);
+        int favoriCount = getFavoriCount(oeuvre);
         commentsTitleLabel.setText("Commentaires (" + commentCount + ")");
 
-        buildStatsRow(commentCount);
+        buildStatsRow(likeCount, commentCount, favoriCount);
         buildCommentsPreview(currentComments);
     }
 
-    private void buildStatsRow(int commentCount) {
+    private void buildStatsRow(int likeCount, int commentCount, int favoriCount) {
         statsRow.getChildren().setAll(
-                buildStatChip("M12.1 18.55 10.55 17.14C5.4 12.47 2 9.39 2 5.6 2 2.52 4.42 0 7.5 0c1.74 0 3.41.81 4.5 2.09C13.09.81 14.76 0 16.5 0 19.58 0 22 2.52 22 5.6c0 3.79-3.4 6.87-8.55 11.55z", 0),
+                buildStatChip("M12.1 18.55 10.55 17.14C5.4 12.47 2 9.39 2 5.6 2 2.52 4.42 0 7.5 0c1.74 0 3.41.81 4.5 2.09C13.09.81 14.76 0 16.5 0 19.58 0 22 2.52 22 5.6c0 3.79-3.4 6.87-8.55 11.55z", likeCount),
                 buildStatChip("M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z", commentCount),
-                buildStatChip("M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z", 0)
+                buildStatChip("M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z", favoriCount)
         );
     }
 
@@ -145,13 +154,16 @@ public class OeuvreDetailsPopupController {
 
     private void buildCommentsPreview(List<Commentaire> comments) {
         commentsListBox.getChildren().clear();
+        // Cacher l'ancien label statique s'il existe dans le FXML
+        if (moreCommentsLabel != null) {
+            moreCommentsLabel.setVisible(false);
+            moreCommentsLabel.setManaged(false);
+        }
 
         if (comments == null || comments.isEmpty()) {
             Label emptyLabel = new Label("Aucun commentaire pour le moment.");
             emptyLabel.getStyleClass().add("oeuvre-post-comments-empty");
             commentsListBox.getChildren().add(emptyLabel);
-            moreCommentsLabel.setVisible(false);
-            moreCommentsLabel.setManaged(false);
             return;
         }
 
@@ -161,13 +173,67 @@ public class OeuvreDetailsPopupController {
         }
 
         if (comments.size() > 3) {
-            moreCommentsLabel.setText("+" + (comments.size() - 3) + " autres commentaires");
-            moreCommentsLabel.setVisible(true);
-            moreCommentsLabel.setManaged(true);
-        } else {
-            moreCommentsLabel.setVisible(false);
-            moreCommentsLabel.setManaged(false);
+            StackPane btnStack = new StackPane();
+            Button showMoreBtn = new Button("Afficher plus (" + (comments.size() - 3) + ")");
+            showMoreBtn.getStyleClass().add("oeuvre-post-comments-more-btn");
+            showMoreBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #3f44d4; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 0; -fx-font-size: 12px;");
+
+            HBox loadingDots = buildLoadingDots();
+            loadingDots.setVisible(false);
+            loadingDots.setManaged(false);
+
+            showMoreBtn.setOnAction(event -> {
+                showMoreBtn.setVisible(false);
+                showMoreBtn.setManaged(false);
+                loadingDots.setVisible(true);
+                loadingDots.setManaged(true);
+
+                PauseTransition pause = new PauseTransition(Duration.seconds(1.2));
+                pause.setOnFinished(e -> {
+                    int subDelay = 0;
+                    for (int i = 3; i < comments.size(); i++) {
+                        Node row = buildCommentRow(comments.get(i));
+                        row.setOpacity(0);
+                        commentsListBox.getChildren().add(row);
+
+                        FadeTransition ft = new FadeTransition(Duration.seconds(0.4), row);
+                        ft.setFromValue(0);
+                        ft.setToValue(1);
+                        ft.setDelay(Duration.millis(subDelay));
+                        ft.play();
+
+                        subDelay += 80;
+                    }
+                    VBox parent = (VBox) btnStack.getParent();
+                    if (parent != null) {
+                        parent.getChildren().remove(btnStack);
+                    }
+                });
+                pause.play();
+            });
+
+            btnStack.getChildren().addAll(showMoreBtn, loadingDots);
+            // On ajoute le bouton dans la box parente de commentsListBox si possible, 
+            // ou directement à la fin de commentsListBox
+            commentsListBox.getChildren().add(btnStack);
         }
+    }
+
+    private HBox buildLoadingDots() {
+        HBox dots = new HBox(4);
+        dots.setAlignment(Pos.CENTER);
+        for (int i = 0; i < 3; i++) {
+            Circle dot = new Circle(3, i == 0 ? javafx.scene.paint.Color.valueOf("#3f44d4") : javafx.scene.paint.Color.valueOf("#94a3b8"));
+            FadeTransition ft = new FadeTransition(Duration.seconds(0.5), dot);
+            ft.setFromValue(1.0);
+            ft.setToValue(0.3);
+            ft.setCycleCount(javafx.animation.Animation.INDEFINITE);
+            ft.setAutoReverse(true);
+            ft.setDelay(Duration.seconds(i * 0.15));
+            dots.getChildren().add(dot);
+            ft.play();
+        }
+        return dots;
     }
 
     private HBox buildCommentRow(Commentaire comment) {
@@ -254,11 +320,42 @@ public class OeuvreDetailsPopupController {
                 currentOeuvre.setComments(new ArrayList<>(currentComments));
             }
             commentsTitleLabel.setText("Commentaires (" + currentComments.size() + ")");
-            buildStatsRow(currentComments.size());
+            int likeCount = getLikeCount(currentOeuvre);
+            int favoriCount = getFavoriCount(currentOeuvre);
+            buildStatsRow(likeCount, currentComments.size(), favoriCount);
             buildCommentsPreview(currentComments);
         } catch (Exception e) {
             showError("Erreur", e.getMessage() == null ? "Une erreur est survenue lors de la suppression." : e.getMessage());
         }
+    }
+
+    private List<Commentaire> loadCommentsForOeuvre(Oeuvre oeuvre) {
+        if (oeuvre == null || oeuvre.getId() == null) {
+            return new ArrayList<>();
+        }
+
+        try {
+            List<Commentaire> comments = commentaireService.getCommentsByOeuvreId(oeuvre.getId());
+            List<Commentaire> safeComments = comments == null ? new ArrayList<>() : new ArrayList<>(comments);
+            oeuvre.setComments(safeComments);
+            return safeComments;
+        } catch (Exception ignored) {
+            return new ArrayList<>();
+        }
+    }
+
+    private int getLikeCount(Oeuvre oeuvre) {
+        if (oeuvre == null || oeuvre.getId() == null) {
+            return 0;
+        }
+        return likeService.countLikesByOeuvre(oeuvre.getId());
+    }
+
+    private int getFavoriCount(Oeuvre oeuvre) {
+        if (oeuvre == null || oeuvre.getId() == null) {
+            return 0;
+        }
+        return likeService.countFavorisByOeuvre(oeuvre.getId());
     }
 
     private void showError(String header, String message) {

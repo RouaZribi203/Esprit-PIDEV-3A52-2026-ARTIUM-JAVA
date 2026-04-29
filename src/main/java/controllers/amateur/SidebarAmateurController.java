@@ -87,7 +87,7 @@ public class SidebarAmateurController {
 
         if (route.startsWith("feed")) {
             feedButton.getStyleClass().add("active");
-        } else if ("favoris".equals(route)) {
+        } else if (route.startsWith("favoris")) {
             favorisButton.getStyleClass().add("active");
         } else if ("evenements".equals(route) || "event-detail".equals(route)) {
             evenementsButton.getStyleClass().add("active");

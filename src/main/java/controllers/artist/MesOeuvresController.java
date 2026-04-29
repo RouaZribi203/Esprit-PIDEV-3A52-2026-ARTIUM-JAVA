@@ -1,8 +1,18 @@
 package controllers.artist;
 
+import javafx.concurrent.Task;
 import services.CommentaireService;
+import services.LikeService;
 import services.OeuvreCollectionService;
 import services.OeuvreService;
+import services.QrCodeService;
+import services.ai.PythonImageEmbeddingClient;
+import controllers.ImageEditorController;
+import controllers.DrawingBoardController;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.SVGPath;
+import javafx.scene.Cursor;
+import javafx.scene.paint.Color;
 import entities.CollectionOeuvre;
 import entities.Commentaire;
 import entities.Oeuvre;
@@ -22,6 +32,8 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -29,17 +41,23 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.SVGPath;
+import javafx.animation.FadeTransition;
+import javafx.animation.PauseTransition;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.util.Duration;
+import javafx.scene.Node;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import utils.UserSession;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -50,6 +68,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import javax.imageio.ImageIO;
 
 public class MesOeuvresController {
 
@@ -78,8 +97,13 @@ public class MesOeuvresController {
     private final OeuvreService oeuvreService = new OeuvreService();
     private final OeuvreCollectionService oeuvreCollectionService = new OeuvreCollectionService();
     private final CommentaireService commentaireService = new CommentaireService();
+    private final LikeService likeService = new LikeService();
+    private final QrCodeService qrCodeService = new QrCodeService();
+    private final PythonImageEmbeddingClient imageEmbeddingClient = new PythonImageEmbeddingClient();
     private final List<Oeuvre> allOeuvres = new ArrayList<>();
     private final Map<Integer, List<Commentaire>> commentsByOeuvreId = new HashMap<>();
+    private final Map<Integer, Integer> likeCountByOeuvreId = new HashMap<>();
+    private final Map<Integer, Integer> favoriCountByOeuvreId = new HashMap<>();
     private final Map<Integer, String> collectionHashtagById = new HashMap<>();
     private String artistDisplayName = "Artiste";
     private String artistSpecialite = "Specialite inconnue";
@@ -95,7 +119,11 @@ public class MesOeuvresController {
         }
         applyIcons();
         loadArtistIdentity();
-        sortCombo.getItems().addAll("Commentaires decroissant", "Commentaires croissant");
+        sortCombo.getItems().addAll(
+                "Commentaires decroissant", "Commentaires croissant",
+                "Likes decroissant", "Likes croissant",
+                "Favoris decroissant", "Favoris croissant"
+        );
         sortCombo.setValue("Commentaires decroissant");
 
         searchField.textProperty().addListener((observable, oldValue, newValue) -> applyFilters());
@@ -144,6 +172,49 @@ public class MesOeuvresController {
             addOeuvreButton.setGraphic(createColoredIcon("M19 11H13V5h-2v6H5v2h6v6h2v-6h6z", 0.72, "#ffffff"));
             addOeuvreButton.setGraphicTextGap(6);
         }
+    }
+
+    private VBox createImageSourceCard(String title, String subtitle, String iconPath, boolean selected) {
+        VBox card = new VBox(5);
+        card.setAlignment(Pos.CENTER);
+        card.setPrefSize(225, 100);
+        card.setCursor(Cursor.HAND);
+        
+        String baseStyle = "-fx-background-radius: 12; -fx-border-radius: 12; -fx-border-width: 1; -fx-padding: 15;";
+        String normalStyle = baseStyle + "-fx-background-color: white; -fx-border-color: #e2e8f0;";
+        String selectedStyle = baseStyle + "-fx-background-color: #f7f7f2; -fx-border-color: #1a1a1a;";
+        
+        card.setStyle(selected ? selectedStyle : normalStyle);
+
+        StackPane iconContainer = new StackPane();
+        iconContainer.setPrefSize(40, 40);
+        iconContainer.setMaxSize(40, 40);
+        iconContainer.setStyle("-fx-background-color: " + (selected ? "white" : "#f8fafc") + "; -fx-background-radius: 8;");
+        
+        SVGPath icon = new SVGPath();
+        icon.setContent(iconPath);
+        icon.setScaleX(0.7);
+        icon.setScaleY(0.7);
+        icon.setStyle("-fx-fill: #1a1a1a;");
+        iconContainer.getChildren().add(icon);
+
+        Label titleLabel = new Label(title);
+        titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #1a1a1a;");
+        
+        Label subtitleLabel = new Label(subtitle);
+        subtitleLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #64748b;");
+
+        card.getChildren().addAll(iconContainer, titleLabel, subtitleLabel);
+        
+        return card;
+    }
+
+    private void updateCardSelection(VBox card, boolean selected) {
+        String baseStyle = "-fx-background-radius: 12; -fx-border-radius: 12; -fx-border-width: 1; -fx-padding: 15;";
+        String normalStyle = baseStyle + "-fx-background-color: white; -fx-border-color: #e2e8f0;";
+        String selectedStyle = baseStyle + "-fx-background-color: #f7f7f2; -fx-border-color: #1a1a1a;";
+        card.setStyle(selected ? selectedStyle : normalStyle);
+        ((StackPane)card.getChildren().get(0)).setStyle("-fx-background-color: " + (selected ? "white" : "#f8fafc") + "; -fx-background-radius: 8;");
     }
 
     private void showOeuvrePopup(Oeuvre existingOeuvre) {
@@ -204,19 +275,97 @@ public class MesOeuvresController {
 
         Label imageLabel = new Label("Image");
         imageLabel.getStyleClass().add("popup-field-label");
-        Button chooseImageButton = new Button("Choisir un fichier");
-        chooseImageButton.getStyleClass().add("popup-close-button");
-        chooseImageButton.setGraphic(createIcon("M20 6h-6.18L12 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z", 0.58));
-        chooseImageButton.setGraphicTextGap(6);
-        Label selectedFileLabel = new Label("Aucun fichier n'a ete selectionne");
-        selectedFileLabel.getStyleClass().add("page-subtitle-small");
-        Label imageError = createPopupErrorLabel();
 
         final String[] imagePathHolder = new String[1];
         imagePathHolder[0] = editMode ? existingOeuvre.getImage() : null;
-        if (editMode && imagePathHolder[0] != null && !imagePathHolder[0].isBlank()) {
-            selectedFileLabel.setText("Image actuelle conservée");
+
+        // Cards for source selection
+        VBox importCard = createImageSourceCard("Importer", "Depuis votre appareil", "M21,15V18H24V20H21V23H19V20H16V18H19V15H21M18,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H14.1C13.4,20.9 13,19.7 13,18.5C13,17.9 13.1,17.2 13.2,16.6L8.5,12L5,15.5V5H19V11.5C19.7,11.2 20.3,11.1 21,11.1V4A2,2 0 0,0 19,2M14,14.5V11L11,14L8,11V14.5L11,17.5L14,14.5Z", false);
+        VBox drawCard = createImageSourceCard("Dessiner", "Créer depuis zéro", "M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87L20.71,7.04M3,17.25V21H6.75L17.81,9.94L14.06,6.19L3,17.25Z", false);
+        
+        HBox cardsRow = new HBox(15, importCard, drawCard);
+        cardsRow.setPadding(new Insets(5, 0, 10, 0));
+
+        // Status bar for selection
+        HBox statusBar = new HBox(10);
+        statusBar.setAlignment(Pos.CENTER_LEFT);
+        statusBar.setPadding(new Insets(10, 15, 10, 15));
+        statusBar.setStyle("-fx-background-color: #f7f7f2; -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;");
+        statusBar.setVisible(imagePathHolder[0] != null);
+        statusBar.setManaged(imagePathHolder[0] != null);
+
+        Circle statusDot = new Circle(4, Color.web("#166534"));
+        Label statusLabel = new Label(editMode ? "Image actuelle conservée" : "Aucune image sélectionnée");
+        statusLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #1a1a1a;");
+        
+        Region statusSpacer = new Region();
+        HBox.setHgrow(statusSpacer, Priority.ALWAYS);
+
+        Button editImageButton = new Button("Éditer");
+        editImageButton.getStyleClass().add("popup-close-button"); // Reuse existing style or similar
+        editImageButton.setGraphic(createColoredIcon("M3,17.25V21H6.75L17.81,9.94L14.06,6.19L3,17.25M20.71,7.04L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87L20.71,7.04Z", 0.5, "#1a1a1a"));
+        editImageButton.setGraphicTextGap(6);
+        editImageButton.setStyle("-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-radius: 6; -fx-padding: 5 15; -fx-text-fill: #1a1a1a; -fx-font-weight: bold;");
+
+        statusBar.getChildren().addAll(statusDot, statusLabel, statusSpacer, editImageButton);
+
+        Label imageError = createPopupErrorLabel();
+
+        // Logic for selection
+        importCard.setOnMouseClicked(e -> {
+            FileChooser chooser = new FileChooser();
+            chooser.setTitle("Selectionner une image");
+            chooser.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.webp")
+            );
+            File file = chooser.showOpenDialog(popupStage);
+            if (file != null) {
+                imagePathHolder[0] = file.getAbsolutePath();
+                statusLabel.setText("Image importée");
+                statusBar.setVisible(true);
+                statusBar.setManaged(true);
+                updateCardSelection(importCard, true);
+                updateCardSelection(drawCard, false);
+                clearPopupError(imageError);
+            }
+        });
+
+        drawCard.setOnMouseClicked(e -> {
+            DrawingBoardController drawingBoard = new DrawingBoardController(popupStage, imagePathHolder[0]);
+            String drawingPath = drawingBoard.showAndWait();
+            if (drawingPath != null) {
+                imagePathHolder[0] = drawingPath;
+                statusLabel.setText("Dessin créé");
+                statusBar.setVisible(true);
+                statusBar.setManaged(true);
+                updateCardSelection(drawCard, true);
+                updateCardSelection(importCard, false);
+                clearPopupError(imageError);
+            }
+        });
+
+        editImageButton.setOnAction(event -> {
+            if (imagePathHolder[0] != null) {
+                ImageEditorController editor = new ImageEditorController(popupStage, imagePathHolder[0]);
+                String editedPath = editor.showAndWait();
+                if (editedPath != null && !editedPath.equals(imagePathHolder[0])) {
+                    imagePathHolder[0] = editedPath;
+                    statusLabel.setText("Image modifiée");
+                }
+            }
+        });
+
+        if (editMode) {
+            // In edit mode, we might want to hide cards or just show current status
+            cardsRow.setVisible(false);
+            cardsRow.setManaged(false);
+            if (imagePathHolder[0] != null && !imagePathHolder[0].isBlank()) {
+                statusLabel.setText("Image actuelle");
+                editImageButton.setVisible(false); // Disable advanced edit in modification as requested before
+                editImageButton.setManaged(false);
+            }
         }
+
         titreField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (safeText(newValue).isEmpty()) {
                 showFieldError(titreError, titreField, "Le titre est obligatoire.");
@@ -248,21 +397,6 @@ public class MesOeuvresController {
             }
         });
 
-        chooseImageButton.setOnAction(event -> {
-            FileChooser chooser = new FileChooser();
-            chooser.setTitle("Selectionner une image");
-            chooser.getExtensionFilters().addAll(
-                    new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.webp")
-            );
-            File file = chooser.showOpenDialog(popupStage);
-            if (file == null) {
-                return;
-            }
-            imagePathHolder[0] = file.getAbsolutePath();
-            selectedFileLabel.setText(file.getName());
-            clearPopupError(imageError);
-        });
-
         try {
             List<CollectionOeuvre> collections = oeuvreCollectionService.getCollectionsByArtisteId(artisteId);
             collectionCombo.setItems(FXCollections.observableArrayList(collections));
@@ -278,6 +412,33 @@ public class MesOeuvresController {
             showPopupError(collectionError, "Erreur chargement collections: " + e.getMessage());
         }
 
+        Label visibilityLabel = new Label("Visibilité");
+        visibilityLabel.getStyleClass().add("popup-field-label");
+
+        ToggleGroup visibilityGroup = new ToggleGroup();
+        // Prevent deselection by clicking the already selected button
+        visibilityGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal == null) {
+                oldVal.setSelected(true);
+            }
+        });
+        ToggleButton publicToggle = new ToggleButton("Public");
+        publicToggle.setToggleGroup(visibilityGroup);
+        publicToggle.getStyleClass().addAll("visibility-toggle", "visibility-toggle-public");
+
+        ToggleButton privateToggle = new ToggleButton("Privée");
+        privateToggle.setToggleGroup(visibilityGroup);
+        privateToggle.getStyleClass().addAll("visibility-toggle", "visibility-toggle-private");
+
+        publicToggle.setSelected(true);
+        if (editMode && existingOeuvre.getType() != null && "privee".equalsIgnoreCase(existingOeuvre.getType().trim())) {
+            privateToggle.setSelected(true);
+        }
+
+        HBox visibilityRow = new HBox(10, publicToggle, privateToggle);
+        visibilityRow.setAlignment(Pos.CENTER_LEFT);
+        visibilityRow.getStyleClass().add("visibility-toggle-row");
+
         Button cancelButton = new Button("Fermer");
         cancelButton.getStyleClass().add("popup-close-button");
         cancelButton.setGraphic(createIcon("M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z", 0.52));
@@ -288,6 +449,7 @@ public class MesOeuvresController {
         publishButton.getStyleClass().add("popup-confirm-button");
         publishButton.setGraphic(createIcon("M9 16.17 4.83 12 3.41 13.41 9 19l12-12-1.41-1.41z", 0.58));
         publishButton.setGraphicTextGap(6);
+        final String previousImagePath = editMode ? safeText(existingOeuvre.getImage()) : "";
         publishButton.setOnAction(event -> {
             clearPopupError(titreError);
             clearPopupError(descriptionError);
@@ -297,6 +459,7 @@ public class MesOeuvresController {
             String titre = safeText(titreField.getText());
             String description = safeText(descriptionArea.getText());
             CollectionOeuvre selectedCollection = collectionCombo.getValue();
+            boolean isPrivate = privateToggle.isSelected();
 
             boolean hasError = false;
             if (!validateTitreField(titreField, titreError)) {
@@ -312,7 +475,7 @@ public class MesOeuvresController {
             } else {
                 clearFieldError(collectionError, collectionCombo);
             }
-            if (imagePathHolder[0] == null || imagePathHolder[0].isBlank()) {
+            if (!editMode && (imagePathHolder[0] == null || imagePathHolder[0].isBlank())) {
                 showPopupError(imageError, "L'image est obligatoire.");
                 hasError = true;
             }
@@ -330,11 +493,18 @@ public class MesOeuvresController {
                 oeuvre.setCollectionId(selectedCollection.getId());
                 oeuvre.setImage(imagePathHolder[0]);
                 oeuvre.setDateCreation(editMode && existingOeuvre.getDateCreation() != null ? existingOeuvre.getDateCreation() : LocalDate.now());
-                oeuvre.setType(resolveTypeFromSpecialite(artistSpecialite));
+                oeuvre.setType(resolveTypeFromVisibility(isPrivate, artistSpecialite));
                 if (editMode) {
                     oeuvreService.update(oeuvre);
+                    if (!previousImagePath.equals(safeText(imagePathHolder[0]))) {
+                        scheduleImageEmbeddingUpdate(existingOeuvre.getId(), imagePathHolder[0]);
+                    }
                 } else {
                     oeuvreService.add(oeuvre);
+                    Integer oeuvreId = oeuvre.getId();
+                    if (oeuvreId != null) {
+                        scheduleImageEmbeddingUpdate(oeuvreId, imagePathHolder[0]);
+                    }
                 }
 
                 popupStage.close();
@@ -343,9 +513,6 @@ public class MesOeuvresController {
                 showFieldError(titreError, titreField, e.getMessage() == null ? (editMode ? "Erreur modification oeuvre." : "Erreur ajout oeuvre.") : e.getMessage());
             }
         });
-
-        HBox imageRow = new HBox(10, chooseImageButton, selectedFileLabel);
-        imageRow.setAlignment(Pos.CENTER_LEFT);
 
         HBox footer = new HBox(10, cancelButton, publishButton);
         footer.setAlignment(Pos.CENTER_RIGHT);
@@ -362,15 +529,18 @@ public class MesOeuvresController {
                 collectionLabel,
                 collectionCombo,
                 collectionError,
+                visibilityLabel,
+                visibilityRow,
                 imageLabel,
-                imageRow,
+                cardsRow,
+                statusBar,
                 imageError,
                 footer
         );
         root.setPadding(new Insets(16));
         root.getStyleClass().add("collection-popup");
 
-        Scene scene = new Scene(root, 720, 500);
+        Scene scene = new Scene(root, 720, 700);
         scene.getStylesheets().addAll(addOeuvreButton.getScene().getStylesheets());
 
         popupStage.setScene(scene);
@@ -476,11 +646,39 @@ public class MesOeuvresController {
         errorLabel.setVisible(false);
     }
 
+    private void scheduleImageEmbeddingUpdate(int oeuvreId, String imagePath) {
+        if (imagePath == null || imagePath.isBlank()) {
+            return;
+        }
+
+        Task<Void> embeddingTask = new Task<>() {
+            @Override
+            protected Void call() throws Exception {
+                String imageEmbedding = imageEmbeddingClient.generateImageEmbeddingJson(imagePath);
+                if (imageEmbedding != null && !imageEmbedding.isBlank()) {
+                    oeuvreService.updateImageEmbedding(oeuvreId, imageEmbedding);
+                }
+                return null;
+            }
+        };
+
+        embeddingTask.setOnFailed(event -> {
+            Throwable error = embeddingTask.getException();
+            System.err.println("Image embedding generation failed for oeuvre " + oeuvreId + ": " + (error == null ? "unknown error" : error.getMessage()));
+        });
+
+        Thread thread = new Thread(embeddingTask, "oeuvre-image-embedding-" + oeuvreId);
+        thread.setDaemon(true);
+        thread.start();
+    }
+
     private void loadOeuvres() {
         try {
             allOeuvres.clear();
             allOeuvres.addAll(oeuvreService.getOeuvresByArtisteId(artisteId));
             commentsByOeuvreId.clear();
+            likeCountByOeuvreId.clear();
+            favoriCountByOeuvreId.clear();
             applyFilters();
         } catch (Exception e) {
             oeuvresContainer.getChildren().clear();
@@ -579,13 +777,15 @@ public class MesOeuvresController {
         }
 
         List<Commentaire> comments = getCommentsForOeuvre(oeuvre);
+        int likesCount = getLikesCount(oeuvre);
+        int favorisCount = getFavorisCount(oeuvre);
 
         HBox statsRow = new HBox(14);
         statsRow.getStyleClass().add("oeuvre-post-stats");
         statsRow.getChildren().addAll(
-                buildStatChip("M12.1 18.55 10.55 17.14C5.4 12.47 2 9.39 2 5.6 2 2.52 4.42 0 7.5 0c1.74 0 3.41.81 4.5 2.09C13.09.81 14.76 0 16.5 0 19.58 0 22 2.52 22 5.6c0 3.79-3.4 6.87-8.55 11.55z", 0),
+                buildStatChip("M12.1 18.55 10.55 17.14C5.4 12.47 2 9.39 2 5.6 2 2.52 4.42 0 7.5 0c1.74 0 3.41.81 4.5 2.09C13.09.81 14.76 0 16.5 0 19.58 0 22 2.52 22 5.6c0 3.79-3.4 6.87-8.55 11.55z", likesCount),
                 buildStatChip("M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z", comments.size()),
-                buildStatChip("M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z", 0)
+                buildStatChip("M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z", favorisCount)
         );
 
         VBox commentsPreviewBox = buildCommentsPreview(comments);
@@ -631,6 +831,53 @@ public class MesOeuvresController {
         }
     }
 
+    private int getLikesCount(Oeuvre oeuvre) {
+        if (oeuvre == null || oeuvre.getId() == null) {
+            return 0;
+        }
+
+        Integer oeuvreId = oeuvre.getId();
+        if (likeCountByOeuvreId.containsKey(oeuvreId)) {
+            return likeCountByOeuvreId.get(oeuvreId);
+        }
+
+        int count = likeService.countLikesByOeuvre(oeuvreId);
+        likeCountByOeuvreId.put(oeuvreId, count);
+        return count;
+    }
+
+    private int getFavorisCount(Oeuvre oeuvre) {
+        if (oeuvre == null || oeuvre.getId() == null) {
+            return 0;
+        }
+
+        Integer oeuvreId = oeuvre.getId();
+        if (favoriCountByOeuvreId.containsKey(oeuvreId)) {
+            return favoriCountByOeuvreId.get(oeuvreId);
+        }
+
+        int count = likeService.countFavorisByOeuvre(oeuvreId);
+        favoriCountByOeuvreId.put(oeuvreId, count);
+        return count;
+    }
+
+    private HBox buildLoadingDots() {
+        HBox dots = new HBox(4);
+        dots.setAlignment(Pos.CENTER);
+        for (int i = 0; i < 3; i++) {
+            Circle dot = new Circle(3, i == 0 ? javafx.scene.paint.Color.valueOf("#3f44d4") : javafx.scene.paint.Color.valueOf("#94a3b8"));
+            FadeTransition ft = new FadeTransition(Duration.seconds(0.5), dot);
+            ft.setFromValue(1.0);
+            ft.setToValue(0.3);
+            ft.setCycleCount(javafx.animation.Animation.INDEFINITE);
+            ft.setAutoReverse(true);
+            ft.setDelay(Duration.seconds(i * 0.15));
+            dots.getChildren().add(dot);
+            ft.play();
+        }
+        return dots;
+    }
+
     private VBox buildCommentsPreview(List<Commentaire> comments) {
         VBox commentsBox = new VBox(8);
         commentsBox.getStyleClass().add("oeuvre-post-comments-box");
@@ -646,15 +893,53 @@ public class MesOeuvresController {
             return commentsBox;
         }
 
+        VBox listContainer = new VBox(8);
+        commentsBox.getChildren().add(listContainer);
+
         int displayCount = Math.min(3, comments.size());
         for (int i = 0; i < displayCount; i++) {
-            commentsBox.getChildren().add(buildCommentRow(comments.get(i)));
+            listContainer.getChildren().add(buildCommentRow(comments.get(i)));
         }
 
         if (comments.size() > 3) {
-            Label moreLabel = new Label("+" + (comments.size() - 3) + " autres commentaires");
-            moreLabel.getStyleClass().add("oeuvre-post-comments-more");
-            commentsBox.getChildren().add(moreLabel);
+            StackPane btnStack = new StackPane();
+            Button showMoreBtn = new Button("Afficher plus (" + (comments.size() - 3) + ")");
+            showMoreBtn.getStyleClass().add("oeuvre-post-comments-more-btn");
+            showMoreBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #3f44d4; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 0; -fx-font-size: 12px;");
+
+            HBox loadingDots = buildLoadingDots();
+            loadingDots.setVisible(false);
+            loadingDots.setManaged(false);
+
+            showMoreBtn.setOnAction(event -> {
+                showMoreBtn.setVisible(false);
+                showMoreBtn.setManaged(false);
+                loadingDots.setVisible(true);
+                loadingDots.setManaged(true);
+
+                PauseTransition pause = new PauseTransition(Duration.seconds(1.2));
+                pause.setOnFinished(e -> {
+                    int subDelay = 0;
+                    for (int i = 3; i < comments.size(); i++) {
+                        Node row = buildCommentRow(comments.get(i));
+                        row.setOpacity(0);
+                        listContainer.getChildren().add(row);
+
+                        FadeTransition ft = new FadeTransition(Duration.seconds(0.4), row);
+                        ft.setFromValue(0);
+                        ft.setToValue(1);
+                        ft.setDelay(Duration.millis(subDelay));
+                        ft.play();
+
+                        subDelay += 80;
+                    }
+                    commentsBox.getChildren().remove(btnStack);
+                });
+                pause.play();
+            });
+
+            btnStack.getChildren().addAll(showMoreBtn, loadingDots);
+            commentsBox.getChildren().add(btnStack);
         }
 
         return commentsBox;
@@ -729,12 +1014,25 @@ public class MesOeuvresController {
         editItem.setGraphic(createColoredIcon("M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z", 0.58, "#6b7280"));
         editItem.setOnAction(event -> showOeuvrePopup(oeuvre));
 
+        MenuItem qrItem = new MenuItem("QR code");
+        qrItem.getStyleClass().add("collection-menu-qr");
+        qrItem.setGraphic(createColoredIcon(
+                "M3 3h8v8H3V3zm2 2v4h4V5H5zm8 0h8v8h-8V5zm2 2v4h4V7h-4zM3 13h8v8H3v-8zm2 2v4h4v-4H5zm10 0h2v2h-2v-2zm2 2h2v2h-2v-2zm2-2h2v2h-2v-2zm-4 4h2v2h-2v-2zm4 0h2v2h-2v-2z",
+                0.58,
+                "#3f44d4"
+        ));
+        qrItem.setOnAction(event -> showQrCodePopup(oeuvre));
+
         MenuItem deleteItem = new MenuItem("Supprimer");
         deleteItem.getStyleClass().add("collection-menu-delete");
         deleteItem.setGraphic(createColoredIcon("M6 7h12v2H6V7zm2 3h8v10H8V10zm3-6h2l1 1h4v2H6V5h4l1-1z", 0.58, "#dc3545"));
         deleteItem.setOnAction(event -> onDeleteOeuvre(oeuvre));
 
-        ContextMenu menu = new ContextMenu(editItem, deleteItem);
+        ContextMenu menu = new ContextMenu(editItem);
+        if (oeuvre != null && "Privee".equalsIgnoreCase(safeText(oeuvre.getType()))) {
+            menu.getItems().add(qrItem);
+        }
+        menu.getItems().add(deleteItem);
         menu.getStyleClass().add("collection-menu");
         return menu;
     }
@@ -763,7 +1061,123 @@ public class MesOeuvresController {
             errorAlert.showAndWait();
         }
     }
+    /****qrcode gen**/
+    private void showQrCodePopup(Oeuvre oeuvre) {
+        if (oeuvre == null || oeuvre.getId() == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.initOwner(addOeuvreButton.getScene().getWindow());
+            alert.setTitle("QR code");
+            alert.setHeaderText(null);
+            alert.setContentText("Impossible de générer le QR code : oeuvre invalide.");
+            alert.showAndWait();
+            return;
+        }
 
+        try {
+            String qrPayload = String.valueOf(oeuvre.getId());
+            String qrUrl = qrCodeService.generateQrCodeUrl(qrPayload, 320);
+            BufferedImage qrImage = ImageIO.read(new URL(qrUrl));
+            if (qrImage == null) {
+                throw new IOException("Impossible de récupérer l'image QR.");
+            }
+            Image fxQrImage = SwingFXUtils.toFXImage(qrImage, null);
+
+            ImageView qrPreview = new ImageView(fxQrImage);
+            qrPreview.setFitWidth(280);
+            qrPreview.setFitHeight(280);
+            qrPreview.setPreserveRatio(true);
+            qrPreview.setSmooth(true);
+
+            Label title = new Label("QR code privé");
+            title.getStyleClass().add("popup-title");
+
+            Button downloadButton = new Button("Télécharger");
+            downloadButton.getStyleClass().add("popup-confirm-button");
+            downloadButton.setGraphic(createColoredIcon("M12 16l4-4h-3V4h-2v8H8l4 4zm-7 2h14v2H5v-2z", 0.58, "#ffffff"));
+            downloadButton.setGraphicTextGap(6);
+
+            Button closeButton = new Button("Fermer");
+            closeButton.getStyleClass().add("popup-close-button");
+            closeButton.setGraphic(createColoredIcon("M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z", 0.52, "#6b7280"));
+            closeButton.setGraphicTextGap(6);
+
+            Stage popupStage = new Stage();
+            popupStage.initModality(Modality.APPLICATION_MODAL);
+            popupStage.initOwner(addOeuvreButton.getScene().getWindow());
+            popupStage.setTitle("QR code oeuvre #" + oeuvre.getId());
+
+            downloadButton.setOnAction(event -> saveQrCodeImage(qrUrl, oeuvre, popupStage));
+            closeButton.setOnAction(event -> popupStage.close());
+
+            HBox actionRow = new HBox(10, downloadButton, closeButton);
+            actionRow.setAlignment(Pos.CENTER);
+
+            VBox root = new VBox(14, title, qrPreview, actionRow);
+            root.setAlignment(Pos.CENTER);
+            root.setPadding(new Insets(18));
+            root.getStyleClass().add("collection-popup");
+
+            Scene scene = new Scene(root, 420, 460);
+            if (addOeuvreButton.getScene() != null) {
+                scene.getStylesheets().addAll(addOeuvreButton.getScene().getStylesheets());
+            }
+
+            popupStage.setScene(scene);
+            popupStage.showAndWait();
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.initOwner(addOeuvreButton.getScene().getWindow());
+            alert.setTitle("QR code");
+            alert.setHeaderText("Erreur de génération");
+            alert.setContentText(e.getMessage() == null ? "Impossible de générer le QR code." : e.getMessage());
+            alert.showAndWait();
+        }
+    }
+
+
+    private void saveQrCodeImage(String qrUrl, Oeuvre oeuvre, Stage ownerStage) {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Télécharger le QR code");
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image PNG", "*.png"));
+        chooser.setInitialFileName("oeuvre_qr_" + oeuvre.getTitre() + ".png");
+
+        File defaultDir = new File(System.getProperty("user.home"), "Downloads");
+        if (defaultDir.exists()) {
+            chooser.setInitialDirectory(defaultDir);
+        }
+
+        File target = chooser.showSaveDialog(ownerStage);
+        if (target == null) {
+            return;
+        }
+
+        if (!target.getName().toLowerCase(Locale.ROOT).endsWith(".png")) {
+            target = new File(target.getParentFile(), target.getName() + ".png");
+        }
+
+        try {
+            BufferedImage image = ImageIO.read(new URL(qrUrl));
+            if (image == null) {
+                throw new IOException("Impossible de récupérer l'image QR.");
+            }
+            ImageIO.write(image, "png", target);
+
+            Alert success = new Alert(Alert.AlertType.INFORMATION);
+            success.initOwner(ownerStage);
+            success.setTitle("QR code");
+            success.setHeaderText(null);
+            success.setContentText("QR code téléchargé avec succès.");
+            success.showAndWait();
+        } catch (IOException e) {
+            Alert error = new Alert(Alert.AlertType.ERROR);
+            error.initOwner(ownerStage);
+            error.setTitle("QR code");
+            error.setHeaderText("Téléchargement impossible");
+            error.setContentText(e.getMessage() == null ? "Impossible d'enregistrer l'image." : e.getMessage());
+            error.showAndWait();
+        }
+    }
+    /****qrcode gen**/
     private ImageView createImageViewFromSource(String imageSource) {
         if (imageSource == null || imageSource.isBlank()) {
             return null;
@@ -888,6 +1302,10 @@ public class MesOeuvresController {
         };
     }
 
+    private String resolveTypeFromVisibility(boolean isPrivate, String specialite) {
+        return isPrivate ? "Privee" : resolveTypeFromSpecialite(specialite);
+    }
+
     private void applyFilters() {
         String keyword = safeText(searchField.getText()).toLowerCase(Locale.ROOT).trim();
         List<Oeuvre> filtered = new ArrayList<>();
@@ -898,7 +1316,7 @@ public class MesOeuvresController {
             }
         }
 
-        applyCommentSort(filtered, sortCombo.getValue());
+        applySort(filtered, sortCombo.getValue());
         renderOeuvres(filtered);
     }
 
@@ -929,16 +1347,27 @@ public class MesOeuvresController {
         }
     }
 
-    private void applyCommentSort(List<Oeuvre> oeuvres, String sortValue) {
-        if (oeuvres == null || oeuvres.isEmpty()) {
+    private void applySort(List<Oeuvre> oeuvres, String sortValue) {
+        if (oeuvres == null || oeuvres.isEmpty() || sortValue == null) {
             return;
         }
 
-        Comparator<Oeuvre> byCommentCount = Comparator.comparingInt(oeuvre -> getCommentsForOeuvre(oeuvre).size());
-        if ("Commentaires croissant".equals(sortValue)) {
-            oeuvres.sort(byCommentCount);
+        Comparator<Oeuvre> comparator;
+
+        if (sortValue.startsWith("Commentaires")) {
+            comparator = Comparator.comparingInt(oeuvre -> getCommentsForOeuvre(oeuvre).size());
+        } else if (sortValue.startsWith("Likes")) {
+            comparator = Comparator.comparingInt(this::getLikesCount);
+        } else if (sortValue.startsWith("Favoris")) {
+            comparator = Comparator.comparingInt(this::getFavorisCount);
         } else {
-            oeuvres.sort(byCommentCount.reversed());
+            return;
+        }
+
+        if (sortValue.endsWith("croissant") && !sortValue.endsWith("decroissant")) {
+            oeuvres.sort(comparator);
+        } else {
+            oeuvres.sort(comparator.reversed());
         }
     }
 }
