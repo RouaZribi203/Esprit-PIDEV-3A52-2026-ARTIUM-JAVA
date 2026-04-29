@@ -2,6 +2,7 @@ package controllers;
 
 import Services.UserService;
 import entities.User;
+import utils.CardAnimator;
 import javafx.animation.FadeTransition;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -21,9 +22,11 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
+import utils.ArtisticBackground;
 import utils.InputValidator;
 
 import java.io.File;
@@ -54,6 +57,9 @@ public class InscriptionController {
 	@FXML private VBox stepOnePane;
 	@FXML private VBox stepTwoPane;
 	@FXML private VBox stepThreePane;
+	@FXML private StackPane landingShell;
+	@FXML private VBox landingHero;
+	@FXML private VBox signupCard;
 	@FXML private Label stepOneBadge;
 	@FXML private Label stepTwoBadge;
 	@FXML private Label stepThreeBadge;
@@ -107,9 +113,17 @@ public class InscriptionController {
 			updateRoleHints();
 			updateLiveValidationMessage();
 		});
-		setupLiveValidation();
 		updateRoleHints();
 		showStep(1, false);
+
+        if (landingShell != null) {
+            ArtisticBackground.attach(landingShell, 20); // 20 touches pour l'inscription
+        }
+
+		javafx.application.Platform.runLater(() -> {
+			if (landingHero != null) CardAnimator.animateFadeSlideUp(landingHero, 40);
+			if (signupCard != null) CardAnimator.animateFadeSlideUp(signupCard, 120);
+		});
 	}
 
 	@FXML
@@ -299,7 +313,8 @@ public class InscriptionController {
 		stepTwoPane.setVisible(step == 2); stepTwoPane.setManaged(step == 2);
 		stepThreePane.setVisible(step == 3); stepThreePane.setManaged(step == 3);
 		if (animate) {
-			fadeIn(step == 1 ? stepOnePane : step == 2 ? stepTwoPane : stepThreePane);
+			Node activePane = step == 1 ? stepOnePane : step == 2 ? stepTwoPane : stepThreePane;
+			CardAnimator.animateFadeSlideUp(activePane, 0);
 		}
 		previousButton.setText(step == 1 ? "Retour à l'accueil" : "Précédent");
 		nextButton.setVisible(step < 3); nextButton.setManaged(step < 3);
@@ -475,11 +490,7 @@ public class InscriptionController {
 	}
 
 	private void fadeIn(Node node) {
-		node.setOpacity(0.0);
-		FadeTransition transition = new FadeTransition(Duration.millis(180), node);
-		transition.setFromValue(0.0);
-		transition.setToValue(1.0);
-		transition.play();
+		// Not used anymore, replaced by CardAnimator
 	}
 
 	private void setMessage(String message, boolean error) {

@@ -8,7 +8,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/20.0.2"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="controllers.amateur.EditProfileController"
+            fx:controller="controllers.artist.EditProfileArtisteController"
             style="-fx-background-color: #eef0f7;">
 
     <center>
@@ -17,7 +17,7 @@
                            -fx-background: transparent;
                            -fx-border-color: transparent;">
             <padding>
-                <Insets top="32" right="40" bottom="40" left="40"/>
+                <Insets top="20" right="24" bottom="24" left="24"/>
             </padding>
 
             <VBox spacing="20">
@@ -205,11 +205,11 @@
                             </VBox>
 
                             <VBox spacing="7" GridPane.columnIndex="1">
-                                <Label text="CENTRE D'INTÉRÊT"
+                                <Label text="SPÉCIALITÉ"
                                        style="-fx-font-size: 11px;
                                               -fx-font-weight: bold;
                                               -fx-text-fill: #5B3DE8;"/>
-                                <ComboBox fx:id="interetCombo"
+                                <ComboBox fx:id="specialiteCombo"
                                           maxWidth="Infinity"
                                           style="-fx-background-color: white;
                                                  -fx-border-color: #dcdce8;
@@ -296,6 +296,7 @@
                         <!-- BOUTONS -->
                         <HBox spacing="12" alignment="CENTER_LEFT">
                             <Button text="Annuler"
+                                    onAction="#handleCancel"
                                     style="-fx-background-color: white;
                                            -fx-text-fill: #5B3DE8;
                                            -fx-font-size: 13px;

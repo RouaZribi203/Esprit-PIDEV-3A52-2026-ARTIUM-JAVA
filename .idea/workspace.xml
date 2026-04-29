@@ -5,16 +5,33 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/copilotDiffState.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/copilotDiffState.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Services/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Services/UserService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/components/HumanVerificationPane.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/components/HumanVerificationPane.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/controllers/AuthLandingController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/AuthLandingController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/BaseUsersBackofficeController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/BaseUsersBackofficeController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/DashboardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/DashboardController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/MainController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/MainController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/NavbarController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/NavbarController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/Navbar.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/Navbar.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/ConnexionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/ConnexionController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/InscriptionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/InscriptionController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/ProfileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/ProfileController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/AmateurMainController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/AmateurMainController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/EditProfileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/EditProfileController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/SidebarAmateurController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/SidebarAmateurController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/ArtistMainController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/ArtistMainController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/ProfileHeaderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/ProfileHeaderController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/SidebarArtisteController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/SidebarArtisteController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/utils/SessionManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/utils/SessionManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/EditProfile.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/EditProfile.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/SidebarAmateur.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/SidebarAmateur.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/artist/ProfileHeader.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/artist/ProfileHeader.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/artist/SidebarArtiste.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/artist/SidebarArtiste.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/auth/Connexion.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/auth/Connexion.fxml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/views/auth/Landing.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/auth/Landing.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/pages/inscription.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/pages/inscription.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/pages/profile.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/pages/profile.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/artist-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/artist-theme.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/auth.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/auth.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/dashboard.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/dashboard.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/profile.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/profile.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

@@ -89,7 +89,7 @@ public class ProfileHeaderController {
         String imagePath = pickProfileImage(user);
         if (imagePath != null) {
             try {
-                Image image = new Image(toImageUrl(imagePath), true);
+                Image image = new Image(toImageUrl(imagePath), false); // chargement synchrone
                 if (!image.isError()) {
                     profileImageView.setImage(image);
                     profileImageView.setVisible(true);
@@ -118,13 +118,7 @@ public class ProfileHeaderController {
     }
 
     private void installCircularClip() {
-        Circle clip = new Circle();
-        profileImageView.layoutBoundsProperty().addListener((obs, oldBounds, newBounds) -> {
-            double radius = Math.min(newBounds.getWidth(), newBounds.getHeight()) / 2.0;
-            clip.setRadius(radius);
-            clip.setCenterX(newBounds.getWidth() / 2.0);
-            clip.setCenterY(newBounds.getHeight() / 2.0);
-        });
+        Circle clip = new Circle(40, 40, 40);
         profileImageView.setClip(clip);
     }
 
@@ -207,7 +201,7 @@ public class ProfileHeaderController {
 
     @FXML
     private void onEditProfileClick() {
-        // Placeholder for edit profile drawer/dialog.
+        navigate("edit-profile");
     }
 
     private void navigate(String route) {

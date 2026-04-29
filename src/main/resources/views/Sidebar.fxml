@@ -40,6 +40,7 @@
     <Button fx:id="reclamationsButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onReclamationsClick" prefHeight="38.0" styleClass="nav-item" text="Reclamations" />
 
     <Region fx:id="sidebarSpacer" VBox.vgrow="ALWAYS" />
+    <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onLogoutClick" prefHeight="38.0" style="-fx-text-fill: #ffdf00; -fx-font-weight: 800;" styleClass="nav-item" text="🚪 Se déconnecter" />
 </VBox>
 
 

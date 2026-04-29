@@ -44,10 +44,10 @@ public class UserService implements Iservice<User> {
     private static final String ADMIN_NOM = "Administrateur";
     private static final String ADMIN_PRENOM = "Système";
     private static final LocalDate ADMIN_DATE_NAISSANCE = LocalDate.of(1990, 1, 1);
-    private static final String ADMIN_NUM_TEL = "00000000";
+    private static final String ADMIN_NUM_TEL = "93604970";
     private static final String ADMIN_VILLE = "Tunis";
     private static final String ADMIN_BIOGRAPHIE = "Compte administrateur principal de la plateforme.";
-    private static final String ADMIN_STATUT = "Activé";
+    private static final String ADMIN_STATUT = "Activé ✅ ";
     private static final String BLOCKED_STATUT = "Bloqué";
     private static final String BLOCKED_LOGIN_MESSAGE = "Votre compte est bloqué en attente d'activation par l'admin.";
 

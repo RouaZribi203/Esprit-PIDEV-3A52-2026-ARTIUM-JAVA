@@ -110,7 +110,16 @@ public class AmateurMainController {
     private void loadAmateurView(String fxmlPath) {
         try {
             URL resource = Objects.requireNonNull(getClass().getResource(fxmlPath), "FXML not found: " + fxmlPath);
-            Node page = FXMLLoader.load(resource);
+            FXMLLoader loader = new FXMLLoader(resource);
+            Node page = loader.load();
+
+            Object controller = loader.getController();
+            if (controller instanceof EditProfileController) {
+                ((EditProfileController) controller).setOnProfileUpdated(() -> {
+                    sidebarIncludeController.setUser(MainFX.getAuthenticatedUser());
+                });
+            }
+
             amateurContentArea.getChildren().setAll(page);
         } catch (IOException e) {
             throw new IllegalStateException("Failed to load amateur page: " + fxmlPath, e);

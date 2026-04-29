@@ -5,6 +5,7 @@ import javafx.fxml.FXML;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import utils.ArtisticBackground;
 import utils.CardAnimator;
 
 public class AuthLandingController {
@@ -17,6 +18,10 @@ public class AuthLandingController {
 
 	@FXML
 	public void initialize() {
+        if (landingShell != null) {
+            ArtisticBackground.attach(landingShell, 20); // 20 touches pour l'accueil
+        }
+        
 		// Attendre que la vue soit bien attachée à la SceneGraph
 		Platform.runLater(() -> {
 			// Topbar (petite entrée par le haut)

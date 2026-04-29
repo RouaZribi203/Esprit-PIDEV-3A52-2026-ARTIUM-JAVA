@@ -71,13 +71,7 @@ public class SidebarAmateurController {
     }
 
     private void installCircularClip() {
-        Circle clip = new Circle();
-        profileImageView.layoutBoundsProperty().addListener((obs, oldBounds, newBounds) -> {
-            double radius = Math.min(newBounds.getWidth(), newBounds.getHeight()) / 2.0;
-            clip.setRadius(radius);
-            clip.setCenterX(newBounds.getWidth() / 2.0);
-            clip.setCenterY(newBounds.getHeight() / 2.0);
-        });
+        Circle clip = new Circle(36, 36, 36);
         profileImageView.setClip(clip);
     }
 
@@ -233,6 +227,12 @@ public class SidebarAmateurController {
     @FXML
     private void onEditProfileClick() {
         navigate("edit-profile");
+    }
+
+    @FXML
+    private void onLogoutClick() {
+        utils.SessionManager.clearSession();
+        controllers.MainFX.switchToAuthLandingView();
     }
 
     private void navigate(String route) {

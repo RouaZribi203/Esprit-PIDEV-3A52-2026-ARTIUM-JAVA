@@ -1,4 +1,4 @@
-package controllers.amateur;
+package controllers.artist;
 
 import controllers.MainFX;
 import entities.User;
@@ -7,11 +7,12 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import java.io.File;
 import Services.UserService;
 import java.sql.SQLDataException;
 
-public class EditProfileController {
+public class EditProfileArtisteController {
 
     @FXML private TextField nomField;
     @FXML private TextField prenomField;
@@ -19,7 +20,7 @@ public class EditProfileController {
     @FXML private TextField villeField;
     @FXML private DatePicker dateNaissancePicker;
     @FXML private TextArea bioArea;
-    @FXML private ComboBox<String> interetCombo;
+    @FXML private ComboBox<String> specialiteCombo;
 
     @FXML private PasswordField oldPasswordField;
     @FXML private PasswordField newPasswordField;
@@ -32,17 +33,22 @@ public class EditProfileController {
 
     private User connectedUser;
     private Runnable onProfileUpdated;
+    private Stage dialogStage;
 
     public void setOnProfileUpdated(Runnable onProfileUpdated) {
         this.onProfileUpdated = onProfileUpdated;
+    }
+
+    public void setDialogStage(Stage dialogStage) {
+        this.dialogStage = dialogStage;
     }
 
     @FXML
     public void initialize() {
         connectedUser = MainFX.getAuthenticatedUser();
 
-        interetCombo.getItems().addAll(
-                "Peinture", "Sculpture", "Photographie", "Musique", "Cinéma"
+        specialiteCombo.getItems().addAll(
+                "Peintre", "Sculpteur", "Photographe", "Musicien", "Auteur", "Cinéaste", "Artiste Digital"
         );
 
         if (connectedUser != null) {
@@ -62,8 +68,8 @@ public class EditProfileController {
         if (connectedUser.getBiographie() != null)
             bioArea.setText(connectedUser.getBiographie());
 
-        if (connectedUser.getCentreInteret() != null)
-            interetCombo.setValue(connectedUser.getCentreInteret());
+        if (connectedUser.getSpecialite() != null)
+            specialiteCombo.setValue(connectedUser.getSpecialite());
 
         // Initiales avatar uniquement
         if (avatarLabel != null) {
@@ -120,12 +126,12 @@ public class EditProfileController {
     private void handleSave() {
         if (nomField.getText() == null || nomField.getText().trim().isEmpty() || 
             emailField.getText() == null || emailField.getText().trim().isEmpty()) {
-            showAlert("Erreur", "Nom et Email sont obligatoires !");
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Nom et Email sont obligatoires !");
             return;
         }
 
         if (dateNaissancePicker.getValue() == null) {
-            showAlert("Erreur", "La date de naissance est obligatoire !");
+            showAlert(Alert.AlertType.ERROR, "Erreur", "La date de naissance est obligatoire !");
             return;
         }
 
@@ -135,7 +141,7 @@ public class EditProfileController {
         connectedUser.setVille(villeField.getText() != null ? villeField.getText().trim() : "");
         connectedUser.setDateNaissance(dateNaissancePicker.getValue());
         connectedUser.setBiographie(bioArea.getText());
-        connectedUser.setCentreInteret(interetCombo.getValue());
+        connectedUser.setSpecialite(specialiteCombo.getValue());
 
         if (connectedUser.getDateInscription() == null) {
             connectedUser.setDateInscription(java.time.LocalDate.now());
@@ -150,19 +156,30 @@ public class EditProfileController {
             userService.update(connectedUser);
             
             utils.SessionManager.setCurrentUser(connectedUser);
+            
+            showAlert(Alert.AlertType.INFORMATION, "Succès", "Profil mis à jour avec succès !");
+
             if (onProfileUpdated != null) {
                 onProfileUpdated.run();
             }
-            
-            showAlert("Succès", "Profil mis à jour avec succès !");
-            prefillForm();
+
+            if (dialogStage != null) {
+                dialogStage.close();
+            }
         } catch (SQLDataException e) {
-            showAlert("Erreur", "Erreur lors de la mise à jour : " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Erreur lors de la mise à jour : " + e.getMessage());
         }
     }
 
-    private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+    @FXML
+    private void handleCancel() {
+        if (dialogStage != null) {
+            dialogStage.close();
+        }
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String message) {
+        Alert alert = new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);

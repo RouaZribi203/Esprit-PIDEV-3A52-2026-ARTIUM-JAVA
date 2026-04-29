@@ -12,8 +12,10 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
+import utils.ArtisticBackground;
 import utils.InputValidator;
 
 import java.sql.SQLDataException;
@@ -24,6 +26,7 @@ public class ConnexionController {
     @FXML private PasswordField passwordField;
     @FXML private Label messageLabel;
     @FXML private VBox loginCard;
+    @FXML private StackPane landingShell;
 
     private final UserService userService = new UserService();
     private HumanVerificationPane captchaPane;
@@ -32,6 +35,10 @@ public class ConnexionController {
 
     @FXML
     public void initialize() {
+        if (landingShell != null) {
+            ArtisticBackground.attach(landingShell, 15); // 15 touches de peinture
+        }
+
         captchaPane = new HumanVerificationPane();
         loginCard.getChildren().add(3, captchaPane);
 

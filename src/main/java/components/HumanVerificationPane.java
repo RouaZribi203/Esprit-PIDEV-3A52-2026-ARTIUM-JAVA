@@ -14,15 +14,15 @@ public class HumanVerificationPane extends VBox {
     private final QuestionCaptcha questionCaptcha;
 
     public HumanVerificationPane() {
-        setSpacing(14);
+        setSpacing(6); // Réduit de 14 à 6
 
-        Label stepLabel1 = new Label("Étape 1 — Glissez le curseur jusqu'au bout");
-        stepLabel1.setStyle("-fx-font-size: 12; -fx-font-weight: 700; -fx-text-fill: #4f46e5;");
+        Label stepLabel1 = new Label("Étape 1 — Glissez le curseur");
+        stepLabel1.setStyle("-fx-font-size: 11; -fx-font-weight: 700; -fx-text-fill: #5164d9;");
 
         sliderCaptcha = new SliderCaptcha();
 
         Label stepLabel2 = new Label("Étape 2 — Répondez à la question");
-        stepLabel2.setStyle("-fx-font-size: 12; -fx-font-weight: 700; -fx-text-fill: #4f46e5;");
+        stepLabel2.setStyle("-fx-font-size: 11; -fx-font-weight: 700; -fx-text-fill: #5164d9;");
 
         questionCaptcha = new QuestionCaptcha();
         questionCaptcha.setDisable(true);
@@ -50,13 +50,13 @@ public class HumanVerificationPane extends VBox {
     }
 
     private VBox styled(Label label, javafx.scene.Node content) {
-        VBox box = new VBox(8, label, content);
-        box.setPadding(new Insets(16));
+        VBox box = new VBox(4, label, content); // Réduit de 8 à 4
+        box.setPadding(new Insets(8)); // Réduit de 16 à 8
         box.setStyle("""
             -fx-background-color: white;
-            -fx-background-radius: 14;
-            -fx-border-radius: 14;
-            -fx-border-color: #e2e8f0;
+            -fx-background-radius: 8;
+            -fx-border-radius: 8;
+            -fx-border-color: #D1D5DB;
             -fx-border-width: 1;
             """);
         return box;

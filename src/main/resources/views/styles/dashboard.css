@@ -14,59 +14,67 @@
 
 /* ── Sidebar ─────────────────────────────────────────────────────── */
 .sidebar {
-    -fx-background-color: linear-gradient(to bottom, #2a27c9 0%, #1e1c8f 55%, #161488 100%);
+    /* Dégradé artistique et fluide : Bleu Royal vers Cyan lumineux */
+    -fx-background-color: linear-gradient(to bottom right, #273c95 0%, #4a5dc4 50%, #38bdf8 100%);
     -fx-min-width: 260;
     -fx-pref-width: 260;
     -fx-max-width: 260;
-    -fx-effect: dropshadow(gaussian, rgba(20, 18, 100, 0.45), 24, 0.22, 4, 0);
+    -fx-effect: dropshadow(gaussian, rgba(39, 60, 149, 0.35), 24, 0.2, 4, 0);
 }
 
-.sidebar-brand { -fx-padding: 8 10 20 10; }
+.sidebar-brand { -fx-padding: 24 10 30 10; }
 
 .brand-dot {
-    -fx-text-fill: #d4d2ff;
-    -fx-font-size: 24px;
+    -fx-text-fill: #ffdf00; /* Touche artistique jaune/or pour le contraste */
+    -fx-font-size: 26px;
     -fx-font-weight: bold;
 }
 
 .brand-label {
-    -fx-text-fill: white;
+    -fx-text-fill: #ffffff; /* Texte blanc pur */
     -fx-font-size: 28px;
-    -fx-font-weight: 700;
+    -fx-font-weight: 800;
+    -fx-font-family: "Georgia", serif; /* Typographie éditoriale */
 }
 
 .nav-item,
 .nav-sub-item {
     -fx-background-color: transparent;
-    -fx-text-fill: rgba(220, 218, 255, 0.88);
+    -fx-text-fill: rgba(255, 255, 255, 0.75); /* Blanc semi-transparent */
     -fx-font-size: 13.5px;
-    -fx-font-weight: 700;
+    -fx-font-weight: 600;
     -fx-alignment: CENTER_LEFT;
-    -fx-padding: 10 14 10 14;
-    -fx-background-radius: 10;
-    -fx-border-radius: 10;
+    -fx-padding: 12 14 12 16;
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
     -fx-cursor: hand;
+    -fx-font-family: "Inter", sans-serif;
 }
 
 .nav-sub-item {
     -fx-font-size: 13px;
-    -fx-font-weight: 600;
-    -fx-padding: 8 14 8 28;
-    -fx-text-fill: rgba(200, 198, 255, 0.78);
+    -fx-font-weight: 500;
+    -fx-padding: 10 14 10 32;
+    -fx-text-fill: rgba(255, 255, 255, 0.65);
 }
 
-.sub-menu { -fx-padding: 0 0 4 0; }
+.sub-menu { -fx-padding: 0 0 8 0; }
 
 .nav-item:hover,
 .nav-sub-item:hover {
-    -fx-background-color: rgba(255, 255, 255, 0.10);
-    -fx-text-fill: white;
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-text-fill: #ffffff; 
 }
 
 .nav-item.active,
 .nav-sub-item.active {
-    -fx-background-color: rgba(255, 255, 255, 0.18);
+    /* Effet "Glassmorphism" (verre dépoli) qui rappelle l'écran de connexion ! */
+    -fx-background-color: rgba(255, 255, 255, 0.20);
     -fx-text-fill: #ffffff;
+    -fx-font-weight: 800;
+    -fx-border-color: rgba(255, 255, 255, 0.5); /* Bordure semi-transparente lumineuse */
+    -fx-border-width: 1.5;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 10, 0, 0, 4);
 }
 
 /* ── Navbar ──────────────────────────────────────────────────────── */
