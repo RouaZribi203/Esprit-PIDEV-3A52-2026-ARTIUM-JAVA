@@ -1,7 +1,7 @@
 package utils;
 
 import entities.User;
-import Services.UserService;
+import services.UserService;
 import java.util.prefs.Preferences;
 import java.sql.SQLDataException;
 

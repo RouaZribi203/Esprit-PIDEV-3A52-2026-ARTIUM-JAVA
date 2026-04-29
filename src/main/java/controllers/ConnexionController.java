@@ -1,6 +1,6 @@
 package controllers;
 
-import Services.UserService;
+import services.UserService;
 import components.HumanVerificationPane;
 import services.UserService;
 import entities.User;

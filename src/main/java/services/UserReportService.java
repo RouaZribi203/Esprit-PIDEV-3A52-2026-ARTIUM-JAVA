@@ -10,6 +10,7 @@ import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.json.JSONObject;
+import services.UserService;
 
 import java.awt.Color;
 import java.io.InputStream;
@@ -65,14 +66,14 @@ public class UserReportService {
     private static final Color COLOR_BORDER       = new Color(210, 222, 240);
 
     // ── Services ──────────────────────────────────────────────────────────────
-    private final UserService    userService;
-    private final GroqAiService  groqAiService;
+    private final UserService userService;
+    private final Services.GroqAiService groqAiService;
 
     public UserReportService() {
-        this(new UserService(), new GroqAiService());
+        this(new UserService(), new Services.GroqAiService());
     }
 
-    public UserReportService(UserService userService, GroqAiService groqAiService) {
+    public UserReportService(UserService userService, Services.GroqAiService groqAiService) {
         this.userService   = userService;
         this.groqAiService = groqAiService;
     }

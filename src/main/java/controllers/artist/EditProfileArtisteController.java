@@ -9,7 +9,7 @@ import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
-import Services.UserService;
+import services.UserService;
 import java.sql.SQLDataException;
 
 public class EditProfileArtisteController {

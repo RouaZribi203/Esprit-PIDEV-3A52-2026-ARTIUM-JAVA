@@ -43,3 +43,7 @@ smtp.properties
 
 # Vosk model (trop lourd)
 src/main/resources/vosk-model-fr/
+
+config/stripe.local.properties
+config/qr-api.local.properties
+config/mail.local.properties
