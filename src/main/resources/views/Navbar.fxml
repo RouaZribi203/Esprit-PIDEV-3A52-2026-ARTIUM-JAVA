@@ -40,9 +40,9 @@
 
     <!-- ── Menu avatar ── -->
     <MenuButton fx:id="userMenuButton"
-                contentDisplay="GRAPHIC_ONLY"
+                contentDisplay="LEFT"
                 mnemonicParsing="false"
-                prefHeight="40.0" prefWidth="40.0"
+                prefHeight="40.0"
                 styleClass="avatar-menu">
         <graphic>
             <StackPane styleClass="navbar-avatar-ring">
@@ -55,11 +55,6 @@
                     </image>
                 </ImageView>
             </StackPane>
-            <ImageView fx:id="navbarAvatarImageView" fitHeight="32.0" fitWidth="33.0" preserveRatio="false" styleClass="navbar-avatar-image">
-                <image>
-                    <Image url="@../../../../../Web/Charte%20Graphique/Logo/PNG%20Icon.png" />
-                </image>
-            </ImageView>
         </graphic>
         <items>
             <MenuItem mnemonicParsing="false"

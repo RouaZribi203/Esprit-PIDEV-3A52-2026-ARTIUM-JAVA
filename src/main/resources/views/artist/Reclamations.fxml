@@ -20,14 +20,14 @@
         <Insets bottom="18.0" left="18.0" right="18.0" top="16.0" />
     </padding>
 
-    <!-- Titre page -->
-    <Label styleClass="page-title-small" text="Réclamations" />
-
-    <!-- Card wrapper (comme la maquette) -->
-    <VBox spacing="14.0" styleClass="artist-card reclamations-card" VBox.vgrow="ALWAYS">
+    <VBox spacing="14.0" styleClass="collections-body-card" VBox.vgrow="ALWAYS">
         <padding>
             <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
         </padding>
+
+        <HBox alignment="CENTER_LEFT" spacing="10.0">
+            <Label styleClass="page-title-small" text="Réclamations" />
+        </HBox>
 
         <TabPane fx:id="tabs" styleClass="reclamations-tabs" tabClosingPolicy="UNAVAILABLE">
             <tabs>

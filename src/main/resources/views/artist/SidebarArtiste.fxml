@@ -27,12 +27,6 @@
             <Label styleClass="card-label" text="Email:" />
             <Label fx:id="emailLabel" styleClass="card-text" text="-" />
         </HBox>
-        <HBox alignment="CENTER_LEFT">
-            <StackPane prefHeight="64.0" prefWidth="64.0" styleClass="sidebar-avatar">
-                <ImageView fx:id="profileImageView" fitHeight="58.0" fitWidth="58.0" pickOnBounds="true" preserveRatio="false" styleClass="sidebar-avatar-image" visible="false" />
-                <Label fx:id="avatarFallbackLabel" styleClass="sidebar-avatar-symbol" text="🎨" />
-            </StackPane>
-        </HBox>
     </VBox>
 
     <VBox spacing="10.0" styleClass="artist-card">

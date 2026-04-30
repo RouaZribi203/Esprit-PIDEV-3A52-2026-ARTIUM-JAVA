@@ -25,7 +25,7 @@
 
 /* --- ROOT & CANVAS --- */
 .auth-root {
-    -fx-font-family: "Inter", "Segoe UI", "Helvetica", sans-serif;
+    -fx-font-family: "Exo 2", sans-serif;
     -fx-background-color: #FAFAFC; /* Toile très légèrement grisée pour adoucir */
 }
 
@@ -69,7 +69,7 @@
 .auth-login-title,
 .auth-landing-title,
 .auth-hero-title {
-    -fx-font-family: "Georgia", "Times New Roman", serif;
+    -fx-font-family: "Exo 2", sans-serif;
     -fx-font-size: 36px; /* Plus petit pour moins de hauteur */
     -fx-text-fill: #273c95; /* Deep Royal Blue from logo */
     -fx-font-weight: normal;
@@ -157,7 +157,7 @@
     -fx-background-color: #273c95; /* Deep Royal Blue */
     -fx-text-fill: #FFFFFF;
     -fx-background-radius: 6; /* Slightly rounded for softness */
-    -fx-font-family: "Inter", sans-serif;
+    -fx-font-family: "Exo 2", sans-serif;
     -fx-font-weight: 700;
     -fx-font-size: 14px;
     -fx-padding: 10 20;
@@ -246,7 +246,7 @@
 .auth-or-label {
     -fx-text-fill: #999999;
     -fx-font-style: italic;
-    -fx-font-family: "Georgia", serif;
+    -fx-font-family: "Exo 2", sans-serif;
 }
 
 /* --- MESSAGES --- */
@@ -284,7 +284,7 @@
     -fx-background-color: transparent;
     -fx-text-fill: #999999;
     -fx-font-size: 18px;
-    -fx-font-family: "Georgia", serif;
+    -fx-font-family: "Exo 2", sans-serif;
     -fx-padding: 0 16 8 0;
     -fx-border-color: transparent;
     -fx-cursor: hand;
@@ -305,5 +305,5 @@
 }
 .auth-photo-placeholder {
     -fx-text-fill: #999999;
-    -fx-font-family: "Inter", sans-serif;
+    -fx-font-family: "Exo 2", sans-serif;
 }

@@ -323,6 +323,51 @@ public class MusiqueService implements Iservice<Musique> {
         return musiques;
     }
 
+    public List<Musique> getByArtistId(int artistId) throws SQLDataException {
+        if (connection == null) {
+            throw new SQLDataException("Connexion a la base de donnees indisponible.");
+        }
+
+        String query = "SELECT o.id, o.titre, o.description, o.date_creation, o.collection_id, o.type, o.classe, o.image, m.genre, m.audio, m.updated_at "
+                + "FROM musique m "
+                + "INNER JOIN oeuvre o ON o.id = m.id "
+                + "INNER JOIN collections c ON c.id = o.collection_id "
+                + "WHERE c.artiste_id = ? "
+                + "ORDER BY o.id DESC";
+
+        List<Musique> musiques = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, artistId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    Musique musique = new Musique();
+                    musique.setId(resultSet.getInt("id"));
+                    musique.setTitre(resultSet.getString("titre"));
+                    musique.setDescription(resultSet.getString("description"));
+                    Date dateCreation = resultSet.getDate("date_creation");
+                    if (dateCreation != null) {
+                        musique.setDateCreation(dateCreation.toLocalDate());
+                    }
+                    musique.setCollectionId(resultSet.getInt("collection_id"));
+                    musique.setType(resultSet.getString("type"));
+                    musique.setClasse(resultSet.getString("classe"));
+                    musique.setImage(ImageUrlUtils.normalizeForDatabase(resultSet.getString("image")));
+                    musique.setGenre(resultSet.getString("genre"));
+                    musique.setAudio(resultSet.getString("audio"));
+                    Timestamp updatedAt = resultSet.getTimestamp("updated_at");
+                    if (updatedAt != null) {
+                        musique.setUpdatedAt(updatedAt.toLocalDateTime());
+                    }
+                    musiques.add(musique);
+                }
+            }
+        } catch (SQLException e) {
+            throw new SQLDataException("Impossible de charger les musiques de l'artiste: " + e.getMessage());
+        }
+
+        return musiques;
+    }
+
     @Override
     public Musique getById(int id) throws SQLDataException {
         return null;

@@ -57,7 +57,10 @@ import javafx.scene.control.Tooltip;
 public class BibliofrontController {
     private final LivreService livreService = new JdbcLivreService();
     private final JdbcLocationLivreService locationLivreService = new JdbcLocationLivreService();
-    private final int currentUserId = 1;
+    private int getCurrentUserId() {
+        entities.User u = utils.SessionManager.getCurrentUser();
+        return (u != null) ? u.getId() : 1;
+    }
     private List<Livre> livres = new ArrayList<>();
     private java.util.function.Consumer<Livre> readerNavigationHandler;
 
@@ -211,7 +214,7 @@ public class BibliofrontController {
         }
         if (filterRentedToggle != null && filterRentedToggle.isSelected()) {
             try {
-                List<Integer> rentedIds = locationLivreService.getRentedLivreIds(currentUserId);
+                List<Integer> rentedIds = locationLivreService.getRentedLivreIds(getCurrentUserId());
                 result = result.stream().filter(l -> rentedIds.contains(l.getId())).collect(Collectors.toList());
             } catch (SQLDataException e) {
                 showError("Filtrage locations", e.getMessage());
@@ -339,7 +342,7 @@ public class BibliofrontController {
             return;
         }
         try {
-            locationLivreService.louerLivre(livre.getId(), currentUserId, jours);
+            locationLivreService.louerLivre(livre.getId(), getCurrentUserId(), jours);
             showInfo("Location", "Livre loué avec succès.");
             refresh();
         } catch (SQLDataException e) {
@@ -690,7 +693,7 @@ public class BibliofrontController {
 
         LocationLivre activeLocation = null;
         if (livre.getId() != null) {
-            try { activeLocation = locationLivreService.getActiveLocation(livre.getId(), currentUserId); }
+            try { activeLocation = locationLivreService.getActiveLocation(livre.getId(), getCurrentUserId()); }
             catch (SQLDataException ignored) {}
         }
 
@@ -763,7 +766,7 @@ public class BibliofrontController {
     private void openPdfInApp(Livre livre) {
         if (livre.getId() == null) { showError("PDF", "Livre invalide."); return; }
         try {
-            LocationLivre loc = locationLivreService.getActiveLocation(livre.getId(), currentUserId);
+            LocationLivre loc = locationLivreService.getActiveLocation(livre.getId(), getCurrentUserId());
             if (loc == null) { showError("PDF", "Vous devez louer ce livre pour l'ouvrir."); return; }
         } catch (SQLDataException e) { showError("PDF", "Impossible de vérifier la location."); return; }
 
@@ -1021,7 +1024,7 @@ public class BibliofrontController {
                 com.stripe.model.PaymentIntent intent = StripePaymentHandler.createPaymentIntent(
                         amountInCents,
                         livre.getTitre() != null ? livre.getTitre() : "Livre",
-                        currentUserId);
+                        getCurrentUserId());
 
                 // Confirm it with the payment method
                 Map<String, Object> confirmParams = new HashMap<>();
@@ -1035,7 +1038,7 @@ public class BibliofrontController {
                     if ("succeeded".equals(status)) {
                         // ── FIX 3: save the rental to the DB before showing success ──
                         try {
-                            locationLivreService.louerLivre(livre.getId(), currentUserId, (int) daysF);
+                            locationLivreService.louerLivre(livre.getId(), getCurrentUserId(), (int) daysF);
                             refresh();
                         } catch (SQLDataException dbEx) {
                             showError("Erreur", "Paiement réussi mais erreur d'enregistrement : " + dbEx.getMessage());

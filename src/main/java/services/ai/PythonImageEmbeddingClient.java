@@ -12,7 +12,7 @@ import java.nio.file.Path;
 
 public class PythonImageEmbeddingClient {
 
-    private static final String DEFAULT_API_URL = "http://127.0.0.1:8001/embed";
+    private static final String DEFAULT_API_URL = "https://goggles-drown-skinhead.ngrok-free.dev/embed";
     private static final String EMBEDDING_KEY = "\"embedding\"";
 
     private final HttpClient httpClient;

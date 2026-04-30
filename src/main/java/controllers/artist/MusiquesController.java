@@ -4,6 +4,8 @@ import services.MusiqueService;
 import services.PlaylistService;
 import entities.Musique;
 import entities.Playlist;
+import entities.User;
+import utils.SessionManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -531,7 +533,13 @@ public class MusiquesController {
 
     private void refreshMusiquesList() {
         try {
-            List<Musique> musiques = musiqueService.getAll();
+            List<Musique> musiques;
+            User loggedInUser = SessionManager.getCurrentUser();
+            if (loggedInUser != null) {
+                musiques = musiqueService.getByArtistId(loggedInUser.getId());
+            } else {
+                musiques = musiqueService.getAll();
+            }
             allTracks.setAll(musiques);
             loadTrackArtistNames(musiques);
             filterTracks(searchField != null ? searchField.getText() : null);

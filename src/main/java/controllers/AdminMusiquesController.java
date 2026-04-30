@@ -443,27 +443,29 @@ public class AdminMusiquesController {
         card.setPrefWidth(TRACK_CARD_WIDTH);
         card.setMaxWidth(TRACK_CARD_WIDTH);
         card.setStyle(index == currentTrackIndex
-                ? "-fx-background-color: #212529; -fx-background-radius: 8; -fx-border-color: #198754; -fx-border-radius: 8; -fx-padding: 8;"
-                : "-fx-background-color: #212529; -fx-background-radius: 8; -fx-padding: 8;");
+                ? "-fx-background-color: #ffffff; -fx-background-radius: 12; -fx-border-color: #38bdf8; -fx-border-width: 2; -fx-border-radius: 12; -fx-padding: 8; -fx-effect: dropshadow(gaussian, rgba(56,189,248,0.2), 12, 0, 0, 4);"
+                : "-fx-background-color: #ffffff; -fx-background-radius: 12; -fx-border-color: #e2e8f0; -fx-border-radius: 12; -fx-padding: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.02), 8, 0, 0, 2);");
 
         Node coverNode = buildCoverNode(musique.getImage());
 
         String titre = musique.getTitre() != null ? musique.getTitre() : "Sans titre";
         Label titleLabel = new Label(titre);
         titleLabel.setWrapText(true);
-        titleLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
+        titleLabel.setStyle("-fx-text-fill: #0f172a; -fx-font-weight: 800;");
 
         String genre = musique.getGenre() != null ? musique.getGenre() : "-";
         Label metaLabel = new Label("Genre: " + genre);
-        metaLabel.setStyle("-fx-text-fill: #cbd5e1;");
+        metaLabel.setStyle("-fx-text-fill: #64748b;");
 
         Button playButton = new Button("Play");
+        playButton.setStyle("-fx-background-color: #f1f5f9; -fx-text-fill: #0f172a; -fx-font-weight: bold; -fx-background-radius: 6;");
         playButton.setOnAction(event -> {
             event.consume();
             playTrackAtIndex(index);
         });
 
         Button deleteButton = new Button("Supprimer");
+        deleteButton.setStyle("-fx-background-color: #fee2e2; -fx-text-fill: #dc2626; -fx-font-weight: bold; -fx-background-radius: 6;");
         deleteButton.setOnAction(event -> {
             event.consume();
             if (confirmDeleteMusique(musique)) {
@@ -483,31 +485,33 @@ public class AdminMusiquesController {
         card.setMinWidth(PLAYLIST_CARD_WIDTH);
         card.setPrefWidth(PLAYLIST_CARD_WIDTH);
         card.setMaxWidth(PLAYLIST_CARD_WIDTH);
-        card.setStyle("-fx-background-color: #212529; -fx-background-radius: 8; -fx-padding: 8;");
+        card.setStyle("-fx-background-color: #ffffff; -fx-background-radius: 12; -fx-border-color: #e2e8f0; -fx-border-radius: 12; -fx-padding: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.02), 8, 0, 0, 2);");
 
         Node coverNode = buildPlaylistCoverNode(playlist.getImage());
 
         Label nameLabel = new Label(safePlaylistName(playlist));
         nameLabel.setWrapText(true);
-        nameLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
+        nameLabel.setStyle("-fx-text-fill: #0f172a; -fx-font-weight: 800;");
 
         String description = playlist.getDescription() != null && !playlist.getDescription().isBlank()
                 ? playlist.getDescription()
                 : "Aucune description";
         Label descriptionLabel = new Label(description);
         descriptionLabel.setWrapText(true);
-        descriptionLabel.setStyle("-fx-text-fill: #cbd5e1;");
+        descriptionLabel.setStyle("-fx-text-fill: #64748b;");
 
         Label countLabel = new Label((playlist.getMusiques() != null ? playlist.getMusiques().size() : 0) + " musique(s)");
-        countLabel.setStyle("-fx-text-fill: #9ca3af;");
+        countLabel.setStyle("-fx-text-fill: #94a3b8;");
 
         Button openButton = new Button("Ouvrir");
+        openButton.setStyle("-fx-background-color: #f1f5f9; -fx-text-fill: #0f172a; -fx-font-weight: bold; -fx-background-radius: 6;");
         openButton.setOnAction(event -> {
             event.consume();
             showPlaylistDetails(playlist);
         });
 
         Button deleteButton = new Button("Supprimer");
+        deleteButton.setStyle("-fx-background-color: #fee2e2; -fx-text-fill: #dc2626; -fx-font-weight: bold; -fx-background-radius: 6;");
         deleteButton.setOnAction(event -> {
             event.consume();
             if (confirmDeletePlaylist(playlist)) {
@@ -592,12 +596,14 @@ public class AdminMusiquesController {
             for (Musique track : tracks) {
                 HBox row = new HBox(8);
                 Label title = new Label(track.getTitre() != null ? track.getTitre() : "Sans titre");
-                title.setStyle("-fx-text-fill: white; -fx-font-weight: 700;");
+                title.setStyle("-fx-text-fill: #0f172a; -fx-font-weight: 700;");
 
                 Button playButton = new Button("Play");
+                playButton.setStyle("-fx-background-color: #f1f5f9; -fx-text-fill: #0f172a; -fx-font-weight: bold; -fx-background-radius: 6;");
                 playButton.setOnAction(event -> playTrackFromAnyList(track));
 
                 Button removeButton = new Button("Retirer");
+                removeButton.setStyle("-fx-background-color: #fee2e2; -fx-text-fill: #dc2626; -fx-font-weight: bold; -fx-background-radius: 6;");
                 removeButton.setOnAction(event -> {
                     event.consume();
                     if (selectedPlaylistId == null || track == null || track.getId() == null) {

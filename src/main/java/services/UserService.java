@@ -556,6 +556,76 @@ public class UserService implements Iservice<User> {
         ensureConnection();
         ensureIdColumn();
 
+        try {
+            // Cascade delete child records pour forcer la suppression de l'utilisateur
+
+            // 1. Delete tickets de l'utilisateur
+            try (PreparedStatement ps = connection.prepareStatement("DELETE FROM ticket WHERE user_id = ?")) {
+                ps.setInt(1, user.getId());
+                ps.executeUpdate();
+            } catch (SQLException e) { System.err.println(e.getMessage()); }
+
+            // 2. Delete evenements de l'utilisateur (artiste)
+            try (PreparedStatement ps = connection.prepareStatement("SELECT id FROM evenement WHERE artiste_id = ?")) {
+                ps.setInt(1, user.getId());
+                try (ResultSet rs = ps.executeQuery()) {
+                    services.EvenementService evenementService = new services.EvenementService();
+                    while (rs.next()) {
+                        entities.Evenement ev = new entities.Evenement();
+                        ev.setId(rs.getInt("id"));
+                        evenementService.delete(ev);
+                    }
+                }
+            } catch (SQLException e) { System.err.println(e.getMessage()); }
+
+            // 3. Delete collections (et oeuvres par cascade)
+            try (PreparedStatement ps = connection.prepareStatement("SELECT id FROM collections WHERE artiste_id = ?")) {
+                ps.setInt(1, user.getId());
+                try (ResultSet rs = ps.executeQuery()) {
+                    services.OeuvreService oeuvreService = new services.OeuvreService();
+                    while (rs.next()) {
+                        oeuvreService.deleteByCollectionId(rs.getInt("id"));
+                    }
+                }
+            } catch (SQLException e) { System.err.println(e.getMessage()); }
+            
+            try (PreparedStatement ps = connection.prepareStatement("DELETE FROM collections WHERE artiste_id = ?")) {
+                ps.setInt(1, user.getId());
+                ps.executeUpdate();
+            } catch (SQLException e) { System.err.println(e.getMessage()); }
+
+            // 4. Delete related records in other tables
+            String[] userTables = {
+                "oeuvre_user:user_id",
+                "`like`:user_id",
+                "commentaire:user_id",
+                "notification:user_id",
+                "reclamation:user_id",
+                "user_report:reporter_id",
+                "user_report:reported_id",
+                "user_connection:user_id",
+                "galerie:artiste_id",
+                "livre:auteur_id",
+                "location_livre:user_id",
+                "musique:artiste_id",
+                "playlist:user_id"
+            };
+            
+            for (String tableDef : userTables) {
+                String[] parts = tableDef.split(":");
+                String table = parts[0];
+                String idCol = parts[1];
+                try (PreparedStatement ps = connection.prepareStatement("DELETE FROM " + table + " WHERE " + idCol + " = ?")) {
+                    ps.setInt(1, user.getId());
+                    ps.executeUpdate();
+                } catch (SQLException e) {
+                    System.err.println("Ignored error deleting from " + table + ": " + e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Erreur générale lors de la suppression en cascade: " + e.getMessage());
+        }
+
         String sql = "DELETE FROM `user` WHERE `" + idColumn + "` = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, user.getId());

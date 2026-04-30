@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.TilePane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox spacing="12.0" styleClass="page-root" stylesheets="@../styles/dashboardevent.css" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.AdminMusiquesController">
+<VBox spacing="12.0" styleClass="page-root" stylesheets="@../styles/dashboard.css" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.AdminMusiquesController">
     <padding>
         <Insets bottom="20.0" left="26.0" right="20.0" top="24.0" />
     </padding>
@@ -48,10 +48,10 @@
             </content>
         </ScrollPane>
 
-        <VBox spacing="6.0" style="-fx-background-color: #171717; -fx-background-radius: 8; -fx-padding: 12;">
-            <Label style="-fx-text-fill: #ffffff; -fx-font-size: 14px; -fx-font-weight: bold;" text="Lecture en cours" />
-            <Label fx:id="nowPlayingTitleLabel" style="-fx-text-fill: #ffffff;" text="Selectionnez une musique" wrapText="true" />
-            <Label fx:id="nowPlayingMetaLabel" style="-fx-text-fill: #b0b0b0;" text="Genre: -" />
+        <VBox spacing="6.0" style="-fx-background-color: #ffffff; -fx-background-radius: 12; -fx-border-color: #e2e8f0; -fx-border-radius: 12; -fx-padding: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.02), 8, 0, 0, 2);">
+            <Label style="-fx-text-fill: #0f172a; -fx-font-size: 14px; -fx-font-weight: bold;" text="Lecture en cours" />
+            <Label fx:id="nowPlayingTitleLabel" style="-fx-text-fill: #1e293b; -fx-font-weight: 600;" text="Selectionnez une musique" wrapText="true" />
+            <Label fx:id="nowPlayingMetaLabel" style="-fx-text-fill: #64748b;" text="Genre: -" />
             <HBox spacing="10.0">
                 <Button mnemonicParsing="false" onAction="#handlePreviousTrack" text="Prev" />
                 <Button fx:id="playPauseButton" mnemonicParsing="false" onAction="#handlePlayPause" text="Play" />
@@ -64,11 +64,11 @@
     <VBox fx:id="playlistsSection" spacing="10.0" visible="false" managed="false">
         <Label text="Toutes les playlists" />
 
-        <VBox fx:id="playlistDetailSection" spacing="8.0" visible="false" managed="false" style="-fx-background-color: rgba(255,255,255,0.06); -fx-background-radius: 8; -fx-padding: 12;">
+        <VBox fx:id="playlistDetailSection" spacing="8.0" visible="false" managed="false" style="-fx-background-color: #ffffff; -fx-background-radius: 12; -fx-border-color: #e2e8f0; -fx-border-radius: 12; -fx-padding: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.02), 8, 0, 0, 2);">
             <HBox spacing="10.0">
                 <VBox spacing="2.0" HBox.hgrow="ALWAYS">
-                    <Label fx:id="playlistDetailTitleLabel" style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;" text="Aucune playlist selectionnee" />
-                    <Label fx:id="playlistDetailMetaLabel" style="-fx-text-fill: #cbd5e1;" text="Cliquez sur une playlist pour voir ses musiques." wrapText="true" />
+                    <Label fx:id="playlistDetailTitleLabel" style="-fx-text-fill: #0f172a; -fx-font-size: 16px; -fx-font-weight: bold;" text="Aucune playlist selectionnee" />
+                    <Label fx:id="playlistDetailMetaLabel" style="-fx-text-fill: #64748b;" text="Cliquez sur une playlist pour voir ses musiques." wrapText="true" />
                 </VBox>
                 <Button mnemonicParsing="false" onAction="#handleClosePlaylistDetail" text="Fermer" />
             </HBox>

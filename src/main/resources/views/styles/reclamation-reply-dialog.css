@@ -1,7 +1,7 @@
 /* Style dédié au popup "Répondre à la réclamation" (comme la capture) */
 
 .reply-dialog-root {
-    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-family: "Exo 2", sans-serif;
     /* fond plus moderne */
     -fx-background-color: linear-gradient(to bottom right, #f5f7ff, #f3fbf9);
 }

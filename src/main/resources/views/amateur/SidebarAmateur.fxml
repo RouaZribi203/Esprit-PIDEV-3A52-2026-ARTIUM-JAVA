@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox prefWidth="320.0" spacing="0.0" styleClass="amateur-left-sidebar" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.amateur.SidebarAmateurController">
+<VBox minWidth="320.0" maxWidth="320.0" prefWidth="320.0" spacing="0.0" styleClass="amateur-left-sidebar" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.amateur.SidebarAmateurController">
     <VBox spacing="0.0" styleClass="sidebar-card">
         
         <!-- Couverture -->

@@ -15,28 +15,34 @@
         <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
     </padding>
 
-    <HBox alignment="CENTER_LEFT" spacing="10.0">
-        <Label styleClass="page-title-small" text="Mes evenements" />
-        <Region HBox.hgrow="ALWAYS" />
-        <Button fx:id="addEvenementButton" mnemonicParsing="false" onAction="#onAddEvenementClick" styleClass="artist-primary-button" text="Ajouter" />
-    </HBox>
+    <VBox spacing="10.0" styleClass="collections-body-card" VBox.vgrow="ALWAYS">
+        <padding>
+            <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
+        </padding>
 
-    <Label styleClass="page-subtitle-small" text="Gerez vos evenements et leur statut." wrapText="true" />
+        <HBox alignment="CENTER_LEFT" spacing="10.0">
+            <Label styleClass="page-title-small" text="Mes evenements" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button fx:id="addEvenementButton" mnemonicParsing="false" onAction="#onAddEvenementClick" styleClass="artist-primary-button" text="Ajouter" />
+        </HBox>
 
-    <HBox alignment="CENTER_LEFT" spacing="10.0">
-        <TextField fx:id="rechercheField" promptText="Rechercher evenement..." styleClass="artist-form-field" HBox.hgrow="ALWAYS" />
-        <Label text="Trier par" />
-        <ComboBox fx:id="triComboBox" prefWidth="220.0" styleClass="artist-form-combo" />
-    </HBox>
+        <Label styleClass="page-subtitle-small" text="Gerez vos evenements et leur statut." wrapText="true" />
 
-    <Label fx:id="emptyStateLabel" managed="false" styleClass="page-subtitle-small" text="Aucun evenement trouve." visible="false" />
+        <HBox alignment="CENTER_LEFT" spacing="10.0">
+            <TextField fx:id="rechercheField" promptText="Rechercher evenement..." styleClass="artist-form-field" HBox.hgrow="ALWAYS" />
+            <Label text="Trier par" />
+            <ComboBox fx:id="triComboBox" prefWidth="220.0" styleClass="artist-form-combo" />
+        </HBox>
 
-    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="artist-events-scroll" VBox.vgrow="ALWAYS">
-        <VBox fx:id="eventsListContainer" spacing="10.0" styleClass="artist-events-list">
-            <padding>
-                <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-            </padding>
-        </VBox>
-    </ScrollPane>
+        <Label fx:id="emptyStateLabel" managed="false" styleClass="page-subtitle-small" text="Aucun evenement trouve." visible="false" />
+
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="artist-events-scroll" VBox.vgrow="ALWAYS">
+            <VBox fx:id="eventsListContainer" spacing="10.0" styleClass="artist-events-list">
+                <padding>
+                    <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                </padding>
+            </VBox>
+        </ScrollPane>
+    </VBox>
 </VBox>
 

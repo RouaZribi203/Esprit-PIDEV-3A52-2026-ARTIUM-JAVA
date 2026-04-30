@@ -45,6 +45,10 @@ public class EvenementService implements Iservice<Evenement> {
             throw new SQLDataException("Impossible de supprimer un evenement sans ID");
         }
 
+        // Cascade delete: supprimer les tickets associés
+        TicketService ticketService = new TicketService();
+        ticketService.deleteTicketsByEvent(evenement.getId());
+
         try (PreparedStatement statement = MyDatabase.getInstance().getConnection().prepareStatement(DELETE_SQL)) {
             statement.setInt(1, evenement.getId());
             statement.executeUpdate();
@@ -170,6 +174,10 @@ public class EvenementService implements Iservice<Evenement> {
         if (evenement == null || evenement.getId() == null) {
             throw new SQLDataException("Impossible de supprimer un evenement sans ID");
         }
+
+        // Cascade delete: supprimer les tickets associés
+        TicketService ticketService = new TicketService();
+        ticketService.deleteTicketsByEvent(evenement.getId());
 
         try (PreparedStatement statement = MyDatabase.getInstance().getConnection().prepareStatement(DELETE_BY_ARTIST_SQL)) {
             statement.setInt(1, evenement.getId());

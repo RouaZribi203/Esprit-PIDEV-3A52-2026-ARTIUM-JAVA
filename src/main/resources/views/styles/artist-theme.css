@@ -1,3 +1,7 @@
+.root {
+    -fx-font-family: "Exo 2", sans-serif;
+}
+
 /* Cache les barres de défilement tout en gardant le scroll actif */
 .scroll-bar:horizontal,
 .scroll-bar:vertical {
@@ -20,14 +24,15 @@
 }
 
 .artist-root {
-    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-family: "Exo 2", sans-serif;
     -fx-background-color: #eaf3ff;
 }
 
 .artist-navbar {
-    -fx-background-color: white;
-    -fx-border-color: #dfe4ea;
+    -fx-background-color: rgba(255, 255, 255, 0.95);
+    -fx-border-color: #e5e7eb;
     -fx-border-width: 0 0 1 0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 10, 0, 0, 2);
 }
 
 .artist-brand-row {
@@ -357,13 +362,23 @@
 .profile-card,
 .artist-card {
     -fx-background-color: white;
-    -fx-background-radius: 16;
+    -fx-background-radius: 12;
     -fx-border-color: #f1f3f8;
-    -fx-border-radius: 16;
-    -fx-effect: dropshadow(gaussian, rgba(149, 157, 165, 0.15), 24, 0, 0, 8);
+    -fx-border-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.04), 16, 0, 0, 4);
+    -fx-transition: all 0.2s ease-in-out;
+}
+
+.artist-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 20, 0, 0, 6);
+    -fx-translate-y: -2;
 }
 
 .profile-cover {
+    -fx-background-image: url('../images/avatar_2.png');
+    -fx-background-size: cover;
+    -fx-background-position: center center;
+    -fx-background-repeat: no-repeat;
     -fx-background-color: linear-gradient(to bottom right, #1e1366, #2a0845, #6441a5);
     -fx-background-radius: 16 16 0 0;
 }
@@ -388,7 +403,8 @@
     -fx-border-color: white;
     -fx-border-width: 4;
     -fx-border-radius: 999;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 4);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 12, 0, 0, 4);
+    -fx-translate-y: -30;
 }
 
 .avatar-text {
@@ -532,22 +548,30 @@
 }
 
 .tab-nav {
-    -fx-border-color: #e5e7eb transparent transparent transparent;
+    -fx-border-color: #f3f4f6 transparent transparent transparent;
     -fx-border-width: 1 0 0 0;
 }
 
 .tab-nav-item {
     -fx-background-color: transparent;
-    -fx-text-fill: #6c757d;
-    -fx-padding: 8 16;
+    -fx-text-fill: #6b7280;
+    -fx-padding: 12 20;
+    -fx-font-weight: 600;
+    -fx-font-size: 14px;
     -fx-cursor: hand;
-    -fx-border-color: transparent transparent #dee2e6 transparent;
-    -fx-border-width: 0 0 2 0;
+    -fx-border-color: transparent transparent transparent transparent;
+    -fx-border-width: 0 0 3 0;
+    -fx-transition: all 0.2s ease-in-out;
+}
+
+.tab-nav-item:hover {
+    -fx-text-fill: #374151;
+    -fx-border-color: transparent transparent #d1d5db transparent;
 }
 
 .tab-nav-item.active {
-    -fx-text-fill: #0d6efd;
-    -fx-border-color: transparent transparent #0d6efd transparent;
+    -fx-text-fill: #4f46e5;
+    -fx-border-color: transparent transparent #4f46e5 transparent;
 }
 
 .card-title {
@@ -781,10 +805,10 @@
 
 .collections-body-card {
     -fx-background-color: white;
-    -fx-border-color: #dee2e6;
-    -fx-border-width: 1;
-    -fx-background-radius: 10;
-    -fx-border-radius: 10;
+    -fx-background-radius: 12;
+    -fx-border-color: #f1f3f8;
+    -fx-border-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.04), 16, 0, 0, 4);
 }
 
 .collections-toolbar {

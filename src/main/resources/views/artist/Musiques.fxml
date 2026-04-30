@@ -17,7 +17,7 @@
         <Insets bottom="20.0" left="26.0" right="20.0" top="24.0" />
     </padding>
 
-    <VBox spacing="14.0" styleClass="users-panel list-card music-panel">
+    <VBox spacing="14.0" styleClass="collections-body-card" VBox.vgrow="ALWAYS">
         <padding>
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
         </padding>

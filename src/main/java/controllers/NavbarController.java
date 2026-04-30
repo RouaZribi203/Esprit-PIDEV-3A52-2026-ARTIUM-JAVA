@@ -125,6 +125,13 @@ public class NavbarController {
     public void setUser(User user) {
         if (user == null || navbarAvatarImageView == null) return;
 
+        String prenom = user.getPrenom() == null ? "" : user.getPrenom().trim();
+        String nom = user.getNom() == null ? "" : user.getNom().trim();
+        String fullName = (prenom + " " + nom).trim();
+        if (userMenuButton != null) {
+            userMenuButton.setText(fullName.isEmpty() ? "Compte" : fullName);
+        }
+
         String imagePath = pickProfileImage(user);
         if (imagePath != null) {
             try {

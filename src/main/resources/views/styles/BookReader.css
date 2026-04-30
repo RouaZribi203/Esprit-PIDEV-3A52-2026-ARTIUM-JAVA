@@ -8,7 +8,7 @@
 /* ── Root StackPane fills the entire Stage ───────────────────────── */
 .reader-root {
     -fx-background-color: #0f0f15;
-    -fx-font-family: "Georgia", "Times New Roman", serif;
+    -fx-font-family: "Exo 2", sans-serif;
     -fx-padding: 0;
 }
 
@@ -139,7 +139,7 @@
 .page-num {
     -fx-text-fill: rgba(110,100,85,0.65);
     -fx-font-size: 11px;
-    -fx-font-family: "Georgia", serif;
+    -fx-font-family: "Exo 2", sans-serif;
     -fx-padding: 0 6 4 6;
 }
 
@@ -262,12 +262,12 @@
     -fx-text-fill: #d4d4e8;
     -fx-font-size: 13px;
     -fx-font-weight: bold;
-    -fx-font-family: "Georgia", serif;
+    -fx-font-family: "Exo 2", sans-serif;
 }
 .ctrl-pages {
     -fx-text-fill: #55556a;
     -fx-font-size: 11px;
-    -fx-font-family: "Georgia", serif;
+    -fx-font-family: "Exo 2", sans-serif;
     -fx-font-style: italic;
 }
 
@@ -282,7 +282,7 @@
 .load-text  {
     -fx-text-fill: #606080;
     -fx-font-size: 16px;
-    -fx-font-family: "Georgia", serif;
+    -fx-font-family: "Exo 2", sans-serif;
     -fx-font-style: italic;
 }
 .ldot {

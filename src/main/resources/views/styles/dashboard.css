@@ -1,15 +1,19 @@
+.root {
+    -fx-font-family: "Exo 2", sans-serif;
+}
+
 /* ═══════════════════════════════════════════════════════════════════
    DASHBOARD PREMIUM — Style "Luxury Glass" v2.0
    ═══════════════════════════════════════════════════════════════════ */
 
 .app-root {
-    -fx-font-family: "Inter", "Segoe UI", "SF Pro Display", Arial, sans-serif;
-    -fx-background-color: #FAFAFC; /* Fond de galerie d'art clair */
+    -fx-font-family: "Exo 2", sans-serif;
+    -fx-background-color: #f1f5f9;
 }
 
 .content-area,
 .page-root {
-    -fx-background-color: #FAFAFC;
+    -fx-background-color: transparent;
 }
 
 /* ── Sidebar ─────────────────────────────────────────────────────── */
@@ -34,7 +38,7 @@
     -fx-text-fill: #ffffff; /* Texte blanc pur */
     -fx-font-size: 28px;
     -fx-font-weight: 800;
-    -fx-font-family: "Georgia", serif; /* Typographie éditoriale */
+    -fx-font-family: "Exo 2", sans-serif; /* Typographie éditoriale */
 }
 
 .nav-item,
@@ -48,7 +52,7 @@
     -fx-background-radius: 14;
     -fx-border-radius: 14;
     -fx-cursor: hand;
-    -fx-font-family: "Inter", sans-serif;
+    -fx-font-family: "Exo 2", sans-serif;
 }
 
 .nav-sub-item {
@@ -79,10 +83,10 @@
 
 /* ── Navbar ──────────────────────────────────────────────────────── */
 .navbar {
-    -fx-background-color: rgba(250, 250, 252, 0.85); /* Translucide */
-    -fx-border-color: rgba(39, 60, 149, 0.08);
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
     -fx-border-width: 0 0 1 0;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.03), 15, 0, 0, 4);
+    -fx-effect: none;
 }
 
 /* Bouton sidebar toggle ─────────────────────────────────────────── */
@@ -239,7 +243,7 @@
     -fx-font-size: 42px;
     -fx-font-weight: 800;
     -fx-text-fill: #273c95; /* Bleu Royal */
-    -fx-font-family: "Georgia", serif; /* Touche artistique éditoriale */
+    -fx-font-family: "Exo 2", sans-serif; /* Touche artistique éditoriale */
 }
 
 .page-subtitle {
@@ -672,7 +676,7 @@
 }
 
 .report-preview-area {
-    -fx-font-family: "Consolas", "Segoe UI", monospace;
+    -fx-font-family: "Exo 2", sans-serif;
     -fx-font-size: 12px;
     -fx-text-fill: #1f2e45;
     -fx-highlight-fill: rgba(91, 86, 232, 0.34);
