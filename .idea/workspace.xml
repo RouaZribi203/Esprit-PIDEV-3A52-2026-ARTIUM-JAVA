@@ -6,9 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="correction blob oeuvre livre">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/services/TicketService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/TicketService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/services/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/UserService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/auth/Landing.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/auth/Landing.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/EmailServiceEvent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/EmailServiceEvent.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -137,7 +135,8 @@
       <workItem from="1777052668685" duration="41855000" />
       <workItem from="1777497851522" duration="12593000" />
       <workItem from="1777535715056" duration="3605000" />
-      <workItem from="1777645552344" duration="4180000" />
+      <workItem from="1777645552344" duration="5495000" />
+      <workItem from="1777673462005" duration="620000" />
     </task>
     <task id="LOCAL-00001" summary="corrections de blob">
       <option name="closed" value="true" />

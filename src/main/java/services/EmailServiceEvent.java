@@ -82,8 +82,46 @@ public class EmailServiceEvent {
                 + "Cordialement,\n"
                 + "L'équipe ARTIUM";
 
-        MimeBodyPart textPart = new MimeBodyPart();
-        textPart.setText(bodyText);
+        MimeBodyPart htmlPart = new MimeBodyPart();
+
+        String htmlContent = "<!DOCTYPE html>" +
+                "<html>" +
+                "<head>" +
+                "<style>" +
+                "body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }" +
+                ".container { max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }" +
+                ".header { background-color: #4CAF50; color: white; padding: 20px; text-align: center; font-size: 22px; }" +
+                ".content { padding: 20px; color: #333; }" +
+                ".content h2 { color: #4CAF50; }" +
+                ".footer { background-color: #f1f1f1; padding: 15px; text-align: center; font-size: 12px; color: #777; }" +
+                ".btn { display: inline-block; padding: 10px 15px; margin-top: 15px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px; }" +
+                "</style>" +
+                "</head>" +
+                "<body>" +
+
+                "<div class='container'>" +
+
+                "<div class='header'>🎟️ ARTIUM Ticketing</div>" +
+
+                "<div class='content'>" +
+                "<h2>Bonjour 👋</h2>" +
+                "<p>Félicitations pour votre achat !</p>" +
+                "<p>Votre ticket VIP pour l'évènement <strong>" + event.getTitre() + "</strong> est prêt.</p>" +
+                "<p>📌 Le code QR présent sur ce ticket devra être scanné à l'entrée.</p>" +
+                "<p>Veuillez trouver votre ticket en pièce jointe.</p>" +
+                "<p>Nous vous souhaitons une excellente expérience 🎉</p>" +
+                "</div>" +
+
+                "<div class='footer'>" +
+                "© 2026 ARTIUM - Tous droits réservés" +
+                "</div>" +
+
+                "</div>" +
+
+                "</body>" +
+                "</html>";
+
+        htmlPart.setContent(htmlContent, "text/html; charset=utf-8");
 
         // Pièce jointe (Le ticket PDF)
         File pdfFile = ticketPdfService.createPreviewPdf(event, ticket);
@@ -93,7 +131,7 @@ public class EmailServiceEvent {
         attachmentPart.setFileName("Ticket_" + event.getTitre().replaceAll("[^a-zA-Z0-9]", "_") + ".pdf");
 
         Multipart multipart = new MimeMultipart();
-        multipart.addBodyPart(textPart);
+        multipart.addBodyPart(htmlPart);
         multipart.addBodyPart(attachmentPart);
 
         message.setContent(multipart);
