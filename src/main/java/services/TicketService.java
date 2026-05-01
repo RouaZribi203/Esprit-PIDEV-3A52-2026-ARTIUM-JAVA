@@ -46,9 +46,7 @@ public class TicketService {
     }
 
     private String generateQrCode(Evenement evenement, int userId) {
-        return "TICKET|event=" + evenement.getId()
-                + "|user=" + userId
-                + "|ref=" + UUID.randomUUID();
+        return "TCK_" + UUID.randomUUID();
     }
 
     public List<Ticket> getTicketsByEventAndUser(int eventId, int userId) throws SQLDataException {

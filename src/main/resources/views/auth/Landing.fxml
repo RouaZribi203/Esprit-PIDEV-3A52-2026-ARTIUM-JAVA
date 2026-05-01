@@ -74,7 +74,7 @@
 
                     <VBox spacing="20">
                         <Button text="Se connecter →" onAction="#onLoginClick" styleClass="auth-primary-button" maxWidth="Infinity"/>
-                        <Button text="Créer une exposition" onAction="#onCreateAccount" styleClass="auth-secondary-button" maxWidth="Infinity"/>
+                        <Button text="Créer un compte" onAction="#onCreateAccount" styleClass="auth-secondary-button" maxWidth="Infinity"/>
                     </VBox>
                 </VBox>
             </HBox>

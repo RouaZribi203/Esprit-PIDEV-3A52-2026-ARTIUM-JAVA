@@ -48,7 +48,7 @@ public class UserService implements Iservice<User> {
     private static final String ADMIN_NUM_TEL = "93604970";
     private static final String ADMIN_VILLE = "Tunis";
     private static final String ADMIN_BIOGRAPHIE = "Compte administrateur principal de la plateforme.";
-    private static final String ADMIN_STATUT = "Activé ✅ ";
+    private static final String ADMIN_STATUT = "Activé";
     private static final String BLOCKED_STATUT = "Bloqué";
     private static final String BLOCKED_LOGIN_MESSAGE = "Votre compte est bloqué en attente d'activation par l'admin.";
 
@@ -878,7 +878,7 @@ public class UserService implements Iservice<User> {
             ps.setString(10, "Non défini");
             ps.setString(11, "Compte créé via Google");
             ps.setNull(12,   java.sql.Types.VARCHAR);
-            ps.setString(13, "Art général");
+            ps.setString(13, "Peinture");
             ps.setNull(14,   java.sql.Types.VARCHAR);
             ps.setNull(15,   java.sql.Types.VARCHAR);
             ps.executeUpdate();
