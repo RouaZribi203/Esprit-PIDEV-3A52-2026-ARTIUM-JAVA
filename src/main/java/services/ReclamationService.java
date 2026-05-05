@@ -11,11 +11,12 @@ public class ReclamationService implements Iservice<Reclamation> {
 
     Connection connection;
 
-    private static final String INSERT_SQL = "INSERT INTO reclamation(texte,date_creation,statut,type,file_name,updated_at,user_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    private static final String UPDATE_SQL = "UPDATE reclamation SET texte = ?, date_creation = ?, statut = ?, type = ?, file_name = ? ,updated_at = ?,user_id=?  WHERE id = ?";
-    private static final String SELECT_ALL_SQL = "SELECT id, texte, date_creation, statut, type,file_name, updated_at, user_id FROM reclamation";
+    private static final String INSERT_SQL = "INSERT INTO reclamation(texte,date_creation,statut,type,file_name,updated_at,user_id,is_archived) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String UPDATE_SQL = "UPDATE reclamation SET texte = ?, date_creation = ?, statut = ?, type = ?, file_name = ? ,updated_at = ?,user_id=?, is_archived=?  WHERE id = ?";
+    private static final String SELECT_ALL_SQL = "SELECT id, texte, date_creation, statut, type,file_name, updated_at, user_id, is_archived FROM reclamation";
     private static final String DELETE_SQL = "DELETE FROM reclamation WHERE id = ?";
-    private static final String UPDATE_STATUT_SQL = "UPDATE reclamation SET statut = ? WHERE id = ?";
+    private static final String UPDATE_STATUT_SQL = "UPDATE reclamation SET statut = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
+    private static final String UPDATE_ARCHIVE_SQL = "UPDATE reclamation SET is_archived = ? WHERE id = ?";
 
     public ReclamationService(){
         connection = MyDatabase.getInstance().getConnection();
@@ -31,6 +32,7 @@ public class ReclamationService implements Iservice<Reclamation> {
             statement.setString(5, reclamation.getFileName());
             statement.setTimestamp(6, java.sql.Timestamp.valueOf(reclamation.getUpdatedAt()));
             statement.setInt(7, reclamation.getUserId());
+            statement.setBoolean(8, reclamation.getIsArchived());
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new SQLDataException("Erreur lors de l'ajout de reclamation: " + e.getMessage());
@@ -53,7 +55,8 @@ public class ReclamationService implements Iservice<Reclamation> {
             statement.setString(5, reclamation.getFileName());
             statement.setTimestamp(6, java.sql.Timestamp.valueOf(reclamation.getUpdatedAt()));
             statement.setInt(7, reclamation.getUserId());
-            statement.setInt(8, reclamation.getId());
+            statement.setBoolean(8, reclamation.getIsArchived());
+            statement.setInt(9, reclamation.getId());
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new SQLDataException("Erreur lors de la modification de la reclamation: " + e.getMessage());
@@ -91,6 +94,7 @@ public class ReclamationService implements Iservice<Reclamation> {
                 reclamation.setFileName(resultSet.getString("file_name"));
                 reclamation.setUpdatedAt(resultSet.getTimestamp("updated_at").toLocalDateTime());
                 reclamation.setUserId(resultSet.getInt("user_id"));
+                reclamation.setIsArchived(resultSet.getBoolean("is_archived"));
                 reclamations.add(reclamation);
             }
         } catch (SQLException e) {
@@ -118,6 +122,7 @@ public class ReclamationService implements Iservice<Reclamation> {
                 reclamation.setFileName(resultSet.getString("file_name"));
                 reclamation.setUpdatedAt(resultSet.getTimestamp("updated_at").toLocalDateTime());
                 reclamation.setUserId(resultSet.getInt("user_id"));
+                reclamation.setIsArchived(resultSet.getBoolean("is_archived"));
             }
         } catch (SQLException e) {
             throw new SQLDataException("Erreur lors de la recuperation de la reclamation: " + e.getMessage());
@@ -133,6 +138,16 @@ public class ReclamationService implements Iservice<Reclamation> {
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new SQLDataException("Erreur lors de la modification du statut: " + e.getMessage());
+        }
+    }
+
+    public void updateArchiveStatusById(int id, boolean isArchived) throws SQLDataException {
+        try (PreparedStatement statement = connection.prepareStatement(UPDATE_ARCHIVE_SQL)) {
+            statement.setBoolean(1, isArchived);
+            statement.setInt(2, id);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new SQLDataException("Erreur lors de la modification de l'archive: " + e.getMessage());
         }
     }
 

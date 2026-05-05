@@ -58,6 +58,7 @@ public class NavbarAmateurController {
     public void initialize() {
         if (notificationsButton != null) {
             notificationsButton.setOnShowing(event -> populateNotificationsMenu());
+            updateNotificationCount();
         }
         if (bibliothequeButton != null) {
             bibliothequeButton.setOnAction(event -> navigate("bibliotheque"));
@@ -164,6 +165,17 @@ public class NavbarAmateurController {
         populateNotificationsMenu();
     }
 
+    private void updateNotificationCount() {
+        if (notificationsButton == null) return;
+        Integer userId = UserSession.getCurrentUserId();
+        if (userId == null) {
+            notificationsButton.setText("");
+        } else {
+            int count = notificationService.countUnreadNotifications(userId);
+            notificationsButton.setText(count == 0 ? "" : String.valueOf(count));
+        }
+    }
+
     private void populateNotificationsMenu() {
         if (notificationsButton == null) {
             return;
@@ -172,41 +184,39 @@ public class NavbarAmateurController {
         Integer userId = UserSession.getCurrentUserId();
         notificationsButton.getItems().clear();
 
-        VBox container = new VBox();
-        container.setSpacing(8);
-        container.setStyle("-fx-background-color: transparent; -fx-padding: 4px;");
-
         // Add header
         Label headerLabel = new Label("Notifications");
         headerLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: 900; -fx-text-fill: #111827; -fx-padding: 4px 8px;");
-        container.getChildren().add(headerLabel);
+        javafx.scene.control.MenuItem headerItem = new javafx.scene.control.MenuItem();
+        headerItem.setGraphic(headerLabel);
+        headerItem.setStyle("-fx-background-color: transparent;");
+        notificationsButton.getItems().add(headerItem);
 
-        Region separator = new Region();
-        separator.setStyle("-fx-background-color: #f3f4f6; -fx-min-height: 2px; -fx-max-height: 2px;");
-        container.getChildren().add(separator);
+        javafx.scene.control.SeparatorMenuItem separator = new javafx.scene.control.SeparatorMenuItem();
+        notificationsButton.getItems().add(separator);
 
         if (userId == null) {
-            notificationsButton.setText("🔔");
-            container.getChildren().add(createEmptyNode("Aucune session utilisateur active."));
+            notificationsButton.setText("");
+            javafx.scene.control.CustomMenuItem emptyItem = new javafx.scene.control.CustomMenuItem(createEmptyNode("Aucune session utilisateur active."), false);
+            emptyItem.setStyle("-fx-background-color: transparent;");
+            notificationsButton.getItems().add(emptyItem);
         } else {
             List<Notification> notifications = notificationService.getUnreadNotifications(userId);
-            notificationsButton.setText(notifications.isEmpty() ? "🔔" : "🔔 " + notifications.size());
+            notificationsButton.setText(notifications.isEmpty() ? "" : String.valueOf(notifications.size()));
 
             if (notifications.isEmpty()) {
-                container.getChildren().add(createEmptyNode("Aucune notification pour le moment."));
+                javafx.scene.control.CustomMenuItem emptyItem = new javafx.scene.control.CustomMenuItem(createEmptyNode("Aucune notification pour le moment."), false);
+                emptyItem.setStyle("-fx-background-color: transparent;");
+                notificationsButton.getItems().add(emptyItem);
             } else {
                 for (Notification notification : notifications) {
-                    container.getChildren().add(createNotificationNode(notification));
+                    javafx.scene.control.CustomMenuItem notifItem = new javafx.scene.control.CustomMenuItem(createNotificationNode(notification), false);
+                    notifItem.setStyle("-fx-background-color: transparent;");
+                    notifItem.setHideOnClick(false); // Manually handle hiding
+                    notificationsButton.getItems().add(notifItem);
                 }
             }
         }
-
-        CustomMenuItem wrapperItem = new CustomMenuItem(container, false);
-        wrapperItem.setHideOnClick(false);
-        // Prevent default MenuItem styles from breaking our layout
-        wrapperItem.setStyle("-fx-background-color: transparent;");
-
-        notificationsButton.getItems().add(wrapperItem);
     }
 
     private javafx.scene.Node createEmptyNode(String text) {
@@ -239,12 +249,38 @@ public class NavbarAmateurController {
             titleLabel.setStyle("-fx-text-fill: #c2410c; -fx-font-size: 15px; -fx-font-weight: 800;");
             messageLabel.setStyle("-fx-text-fill: #ea580c; -fx-font-size: 13px;");
             timeLabel.setStyle("-fx-text-fill: #f97316; -fx-font-size: 11px; -fx-font-weight: bold;");
+        } else if (title.toLowerCase().contains("réclamation") || title.toLowerCase().contains("reclamation")) {
+            content.setStyle("-fx-background-color: #f0fdfa; -fx-border-color: #ccfbf1; -fx-border-radius: 12px; -fx-background-radius: 12px; -fx-padding: 14px; -fx-cursor: hand;");
+            titleLabel.setStyle("-fx-text-fill: #0f766e; -fx-font-size: 15px; -fx-font-weight: 800;");
+            messageLabel.setStyle("-fx-text-fill: #115e59; -fx-font-size: 13px;");
+            timeLabel.setStyle("-fx-text-fill: #14b8a6; -fx-font-size: 11px; -fx-font-weight: bold;");
         } else {
             content.setStyle("-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 12px; -fx-background-radius: 12px; -fx-padding: 14px; -fx-cursor: hand;");
             titleLabel.setStyle("-fx-text-fill: #1e293b; -fx-font-size: 15px; -fx-font-weight: 800;");
             messageLabel.setStyle("-fx-text-fill: #475569; -fx-font-size: 13px;");
             timeLabel.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px; -fx-font-weight: bold;");
         }
+
+        content.setOnMouseClicked(e -> {
+            notification.setRead(true);
+            
+            // Navigate to the correct section based on the notification type
+            if (title.toLowerCase().contains("annul")) {
+                navigate("evenements");
+            } else if (title.toLowerCase().contains("réclamation") || title.toLowerCase().contains("reclamation")) {
+                navigate("reclamations");
+            }
+            
+            // Refresh the notifications list (this will remove it since it's now marked as read)
+            populateNotificationsMenu();
+            updateNotificationCount();
+            
+            // Close the dropdown menu after clicking
+            if (notificationsButton != null) {
+                notificationsButton.hide();
+            }
+        });
+
         return content;
     }
 

@@ -48,7 +48,7 @@ public class ReclamationsController {
 
     @FXML
     public void initialize() {
-        statutFilter.getItems().setAll("Tous", "Traitée", "Non traitée");
+        statutFilter.getItems().setAll("Tous", "Traitée", "Non traitée", "Archivée");
         statutFilter.getSelectionModel().selectFirst();
         
         if (dateFilter != null) {
@@ -90,10 +90,32 @@ public class ReclamationsController {
     private void refresh() {
         try {
             all.clear();
-            all.addAll(reclamationService.getAll());
+            List<Reclamation> reclamations = reclamationService.getAll();
+            autoArchiveReclamations(reclamations);
+            all.addAll(reclamations);
             applySearchAndFilter();
         } catch (SQLDataException e) {
             showError("Chargement impossible", e.getMessage());
+        }
+    }
+
+    private void autoArchiveReclamations(List<Reclamation> list) {
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        for (Reclamation r : list) {
+            if (Boolean.TRUE.equals(r.getIsArchived())) continue;
+            
+            String s = normalize(r.getStatut());
+            if ((s.contains("traite") || s.contains("resolu") || s.contains("done")) && !s.contains("non")) {
+                if (r.getUpdatedAt() != null) {
+                    long days = java.time.temporal.ChronoUnit.DAYS.between(r.getUpdatedAt(), now);
+                    if (days >= 7) {
+                        try {
+                            reclamationService.updateArchiveStatusById(r.getId(), true);
+                            r.setIsArchived(true);
+                        } catch (Exception ignored) {}
+                    }
+                }
+            }
         }
     }
 
@@ -130,6 +152,11 @@ public class ReclamationsController {
                     public void onReply(Reclamation reclamation) {
                         cardController.openReplyDialog(reclamation);
                         refresh();
+                    }
+
+                    @Override
+                    public void onArchive(Reclamation reclamation) {
+                        handleArchive(reclamation);
                     }
 
                     @Override
@@ -173,6 +200,15 @@ public class ReclamationsController {
         }
     }
 
+    private void handleArchive(Reclamation rec) {
+        try {
+            reclamationService.updateArchiveStatusById(rec.getId(), true);
+            refresh();
+        } catch (Exception e) {
+            showError("Archivage impossible", e.getMessage());
+        }
+    }
+
     private String getSelectedType() {
         Toggle t = typeTabsGroup.getSelectedToggle();
         if (t == tabPaiement) return "Paiement";
@@ -192,9 +228,17 @@ public class ReclamationsController {
     }
 
     private boolean matchesStatut(Reclamation r, String selected) {
-        if (selected == null || selected.equals("Tous")) return true;
         String s = normalize(r.getStatut());
         String sel = normalize(selected);
+        
+        boolean isArchived = Boolean.TRUE.equals(r.getIsArchived());
+        if (sel.contains("archive")) return isArchived;
+        
+        if (selected == null || selected.equals("Tous")) {
+            return !isArchived; // Hide archived ones from "Tous"
+        }
+        
+        if (isArchived) return false;
 
         // normalize status values from DB: "non traitée", "NON_TRAITEE", "traitee", "en_cours"...
         boolean isNon = s.contains("nontra") || s.contains("non tra") || s.contains("non-tr") || s.contains("en cours") || s.contains("encours") || s.contains("pending");

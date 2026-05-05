@@ -19,6 +19,7 @@ public class ReclamationCardController {
     public interface CardActionHandler {
         void onReply(Reclamation reclamation);
         void onDelete(Reclamation reclamation);
+        void onArchive(Reclamation reclamation);
     }
 
     @FXML private Label texteLabel;
@@ -82,10 +83,27 @@ public class ReclamationCardController {
         MenuItem reply = new MenuItem("Repondre");
         reply.getStyleClass().add("reclamation-actions-reply");
 
+        MenuItem archive = new MenuItem("Archiver");
+        archive.getStyleClass().add("reclamation-actions-archive");
+
         MenuItem delete = new MenuItem("Supprimer");
         delete.getStyleClass().add("reclamation-actions-delete");
 
-        menu.getItems().addAll(reply, delete);
+        // "Archiver" option is only available if status is Traitée
+        boolean isTraite = false;
+        if (reclamation != null && reclamation.getStatut() != null) {
+            String s = normalize(reclamation.getStatut());
+            boolean isNon = s.contains("non") || s.contains("en cours") || s.contains("pending") || s.contains("nontraite");
+            if (!isNon && (s.contains("traite") || s.contains("resolu") || s.contains("resolved") || s.contains("done"))) {
+                isTraite = true;
+            }
+        }
+
+        if (isTraite && !Boolean.TRUE.equals(reclamation.getIsArchived())) {
+            menu.getItems().addAll(reply, archive, delete);
+        } else {
+            menu.getItems().addAll(reply, delete);
+        }
 
         dotsButton.setOnMouseClicked(e -> {
             if (e.getButton() == MouseButton.PRIMARY) {
@@ -95,6 +113,10 @@ public class ReclamationCardController {
 
         reply.setOnAction(e -> {
             if (actionHandler != null && reclamation != null) actionHandler.onReply(reclamation);
+        });
+
+        archive.setOnAction(e -> {
+            if (actionHandler != null && reclamation != null) actionHandler.onArchive(reclamation);
         });
 
         delete.setOnAction(e -> {

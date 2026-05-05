@@ -3,6 +3,7 @@ package controllers.pages.reclamations;
 import javafx.application.Platform;
 import services.ReclamationService;
 import services.ReponseService;
+import services.NotificationService;
 import services.OpenRouterReclamationReplyService;
 import entities.Reclamation;
 import entities.Reponse;
@@ -50,6 +51,7 @@ public class ReclamationReplyDialogController {
 
     private final ReponseService reponseService = new ReponseService();
     private final ReclamationService reclamationService = new ReclamationService();
+    private final NotificationService notificationService = new NotificationService();
     private final OpenRouterReclamationReplyService aiReplyService = new OpenRouterReclamationReplyService();
     private Reclamation reclamation;
     private Reponse selectedForEdit;
@@ -350,6 +352,11 @@ public class ReclamationReplyDialogController {
             markReclamationTraite();
             clearValidationError();
 
+            // Envoyer une notification in-app à l'utilisateur
+            if (reclamation.getUserId() != null) {
+                notificationService.sendReclamationReplyNotice(reclamation.getUserId(), reclamation.getId());
+            }
+
             // Envoyer une notification push à l'utilisateur
             sendPushNotification(reclamation);
 
@@ -402,6 +409,11 @@ public class ReclamationReplyDialogController {
             loadHistory();
 
             markReclamationTraite();
+
+            // Envoyer une notification in-app à l'utilisateur
+            if (reclamation.getUserId() != null) {
+                notificationService.sendReclamationReplyNotice(reclamation.getUserId(), reclamation.getId());
+            }
 
             // Envoyer une notification push à l'utilisateur
             sendPushNotification(reclamation);

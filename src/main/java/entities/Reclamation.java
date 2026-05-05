@@ -12,6 +12,7 @@ public class Reclamation {
     private String fileName;
     private LocalDateTime updatedAt;
     private Integer userId;
+    private Boolean isArchived = false;
 
     public Reclamation() {
     }
@@ -24,6 +25,7 @@ public class Reclamation {
         this.fileName = fileName;
         this.updatedAt = updatedAt;
         this.userId = userId;
+        this.isArchived = false;
     }
 
     public Reclamation(Integer id, String texte, LocalDateTime dateCreation, String statut, String type, String fileName, LocalDateTime updatedAt, Integer userId) {
@@ -35,6 +37,19 @@ public class Reclamation {
         this.fileName = fileName;
         this.updatedAt = updatedAt;
         this.userId = userId;
+        this.isArchived = false;
+    }
+
+    public Reclamation(Integer id, String texte, LocalDateTime dateCreation, String statut, String type, String fileName, LocalDateTime updatedAt, Integer userId, Boolean isArchived) {
+        this.id = id;
+        this.texte = texte;
+        this.dateCreation = dateCreation;
+        this.statut = statut;
+        this.type = type;
+        this.fileName = fileName;
+        this.updatedAt = updatedAt;
+        this.userId = userId;
+        this.isArchived = isArchived == null ? false : isArchived;
     }
 
     public Integer getId() {
@@ -97,6 +112,14 @@ public class Reclamation {
 
     public void setUserId(Integer userId) {
         this.userId = userId;
+    }
+
+    public Boolean getIsArchived() {
+        return isArchived;
+    }
+
+    public void setIsArchived(Boolean isArchived) {
+        this.isArchived = isArchived == null ? false : isArchived;
     }
 }
 

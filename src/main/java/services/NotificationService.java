@@ -39,6 +39,11 @@ public class NotificationService {
         sendNotification(userId, "Evenement annule", message);
     }
 
+    public void sendReclamationReplyNotice(int userId, Integer reclamationId) {
+        String message = "Un administrateur a répondu à votre réclamation"  + ".";
+        sendNotification(userId, "Réponse à votre réclamation", message);
+    }
+
     public List<Notification> getUnreadNotifications(int userId) {
         synchronized (STORE) {
             return STORE.stream()
