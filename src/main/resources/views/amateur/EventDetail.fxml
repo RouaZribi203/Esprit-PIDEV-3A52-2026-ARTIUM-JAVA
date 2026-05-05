@@ -155,8 +155,8 @@
                             </VBox>
 
                             <!-- Map View -->
-                            <StackPane HBox.hgrow="ALWAYS" minHeight="200.0" prefHeight="220.0" maxHeight="220.0" style="-fx-background-color: #f3f4f6; -fx-background-radius: 12px; -fx-border-color: #e5e7eb; -fx-border-radius: 12px; -fx-overflow: hidden;">
-                                <WebView fx:id="mapWebView" prefHeight="220.0" maxHeight="220.0" />
+                            <StackPane fx:id="mapContainer" HBox.hgrow="ALWAYS" minHeight="200.0" prefHeight="280.0" maxHeight="280.0" style="-fx-background-color: #f3f4f6; -fx-background-radius: 12px; -fx-border-color: #e5e7eb; -fx-border-radius: 12px; -fx-overflow: hidden;">
+                                <WebView fx:id="mapWebView" minWidth="100.0" minHeight="100.0" prefHeight="280.0" maxHeight="280.0" maxWidth="Infinity" />
                             </StackPane>
                         </HBox>
                     </VBox>

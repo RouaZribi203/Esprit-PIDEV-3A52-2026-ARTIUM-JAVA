@@ -15,6 +15,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
+import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import services.GalerieService;
@@ -90,6 +91,9 @@ public class EventDetailController {
 	private WebView mapWebView;
 
 	@FXML
+	private Pane mapContainer;
+
+	@FXML
 	private Button buyTicketButton;
 
 	@FXML
@@ -135,6 +139,14 @@ public class EventDetailController {
 	private void initialize() {
 		if (mapWebView != null) {
 			mapWebView.setContextMenuEnabled(false);
+			if (mapContainer != null) {
+				mapWebView.prefWidthProperty().bind(mapContainer.widthProperty());
+				mapWebView.prefHeightProperty().bind(mapContainer.heightProperty());
+				mapWebView.maxWidthProperty().bind(mapContainer.widthProperty());
+				
+				mapContainer.widthProperty().addListener((obs, oldVal, newVal) -> forceMapResize());
+				mapContainer.heightProperty().addListener((obs, oldVal, newVal) -> forceMapResize());
+			}
 			renderMapPlaceholder();
 		}
 		updateTicketsToggleButton(false);
@@ -430,6 +442,14 @@ public class EventDetailController {
 		ticketsToggleButton.setText(ticketsExpanded ? "Voir moins" : "Voir plus");
 	}
 
+	private void forceMapResize() {
+		if (mapWebView != null && mapWebView.getEngine().getDocument() != null) {
+			try {
+				mapWebView.getEngine().executeScript("if (typeof fixSize === 'function') fixSize();");
+			} catch (Exception ignored) { }
+		}
+	}
+
 	private void renderMap(double latitude, double longitude, String galleryName, String address, String coordinatesText) {
 		if (mapWebView == null) {
 			return;
@@ -452,10 +472,12 @@ public class EventDetailController {
 			    <meta charset="UTF-8" />
 			    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 			    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+			    <script>var L_DISABLE_3D = true;</script>
 			    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 			    <style>
 			        html, body {
 			            margin: 0;
+			            padding: 0;
 			            width: 100%%;
 			            height: 100%%;
 			            overflow: hidden;
@@ -463,8 +485,11 @@ public class EventDetailController {
 			            font-family: 'Segoe UI', Arial, sans-serif;
 			        }
 			        #map {
-			            width: 100%%;
-			            height: 100%%;
+			            position: absolute;
+			            top: 0;
+			            left: 0;
+			            right: 0;
+			            bottom: 0;
 			        }
 			        .leaflet-container {
 			            background: #edf0f5;
@@ -474,13 +499,39 @@ public class EventDetailController {
 			<body>
 			    <div id="map"></div>
 			    <script>
-			        const map = L.map('map', { zoomControl: true, attributionControl: true }).setView([%s, %s], 16);
+			        const map = L.map('map', { 
+			            zoomControl: true, 
+			            attributionControl: true,
+			            zoomAnimation: false,
+			            markerZoomAnimation: false,
+			            fadeAnimation: false
+			        }).setView([%s, %s], 16);
+			        
 			        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 			            maxZoom: 19,
 			            attribution: '&copy; OpenStreetMap contributors'
 			        }).addTo(map);
+			        
 			        const marker = L.marker([%s, %s]).addTo(map);
 			        marker.bindPopup('<strong>%s</strong><br/>%s<br/>%s');
+			        
+			        // Aggressive fix for grey tiles and partial rendering in JavaFX WebView
+			        const fixSize = function() {
+			            map.invalidateSize();
+			        };
+			        
+			        let checks = 0;
+			        const interval = setInterval(function() {
+			            fixSize();
+			            if (++checks > 10) clearInterval(interval);
+			        }, 200);
+			        
+			        window.addEventListener('resize', fixSize);
+			        
+			        if (typeof ResizeObserver !== 'undefined') {
+			            new ResizeObserver(fixSize).observe(document.body);
+			            new ResizeObserver(fixSize).observe(document.getElementById('map'));
+			        }
 			    </script>
 			</body>
 			</html>
