@@ -36,8 +36,8 @@ public class OeuvreRecommendationService {
             return new ArrayList<>();
         }
 
-        // Éliminer les œuvres de type "Privee"
-        allOeuvres.removeIf(o -> "Privee".equalsIgnoreCase(o.getType()));
+        // Exclude private artworks (is_public = false)
+        allOeuvres.removeIf(o -> !o.isPublic());
 
         Set<Integer> interactedIds = loadInteractedOeuvreIds(user.getId());
         if (interactedIds.isEmpty()) {

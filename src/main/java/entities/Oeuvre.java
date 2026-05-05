@@ -15,6 +15,7 @@ public class Oeuvre {
     private String imageEmbedding;
     private Integer collectionId;
     private String classe;
+    private boolean isPublic = true;
 
     // Relation many-to-many via oeuvre_user (loaded by service layer).
     private List<User> favusers = new ArrayList<>();
@@ -103,6 +104,14 @@ public class Oeuvre {
 
     public void setClasse(String classe) {
         this.classe = classe;
+    }
+
+    public boolean isPublic() {
+        return isPublic;
+    }
+
+    public void setPublic(boolean isPublic) {
+        this.isPublic = isPublic;
     }
 
     public List<User> getUsers() {

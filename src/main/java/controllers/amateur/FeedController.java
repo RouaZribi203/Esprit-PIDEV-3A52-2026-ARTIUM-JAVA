@@ -248,7 +248,7 @@ public class FeedController {
 				boolean favoriByCurrentUser = isFavoriByCurrentUser(updatedOeuvre);
 
 				// Rebuild statsRow (index 5)
-				boolean isPrivate = "privee".equalsIgnoreCase(safeText(updatedOeuvre.getType()));
+				boolean isPrivate = !updatedOeuvre.isPublic();
 				HBox statsRow = new HBox(14);
 				statsRow.getStyleClass().add("oeuvre-post-stats");
 				statsRow.getChildren().addAll(
@@ -407,7 +407,7 @@ public class FeedController {
 		boolean likedByCurrentUser = isLikedByCurrentUser(oeuvre);
 		boolean favoriByCurrentUser = isFavoriByCurrentUser(oeuvre);
 
-		boolean isPrivate = "privee".equalsIgnoreCase(safeText(oeuvre.getType()));
+		boolean isPrivate = !oeuvre.isPublic();
 		HBox statsRow = new HBox(14);
 		statsRow.getStyleClass().add("oeuvre-post-stats");
 		statsRow.getChildren().addAll(
@@ -614,7 +614,7 @@ public class FeedController {
 		title.getStyleClass().add("oeuvre-post-comments-title");
 		commentsBox.getChildren().add(title);
 
-		boolean isPrivate = "privee".equalsIgnoreCase(safeText(oeuvre.getType()));
+		boolean isPrivate = !oeuvre.isPublic();
 
 		if (comments == null || comments.isEmpty()) {
 			Label emptyLabel = new Label("Aucun commentaire pour le moment.");
@@ -1220,8 +1220,15 @@ public class FeedController {
 	}
 
 	private boolean matchesRouteFilter(Oeuvre oeuvre) {
+		if (oeuvre == null) {
+			return false;
+		}
 		if (oeuvre != null && qrSearchedOeuvreId != null && qrSearchedOeuvreId.equals(oeuvre.getId())) {
 			return true;
+		}
+		// Private artworks are hidden from normal feed/search. They are only shown via QR lookup.
+		if (!oeuvre.isPublic()) {
+			return false;
 		}
 		String type = safeText(oeuvre == null ? "" : oeuvre.getType()).toLowerCase(Locale.ROOT);
 		return switch (currentRouteFilter) {

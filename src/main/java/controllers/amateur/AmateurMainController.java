@@ -63,7 +63,7 @@ public class AmateurMainController {
         navbarIncludeController.setActiveRoute(route);
         sidebarIncludeController.setActiveItem(route);
         Object controller = loadAmateurView(resolveRoute(route));
-        configureLoadedController(controller);
+        configureLoadedController(controller, route);
     }
 
     public void openEventDetail(Evenement event) {
@@ -86,8 +86,9 @@ public class AmateurMainController {
 
     private String resolveRoute(String route) {
         return switch (route) {
-            case "feed-recommandations" -> "/views/amateur/FeedReco.fxml";
-            case "favoris" -> "/views/amateur/Favoris.fxml";
+            case "feed", "feed-peintures", "feed-sculptures", "feed-photos", "feed-recommandations",
+                 "favoris", "favoris-peintures", "favoris-sculptures", "favoris-photos", "favoris-recommandations"
+                    -> "/views/amateur/Feed.fxml";
             case "evenements" -> "/views/amateur/Evenements.fxml";
             case "event-detail" -> "/views/amateur/EventDetail.fxml";
             case "payment-form" -> "/views/amateur/PaymentForm.fxml";
@@ -152,8 +153,10 @@ public class AmateurMainController {
         }
     }
 
-    private void configureLoadedController(Object controller) {
-        if (controller instanceof EventsfrontController eventsController) {
+    private void configureLoadedController(Object controller, String route) {
+        if (controller instanceof FeedController feedController) {
+            feedController.setRouteFilter(route);
+        } else if (controller instanceof EventsfrontController eventsController) {
             eventsController.setDetailNavigationHandler(this::openEventDetail);
         } else if (controller instanceof EventDetailController detailController) {
             detailController.setEvent(selectedEvent);

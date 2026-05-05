@@ -51,8 +51,9 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
 
         String type = t.getType() == null || t.getType().trim().isEmpty() ? "Oeuvre" : t.getType().trim();
         LocalDate dateCreation = t.getDateCreation() == null ? LocalDate.now() : t.getDateCreation();
+        boolean isPublic = t.isPublic();
 
-        String sql = "INSERT INTO oeuvre (titre, description, date_creation, image, type, embedding, image_embedding, collection_id, classe) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO oeuvre (titre, description, date_creation, image, type, embedding, image_embedding, collection_id, classe, is_public) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, titre);
             preparedStatement.setString(2, description);
@@ -63,6 +64,7 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
             preparedStatement.setString(7, t.getImageEmbedding());
             preparedStatement.setInt(8, collectionId);
             preparedStatement.setString(9, "oeuvre");
+            preparedStatement.setBoolean(10, isPublic);
             preparedStatement.executeUpdate();
 
             try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
@@ -182,8 +184,9 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
 
         String type = t.getType() == null || t.getType().trim().isEmpty() ? "Oeuvre" : t.getType().trim();
         LocalDate dateCreation = t.getDateCreation() == null ? LocalDate.now() : t.getDateCreation();
+        boolean isPublic = t.isPublic();
 
-        String sql = "UPDATE oeuvre SET titre = ?, description = ?, date_creation = ?, image = ?, type = ?, collection_id = ?, classe = ? WHERE id = ?";
+        String sql = "UPDATE oeuvre SET titre = ?, description = ?, date_creation = ?, image = ?, type = ?, collection_id = ?, classe = ?, is_public = ? WHERE id = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, titre);
             preparedStatement.setString(2, description);
@@ -192,7 +195,8 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
             preparedStatement.setString(5, type);
             preparedStatement.setInt(6, collectionId);
             preparedStatement.setString(7, "oeuvre");
-            preparedStatement.setInt(8, t.getId());
+            preparedStatement.setBoolean(8, isPublic);
+            preparedStatement.setInt(9, t.getId());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new SQLDataException(e.getMessage());
@@ -201,7 +205,7 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
 
     @Override
     public List<Oeuvre> getAll() throws SQLDataException {
-        String sql = "SELECT id, titre, description, date_creation, image, type, embedding, image_embedding, collection_id "
+        String sql = "SELECT id, titre, description, date_creation, image, type, embedding, image_embedding, collection_id, is_public "
                 + "FROM oeuvre "
                 + "WHERE classe NOT IN ('livre', 'musique') "
                 + "ORDER BY date_creation DESC, id DESC";
@@ -220,7 +224,7 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
 
     public List<Oeuvre> getAllAmteur() throws SQLDataException {
 
-        String sql = "SELECT id, titre, description, date_creation, image, type, embedding, image_embedding, collection_id "
+        String sql = "SELECT id, titre, description, date_creation, image, type, embedding, image_embedding, collection_id, is_public "
                 + "FROM oeuvre "
                 + "WHERE type IN ('Peinture', 'Sculpture', 'Photographie') "
                 + "ORDER BY date_creation DESC, id DESC";
@@ -250,7 +254,7 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
      * Retourne la liste des oeuvres d'un artiste (simple, sans engagement data).
      */
     public List<Oeuvre> getOeuvresByArtisteId(int artisteId) throws SQLDataException {
-        String sql = "SELECT o.id, o.titre, o.description, o.date_creation, o.image, o.type, o.embedding, o.image_embedding, o.collection_id "
+        String sql = "SELECT o.id, o.titre, o.description, o.date_creation, o.image, o.type, o.embedding, o.image_embedding, o.collection_id, o.is_public "
                 + "FROM oeuvre o "
                 + "INNER JOIN collections c ON c.id = o.collection_id "
                 + "WHERE c.artiste_id = ? "
@@ -271,7 +275,7 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
     }
 
     public List<Oeuvre> getOeuvresByCollectionId(int collectionId) throws SQLDataException {
-        String sql = "SELECT id, titre, description, date_creation, image, type, embedding, image_embedding, collection_id "
+        String sql = "SELECT id, titre, description, date_creation, image, type, embedding, image_embedding, collection_id, is_public "
                 + "FROM oeuvre "
                 + "WHERE collection_id = ? "
                 + "ORDER BY id DESC";
@@ -291,7 +295,7 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
     }
 
     public Oeuvre getOeuvreById(int oeuvreId) throws SQLDataException {
-        String sql = "SELECT id, titre, description, date_creation, image, type, embedding, image_embedding, collection_id "
+        String sql = "SELECT id, titre, description, date_creation, image, type, embedding, image_embedding, collection_id, is_public "
                 + "FROM oeuvre WHERE id = ? LIMIT 1";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
@@ -355,6 +359,14 @@ public class OeuvreService implements services.Iservice<Oeuvre> {
         int collectionId = resultSet.getInt("collection_id");
         if (!resultSet.wasNull()) {
             oeuvre.setCollectionId(collectionId);
+        }
+
+        // Set is_public (default to true if column doesn't exist or is NULL)
+        try {
+            oeuvre.setPublic(resultSet.getBoolean("is_public"));
+        } catch (SQLException e) {
+            // If column doesn't exist, default to true
+            oeuvre.setPublic(true);
         }
 
         return oeuvre;

@@ -430,9 +430,11 @@ public class MesOeuvresController {
         privateToggle.setToggleGroup(visibilityGroup);
         privateToggle.getStyleClass().addAll("visibility-toggle", "visibility-toggle-private");
 
-        publicToggle.setSelected(true);
-        if (editMode && existingOeuvre.getType() != null && "privee".equalsIgnoreCase(existingOeuvre.getType().trim())) {
+        // Set visibility based on is_public attribute (true = public, false = private)
+        if (editMode && !existingOeuvre.isPublic()) {
             privateToggle.setSelected(true);
+        } else {
+            publicToggle.setSelected(true);
         }
 
         HBox visibilityRow = new HBox(10, publicToggle, privateToggle);
@@ -459,7 +461,6 @@ public class MesOeuvresController {
             String titre = safeText(titreField.getText());
             String description = safeText(descriptionArea.getText());
             CollectionOeuvre selectedCollection = collectionCombo.getValue();
-            boolean isPrivate = privateToggle.isSelected();
 
             boolean hasError = false;
             if (!validateTitreField(titreField, titreError)) {
@@ -485,6 +486,10 @@ public class MesOeuvresController {
 
             try {
                 Oeuvre oeuvre = editMode ? existingOeuvre : new Oeuvre();
+                if (!editMode) {
+                    // By default, new artworks are public
+                    oeuvre.setPublic(true);
+                }
                 if (oeuvre.getId() == null && editMode) {
                     oeuvre.setId(existingOeuvre.getId());
                 }
@@ -493,7 +498,10 @@ public class MesOeuvresController {
                 oeuvre.setCollectionId(selectedCollection.getId());
                 oeuvre.setImage(imagePathHolder[0]);
                 oeuvre.setDateCreation(editMode && existingOeuvre.getDateCreation() != null ? existingOeuvre.getDateCreation() : LocalDate.now());
-                oeuvre.setType(resolveTypeFromVisibility(isPrivate, artistSpecialite));
+                // Set is_public attribute based on visibility toggle
+                oeuvre.setPublic(publicToggle.isSelected());
+                // Type is always based on specialite, never "Privee"
+                oeuvre.setType(resolveTypeFromSpecialite(artistSpecialite));
                 if (editMode) {
                     oeuvreService.update(oeuvre);
                     if (!previousImagePath.equals(safeText(imagePathHolder[0]))) {
@@ -1029,7 +1037,8 @@ public class MesOeuvresController {
         deleteItem.setOnAction(event -> onDeleteOeuvre(oeuvre));
 
         ContextMenu menu = new ContextMenu(editItem);
-        if (oeuvre != null && "Privee".equalsIgnoreCase(safeText(oeuvre.getType()))) {
+        // Show QR code option only if the artwork is private (is_public = false)
+        if (oeuvre != null && !oeuvre.isPublic()) {
             menu.getItems().add(qrItem);
         }
         menu.getItems().add(deleteItem);
@@ -1302,9 +1311,6 @@ public class MesOeuvresController {
         };
     }
 
-    private String resolveTypeFromVisibility(boolean isPrivate, String specialite) {
-        return isPrivate ? "Privee" : resolveTypeFromSpecialite(specialite);
-    }
 
     private void applyFilters() {
         String keyword = safeText(searchField.getText()).toLowerCase(Locale.ROOT).trim();
