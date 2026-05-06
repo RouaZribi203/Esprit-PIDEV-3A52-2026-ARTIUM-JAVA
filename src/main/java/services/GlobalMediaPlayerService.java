@@ -51,6 +51,7 @@ public final class GlobalMediaPlayerService {
 
     private final ObservableList<Musique> queue = FXCollections.observableArrayList();
     private int queueIndex = -1;
+    private final BooleanProperty isPlaylistMode = new SimpleBooleanProperty(false);
     
     private final ObjectProperty<PlaybackMode> playbackMode = new SimpleObjectProperty<>(PlaybackMode.NORMAL);
     private int smartShuffleCounter = 0;
@@ -65,11 +66,12 @@ public final class GlobalMediaPlayerService {
         return INSTANCE;
     }
 
-    public void playTrack(Musique track, List<Musique> queueTracks, int selectedIndex, String artistName) {
+    public void playTrack(Musique track, List<Musique> queueTracks, int selectedIndex, String artistName, boolean isPlaylist) {
         if (track == null) {
             return;
         }
         smartShuffleCounter = 0;
+        this.isPlaylistMode.set(isPlaylist);
 
         queue.setAll(queueTracks != null ? queueTracks : List.of(track));
         if (queue.isEmpty()) {
@@ -113,7 +115,7 @@ public final class GlobalMediaPlayerService {
         }
         smartShuffleCounter = 0;
         
-        if (playbackMode.get() == PlaybackMode.SHUFFLE) {
+        if (isPlaylistMode.get() && playbackMode.get() == PlaybackMode.SHUFFLE) {
             if (queue.size() > 1) {
                 int nextIndex;
                 do {
@@ -135,7 +137,7 @@ public final class GlobalMediaPlayerService {
             return;
         }
 
-        if (playbackMode.get() == PlaybackMode.SHUFFLE) {
+        if (isPlaylistMode.get() && playbackMode.get() == PlaybackMode.SHUFFLE) {
             if (queue.size() > 1) {
                 int nextIndex;
                 do {
@@ -150,9 +152,9 @@ public final class GlobalMediaPlayerService {
             return;
         }
 
-        if (playbackMode.get() == PlaybackMode.SMART_SHUFFLE) {
+        if (isPlaylistMode.get() && playbackMode.get() == PlaybackMode.SMART_SHUFFLE) {
             if (smartShuffleCounter >= 2) {
-                // Play a smart song
+                // Play a smart song from outside the playlist
                 Musique current = currentTrack.get();
                 String genre = current != null && current.getGenre() != null ? current.getGenre() : "";
                 
@@ -178,23 +180,24 @@ public final class GlobalMediaPlayerService {
                     if (!candidates.isEmpty()) {
                         Musique smartSong = candidates.get(random.nextInt(candidates.size()));
                         smartShuffleCounter = 0;
-                        // Return without modifying current queueIndex
-                        openTrack(smartSong, "✨ Recommandation IA", true);
+                        // Play the external song without modifying the internal queue index
+                        openTrack(smartSong, "✨ IA: " + (smartSong.getGenre() != null ? smartSong.getGenre() : ""), true);
                         return;
                     }
                 } catch (Exception e) {
                     System.err.println("Impossible de charger une musique smart: " + e.getMessage());
                 }
             }
-            smartShuffleCounter++;
             
+            // If we are here, we either didn't reach 2 yet, or fetching an external song failed.
+            smartShuffleCounter++;
             queueIndex = queueIndex >= queue.size() - 1 ? 0 : queueIndex + 1;
             Musique target = queue.get(queueIndex);
             openTrack(target, trackArtist.get(), true);
             return;
         }
 
-        // NORMAL mode
+        // NORMAL mode (or not in a playlist)
         queueIndex = queueIndex >= queue.size() - 1 ? 0 : queueIndex + 1;
         Musique target = queue.get(queueIndex);
         openTrack(target, trackArtist.get(), true);

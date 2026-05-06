@@ -778,7 +778,8 @@ public class MusicfrontController {
 		renderGrid();
 		updateNowPlayingLabels(selectedTrack);
 		updateLyricsPanel(selectedTrack);
-		globalMediaPlayer.playTrack(selectedTrack, visibleTracks, index, "Artiste inconnu");
+		// When playing from the general list, it is not a playlist context.
+		globalMediaPlayer.playTrack(selectedTrack, visibleTracks, index, "Artiste inconnu", false);
 	}
 
 	private String validateImagePath(String imagePath) {
@@ -1230,18 +1231,24 @@ public class MusicfrontController {
 			return;
 		}
 
-		int index = -1;
-		for (int i = 0; i < visibleTracks.size(); i++) {
-			Musique candidate = visibleTracks.get(i);
-			if (candidate.getId() != null && candidate.getId().equals(track.getId())) {
-				index = i;
-				break;
-			}
-		}
+		java.util.List<Musique> queueTracks = java.util.List.of(track);
+		int index = 0;
 
-		if (index >= 0) {
-			playTrackAtIndex(index);
-			return;
+		if (selectedPlaylistId != null) {
+			Playlist playlist = findPlaylistById(selectedPlaylistId);
+			if (playlist != null && playlist.getMusiques() != null && !playlist.getMusiques().isEmpty()) {
+				queueTracks = playlist.getMusiques();
+				index = -1;
+				for (int i = 0; i < queueTracks.size(); i++) {
+					if (queueTracks.get(i).getId() != null && queueTracks.get(i).getId().equals(track.getId())) {
+						index = i;
+						break;
+					}
+				}
+				if (index < 0) {
+					index = 0;
+				}
+			}
 		}
 
 		currentLyricsTrack = track;
@@ -1249,7 +1256,9 @@ public class MusicfrontController {
 		renderGrid();
 		updateNowPlayingLabels(track);
 		updateLyricsPanel(track);
-		globalMediaPlayer.playTrack(track, java.util.List.of(track), 0, "Artiste inconnu");
+		
+		// This is a playlist context!
+		globalMediaPlayer.playTrack(track, queueTracks, index, "Artiste inconnu", true);
 	}
 
 	private Node buildPlaylistCoverNode(String imageSource) {
