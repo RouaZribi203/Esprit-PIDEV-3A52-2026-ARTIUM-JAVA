@@ -28,8 +28,8 @@ public class JdbcLivreService implements LivreService {
 
     @Override
     public void add(Livre livre) throws SQLDataException {
-        String insertOeuvreSql = "INSERT INTO oeuvre (titre, description, date_creation, image, type, embedding, image_embedding, collection_id, classe) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String insertOeuvreSql = "INSERT INTO oeuvre (titre, description, date_creation, image, type, embedding, image_embedding, collection_id, classe, is_public) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         String insertLivreSql = "INSERT INTO livre (categorie, prix_location, fichier_pdf, id) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement insertOeuvre = getConnection().prepareStatement(insertOeuvreSql, Statement.RETURN_GENERATED_KEYS)) {
@@ -42,6 +42,7 @@ public class JdbcLivreService implements LivreService {
             insertOeuvre.setNull(7, Types.LONGVARCHAR);
             insertOeuvre.setInt(8, safeCollectionId(livre.getCollectionId()));
             insertOeuvre.setString(9, "livre");
+            insertOeuvre.setBoolean(10, true);
 
             int affectedRows = insertOeuvre.executeUpdate();
             if (affectedRows == 0) {
@@ -114,7 +115,7 @@ public class JdbcLivreService implements LivreService {
 
     @Override
     public List<Livre> getByArtist(int artistId) throws SQLDataException {
-        String baseSql = "SELECT o.id, o.titre, o.description, o.date_creation, o.collection_id, o.image, " +
+        String baseSql = "SELECT o.id, o.titre, o.description, o.date_creation, o.collection_id, o.image, o.is_public, " +
                 "l.categorie, l.prix_location, l.fichier_pdf, " +
                 "CONCAT(u.prenom, ' ', u.nom) AS auteur, " +
                 "CASE WHEN EXISTS (" +
@@ -146,7 +147,7 @@ public class JdbcLivreService implements LivreService {
 
     @Override
     public List<Livre> search(String searchText, String categorie) throws SQLDataException {
-        String baseSql = "SELECT o.id, o.titre, o.description, o.date_creation, o.collection_id, o.image, " +
+        String baseSql = "SELECT o.id, o.titre, o.description, o.date_creation, o.collection_id, o.image, o.is_public, " +
                 "l.categorie, l.prix_location, l.fichier_pdf, " +
                 "CONCAT(u.prenom, ' ', u.nom) AS auteur, " +
                 "CASE WHEN EXISTS (" +
@@ -211,6 +212,15 @@ public class JdbcLivreService implements LivreService {
         livre.setDisponibilite(rs.getInt("disponible") == 1);
         livre.setImage(ImageUrlUtils.normalizeForDatabase(rs.getString("image")));
         livre.setFichierPdf(PdfUrlUtils.normalizeForDatabase(rs.getString("fichier_pdf")));
+        
+        // Set is_public (default to true if column doesn't exist or is NULL)
+        try {
+            livre.setPublic(rs.getBoolean("is_public"));
+        } catch (SQLException e) {
+            // If column doesn't exist, default to true
+            livre.setPublic(true);
+        }
+        
         return livre;
     }
 

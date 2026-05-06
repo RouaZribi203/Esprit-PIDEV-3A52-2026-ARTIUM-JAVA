@@ -17,9 +17,6 @@
             </center>
         </BorderPane>
     </center>
-    <bottom>
-        <fx:include fx:id="globalPlayerInclude" source="components/GlobalPlayer.fxml" />
-    </bottom>
 </BorderPane>
 
 

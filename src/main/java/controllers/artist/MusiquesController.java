@@ -540,11 +540,20 @@ public class MusiquesController {
 
     private void loadCollections() {
         List<CollectionChoice> choices = new ArrayList<>();
+        
+        // Get the currently logged-in user
+        User currentUser = SessionManager.getCurrentUser();
+        if (currentUser == null) {
+            collectionComboBox.setItems(FXCollections.observableArrayList());
+            return;
+        }
+        
+        // Query collections for the current artist only
         String[] queries = {
-                "SELECT id, titre FROM collections",
-                "SELECT id, titre FROM collection_oeuvre",
-                "SELECT id, titre FROM collectionoeuvre",
-                "SELECT id, titre FROM collection"
+                "SELECT id, titre FROM collections WHERE artiste_id = ?",
+                "SELECT id, titre FROM collection_oeuvre WHERE artiste_id = ?",
+                "SELECT id, titre FROM collectionoeuvre WHERE artiste_id = ?",
+                "SELECT id, titre FROM collection WHERE artiste_id = ?"
         };
 
         Connection connection = MyDatabase.getInstance().getConnection();
@@ -554,13 +563,16 @@ public class MusiquesController {
         }
 
         for (String query : queries) {
-            try (Statement statement = connection.createStatement(); ResultSet resultSet = statement.executeQuery(query)) {
-                while (resultSet.next()) {
-                    choices.add(new CollectionChoice(resultSet.getInt("id"), resultSet.getString("titre")));
-                }
-                if (!choices.isEmpty()) {
-                    collectionComboBox.setItems(FXCollections.observableArrayList(choices));
-                    return;
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.setInt(1, currentUser.getId());
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    while (resultSet.next()) {
+                        choices.add(new CollectionChoice(resultSet.getInt("id"), resultSet.getString("titre")));
+                    }
+                    if (!choices.isEmpty()) {
+                        collectionComboBox.setItems(FXCollections.observableArrayList(choices));
+                        return;
+                    }
                 }
             } catch (SQLException ignored) {
                 choices.clear();
@@ -654,7 +666,7 @@ public class MusiquesController {
         renderTrackGrid();
 
         String artistName = resolveTrackArtistName(selectedTrack);
-        globalMediaPlayer.playTrack(selectedTrack, visibleTracks, index, artistName);
+        globalMediaPlayer.playTrack(selectedTrack, visibleTracks, index, artistName,true);
     }
 
     private String resolveTrackArtistName(Musique track) {
@@ -1284,7 +1296,7 @@ public class MusiquesController {
 
         @Override
         public String toString() {
-            return titre + " (#" + id + ")";
+            return titre;
         }
     }
 }

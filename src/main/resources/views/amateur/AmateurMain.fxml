@@ -18,19 +18,19 @@
         <fx:include fx:id="navbarInclude" source="NavbarAmateur.fxml"/>
     </top>
     <center>
-        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="amateur-scroll" vbarPolicy="AS_NEEDED">
-            <content>
-                <HBox spacing="18.0" styleClass="amateur-shell">
-                    <padding>
-                        <Insets top="18.0" right="18.0" bottom="18.0" left="18.0"/>
-                    </padding>
-                    <fx:include fx:id="sidebarInclude" source="SidebarAmateur.fxml"/>
-                    <VBox spacing="14.0" styleClass="amateur-content-column" HBox.hgrow="ALWAYS">
-                        <StackPane fx:id="amateurContentArea" minHeight="420.0" styleClass="amateur-page-host" VBox.vgrow="ALWAYS"/>
-                    </VBox>
-                </HBox>
-            </content>
-        </ScrollPane>
+        <HBox spacing="18.0" styleClass="amateur-shell">
+            <padding>
+                <Insets top="18.0" right="18.0" bottom="18.0" left="18.0"/>
+            </padding>
+            <fx:include fx:id="sidebarInclude" source="SidebarAmateur.fxml"/>
+            <VBox spacing="14.0" styleClass="amateur-content-column" HBox.hgrow="ALWAYS">
+                <ScrollPane fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" styleClass="amateur-scroll" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS">
+                    <content>
+                        <StackPane fx:id="amateurContentArea" minHeight="420.0" styleClass="amateur-page-host"/>
+                    </content>
+                </ScrollPane>
+            </VBox>
+        </HBox>
     </center>
     <bottom>
         <fx:include fx:id="globalPlayerInclude" source="../components/GlobalPlayer.fxml"/>

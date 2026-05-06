@@ -71,7 +71,7 @@ public class SidebarAmateurController {
     }
 
     private void installCircularClip() {
-        Circle clip = new Circle(36, 36, 36);
+        Circle clip = new Circle(21, 21, 21);
         profileImageView.setClip(clip);
     }
 

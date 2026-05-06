@@ -39,7 +39,7 @@ public class MusiqueService implements Iservice<Musique> {
             throw new SQLDataException("Connexion a la base de donnees indisponible.");
         }
 
-        String oeuvreInsert = "INSERT INTO oeuvre (titre, description, date_creation, image, type, collection_id, classe) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String oeuvreInsert = "INSERT INTO oeuvre (titre, description, date_creation, image, type, collection_id, classe, is_public) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         String musiqueInsert = "INSERT INTO musique (id, genre, audio, updated_at) VALUES (?, ?, ?, ?)";
 
         String imageUrl = prepareImageUrl(musique.getImage());
@@ -57,6 +57,7 @@ public class MusiqueService implements Iservice<Musique> {
                 oeuvreStatement.setString(5, musique.getType() != null ? musique.getType() : "Musique");
                 oeuvreStatement.setInt(6, effectiveCollectionId);
                 oeuvreStatement.setString(7, musique.getClasse() != null ? musique.getClasse() : "musique");
+                oeuvreStatement.setBoolean(8, true);
                 oeuvreStatement.executeUpdate();
 
                 try (var keys = oeuvreStatement.getGeneratedKeys()) {
@@ -288,7 +289,7 @@ public class MusiqueService implements Iservice<Musique> {
             throw new SQLDataException("Connexion a la base de donnees indisponible.");
         }
 
-        String query = "SELECT o.id, o.titre, o.description, o.date_creation, o.collection_id, o.type, o.classe, o.image, m.genre, m.audio, m.updated_at "
+        String query = "SELECT o.id, o.titre, o.description, o.date_creation, o.collection_id, o.type, o.classe, o.image, o.is_public, m.genre, m.audio, m.updated_at "
                 + "FROM musique m INNER JOIN oeuvre o ON o.id = m.id ORDER BY o.id DESC";
 
         List<Musique> musiques = new ArrayList<>();
@@ -313,6 +314,14 @@ public class MusiqueService implements Iservice<Musique> {
                 if (updatedAt != null) {
                     musique.setUpdatedAt(updatedAt.toLocalDateTime());
                 }
+                
+                // Set is_public (default to true if column doesn't exist or is NULL)
+                try {
+                    musique.setPublic(resultSet.getBoolean("is_public"));
+                } catch (SQLException e) {
+                    // If column doesn't exist, default to true
+                    musique.setPublic(true);
+                }
 
                 musiques.add(musique);
             }
@@ -328,7 +337,7 @@ public class MusiqueService implements Iservice<Musique> {
             throw new SQLDataException("Connexion a la base de donnees indisponible.");
         }
 
-        String query = "SELECT o.id, o.titre, o.description, o.date_creation, o.collection_id, o.type, o.classe, o.image, m.genre, m.audio, m.updated_at "
+        String query = "SELECT o.id, o.titre, o.description, o.date_creation, o.collection_id, o.type, o.classe, o.image, o.is_public, m.genre, m.audio, m.updated_at "
                 + "FROM musique m "
                 + "INNER JOIN oeuvre o ON o.id = m.id "
                 + "INNER JOIN collections c ON c.id = o.collection_id "
@@ -358,6 +367,15 @@ public class MusiqueService implements Iservice<Musique> {
                     if (updatedAt != null) {
                         musique.setUpdatedAt(updatedAt.toLocalDateTime());
                     }
+                    
+                    // Set is_public (default to true if column doesn't exist or is NULL)
+                    try {
+                        musique.setPublic(resultSet.getBoolean("is_public"));
+                    } catch (SQLException e) {
+                        // If column doesn't exist, default to true
+                        musique.setPublic(true);
+                    }
+                    
                     musiques.add(musique);
                 }
             }
