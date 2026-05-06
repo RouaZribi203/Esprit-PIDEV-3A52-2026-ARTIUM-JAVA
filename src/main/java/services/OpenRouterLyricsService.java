@@ -40,6 +40,15 @@ public class OpenRouterLyricsService {
     }
 
     public String generateLyrics(Musique track) {
+        if (track != null && track.getTitre() != null && !track.getTitre().isBlank()) {
+            String webLyrics = searchWebForLyrics(track.getTitre(), track.getDescription());
+            if (webLyrics != null && !webLyrics.isBlank()) {
+                System.out.println("Paroles trouvées sur lrclib.net !");
+                return webLyrics.trim();
+            }
+        }
+
+        System.out.println("Paroles non trouvées sur le web, utilisation de l'IA (Groq/OpenRouter)...");
         String apiKey = resolveApiKey();
         String model = resolveModel();
         String prompt = buildPrompt(track);
@@ -141,40 +150,84 @@ public class OpenRouterLyricsService {
         String description = safe(track != null ? track.getDescription() : null, "Aucune description disponible.");
         String language = LanguageDetector.detectLanguage(track);
 
-        // Analyze audio file to get features
-        AudioAnalyzer.AudioFeatures audioFeatures = AudioAnalyzer.analyzeAudio(
-            track != null ? track.getAudio() : null
-        );
+        return "You are an expert music lyrics generator and database. Your task is to provide lyrics for the song titled: \"" + title + "\".\n\n"
+                + "Context: The genre is " + genre + " and theme is " + description + ".\n"
+                + "Language: " + language + ".\n\n"
+                + "CRITICAL INSTRUCTIONS:\n"
+                + "1. First, try to provide the REAL, actual lyrics if this is a known song.\n"
+                + "2. If you do not know the song, you MUST write high-quality ORIGINAL lyrics that fit the title and genre.\n"
+                + "3. You must output ONLY the raw lyrics. NEVER include introductory text, apologies, metadata, or explanations.\n"
+                + "4. NEVER say 'Here are the lyrics', 'I couldn't find', or 'I found a song'.\n"
+                + "5. Start immediately with the first line of the song.\n\n"
+                + "Lyrics:";
+    }
 
-        return "You are a professional songwriter. Create original and engaging song lyrics in " + language + " based on these specifications:\n\n"
-                + "SONG TITLE: " + title + "\n"
-                + "GENRE: " + genre + "\n"
-                + "THEME/DESCRIPTION: " + description + "\n"
-                + "ESTIMATED BPM: " + audioFeatures.estimatedBpm + "\n"
-                + "APPROXIMATE KEY: " + audioFeatures.approximateKey + "\n"
-                + "ENERGY LEVEL: " + audioFeatures.energyLevel + "\n"
-                + "MOOD: " + audioFeatures.mood + "\n\n"
-                + "IMPORTANT INSTRUCTIONS:\n"
-                + "1. MUST be directly inspired by and related to the theme described above\n"
-                + "2. MUST follow the style and tone appropriate for " + genre + " music\n"
-                + "3. MUST match the mood: " + audioFeatures.mood + "\n"
-                + "4. MUST have a rhythm and pacing suitable for " + audioFeatures.estimatedBpm + " BPM\n"
-                + "5. MUST include verses and a memorable chorus/refrain\n"
-                + "6. MUST be emotionally resonant and match the song's energy level\n"
-                + "7. Use vivid imagery and emotional language that reflects the theme\n"
-                + "8. MUST be completely original - do not reproduce any existing songs\n"
-                + "9. Return ONLY the lyrics without any explanation, intro, or metadata\n\n"
-                + "Now write the lyrics:";
+    private String fetchFromLrcLib(String url) {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .timeout(Duration.ofSeconds(8))
+                    .header("User-Agent", "Artium-App/1.0")
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                String body = response.body();
+                try {
+                    if (body.trim().startsWith("[")) {
+                        org.json.JSONArray array = new org.json.JSONArray(body);
+                        for (int i = 0; i < array.length(); i++) {
+                            org.json.JSONObject trackObj = array.getJSONObject(i);
+                            if (trackObj.has("plainLyrics") && !trackObj.isNull("plainLyrics")) {
+                                String lyrics = trackObj.getString("plainLyrics");
+                                if (lyrics != null && !lyrics.isBlank()) {
+                                    return lyrics;
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    System.err.println("JSON parse error for lrclib: " + e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Web search failed for URL " + url + ": " + e.getMessage());
+        }
+        return null;
+    }
+
+    private String searchWebForLyrics(String title, String description) {
+        if (title == null || title.isBlank() || title.equalsIgnoreCase("Morceau sans titre")) {
+            return null;
+        }
+        
+        String encodedTitle = java.net.URLEncoder.encode(title.trim(), StandardCharsets.UTF_8);
+        
+        if (description != null && !description.isBlank() && description.length() <= 50 && !description.equalsIgnoreCase("Aucune description disponible.")) {
+            String encodedDesc = java.net.URLEncoder.encode(description.trim(), StandardCharsets.UTF_8);
+            String lyrics = fetchFromLrcLib("https://lrclib.net/api/search?track_name=" + encodedTitle + "&artist_name=" + encodedDesc);
+            if (lyrics != null) return lyrics;
+            
+            lyrics = fetchFromLrcLib("https://lrclib.net/api/search?q=" + encodedTitle + "+" + encodedDesc);
+            if (lyrics != null) return lyrics;
+        }
+
+        String lyrics = fetchFromLrcLib("https://lrclib.net/api/search?track_name=" + encodedTitle);
+        if (lyrics != null) return lyrics;
+        
+        return fetchFromLrcLib("https://lrclib.net/api/search?q=" + encodedTitle);
     }
 
     private String buildRequestBody(String model, String prompt) {
         return "{" +
                 "\"model\":\"" + jsonEscape(model) + "\"," +
                 "\"messages\":[" +
-                "{\"role\":\"system\",\"content\":\"You are a song writing assistant. Generate only original and non-copyrighted lyrics.\"}," +
+                "{\"role\":\"system\",\"content\":\"You are an expert music lyrics database. Provide only the lyrics without formatting or explanations.\"}," +
                 "{\"role\":\"user\",\"content\":\"" + jsonEscape(prompt) + "\"}" +
                 "]," +
-                "\"temperature\":0.9," +
+                "\"temperature\":0.5," +
                 "\"max_tokens\":1000," +
                 "\"top_p\":0.95," +
                 "\"stream\":false" +
@@ -185,54 +238,46 @@ public class OpenRouterLyricsService {
         if (responseBody == null || responseBody.isBlank()) {
             return null;
         }
-
-        // Use string search instead of regex to avoid StackOverflowError on huge text
-        String searchStr = "\"content\":";
-        int idx = responseBody.indexOf(searchStr);
-        while (idx != -1) {
-            int quoteStart = responseBody.indexOf("\"", idx + searchStr.length());
-            if (quoteStart != -1) {
-                int quoteEnd = responseBody.indexOf("\"", quoteStart + 1);
-                while (quoteEnd != -1 && responseBody.charAt(quoteEnd - 1) == '\\') {
-                    quoteEnd = responseBody.indexOf("\"", quoteEnd + 1);
-                }
-                
-                if (quoteEnd != -1) {
-                    String raw = responseBody.substring(quoteStart + 1, quoteEnd);
-                    // Check if it's not the system message echoing prompt
-                    if (!raw.contains("You are a song writing assistant") && raw.length() > 20) {
-                        String unescaped = unescapeJson(raw);
-                        if (unescaped != null && !unescaped.isBlank()) {
-                            return unescaped;
+        try {
+            org.json.JSONObject json = new org.json.JSONObject(responseBody);
+            if (json.has("choices")) {
+                org.json.JSONArray choices = json.getJSONArray("choices");
+                if (choices.length() > 0) {
+                    org.json.JSONObject choice = choices.getJSONObject(0);
+                    if (choice.has("message")) {
+                        org.json.JSONObject message = choice.getJSONObject("message");
+                        if (message.has("content")) {
+                            String content = message.getString("content");
+                            if (content != null && !content.isBlank()) {
+                                return content;
+                            }
                         }
                     }
                 }
             }
-            idx = responseBody.indexOf(searchStr, idx + searchStr.length());
-        }
-
-        // Fallback to regex
-        Matcher matcher = CONTENT_PATTERN.matcher(responseBody);
-        while (matcher.find()) {
-            String raw = matcher.group(1);
-            if (!raw.contains("You are a song writing assistant")) {
-                String unescaped = unescapeJson(raw);
-                if (unescaped != null && !unescaped.isBlank()) {
-                    return unescaped;
-                }
-            }
+        } catch (Exception e) {
+            System.err.println("Failed to parse Groq response JSON: " + e.getMessage());
         }
         return null;
     }
 
     private String extractErrorMessage(String responseBody, int statusCode) {
         if (responseBody != null && !responseBody.isBlank()) {
-            Matcher messageMatcher = MESSAGE_PATTERN.matcher(responseBody);
-            if (messageMatcher.find()) {
-                String message = unescapeJson(messageMatcher.group(1));
-                if (message != null && !message.isBlank()) {
-                    return message;
+            try {
+                org.json.JSONObject json = new org.json.JSONObject(responseBody);
+                if (json.has("error")) {
+                    Object errObj = json.get("error");
+                    if (errObj instanceof org.json.JSONObject) {
+                        org.json.JSONObject errJson = (org.json.JSONObject) errObj;
+                        if (errJson.has("message")) {
+                            return errJson.getString("message");
+                        }
+                    } else if (errObj instanceof String) {
+                        return (String) errObj;
+                    }
                 }
+            } catch (Exception e) {
+                // Continue to content fallback
             }
 
             String content = extractContent(responseBody);
@@ -240,7 +285,7 @@ public class OpenRouterLyricsService {
                 return content;
             }
         }
-        return "OpenRouter a retourné une erreur (HTTP " + statusCode + ").";
+        return "OpenRouter/Groq a retourné une erreur (HTTP " + statusCode + ").";
     }
 
     private String jsonEscape(String value) {
