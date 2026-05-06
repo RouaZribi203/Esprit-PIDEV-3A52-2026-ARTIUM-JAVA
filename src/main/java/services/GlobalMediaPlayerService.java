@@ -322,9 +322,8 @@ public final class GlobalMediaPlayerService {
                 if (rawAudio != null && rawAudio.contains("?")) {
                     String query = rawAudio.substring(rawAudio.indexOf('?') + 1);
                     double rate = 1.0;
-                    double bass = 0.0;
-                    double mid = 0.0;
-                    double treble = 0.0;
+                    double balance = 0.0;
+                    double sub = 0.0, bass = 0.0, mid = 0.0, pres = 0.0, brill = 0.0;
                     for (String param : query.split("&")) {
                         String[] kv = param.split("=");
                         if (kv.length == 2) {
@@ -332,25 +331,33 @@ public final class GlobalMediaPlayerService {
                                 double val = Double.parseDouble(kv[1]);
                                 switch (kv[0]) {
                                     case "rate": rate = val; break;
+                                    case "bal": balance = val; break;
+                                    case "sub": sub = val; break;
                                     case "bass": bass = val; break;
                                     case "mid": mid = val; break;
-                                    case "treble": treble = val; break;
+                                    case "pres": pres = val; break;
+                                    case "brill": brill = val; break;
                                 }
                             } catch (NumberFormatException ignored) {}
                         }
                     }
                     mediaPlayer.setRate(rate);
+                    mediaPlayer.setBalance(balance);
                     javafx.scene.media.AudioEqualizer eq = mediaPlayer.getAudioEqualizer();
-                    if (eq != null && (bass != 0 || mid != 0 || treble != 0)) {
+                    if (eq != null && (sub != 0 || bass != 0 || mid != 0 || pres != 0 || brill != 0)) {
                         eq.setEnabled(true);
                         for (javafx.scene.media.EqualizerBand band : eq.getBands()) {
                             double freq = band.getCenterFrequency();
-                            if (freq < 250) {
+                            if (freq <= 64) {
+                                band.setGain(sub);
+                            } else if (freq <= 250) {
                                 band.setGain(bass);
-                            } else if (freq < 4000) {
+                            } else if (freq <= 1000) {
                                 band.setGain(mid);
+                            } else if (freq <= 4000) {
+                                band.setGain(pres);
                             } else {
-                                band.setGain(treble);
+                                band.setGain(brill);
                             }
                         }
                     }

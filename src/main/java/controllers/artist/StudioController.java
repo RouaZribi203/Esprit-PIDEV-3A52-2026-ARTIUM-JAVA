@@ -17,12 +17,20 @@ public class StudioController {
 
     @FXML private Slider pitchSlider;
     @FXML private Label pitchLabel;
+    @FXML private Slider balanceSlider;
+    @FXML private Label balanceLabel;
+    
+    @FXML private Slider subSlider;
+    @FXML private Label subLabel;
     @FXML private Slider bassSlider;
     @FXML private Label bassLabel;
     @FXML private Slider midSlider;
     @FXML private Label midLabel;
-    @FXML private Slider trebleSlider;
-    @FXML private Label trebleLabel;
+    @FXML private Slider presSlider;
+    @FXML private Label presLabel;
+    @FXML private Slider brillSlider;
+    @FXML private Label brillLabel;
+    
     @FXML private Label statusLabel;
 
     private String baseAudioPath;
@@ -64,9 +72,12 @@ public class StudioController {
                     double val = Double.parseDouble(kv[1]);
                     switch (kv[0]) {
                         case "rate": pitchSlider.setValue(val); break;
+                        case "bal": balanceSlider.setValue(val); break;
+                        case "sub": subSlider.setValue(val); break;
                         case "bass": bassSlider.setValue(val); break;
                         case "mid": midSlider.setValue(val); break;
-                        case "treble": trebleSlider.setValue(val); break;
+                        case "pres": presSlider.setValue(val); break;
+                        case "brill": brillSlider.setValue(val); break;
                     }
                 } catch (NumberFormatException ignored) {}
             }
@@ -82,27 +93,39 @@ public class StudioController {
             }
         });
         
-        bassSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
-            bassLabel.setText(String.format(Locale.ROOT, "%.1f dB", newVal.doubleValue()));
-            updateEqualizer();
+        balanceSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            balanceLabel.setText(String.format(Locale.ROOT, "%.2f", newVal.doubleValue()));
+            if (previewPlayer != null) {
+                previewPlayer.setBalance(newVal.doubleValue());
+            }
         });
         
-        midSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
-            midLabel.setText(String.format(Locale.ROOT, "%.1f dB", newVal.doubleValue()));
-            updateEqualizer();
-        });
-        
-        trebleSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
-            trebleLabel.setText(String.format(Locale.ROOT, "%.1f dB", newVal.doubleValue()));
-            updateEqualizer();
-        });
+        setupEqSlider(subSlider, subLabel);
+        setupEqSlider(bassSlider, bassLabel);
+        setupEqSlider(midSlider, midLabel);
+        setupEqSlider(presSlider, presLabel);
+        setupEqSlider(brillSlider, brillLabel);
+    }
+
+    private void setupEqSlider(Slider slider, Label label) {
+        if (slider != null) {
+            slider.valueProperty().addListener((obs, oldVal, newVal) -> {
+                if (label != null) {
+                    label.setText(String.format(Locale.ROOT, "%.1f dB", newVal.doubleValue()));
+                }
+                updateEqualizer();
+            });
+        }
     }
 
     private void updateLabels() {
-        pitchLabel.setText(String.format(Locale.ROOT, "%.2fx", pitchSlider.getValue()));
-        bassLabel.setText(String.format(Locale.ROOT, "%.1f dB", bassSlider.getValue()));
-        midLabel.setText(String.format(Locale.ROOT, "%.1f dB", midSlider.getValue()));
-        trebleLabel.setText(String.format(Locale.ROOT, "%.1f dB", trebleSlider.getValue()));
+        if (pitchLabel != null) pitchLabel.setText(String.format(Locale.ROOT, "%.2fx", pitchSlider.getValue()));
+        if (balanceLabel != null) balanceLabel.setText(String.format(Locale.ROOT, "%.2f", balanceSlider.getValue()));
+        if (subLabel != null) subLabel.setText(String.format(Locale.ROOT, "%.1f dB", subSlider.getValue()));
+        if (bassLabel != null) bassLabel.setText(String.format(Locale.ROOT, "%.1f dB", bassSlider.getValue()));
+        if (midLabel != null) midLabel.setText(String.format(Locale.ROOT, "%.1f dB", midSlider.getValue()));
+        if (presLabel != null) presLabel.setText(String.format(Locale.ROOT, "%.1f dB", presSlider.getValue()));
+        if (brillLabel != null) brillLabel.setText(String.format(Locale.ROOT, "%.1f dB", brillSlider.getValue()));
     }
 
     private void updateEqualizer() {
@@ -111,18 +134,24 @@ public class StudioController {
         if (eq == null) return;
         
         eq.setEnabled(true);
+        double sub = subSlider.getValue();
         double bass = bassSlider.getValue();
         double mid = midSlider.getValue();
-        double treble = trebleSlider.getValue();
+        double pres = presSlider.getValue();
+        double brill = brillSlider.getValue();
         
         for (EqualizerBand band : eq.getBands()) {
             double freq = band.getCenterFrequency();
-            if (freq < 250) {
+            if (freq <= 64) {
+                band.setGain(sub);
+            } else if (freq <= 250) {
                 band.setGain(bass);
-            } else if (freq < 4000) {
+            } else if (freq <= 1000) {
                 band.setGain(mid);
+            } else if (freq <= 4000) {
+                band.setGain(pres);
             } else {
-                band.setGain(treble);
+                band.setGain(brill);
             }
         }
     }
@@ -131,18 +160,18 @@ public class StudioController {
     private void handlePreview() {
         if (isPlaying) {
             stopPreview();
-            statusLabel.setText("Aperçu arrêté");
+            if (statusLabel != null) statusLabel.setText("Aperçu arrêté");
             return;
         }
 
         if (baseAudioPath == null || baseAudioPath.isBlank()) {
-            statusLabel.setText("Aucun fichier audio selectionné.");
+            if (statusLabel != null) statusLabel.setText("Aucun fichier audio selectionné.");
             return;
         }
 
         String mediaSource = toMediaSource(baseAudioPath);
         if (mediaSource == null) {
-            statusLabel.setText("Impossible de charger l'audio.");
+            if (statusLabel != null) statusLabel.setText("Impossible de charger l'audio.");
             return;
         }
 
@@ -150,21 +179,22 @@ public class StudioController {
             Media media = new Media(mediaSource);
             previewPlayer = new MediaPlayer(media);
             previewPlayer.setRate(pitchSlider.getValue());
+            previewPlayer.setBalance(balanceSlider.getValue());
             
             previewPlayer.setOnReady(() -> {
                 updateEqualizer();
                 previewPlayer.play();
                 isPlaying = true;
-                statusLabel.setText("Lecture en cours...");
+                if (statusLabel != null) statusLabel.setText("Lecture en cours...");
             });
             
             previewPlayer.setOnEndOfMedia(() -> {
                 isPlaying = false;
-                statusLabel.setText("Aperçu terminé");
+                if (statusLabel != null) statusLabel.setText("Aperçu terminé");
             });
 
         } catch (Exception e) {
-            statusLabel.setText("Erreur: " + e.getMessage());
+            if (statusLabel != null) statusLabel.setText("Erreur: " + e.getMessage());
         }
     }
 
@@ -181,25 +211,43 @@ public class StudioController {
     private void handleSave() {
         stopPreview();
         double rate = pitchSlider.getValue();
+        double bal = balanceSlider.getValue();
+        double sub = subSlider.getValue();
         double bass = bassSlider.getValue();
         double mid = midSlider.getValue();
-        double treble = trebleSlider.getValue();
+        double pres = presSlider.getValue();
+        double brill = brillSlider.getValue();
         
         // Build final path
-        if (rate != 1.0 || bass != 0.0 || mid != 0.0 || treble != 0.0) {
-            finalAudioPath = String.format(Locale.ROOT, "%s?rate=%.2f&bass=%.1f&mid=%.1f&treble=%.1f", 
-                baseAudioPath, rate, bass, mid, treble);
+        if (rate != 1.0 || bal != 0.0 || sub != 0.0 || bass != 0.0 || mid != 0.0 || pres != 0.0 || brill != 0.0) {
+            finalAudioPath = String.format(Locale.ROOT, "%s?rate=%.2f&bal=%.2f&sub=%.1f&bass=%.1f&mid=%.1f&pres=%.1f&brill=%.1f", 
+                baseAudioPath, rate, bal, sub, bass, mid, pres, brill);
         } else {
             finalAudioPath = baseAudioPath;
         }
         
-        dialogStage.close();
+        if (dialogStage != null) {
+            dialogStage.close();
+        }
     }
 
     @FXML
     private void handleCancel() {
         stopPreview();
-        dialogStage.close();
+        if (dialogStage != null) {
+            dialogStage.close();
+        }
+    }
+
+    @FXML
+    private void handleReset() {
+        pitchSlider.setValue(1.0);
+        balanceSlider.setValue(0.0);
+        subSlider.setValue(0.0);
+        bassSlider.setValue(0.0);
+        midSlider.setValue(0.0);
+        presSlider.setValue(0.0);
+        brillSlider.setValue(0.0);
     }
 
     private String toMediaSource(String audioPath) {
