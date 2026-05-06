@@ -38,6 +38,11 @@ import utils.MyDatabase;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import javafx.stage.Modality;
 import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -308,6 +313,42 @@ public class MusiquesController {
         File file = chooser.showOpenDialog(audioPathField.getScene().getWindow());
         if (file != null) {
             audioPathField.setText(file.getAbsolutePath());
+        }
+    }
+
+    @FXML
+    private void handleOpenStudio() {
+        String currentAudio = audioPathField.getText() != null ? audioPathField.getText().trim() : "";
+        if (currentAudio.isEmpty() && editingAudioPath != null && !editingAudioPath.isEmpty()) {
+            currentAudio = editingAudioPath;
+        }
+
+        if (currentAudio.isEmpty()) {
+            setFeedback("Veuillez d'abord choisir un fichier audio avant d'ouvrir le studio.", false);
+            return;
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/artist/Studio.fxml"));
+            Parent root = loader.load();
+
+            StudioController controller = loader.getController();
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("Studio de Mixage");
+            stage.setScene(new Scene(root));
+            
+            controller.setDialogStage(stage);
+            controller.setAudioPath(currentAudio);
+            
+            stage.showAndWait();
+
+            String newPath = controller.getFinalAudioPath();
+            if (newPath != null && !newPath.isEmpty()) {
+                audioPathField.setText(newPath);
+            }
+        } catch (IOException e) {
+            setFeedback("Erreur lors de l'ouverture du studio: " + e.getMessage(), false);
         }
     }
 

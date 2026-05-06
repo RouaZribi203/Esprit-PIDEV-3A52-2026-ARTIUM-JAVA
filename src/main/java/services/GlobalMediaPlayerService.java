@@ -317,6 +317,45 @@ public final class GlobalMediaPlayerService {
             timeText.set("0:00 / 0:00");
 
             mediaPlayer.setOnReady(() -> {
+                // Apply effects if present
+                String rawAudio = track.getAudio();
+                if (rawAudio != null && rawAudio.contains("?")) {
+                    String query = rawAudio.substring(rawAudio.indexOf('?') + 1);
+                    double rate = 1.0;
+                    double bass = 0.0;
+                    double mid = 0.0;
+                    double treble = 0.0;
+                    for (String param : query.split("&")) {
+                        String[] kv = param.split("=");
+                        if (kv.length == 2) {
+                            try {
+                                double val = Double.parseDouble(kv[1]);
+                                switch (kv[0]) {
+                                    case "rate": rate = val; break;
+                                    case "bass": bass = val; break;
+                                    case "mid": mid = val; break;
+                                    case "treble": treble = val; break;
+                                }
+                            } catch (NumberFormatException ignored) {}
+                        }
+                    }
+                    mediaPlayer.setRate(rate);
+                    javafx.scene.media.AudioEqualizer eq = mediaPlayer.getAudioEqualizer();
+                    if (eq != null && (bass != 0 || mid != 0 || treble != 0)) {
+                        eq.setEnabled(true);
+                        for (javafx.scene.media.EqualizerBand band : eq.getBands()) {
+                            double freq = band.getCenterFrequency();
+                            if (freq < 250) {
+                                band.setGain(bass);
+                            } else if (freq < 4000) {
+                                band.setGain(mid);
+                            } else {
+                                band.setGain(treble);
+                            }
+                        }
+                    }
+                }
+
                 Duration total = mediaPlayer.getTotalDuration();
                 timeText.set(formatDuration(Duration.ZERO) + " / " + formatDuration(total));
                 if (autoPlay) {
@@ -367,6 +406,11 @@ public final class GlobalMediaPlayerService {
         }
 
         String trimmed = audioPath.trim();
+        int queryIndex = trimmed.indexOf('?');
+        if (queryIndex >= 0) {
+            trimmed = trimmed.substring(0, queryIndex);
+        }
+
         File local = resolveLocalAudioFile(trimmed);
         if (local != null && local.exists() && local.isFile()) {
             return local.toURI().toString();

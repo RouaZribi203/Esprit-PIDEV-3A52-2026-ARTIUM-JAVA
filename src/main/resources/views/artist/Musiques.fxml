@@ -86,6 +86,7 @@
                 <HBox spacing="10.0">
                     <TextField fx:id="audioPathField" editable="false" promptText="Cliquez pour parcourir" styleClass="input-field" HBox.hgrow="ALWAYS" />
                     <Button mnemonicParsing="false" onAction="#handleChooseAudio" styleClass="secondary-button" text="Parcourir" />
+                    <Button mnemonicParsing="false" onAction="#handleOpenStudio" styleClass="secondary-action-button" text="Ouvrir le Studio" />
                 </HBox>
                 <Label styleClass="section-subtitle" text="Formats acceptes: MP3, M4A, WAV" />
             </VBox>

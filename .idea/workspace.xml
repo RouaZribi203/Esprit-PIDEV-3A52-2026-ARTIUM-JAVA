@@ -6,14 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="correction blob oeuvre livre">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/NavbarAmateurController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/NavbarAmateurController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationCardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationCardController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationReplyDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationReplyDialogController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationsController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/entities/Reclamation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/entities/Reclamation.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/services/NotificationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/NotificationService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/services/ReclamationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/ReclamationService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/NavbarAmateur.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/NavbarAmateur.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/MusiquesController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/MusiquesController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/GlobalMediaPlayerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/GlobalMediaPlayerService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/artist/Musiques.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/artist/Musiques.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -60,6 +55,10 @@
     &quot;accountId&quot;: &quot;c4a6a437-d269-4169-a9d6-561a5bc22807&quot;
   }
 }</component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 7
 }</component>

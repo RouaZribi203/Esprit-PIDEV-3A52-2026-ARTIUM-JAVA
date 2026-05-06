@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.Region?>
+
+<VBox spacing="20.0" styleClass="page-root, users-shell" stylesheets="@../styles/amateur-theme.css" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.artist.StudioController">
+    <padding>
+        <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+    </padding>
+
+    <Label styleClass="page-title" text="Studio de Mixage" />
+    <Label styleClass="section-subtitle" text="Ajustez les effets audio pour votre publication" wrapText="true" />
+
+    <VBox spacing="10.0" styleClass="collections-body-card">
+        <padding>
+            <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
+        </padding>
+        
+        <Label styleClass="field-label" text="Vitesse / Pitch" />
+        <HBox spacing="10.0" alignment="CENTER_LEFT">
+            <Slider fx:id="pitchSlider" min="0.5" max="2.0" value="1.0" blockIncrement="0.1" HBox.hgrow="ALWAYS" />
+            <Label fx:id="pitchLabel" text="1.00x" styleClass="field-label" prefWidth="60.0" />
+        </HBox>
+
+        <Region prefHeight="10.0" />
+        <Label styleClass="section-title" text="Égaliseur" />
+
+        <Label styleClass="field-label" text="Basses" />
+        <HBox spacing="10.0" alignment="CENTER_LEFT">
+            <Slider fx:id="bassSlider" min="-24.0" max="12.0" value="0.0" blockIncrement="1.0" HBox.hgrow="ALWAYS" />
+            <Label fx:id="bassLabel" text="0.0 dB" styleClass="field-label" prefWidth="60.0" />
+        </HBox>
+
+        <Label styleClass="field-label" text="Médiums" />
+        <HBox spacing="10.0" alignment="CENTER_LEFT">
+            <Slider fx:id="midSlider" min="-24.0" max="12.0" value="0.0" blockIncrement="1.0" HBox.hgrow="ALWAYS" />
+            <Label fx:id="midLabel" text="0.0 dB" styleClass="field-label" prefWidth="60.0" />
+        </HBox>
+
+        <Label styleClass="field-label" text="Aigus" />
+        <HBox spacing="10.0" alignment="CENTER_LEFT">
+            <Slider fx:id="trebleSlider" min="-24.0" max="12.0" value="0.0" blockIncrement="1.0" HBox.hgrow="ALWAYS" />
+            <Label fx:id="trebleLabel" text="0.0 dB" styleClass="field-label" prefWidth="60.0" />
+        </HBox>
+    </VBox>
+
+    <HBox alignment="CENTER" spacing="10.0">
+        <Button mnemonicParsing="false" onAction="#handlePreview" styleClass="secondary-button" text="Aperçu Lecture / Pause" />
+        <Label fx:id="statusLabel" text="Prêt" styleClass="section-subtitle" />
+    </HBox>
+
+    <HBox alignment="CENTER_RIGHT" spacing="14.0">
+        <Button mnemonicParsing="false" onAction="#handleCancel" styleClass="secondary-button" text="Annuler" />
+        <Button mnemonicParsing="false" onAction="#handleSave" styleClass="primary-button" text="Appliquer les Effets" />
+    </HBox>
+</VBox>
