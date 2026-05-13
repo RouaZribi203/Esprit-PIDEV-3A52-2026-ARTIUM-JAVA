@@ -44,7 +44,16 @@ import utils.PdfUrlUtils;
 public class ReclamationsController implements Initializable {
 
 	@FXML
-	private TabPane tabs;
+	private VBox sendSection;
+
+	@FXML
+	private VBox myReclamationsSection;
+
+	@FXML
+	private Button btnSend;
+
+	@FXML
+	private Button btnMyReclamations;
 
 	// Send tab
 	@FXML
@@ -130,6 +139,36 @@ public class ReclamationsController implements Initializable {
 		clearAttachmentSelection();
 		updateTypeFilterButtons(typeFilterAll);
 
+		refreshMyReclamations();
+		handleShowSend();
+	}
+
+	@FXML
+	private void handleShowSend() {
+		if (sendSection != null) {
+			sendSection.setVisible(true);
+			sendSection.setManaged(true);
+		}
+		if (myReclamationsSection != null) {
+			myReclamationsSection.setVisible(false);
+			myReclamationsSection.setManaged(false);
+		}
+		if (btnSend != null) btnSend.setStyle("-fx-background-color: transparent; -fx-text-fill: #111827; -fx-font-weight: bold; -fx-font-size: 15px; -fx-border-color: transparent transparent #111827 transparent; -fx-border-width: 0 0 2px 0; -fx-padding: 8px 12px; -fx-cursor: hand;");
+		if (btnMyReclamations != null) btnMyReclamations.setStyle("-fx-background-color: transparent; -fx-text-fill: #6b7280; -fx-font-weight: bold; -fx-font-size: 15px; -fx-border-color: transparent; -fx-padding: 8px 12px; -fx-cursor: hand;");
+	}
+
+	@FXML
+	private void handleShowMyReclamations() {
+		if (myReclamationsSection != null) {
+			myReclamationsSection.setVisible(true);
+			myReclamationsSection.setManaged(true);
+		}
+		if (sendSection != null) {
+			sendSection.setVisible(false);
+			sendSection.setManaged(false);
+		}
+		if (btnMyReclamations != null) btnMyReclamations.setStyle("-fx-background-color: transparent; -fx-text-fill: #111827; -fx-font-weight: bold; -fx-font-size: 15px; -fx-border-color: transparent transparent #111827 transparent; -fx-border-width: 0 0 2px 0; -fx-padding: 8px 12px; -fx-cursor: hand;");
+		if (btnSend != null) btnSend.setStyle("-fx-background-color: transparent; -fx-text-fill: #6b7280; -fx-font-weight: bold; -fx-font-size: 15px; -fx-border-color: transparent; -fx-padding: 8px 12px; -fx-cursor: hand;");
 		refreshMyReclamations();
 	}
 
@@ -255,14 +294,7 @@ public class ReclamationsController implements Initializable {
 			refreshMyReclamations();
 
 			// Switch to "Mes Réclamations" after send
-			if (tabs != null) {
-				for (Tab t : tabs.getTabs()) {
-					if (t != null && "Mes Réclamations".equals(t.getText())) {
-						tabs.getSelectionModel().select(t);
-						break;
-					}
-				}
-			}
+			handleShowMyReclamations();
 		} catch (SQLDataException e) {
 			showError("Envoi impossible", e.getMessage());
 		} catch (Exception e) {

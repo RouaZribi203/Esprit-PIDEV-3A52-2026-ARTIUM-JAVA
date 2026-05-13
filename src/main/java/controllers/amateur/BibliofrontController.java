@@ -78,7 +78,12 @@ public class BibliofrontController {
     private TilePane cardsTile;
 
     @FXML
-    private ToggleButton filterRentedToggle;
+    private Button btnTousLivres;
+
+    @FXML
+    private Button btnMesLocations;
+
+    private boolean isRentedFilterActive = false;
 
     @FXML
     private ComboBox<String> authorCombo;
@@ -86,29 +91,10 @@ public class BibliofrontController {
     @FXML
     private ComboBox<String> priceSortCombo;
 
-    @FXML
-    private Label badge1Icon;
 
-    @FXML
-    private Label badge1Text;
-
-    @FXML
-    private Label badge2Icon;
-
-    @FXML
-    private Label badge2Text;
-
-    @FXML
-    private Label badge3Icon;
-
-    @FXML
-    private Label badge3Text;
 
     @FXML
     public void initialize() {
-        if (filterRentedToggle != null) {
-            filterRentedToggle.selectedProperty().addListener((obs, oldVal, newVal) -> applyFilter());
-        }
         if (searchField != null) {
             searchField.textProperty().addListener((obs, old, newV) -> applyFilter());
         }
@@ -127,7 +113,6 @@ public class BibliofrontController {
         if (priceSortCombo != null) {
             priceSortCombo.setTooltip(new Tooltip("Trier les livres par prix de location : décroissant ou croissant."));
         }
-        setupBadgeHoverEffects();
         refresh();
     }
 
@@ -141,58 +126,20 @@ public class BibliofrontController {
         refresh();
     }
 
-    private void setupBadgeHoverEffects() {
-        // Badge 1 (Green - Livres numériques)
-        if (badge1Icon != null) {
-            badge1Icon.setOnMouseEntered(e -> {
-                badge1Icon.setStyle("-fx-font-size: 16; -fx-padding: 6 12; -fx-background-color: #10b981; -fx-border-color: #10b981; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 3);");
-            });
-            badge1Icon.setOnMouseExited(e -> {
-                badge1Icon.setStyle("-fx-font-size: 16; -fx-padding: 6 12; -fx-background-color: #eff6ff; -fx-border-color: #10b981; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: #10b981; -fx-font-weight: bold; -fx-cursor: hand;");
-            });
-        }
-        if (badge1Text != null) {
-            badge1Text.setOnMouseEntered(e -> {
-                badge1Text.setStyle("-fx-font-size: 13; -fx-padding: 6 12; -fx-background-color: #10b981; -fx-border-color: #10b981; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 3);");
-            });
-            badge1Text.setOnMouseExited(e -> {
-                badge1Text.setStyle("-fx-font-size: 13; -fx-padding: 6 12; -fx-background-color: #eff6ff; -fx-border-color: #10b981; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: #10b981; -fx-font-weight: bold; -fx-cursor: hand;");
-            });
-        }
-        // Badge 2 (Yellow - Accès immédiat)
-        if (badge2Icon != null) {
-            badge2Icon.setOnMouseEntered(e -> {
-                badge2Icon.setStyle("-fx-font-size: 16; -fx-padding: 6 12; -fx-background-color: #f59e0b; -fx-border-color: #f59e0b; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 3);");
-            });
-            badge2Icon.setOnMouseExited(e -> {
-                badge2Icon.setStyle("-fx-font-size: 16; -fx-padding: 6 12; -fx-background-color: #fef3c7; -fx-border-color: #f59e0b; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: #f59e0b; -fx-font-weight: bold; -fx-cursor: hand;");
-            });
-        }
-        if (badge2Text != null) {
-            badge2Text.setOnMouseEntered(e -> {
-                badge2Text.setStyle("-fx-font-size: 13; -fx-padding: 6 12; -fx-background-color: #f59e0b; -fx-border-color: #f59e0b; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 3);");
-            });
-            badge2Text.setOnMouseExited(e -> {
-                badge2Text.setStyle("-fx-font-size: 13; -fx-padding: 6 12; -fx-background-color: #fef3c7; -fx-border-color: #f59e0b; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: #f59e0b; -fx-font-weight: bold; -fx-cursor: hand;");
-            });
-        }
-        // Badge 3 (Blue - Louer & Lire)
-        if (badge3Icon != null) {
-            badge3Icon.setOnMouseEntered(e -> {
-                badge3Icon.setStyle("-fx-font-size: 16; -fx-padding: 6 12; -fx-background-color: #3b82f6; -fx-border-color: #3b82f6; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 3);");
-            });
-            badge3Icon.setOnMouseExited(e -> {
-                badge3Icon.setStyle("-fx-font-size: 16; -fx-padding: 6 12; -fx-background-color: #dbeafe; -fx-border-color: #3b82f6; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: #3b82f6; -fx-font-weight: bold; -fx-cursor: hand;");
-            });
-        }
-        if (badge3Text != null) {
-            badge3Text.setOnMouseEntered(e -> {
-                badge3Text.setStyle("-fx-font-size: 13; -fx-padding: 6 12; -fx-background-color: #3b82f6; -fx-border-color: #3b82f6; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 3);");
-            });
-            badge3Text.setOnMouseExited(e -> {
-                badge3Text.setStyle("-fx-font-size: 13; -fx-padding: 6 12; -fx-background-color: #dbeafe; -fx-border-color: #3b82f6; -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: #3b82f6; -fx-font-weight: bold; -fx-cursor: hand;");
-            });
-        }
+    @FXML
+    private void handleShowTousLivres() {
+        isRentedFilterActive = false;
+        if (btnTousLivres != null) btnTousLivres.setStyle("-fx-background-color: transparent; -fx-text-fill: #111827; -fx-font-weight: bold; -fx-font-size: 15px; -fx-border-color: transparent transparent #111827 transparent; -fx-border-width: 0 0 2px 0; -fx-padding: 8px 12px; -fx-cursor: hand;");
+        if (btnMesLocations != null) btnMesLocations.setStyle("-fx-background-color: transparent; -fx-text-fill: #6b7280; -fx-font-weight: bold; -fx-font-size: 15px; -fx-border-color: transparent; -fx-padding: 8px 12px; -fx-cursor: hand;");
+        applyFilter();
+    }
+
+    @FXML
+    private void handleShowMesLocations() {
+        isRentedFilterActive = true;
+        if (btnMesLocations != null) btnMesLocations.setStyle("-fx-background-color: transparent; -fx-text-fill: #111827; -fx-font-weight: bold; -fx-font-size: 15px; -fx-border-color: transparent transparent #111827 transparent; -fx-border-width: 0 0 2px 0; -fx-padding: 8px 12px; -fx-cursor: hand;");
+        if (btnTousLivres != null) btnTousLivres.setStyle("-fx-background-color: transparent; -fx-text-fill: #6b7280; -fx-font-weight: bold; -fx-font-size: 15px; -fx-border-color: transparent; -fx-padding: 8px 12px; -fx-cursor: hand;");
+        applyFilter();
     }
 
     private void applyFilter() {
@@ -212,7 +159,7 @@ public class BibliofrontController {
         } else if ("💰 Prix croissant".equals(priceSort)) {
             result.sort((a, b) -> Double.compare(a.getPrixLocation() != null ? a.getPrixLocation() : 0, b.getPrixLocation() != null ? a.getPrixLocation() : 0));
         }
-        if (filterRentedToggle != null && filterRentedToggle.isSelected()) {
+        if (isRentedFilterActive) {
             try {
                 List<Integer> rentedIds = locationLivreService.getRentedLivreIds(getCurrentUserId());
                 result = result.stream().filter(l -> rentedIds.contains(l.getId())).collect(Collectors.toList());
