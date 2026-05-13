@@ -6,25 +6,58 @@
   <component name="ChangeListManager">
     <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="correction blob oeuvre livre">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/ReclamationsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/ReclamationsController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/ReclamationsArtisteController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/ReclamationsArtisteController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationCardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationCardController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationsController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/services/EmailService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/EmailService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/services/JdbcLocationLivreService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/JdbcLocationLivreService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/services/OpenRouterReclamationReplyService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/OpenRouterReclamationReplyService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/utils/EmailUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/utils/EmailUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/NavbarAmateur.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/NavbarAmateur.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/Reclamations.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/Reclamations.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/SidebarAmateur.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/SidebarAmateur.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/artist/Reclamations.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/artist/Reclamations.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/pages/reclamations.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/pages/reclamations.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/AmateurMain.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/AmateurMain.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/Musique.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/Musique.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CopilotChats">
+    <option name="panelChat">
+      <chat>
+        <option name="activeSessionId" value="1fb591d4-670d-400f-9eb2-2447a9a13943" />
+        <option name="sessions">
+          <session>
+            <option name="chatType" value="PANEL" />
+            <option name="id" value="2f6080c2-32ff-4d5e-a3f3-69eb97bedb88" />
+            <option name="modeId" value="Ask" />
+            <option name="modelType" value="builtin_family" />
+            <option name="modelValue" value="auto" />
+            <option name="targetType" value="LOCAL" />
+          </session>
+          <session>
+            <option name="chatType" value="PANEL" />
+            <option name="id" value="96368b31-dfae-41ed-8c86-783638b208f3" />
+            <option name="modeId" value="Agent" />
+            <option name="modelType" value="builtin_family" />
+            <option name="modelValue" value="auto" />
+            <option name="targetType" value="LOCAL" />
+          </session>
+          <session>
+            <option name="chatType" value="PANEL" />
+            <option name="id" value="412caa95-8a22-4599-b2d5-34f78d79164c" />
+            <option name="modeId" value="Agent" />
+            <option name="modelType" value="builtin_family" />
+            <option name="modelValue" value="auto" />
+            <option name="status" value="Stopped" />
+            <option name="targetType" value="LOCAL" />
+          </session>
+          <session>
+            <option name="chatType" value="PANEL" />
+            <option name="id" value="1fb591d4-670d-400f-9eb2-2447a9a13943" />
+            <option name="modeId" value="Agent" />
+            <option name="modelType" value="builtin_family" />
+            <option name="modelValue" value="auto" />
+            <option name="status" value="Completed" />
+            <option name="targetType" value="LOCAL" />
+          </session>
+        </option>
+        <option name="type" value="PANEL" />
+      </chat>
+    </option>
   </component>
   <component name="CopilotPersistence">
     <persistenceIdMap>
@@ -39,8 +72,8 @@
   </component>
   <component name="CopilotUserSelectedModel">
     <selectedModels>
-      <entry key="chat-panel" value="Auto" />
       <entry key="agent-panel" value="Auto" />
+      <entry key="chat-panel" value="Auto" />
     </selectedModels>
   </component>
   <component name="FileTemplateManagerImpl">
@@ -76,6 +109,20 @@
   <component name="ProjectId" id="3CBOsOPT2jv5fiXn9rY3ITlYjez" />
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="1" id="Add" />
+  </component>
+  <component name="ProjectSessionTemplates">
+    <option name="panelTemplate">
+      <template>
+        <option name="modeId" value="Agent" />
+        <option name="model">
+          <model>
+            <option name="modelType" value="builtin_family" />
+            <option name="modelValue" value="auto" />
+          </model>
+        </option>
+        <option name="targetType" value="LOCAL" />
+      </template>
+    </option>
   </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />

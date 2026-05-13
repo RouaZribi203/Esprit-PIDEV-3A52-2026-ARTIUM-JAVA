@@ -24,7 +24,7 @@
             </padding>
             <fx:include fx:id="sidebarInclude" source="SidebarAmateur.fxml"/>
             <VBox spacing="14.0" styleClass="amateur-content-column" HBox.hgrow="ALWAYS">
-                <ScrollPane fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" styleClass="amateur-scroll" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS">
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="amateur-scroll" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS">
                     <content>
                         <StackPane fx:id="amateurContentArea" minHeight="420.0" styleClass="amateur-page-host"/>
                     </content>
