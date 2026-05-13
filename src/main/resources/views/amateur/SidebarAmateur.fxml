@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.SVGPath?>
 
-<VBox maxWidth="280.0" minWidth="280.0" prefWidth="280.0" spacing="0.0" styleClass="amateur-left-sidebar" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.amateur.SidebarAmateurController">
+<VBox maxWidth="280.0" minWidth="280.0" prefWidth="280.0" spacing="0.0" styleClass="amateur-left-sidebar" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.amateur.SidebarAmateurController">
     <VBox spacing="0.0" styleClass="new-sidebar-container" VBox.vgrow="ALWAYS">
         
         <!-- Logo / Brand Removed (Moved to Navbar) -->

@@ -39,7 +39,7 @@ public class JdbcLocationLivreService {
             }
 
             String insertSql = "INSERT INTO location_livre (date_debut, etat, nombre_de_jours, user_id, livre_id) " +
-                    "VALUES (NOW(), 'en_cours', ?, ?, ?)";
+                    "VALUES (NOW(), 'Active', ?, ?, ?)";
             try (PreparedStatement stmt = connection.prepareStatement(insertSql)) {
                 stmt.setInt(1, nombreDeJours);
                 stmt.setInt(2, userId);

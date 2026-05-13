@@ -2,7 +2,6 @@ package utils;
 
 import java.util.Properties;
 import javax.mail.Message;
-import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
@@ -53,7 +52,7 @@ public class EmailUtil {
                 message.setFrom(new InternetAddress(SENDER_EMAIL));
                 message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(ADMIN_EMAIL));
                 message.setSubject(subject);
-                message.setText(content);
+                message.setContent(buildHtmlEmail(content), "text/html; charset=UTF-8");
 
                 // Envoi réel de l'email
                 Transport.send(message); 
@@ -64,16 +63,39 @@ public class EmailUtil {
                 System.out.println("========================================");
                 
             } catch (Throwable e) {
-                e.printStackTrace();
                 System.err.println("Erreur critique lors de l'envoi de l'email: " + e.getMessage());
                 javafx.application.Platform.runLater(() -> {
                     javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
                     alert.setTitle("Erreur d'envoi d'email");
                     alert.setHeaderText("L'email n'a pas pu être envoyé.");
-                    alert.setContentText("Détail de l'erreur : " + e.toString() + "\n\nVérifiez votre connexion, vos identifiants ou si Maven a bien téléchargé javax.mail.");
+                    alert.setContentText("Détail de l'erreur : " + e + "\n\nVérifiez votre connexion, vos identifiants ou si Maven a bien téléchargé javax.mail.");
                     alert.showAndWait();
                 });
             }
         }).start();
+    }
+
+    static String buildHtmlEmail(String content) {
+        return "<!DOCTYPE html>"
+                + "<html lang=\"fr\">"
+                + "<body style=\"margin:0;padding:0;background-color:#f6f8fb;font-family:Arial,Helvetica,sans-serif;color:#1f2937;\">"
+                + "<div style=\"max-width:720px;margin:0 auto;padding:32px 16px;\">"
+                + "<div style=\"background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:28px 32px;box-shadow:0 10px 24px rgba(15,23,42,0.08);\">"
+                + "<h1 style=\"margin:0 0 18px;font-size:22px;color:#111827;\">Nouvelle réclamation</h1>"
+                + "<div style=\"font-size:15px;line-height:1.7;white-space:pre-wrap;\">"
+                + escapeHtml(content)
+                + "</div>"
+                + "</div></div></body></html>";
+    }
+
+    private static String escapeHtml(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
     }
 }

@@ -57,7 +57,7 @@ public class ReclamationCardController {
         boolean isNon = s.contains("non")
                 || s.contains("en cours")
                 || s.contains("pending")
-                || s.contains("non traite")
+                || s.contains("Non traitée")
                 || s.contains("nontraite");
         boolean isTraite = !isNon && (s.contains("traite") || s.contains("resolu") || s.contains("resolved") || s.contains("done"));
 

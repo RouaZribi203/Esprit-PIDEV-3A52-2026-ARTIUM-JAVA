@@ -6,21 +6,20 @@
   <component name="ChangeListManager">
     <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="correction blob oeuvre livre">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/AdminMusiquesController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/AdminMusiquesController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/MusicfrontController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/MusicfrontController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/SidebarAmateurController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/SidebarAmateurController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/MusiquesController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/MusiquesController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/services/JdbcLivreService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/JdbcLivreService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/services/MusiqueService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/MusiqueService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/MainLayout.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/MainLayout.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/AmateurMain.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/AmateurMain.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/Bibliotheque.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/Bibliotheque.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/Musique.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/Musique.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/ReclamationsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/ReclamationsController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/ReclamationsArtisteController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/ReclamationsArtisteController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationCardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationCardController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/pages/reclamations/ReclamationsController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/EmailService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/EmailService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/JdbcLocationLivreService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/JdbcLocationLivreService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/OpenRouterReclamationReplyService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/OpenRouterReclamationReplyService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/utils/EmailUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/utils/EmailUtil.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/NavbarAmateur.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/NavbarAmateur.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/Reclamations.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/Reclamations.fxml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/SidebarAmateur.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/SidebarAmateur.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/pages/livres.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/pages/livres.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/pages/musiques.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/pages/musiques.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/artist/Reclamations.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/artist/Reclamations.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/views/pages/reclamations.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/pages/reclamations.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -156,7 +155,13 @@
       <workItem from="1777645552344" duration="5495000" />
       <workItem from="1777673462005" duration="620000" />
       <workItem from="1778004583788" duration="8016000" />
-      <workItem from="1778099669900" duration="2836000" />
+      <workItem from="1778099669900" duration="3085000" />
+      <workItem from="1778102961875" duration="234000" />
+      <workItem from="1778141254228" duration="2657000" />
+      <workItem from="1778150818012" duration="2355000" />
+      <workItem from="1778458068210" duration="621000" />
+      <workItem from="1778488084074" duration="1183000" />
+      <workItem from="1778681648306" duration="10822000" />
     </task>
     <task id="LOCAL-00001" summary="corrections de blob">
       <option name="closed" value="true" />

@@ -46,10 +46,7 @@ public final class EmailService {
 		}
 
 		String subject = "Artium - code de reinitialisation";
-		String body = "Bonjour,\n\n"
-				+ "Votre code de reinitialisation est : " + resetCode + "\n"
-				+ "Ce code expire le : " + expiresAt.format(EXPIRY_FORMAT) + "\n\n"
-				+ "Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail.";
+		String body = buildPasswordResetHtmlBody(resetCode, expiresAt);
 
 		Socket socket = null;
 		BufferedReader reader = null;
@@ -86,7 +83,7 @@ public final class EmailService {
 			writer.write("Subject: " + subject + "\r\n");
 			writer.write("Date: " + DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.now(ZoneId.systemDefault())) + "\r\n");
 			writer.write("MIME-Version: 1.0\r\n");
-			writer.write("Content-Type: text/plain; charset=UTF-8\r\n");
+			writer.write("Content-Type: text/html; charset=UTF-8\r\n");
 			writer.write("Content-Transfer-Encoding: 8bit\r\n");
 			writer.write("\r\n");
 			writer.write(body.replace("\n", "\r\n"));
@@ -165,6 +162,38 @@ public final class EmailService {
 
 	private static String base64(String value) {
 		return Base64.getEncoder().encodeToString(value.getBytes(StandardCharsets.UTF_8));
+	}
+
+	static String buildPasswordResetHtmlBody(String resetCode, LocalDateTime expiresAt) {
+		String safeCode = escapeHtml(resetCode);
+		String safeExpiry = escapeHtml(expiresAt.format(EXPIRY_FORMAT));
+		return "<!DOCTYPE html>"
+				+ "<html lang=\"fr\">"
+				+ "<body style=\"margin:0;padding:0;background-color:#f6f8fb;font-family:Arial,Helvetica,sans-serif;color:#1f2937;\">"
+				+ "<div style=\"max-width:640px;margin:0 auto;padding:32px 16px;\">"
+				+ "<div style=\"background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:32px;box-shadow:0 10px 24px rgba(15,23,42,0.08);\">"
+				+ "<h1 style=\"margin:0 0 20px;font-size:24px;color:#111827;\">Artium</h1>"
+				+ "<p style=\"margin:0 0 16px;font-size:16px;line-height:1.6;\">Bonjour,</p>"
+				+ "<p style=\"margin:0 0 12px;font-size:16px;line-height:1.6;\">Votre code de reinitialisation est :</p>"
+				+ "<div style=\"display:inline-block;padding:14px 20px;margin:0 0 18px;background:#eef2ff;border:1px dashed #6366f1;border-radius:10px;font-size:28px;letter-spacing:4px;font-weight:700;color:#312e81;\">"
+				+ safeCode
+				+ "</div>"
+				+ "<p style=\"margin:0 0 16px;font-size:15px;line-height:1.6;\">Ce code expire le : <strong>"
+				+ safeExpiry
+				+ "</strong></p>"
+				+ "<p style=\"margin:0;font-size:14px;line-height:1.6;color:#6b7280;\">Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail.</p>"
+				+ "</div></div></body></html>";
+	}
+
+	private static String escapeHtml(String value) {
+		if (value == null) {
+			return "";
+		}
+		return value.replace("&", "&amp;")
+				.replace("<", "&lt;")
+				.replace(">", "&gt;")
+				.replace("\"", "&quot;")
+				.replace("'", "&#39;");
 	}
 
 	private static String readConfig(String propertyName, String envName, String defaultValue) {

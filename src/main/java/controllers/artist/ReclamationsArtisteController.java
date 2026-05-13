@@ -30,6 +30,8 @@ import java.text.Normalizer;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import java.awt.Desktop;
+import utils.ImageUrlUtils;
+import utils.PdfUrlUtils;
 
 public class ReclamationsArtisteController implements Initializable {
 
@@ -95,7 +97,7 @@ public class ReclamationsArtisteController implements Initializable {
 		typeCombo.setItems(FXCollections.observableArrayList(
 				"Paiement",
 				"Oeuvre",
-				"Evenement",
+				"Evènement",
 				"Compte",
 				"Autre"
 		));
@@ -220,10 +222,26 @@ public class ReclamationsArtisteController implements Initializable {
 		Reclamation r = new Reclamation();
 		r.setTexte(description);
 		r.setType(type);
-		r.setStatut("Non traite");
+		r.setStatut("Non traitée");
 		r.setDateCreation(now);
 		r.setUpdatedAt(now);
-		r.setFileName(selectedAttachmentFile == null ? null : selectedAttachmentFile.getAbsolutePath());
+		// Persist attachment into XAMPP web folder and store public URL
+		String persistedFileUrl = null;
+		if (selectedAttachmentFile != null) {
+			String localPath = selectedAttachmentFile.getAbsolutePath();
+			String lower = selectedAttachmentFile.getName().toLowerCase(Locale.ROOT);
+			try {
+				if (lower.endsWith(".pdf")) {
+					persistedFileUrl = PdfUrlUtils.persistToWebPdfDirectoryAndNormalize(localPath);
+				} else {
+					persistedFileUrl = ImageUrlUtils.persistToWebImageDirectoryAndNormalize(localPath);
+				}
+			} catch (java.sql.SQLDataException ex) {
+				showError("Fichier", "Impossible de copier la pièce jointe: " + ex.getMessage());
+				return;
+			}
+		}
+		r.setFileName(persistedFileUrl);
 		r.setUserId(userId);
 
 		try {
@@ -446,48 +464,97 @@ public class ReclamationsArtisteController implements Initializable {
 		HBox dateUpdateBox = createDetailRow("Dernière modification", dateUpdate);
 		content.getChildren().add(dateUpdateBox);
 
-		// Fichier joint avec visualisation
+		// Fichier joint avec visualisation — supporte URL publiques (http(s)) et chemins locaux
 		if (r.getFileName() != null && !r.getFileName().isBlank()) {
-			File attachmentFile = new File(r.getFileName());
-			if (attachmentFile.exists()) {
-				VBox fileBox = new VBox(5);
-				Label fileLabel = new Label("Pièce jointe");
-				fileLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 12;");
-				fileBox.getChildren().add(fileLabel);
+			String fileRef = r.getFileName();
+			VBox fileBox = new VBox(5);
+			Label fileLabel = new Label("Pièce jointe");
+			fileLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 12;");
+			fileBox.getChildren().add(fileLabel);
 
-				String fileName = attachmentFile.getName().toLowerCase(Locale.ROOT);
-				
-				// Pour les images : affichage direct
-				if (fileName.endsWith(".png") || fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) {
-					try {
-						Image image = new Image(attachmentFile.toURI().toString());
-						ImageView imageView = new ImageView(image);
-						imageView.setPreserveRatio(true);
-						imageView.setFitWidth(300);
-						imageView.setFitHeight(300);
-						fileBox.getChildren().add(imageView);
-					} catch (Exception e) {
-						fileBox.getChildren().add(new Label("Erreur lors du chargement de l'image"));
+			try {
+				if (fileRef.startsWith("http://") || fileRef.startsWith("https://")) {
+					String fname = fileRef.substring(fileRef.lastIndexOf('/') + 1).toLowerCase(Locale.ROOT);
+					if (fname.endsWith(".png") || fname.endsWith(".jpg") || fname.endsWith(".jpeg")) {
+						try {
+							File localImage = resolveDisplayAttachmentFile(fileRef);
+							String imageSource = localImage != null && localImage.exists()
+									? localImage.toURI().toString()
+									: fileRef;
+							Image image = new Image(imageSource, true);
+							ImageView imageView = new ImageView(image);
+							imageView.setPreserveRatio(true);
+							imageView.setFitWidth(300);
+							imageView.setFitHeight(300);
+							fileBox.getChildren().add(imageView);
+						} catch (Exception e) {
+							fileBox.getChildren().add(new Label("Erreur lors du chargement de l'image"));
+						}
+					} else if (fname.endsWith(".pdf")) {
+						HBox pdfBox = new HBox(10);
+						Label pdfNameLabel = new Label(fname);
+						pdfNameLabel.setStyle("-fx-text-fill: #333;");
+						Button openButton = new Button("Ouvrir le PDF");
+						openButton.setStyle("-fx-padding: 8; -fx-font-size: 11;");
+						openButton.setOnAction(e -> {
+							try {
+								Desktop.getDesktop().browse(new java.net.URI(fileRef));
+							} catch (Exception ex) {
+								showError("Erreur", "Impossible d'ouvrir le PDF: " + ex.getMessage());
+							}
+						});
+						pdfBox.getChildren().addAll(pdfNameLabel, openButton);
+						fileBox.getChildren().add(pdfBox);
+					} else {
+						HBox linkBox = new HBox(10);
+						Label linkLabel = new Label(fileRef.substring(fileRef.lastIndexOf('/') + 1));
+						Button openButton = new Button("Ouvrir");
+						openButton.setOnAction(e -> {
+							try {
+								Desktop.getDesktop().browse(new java.net.URI(fileRef));
+							} catch (Exception ex) {
+								showError("Erreur", "Impossible d'ouvrir le fichier: " + ex.getMessage());
+							}
+						});
+						linkBox.getChildren().addAll(linkLabel, openButton);
+						fileBox.getChildren().add(linkBox);
 					}
-				} 
-				// Pour les PDFs : bouton d'ouverture
-				else if (fileName.endsWith(".pdf")) {
-					HBox pdfBox = new HBox(10);
-					Label pdfNameLabel = new Label(attachmentFile.getName());
-					pdfNameLabel.setStyle("-fx-text-fill: #333;");
-					
-					Button openButton = new Button("Ouvrir le PDF");
-					openButton.setStyle("-fx-padding: 8; -fx-font-size: 11;");
-					openButton.setOnAction(e -> openFile(attachmentFile));
-					
-					pdfBox.getChildren().addAll(pdfNameLabel, openButton);
-					fileBox.getChildren().add(pdfBox);
+					content.getChildren().add(fileBox);
+				} else {
+					// chemin local
+					File attachmentFile = new File(fileRef);
+					if (attachmentFile.exists()) {
+						String fileName = attachmentFile.getName().toLowerCase(Locale.ROOT);
+						if (fileName.endsWith(".png") || fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) {
+							try {
+								Image image = new Image(attachmentFile.toURI().toString(), true);
+								ImageView imageView = new ImageView(image);
+								imageView.setPreserveRatio(true);
+								imageView.setFitWidth(300);
+								imageView.setFitHeight(300);
+								fileBox.getChildren().add(imageView);
+							} catch (Exception e) {
+								fileBox.getChildren().add(new Label("Erreur lors du chargement de l'image"));
+							}
+						} else if (fileName.endsWith(".pdf")) {
+							HBox pdfBox = new HBox(10);
+							Label pdfNameLabel = new Label(attachmentFile.getName());
+							pdfNameLabel.setStyle("-fx-text-fill: #333;");
+							Button openButton = new Button("Ouvrir le PDF");
+							openButton.setStyle("-fx-padding: 8; -fx-font-size: 11;");
+							openButton.setOnAction(e -> openFile(attachmentFile));
+							pdfBox.getChildren().addAll(pdfNameLabel, openButton);
+							fileBox.getChildren().add(pdfBox);
+						}
+						content.getChildren().add(fileBox);
+					} else {
+						HBox missing = createDetailRow("Pièce jointe", "Fichier non trouvé : " + fileRef);
+						content.getChildren().add(missing);
+					}
 				}
-				
-				content.getChildren().add(fileBox);
-			} else {
-				HBox fileBox = createDetailRow("Pièce jointe", "Fichier non trouvé : " + r.getFileName());
-				content.getChildren().add(fileBox);
+			} catch (Exception ex) {
+				HBox err = createDetailRow("Pièce jointe", "Erreur lors du traitement du fichier: " + ex.getMessage());
+				content.getChildren().add(err);
 			}
 		} else {
 			HBox fileBox = createDetailRow("Pièce jointe", "Aucun");
@@ -572,12 +639,24 @@ public class ReclamationsArtisteController implements Initializable {
 		Label attachmentLabel = new Label("Pièce jointe (image ou PDF)");
 		attachmentLabel.setStyle("-fx-font-weight: bold;");
 
-		File currentAttachment = r.getFileName() != null && !r.getFileName().isBlank() ? new File(r.getFileName()) : null;
-		Label selectedAttachmentLabel = new Label(
-			currentAttachment != null && currentAttachment.exists()
-				? "Fichier actuel: " + currentAttachment.getName()
-				: "Aucun fichier"
-		);
+		// If stored fileName is an HTTP URL, treat as remote; otherwise try to read as local file
+		File currentAttachment = null;
+		String fileRef = r.getFileName();
+		String currentAttachmentLabelText = "Aucun fichier";
+		if (fileRef != null && !fileRef.isBlank()) {
+			if (fileRef.startsWith("http://") || fileRef.startsWith("https://")) {
+				String fname = fileRef.substring(Math.max(0, fileRef.lastIndexOf('/') + 1));
+				currentAttachmentLabelText = "Fichier actuel: " + fname;
+			} else {
+				currentAttachment = new File(fileRef);
+				if (currentAttachment.exists()) {
+					currentAttachmentLabelText = "Fichier actuel: " + currentAttachment.getName();
+				} else {
+					currentAttachmentLabelText = "Fichier actuel: (local introuvable)";
+				}
+			}
+		}
+		Label selectedAttachmentLabel = new Label(currentAttachmentLabelText);
 		selectedAttachmentLabel.setStyle("-fx-text-fill: #666;");
 
 		HBox attachmentButtonBox = new HBox(8);
@@ -588,7 +667,8 @@ public class ReclamationsArtisteController implements Initializable {
 
 		Button removeButton = new Button("Retirer la pièce jointe");
 		removeButton.setStyle("-fx-padding: 8;");
-		removeButton.setDisable(currentAttachment == null || !currentAttachment.exists());
+		// allow removal if there is any current reference (local or remote)
+		removeButton.setDisable(fileRef == null || fileRef.isBlank());
 
 		// État pour le fichier sélectionné lors de l'édition
 		final File[] editingAttachmentFile = {currentAttachment};
@@ -653,18 +733,34 @@ public class ReclamationsArtisteController implements Initializable {
 				}
 			}
 
-			try {
-				r.setTexte(newText);
-				r.setFileName(editingAttachmentFile[0] == null ? null : editingAttachmentFile[0].getAbsolutePath());
-				r.setUpdatedAt(LocalDateTime.now());
-				reclamationService.update(r);
-				refreshMyReclamations();
-				showInfo("Modification", "Réclamation modifiée avec succès.");
-			} catch (SQLDataException ex) {
-				showError("Modification impossible", ex.getMessage());
-			} catch (Exception ex) {
-				showError("Modification impossible", "Erreur inattendue: " + ex.getMessage());
-			}
+				try {
+					r.setTexte(newText);
+					// If a new local file was chosen, persist it and set public URL
+					String newFileUrl = null;
+					if (editingAttachmentFile[0] != null) {
+						String localPath = editingAttachmentFile[0].getAbsolutePath();
+						String lowerName = editingAttachmentFile[0].getName().toLowerCase(Locale.ROOT);
+						try {
+							if (lowerName.endsWith(".pdf")) {
+								newFileUrl = PdfUrlUtils.persistToWebPdfDirectoryAndNormalize(localPath);
+							} else {
+								newFileUrl = ImageUrlUtils.persistToWebImageDirectoryAndNormalize(localPath);
+							}
+						} catch (java.sql.SQLDataException ex) {
+							showWarning("Fichier invalide", "Impossible de copier la pièce jointe: " + ex.getMessage());
+							return;
+						}
+					}
+					r.setFileName(newFileUrl);
+					r.setUpdatedAt(LocalDateTime.now());
+					reclamationService.update(r);
+					refreshMyReclamations();
+					showInfo("Modification", "Réclamation modifiée avec succès.");
+				} catch (SQLDataException ex) {
+					showError("Modification impossible", ex.getMessage());
+				} catch (Exception ex) {
+					showError("Modification impossible", "Erreur inattendue: " + ex.getMessage());
+				}
 		});
 	}
 
@@ -760,7 +856,7 @@ public class ReclamationsArtisteController implements Initializable {
 
 	@FXML
 	private void onTypeFilterEvent(ActionEvent event) {
-		selectedTypeFilter = "Evenement";
+		selectedTypeFilter = "Evènement";
 		updateTypeFilterButtons(typeFilterEvent);
 		applyMyFilters();
 	}
@@ -806,6 +902,27 @@ public class ReclamationsArtisteController implements Initializable {
 		a.setHeaderText(header);
 		a.setContentText(message);
 		a.showAndWait();
+	}
+
+	private File resolveDisplayAttachmentFile(String fileRef) {
+		if (fileRef == null || fileRef.isBlank()) {
+			return null;
+		}
+		try {
+			if (fileRef.startsWith(ImageUrlUtils.IMAGE_BASE_URL)) {
+				String fileName = fileRef.substring(ImageUrlUtils.IMAGE_BASE_URL.length());
+				fileName = java.net.URLDecoder.decode(fileName, java.nio.charset.StandardCharsets.UTF_8);
+				return new File("C:\\xampp\\htdocs\\img", fileName);
+			}
+			if (fileRef.startsWith(PdfUrlUtils.PDF_BASE_URL)) {
+				String fileName = fileRef.substring(PdfUrlUtils.PDF_BASE_URL.length());
+				fileName = java.net.URLDecoder.decode(fileName, java.nio.charset.StandardCharsets.UTF_8);
+				return new File("C:\\xampp\\htdocs\\pdf", fileName);
+			}
+		} catch (Exception ignored) {
+			// Fallback below.
+		}
+		return new File(fileRef);
 	}
 
 	private static boolean isBlankOrTooShort(String value) {

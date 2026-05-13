@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.shape.SVGPath?>
 
-<HBox alignment="CENTER_LEFT" prefHeight="66.0" spacing="12.0" styleClass="amateur-navbar" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.amateur.NavbarAmateurController">
+<HBox alignment="CENTER_LEFT" prefHeight="66.0" spacing="12.0" styleClass="amateur-navbar" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.amateur.NavbarAmateurController">
     <padding>
         <Insets bottom="10.0" left="16.0" right="40.0" top="10.0" />
     </padding>

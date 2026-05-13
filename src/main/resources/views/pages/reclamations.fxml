@@ -37,7 +37,7 @@
             </ToggleButton>
             <ToggleButton fx:id="tabPaiement" text="Paiement" toggleGroup="$typeTabsGroup" styleClass="reclamation-tab" />
             <ToggleButton fx:id="tabOeuvre" text="Oeuvre" toggleGroup="$typeTabsGroup" styleClass="reclamation-tab" />
-            <ToggleButton fx:id="tabEvenement" text="Evenement" toggleGroup="$typeTabsGroup" styleClass="reclamation-tab" />
+            <ToggleButton fx:id="tabEvenement" text="Evènement" toggleGroup="$typeTabsGroup" styleClass="reclamation-tab" />
             <ToggleButton fx:id="tabCompte" text="Compte" toggleGroup="$typeTabsGroup" styleClass="reclamation-tab" />
         </HBox>
 

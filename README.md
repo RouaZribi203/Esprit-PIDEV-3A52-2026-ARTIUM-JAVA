@@ -146,6 +146,18 @@ Priorite de lecture:
 2. propriete JVM `openrouter.apiKey` / `openrouter.model`
 3. variables d'environnement `OPENROUTER_API_KEY` / `OPENROUTER_MODEL`
 
+## Notifications e-mail
+
+Deux flux d'e-mail importants sont envoyes en HTML:
+
+- **Mot de passe oublie**: envoi du code de reinitialisation via `services.EmailService.sendPasswordResetCode(...)`
+  - configuration SMTP lue depuis `smtp.properties` ou les variables systeme / environnement associees
+  - en-tete MIME en `text/html; charset=UTF-8`
+- **Reclamation**: notification vers l'administrateur via `utils.EmailUtil.sendEmailToAdmin(...)`
+  - configuration locale chargee depuis `config.properties`
+  - cles utilisees: `smtp.sender.email`, `smtp.sender.password`, `smtp.admin.email`
+  - contenu rendu avec un modele HTML simple et echappe
+
 ## Lancement du projet
 
 Depuis la racine du projet:
@@ -163,6 +175,7 @@ Point d'entree JavaFX: `controllers.MainFX` (configure dans `pom.xml`).
 - gestion de session via `SessionManager`
 - persistance MySQL avec services JDBC dedies
 - support de lecture/manipulation PDF via PDFBox
+- notifications e-mail HTML pour la reinitialisation de mot de passe et les reclamations
 
 ## Qualite et bonnes pratiques
 

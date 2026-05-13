@@ -213,7 +213,7 @@ public class ReclamationsController {
         Toggle t = typeTabsGroup.getSelectedToggle();
         if (t == tabPaiement) return "Paiement";
         if (t == tabOeuvre) return "Oeuvre";
-        if (t == tabEvenement) return "Evenement";
+                if (t == tabEvenement) return "Evènement";
         if (t == tabCompte) return "Compte";
         return "Tous les types";
     }
