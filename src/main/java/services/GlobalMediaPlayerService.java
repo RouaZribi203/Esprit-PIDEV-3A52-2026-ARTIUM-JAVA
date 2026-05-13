@@ -456,33 +456,31 @@ public final class GlobalMediaPlayerService {
             }
         }
 
-        if (trimmed.startsWith("/audio/") || trimmed.startsWith("/htdocs/audio/")) {
-            String fileName = extractFileName(trimmed);
-            return fileName.isEmpty() ? null : new File(XAMPP_AUDIO_DIR, fileName);
+        File directFile = new File(trimmed);
+        if (directFile.exists() && directFile.isFile()) {
+            return directFile;
         }
 
-        if (trimmed.startsWith("/uploads/audio/") || trimmed.startsWith("/htdocs/uploads/audio/")) {
-            String fileName = extractFileName(trimmed);
-            return fileName.isEmpty() ? null : new File(XAMPP_UPLOADS_AUDIO_DIR, fileName);
+        String fileName = extractFileName(trimmed);
+        if (!fileName.isEmpty()) {
+            File[] fallbackDirs = {
+                new File("C:\\xampp\\htdocs\\audio"),
+                new File("C:\\xampp\\htdocs\\music"),
+                new File("C:\\xampp\\htdocs\\uploads\\audio"),
+                new File("C:\\xampp\\htdocs\\uploads\\music"),
+                new File("C:\\xampp\\htdocs\\img"),
+                new File("c:\\Work\\3eme\\Semestre2\\PI_Dev\\Artium(final)\\ARTIUM\\public\\uploads\\music"),
+                new File("c:\\Work\\3eme\\Semestre2\\PI_Dev\\Artium(final)\\ARTIUM\\public\\audio")
+            };
+            for (File dir : fallbackDirs) {
+                File candidate = new File(dir, fileName);
+                if (candidate.exists() && candidate.isFile()) {
+                    return candidate;
+                }
+            }
         }
 
         if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
-            try {
-                URI uri = URI.create(trimmed);
-                String path = uri.getPath();
-                if (path != null) {
-                    if (path.startsWith("/audio/") || path.startsWith("/htdocs/audio/")) {
-                        String fileName = extractFileName(path);
-                        return fileName.isEmpty() ? null : new File(XAMPP_AUDIO_DIR, fileName);
-                    }
-                    if (path.startsWith("/uploads/audio/") || path.startsWith("/htdocs/uploads/audio/")) {
-                        String fileName = extractFileName(path);
-                        return fileName.isEmpty() ? null : new File(XAMPP_UPLOADS_AUDIO_DIR, fileName);
-                    }
-                }
-            } catch (RuntimeException ignored) {
-                return null;
-            }
             return null;
         }
 
