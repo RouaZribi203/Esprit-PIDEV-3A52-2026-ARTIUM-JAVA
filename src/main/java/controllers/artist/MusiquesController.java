@@ -329,18 +329,23 @@ public class MusiquesController {
         }
 
         try {
+            File audioFile = utils.AudioPathResolver.resolveForStudio(currentAudio);
+
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/artist/Studio.fxml"));
             Parent root = loader.load();
 
             StudioController controller = loader.getController();
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setTitle("Studio de Mixage");
-            stage.setScene(new Scene(root));
-            
+            stage.setTitle("Artium Studio — Édition Audio Pro");
+            Scene scene = new Scene(root, 1360, 820);
+            stage.setScene(scene);
+            stage.setMinWidth(1200);
+            stage.setMinHeight(760);
+
+            controller.openWithAudio(audioFile, currentAudio);
             controller.setDialogStage(stage);
-            controller.setAudioPath(currentAudio);
-            
+
             stage.showAndWait();
 
             String newPath = controller.getFinalAudioPath();
@@ -348,7 +353,9 @@ public class MusiquesController {
                 audioPathField.setText(newPath);
             }
         } catch (IOException e) {
-            setFeedback("Erreur lors de l'ouverture du studio: " + e.getMessage(), false);
+            setFeedback("Impossible d'ouvrir le studio : " + e.getMessage(), false);
+        } catch (Exception e) {
+            setFeedback("Erreur studio : " + e.getMessage(), false);
         }
     }
 
