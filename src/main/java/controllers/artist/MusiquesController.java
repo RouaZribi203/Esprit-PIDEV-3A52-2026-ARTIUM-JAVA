@@ -32,6 +32,9 @@ import javafx.geometry.Side;
 import javafx.scene.media.MediaException;
 import javafx.stage.FileChooser;
 import services.GlobalMediaPlayerService;
+import javafx.animation.FadeTransition;
+import javafx.animation.TranslateTransition;
+import javafx.util.Duration;
 import utils.ImageUrlUtils;
 import utils.MyDatabase;
 
@@ -213,6 +216,33 @@ public class MusiquesController {
         
         refreshMusiquesList();
         refreshPlaylistsList();
+
+        // Listen to active track changes to dynamically update card style
+        globalMediaPlayer.currentTrackProperty().addListener((obs, oldTrack, newTrack) -> {
+            javafx.application.Platform.runLater(() -> {
+                updateCurrentTrackIndex(newTrack);
+                renderTrackGrid();
+            });
+        });
+
+        // Listen to play/pause state
+        globalMediaPlayer.playingProperty().addListener((obs, oldVal, newVal) -> {
+            javafx.application.Platform.runLater(this::renderTrackGrid);
+        });
+    }
+
+    private void updateCurrentTrackIndex(Musique newTrack) {
+        if (newTrack == null) {
+            currentTrackIndex = -1;
+            return;
+        }
+        for (int i = 0; i < visibleTracks.size(); i++) {
+            if (newTrack.getId() != null && newTrack.getId().equals(visibleTracks.get(i).getId())) {
+                currentTrackIndex = i;
+                return;
+            }
+        }
+        currentTrackIndex = -1;
     }
 
     private void configureGridSizing() {
@@ -890,16 +920,32 @@ public class MusiquesController {
     }
 
     private VBox createTrackCard(Musique musique, int index) {
-        VBox card = new VBox(6);
+        VBox card = new VBox(8);
         card.setMinWidth(TRACK_CARD_WIDTH);
         card.setPrefWidth(TRACK_CARD_WIDTH);
         card.setMaxWidth(TRACK_CARD_WIDTH);
         card.getStyleClass().add("music-track-card");
-        if (index == currentTrackIndex) {
+        
+        boolean isActive = (index == currentTrackIndex);
+        boolean isPlaying = isActive && globalMediaPlayer.isPlaying();
+        
+        if (isActive) {
             card.getStyleClass().add("music-track-card-active");
         }
 
-        Node coverNode = buildCoverNode(musique.getImage());
+        // Lift transition on hover
+        card.setOnMouseEntered(event -> {
+            TranslateTransition tt = new TranslateTransition(Duration.millis(120), card);
+            tt.setToY(-5);
+            tt.play();
+        });
+        card.setOnMouseExited(event -> {
+            TranslateTransition tt = new TranslateTransition(Duration.millis(120), card);
+            tt.setToY(0);
+            tt.play();
+        });
+
+        Node coverNode = buildCoverNode(musique.getImage(), isActive, isPlaying, index);
 
         String titre = musique.getTitre() != null ? musique.getTitre() : "Sans titre";
         Label titleLabel = new Label(titre);
@@ -940,54 +986,148 @@ public class MusiquesController {
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
-        HBox titleRow = new HBox(8, titleLabel, spacer, menuButton);
+        HBox titleRow = new HBox(4, titleLabel, spacer, menuButton);
+        titleRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+        String artist = resolveTrackArtistName(musique);
+        Label artistLabel = new Label(artist);
+        artistLabel.getStyleClass().add("music-track-artist");
 
         String genre = musique.getGenre() != null ? musique.getGenre() : "-";
-        Label metaLabel = new Label("Genre: " + genre);
-        metaLabel.getStyleClass().add("music-track-meta");
+        Label genreBadge = new Label(genre);
+        genreBadge.getStyleClass().add("music-genre-badge");
 
-        card.getChildren().addAll(coverNode, titleRow, metaLabel);
+        HBox badgeRow = new HBox(genreBadge);
+        badgeRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+        card.getChildren().addAll(coverNode, titleRow, artistLabel, badgeRow);
         card.setOnMouseClicked(event -> playTrackAtIndex(index, true));
         return card;
     }
 
-    private Node buildCoverNode(String imageSource) {
+    private Node buildCoverNode(String imageSource, boolean isActive, boolean isPlaying, int index) {
         StackPane placeholder = createCoverContainer(TRACK_COVER_SIZE, TRACK_COVER_SIZE);
         placeholder.getStyleClass().add("music-cover-placeholder");
 
+        Node contentNode;
         if (imageSource == null || imageSource.isBlank()) {
-            Label noImageLabel = new Label("No cover");
-            noImageLabel.getStyleClass().add("music-cover-placeholder-text");
+            Label noImageLabel = new Label("🎵");
+            noImageLabel.setStyle("-fx-font-size: 36px; -fx-text-fill: #9ca3af;");
             placeholder.getChildren().add(noImageLabel);
-            return placeholder;
-        }
+            contentNode = placeholder;
+        } else {
+            try {
+                Image image = loadImageSafely(imageSource);
+                if (image == null) {
+                    Label noImageLabel = new Label("🎵");
+                    noImageLabel.setStyle("-fx-font-size: 36px; -fx-text-fill: #9ca3af;");
+                    placeholder.getChildren().add(noImageLabel);
+                    contentNode = placeholder;
+                } else {
+                    ImageView imageView = new ImageView(image);
+                    imageView.setFitWidth(TRACK_COVER_SIZE);
+                    imageView.setFitHeight(TRACK_COVER_SIZE);
+                    imageView.setPreserveRatio(false);
+                    imageView.setSmooth(true);
+                    imageView.getStyleClass().add("music-cover-image");
 
-        try {
-            Image image = loadImageSafely(imageSource);
-            if (image == null) {
-                Label noImageLabel = new Label("No cover");
-                noImageLabel.getStyleClass().add("music-cover-placeholder-text");
+                    StackPane coverWrap = createCoverContainer(TRACK_COVER_SIZE, TRACK_COVER_SIZE);
+                    coverWrap.getStyleClass().add("music-cover-placeholder");
+                    coverWrap.getChildren().add(imageView);
+                    contentNode = coverWrap;
+                }
+            } catch (Exception ex) {
+                Label noImageLabel = new Label("🎵");
+                noImageLabel.setStyle("-fx-font-size: 36px; -fx-text-fill: #9ca3af;");
                 placeholder.getChildren().add(noImageLabel);
-                return placeholder;
+                contentNode = placeholder;
             }
-
-            ImageView imageView = new ImageView(image);
-            imageView.setFitWidth(TRACK_COVER_SIZE);
-            imageView.setFitHeight(TRACK_COVER_SIZE);
-            imageView.setPreserveRatio(false);
-            imageView.setSmooth(true);
-            imageView.getStyleClass().add("music-cover-image");
-
-            StackPane coverWrap = createCoverContainer(TRACK_COVER_SIZE, TRACK_COVER_SIZE);
-            coverWrap.getStyleClass().add("music-cover-placeholder");
-            coverWrap.getChildren().add(imageView);
-            return coverWrap;
-        } catch (Exception ex) {
-            Label noImageLabel = new Label("No cover");
-            noImageLabel.getStyleClass().add("music-cover-placeholder-text");
-            placeholder.getChildren().add(noImageLabel);
-            return placeholder;
         }
+
+        StackPane coverStack = (StackPane) contentNode;
+
+        StackPane hoverOverlay = new StackPane();
+        hoverOverlay.getStyleClass().add("music-cover-hover-overlay");
+
+        Button hoverPlayBtn = new Button();
+        hoverPlayBtn.getStyleClass().add("music-cover-hover-play-button");
+
+        if (isActive) {
+            hoverPlayBtn.setText(isPlaying ? "⏸" : "▶");
+            hoverOverlay.setOpacity(0.8);
+        } else {
+            hoverPlayBtn.setText("▶");
+            hoverOverlay.setOpacity(0.0);
+        }
+
+        hoverPlayBtn.setOnAction(event -> {
+            event.consume();
+            if (isActive) {
+                globalMediaPlayer.togglePlayPause();
+            } else {
+                playTrackAtIndex(index, true);
+            }
+        });
+
+        hoverOverlay.getChildren().add(hoverPlayBtn);
+        coverStack.getChildren().add(hoverOverlay);
+
+        if (!isActive) {
+            coverStack.setOnMouseEntered(e -> {
+                FadeTransition fade = new FadeTransition(Duration.millis(150), hoverOverlay);
+                fade.setToValue(0.85);
+                fade.play();
+            });
+            coverStack.setOnMouseExited(e -> {
+                FadeTransition fade = new FadeTransition(Duration.millis(150), hoverOverlay);
+                fade.setToValue(0.0);
+                fade.play();
+            });
+        } else {
+            coverStack.setOnMouseEntered(e -> {
+                FadeTransition fade = new FadeTransition(Duration.millis(100), hoverOverlay);
+                fade.setToValue(1.0);
+                fade.play();
+            });
+            coverStack.setOnMouseExited(e -> {
+                FadeTransition fade = new FadeTransition(Duration.millis(100), hoverOverlay);
+                fade.setToValue(0.8);
+                fade.play();
+            });
+        }
+
+        // Live equalizer badge on top right
+        if (isActive) {
+            HBox eqContainer = new HBox(2);
+            eqContainer.getStyleClass().add("music-eq-badge");
+            eqContainer.setAlignment(javafx.geometry.Pos.CENTER);
+            eqContainer.setMaxSize(30, 20);
+            StackPane.setAlignment(eqContainer, javafx.geometry.Pos.TOP_RIGHT);
+            StackPane.setMargin(eqContainer, new javafx.geometry.Insets(8));
+
+            for (int j = 0; j < 3; j++) {
+                Rectangle bar = new Rectangle(3, 10);
+                bar.setArcWidth(1.5);
+                bar.setArcHeight(1.5);
+                bar.setStyle("-fx-fill: white;");
+                eqContainer.getChildren().add(bar);
+
+                if (isPlaying) {
+                    javafx.animation.Timeline timeline = new javafx.animation.Timeline(
+                        new javafx.animation.KeyFrame(Duration.ZERO, new javafx.animation.KeyValue(bar.scaleYProperty(), 0.2)),
+                        new javafx.animation.KeyFrame(Duration.millis(250 + new java.util.Random().nextInt(250)), new javafx.animation.KeyValue(bar.scaleYProperty(), 1.0))
+                    );
+                    timeline.setAutoReverse(true);
+                    timeline.setCycleCount(javafx.animation.Animation.INDEFINITE);
+                    timeline.play();
+                } else {
+                    bar.setScaleY(0.2);
+                }
+            }
+            coverStack.getChildren().add(eqContainer);
+        }
+
+        return coverStack;
     }
 
     private void filterTracks(String query) {
@@ -1198,6 +1338,8 @@ public class MusiquesController {
         container.setMaxSize(width, height);
 
         Rectangle clip = new Rectangle(width, height);
+        clip.setArcWidth(16);
+        clip.setArcHeight(16);
         container.setClip(clip);
         return container;
     }

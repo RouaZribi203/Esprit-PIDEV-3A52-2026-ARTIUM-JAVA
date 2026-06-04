@@ -23,7 +23,7 @@
         </padding>
 
         <HBox alignment="CENTER_LEFT" spacing="16.0" styleClass="users-header">
-            <Label styleClass="page-title" text="Gestion des musiques" />
+            <Label styleClass="page-title-small" text="Gestion des musiques" />
             <Region HBox.hgrow="ALWAYS" />
             <Button fx:id="toggleFormButton" mnemonicParsing="false" onAction="#handleToggleForm" styleClass="primary-action-button" text="Ajouter une musique" />
         </HBox>

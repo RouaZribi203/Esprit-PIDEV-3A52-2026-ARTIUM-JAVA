@@ -7,7 +7,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
+
+import java.net.URL;
 
 import java.io.File;
 import java.text.Normalizer;
@@ -36,6 +40,12 @@ public class ProfileHeaderController {
     private Label avatarLabelFallback;
 
     @FXML
+    private StackPane coverPane;
+
+    @FXML
+    private ImageView coverBannerView;
+
+    @FXML
     private Button collectionsTabButton;
 
     @FXML
@@ -61,10 +71,12 @@ public class ProfileHeaderController {
     private String dynamicRoute = "oeuvres";
     private static final DateTimeFormatter DATE_FORMATTER =
             DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).localizedBy(Locale.FRANCE);
+    private static final String COVER_IMAGE_PATH = "/views/images/avatar_2.png";
 
     @FXML
     public void initialize() {
         installCircularClip();
+        setupCoverBanner();
         User connectedUser = MainFX.getAuthenticatedUser();
         if (connectedUser != null) {
             setUser(connectedUser);
@@ -130,6 +142,60 @@ public class ProfileHeaderController {
     private void installCircularClip() {
         Circle clip = new Circle(40, 40, 40);
         profileImageView.setClip(clip);
+    }
+
+    private void setupCoverBanner() {
+        if (coverPane == null || coverBannerView == null) {
+            return;
+        }
+
+        Rectangle clip = new Rectangle();
+        clip.widthProperty().bind(coverPane.widthProperty());
+        clip.heightProperty().bind(coverPane.heightProperty());
+        clip.setArcWidth(16);
+        clip.setArcHeight(16);
+        coverPane.setClip(clip);
+
+        URL coverUrl = getClass().getResource(COVER_IMAGE_PATH);
+        if (coverUrl == null) {
+            return;
+        }
+
+        Image coverImage = new Image(coverUrl.toExternalForm(), true);
+        coverBannerView.setImage(coverImage);
+        coverBannerView.setSmooth(true);
+
+        Runnable refit = () -> applyCoverFit(coverImage);
+        coverImage.progressProperty().addListener((obs, oldProgress, progress) -> {
+            if (progress.doubleValue() >= 1.0 && !coverImage.isError()) {
+                refit.run();
+            }
+        });
+        coverPane.widthProperty().addListener((obs, oldW, newW) -> refit.run());
+        coverPane.heightProperty().addListener((obs, oldH, newH) -> refit.run());
+    }
+
+    private void applyCoverFit(Image image) {
+        if (coverPane == null || coverBannerView == null || image == null) {
+            return;
+        }
+        double imgW = image.getWidth();
+        double imgH = image.getHeight();
+        double paneW = coverPane.getWidth();
+        double paneH = coverPane.getHeight();
+        if (imgW <= 0 || imgH <= 0 || paneW <= 0 || paneH <= 0) {
+            return;
+        }
+
+        double scale = Math.max(paneW / imgW, paneH / imgH);
+        double fitW = imgW * scale;
+        double fitH = imgH * scale;
+
+        coverBannerView.setFitWidth(fitW);
+        coverBannerView.setFitHeight(fitH);
+        coverBannerView.setPreserveRatio(true);
+        coverBannerView.setLayoutX((paneW - fitW) / 2.0);
+        coverBannerView.setLayoutY((paneH - fitH) / 2.0);
     }
 
     private String pickProfileImage(User user) {

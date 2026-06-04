@@ -89,7 +89,11 @@ public class MainFX extends Application {
                 scene.setRoot(root);
             }
             URL stylesheet = Objects.requireNonNull(MainFX.class.getResource(stylesheetPath), "Missing stylesheet");
-            scene.getStylesheets().setAll(stylesheet.toExternalForm());
+            URL globalPlayerStylesheet = Objects.requireNonNull(
+                MainFX.class.getResource(GLOBAL_PLAYER_STYLESHEET), "Missing global player stylesheet");
+            scene.getStylesheets().setAll(
+                stylesheet.toExternalForm(),
+                globalPlayerStylesheet.toExternalForm());
             primaryStage.setTitle(title);
             primaryStage.setMaximized(true);
             primaryStage.show();

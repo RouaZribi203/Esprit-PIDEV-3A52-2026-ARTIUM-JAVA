@@ -2,10 +2,13 @@ package services;
 
 import entities.Musique;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -43,6 +46,7 @@ public final class GlobalMediaPlayerService {
     private final StringProperty trackMeta = new SimpleStringProperty("Genre: -");
     private final StringProperty statusText = new SimpleStringProperty("Pret");
     private final StringProperty timeText = new SimpleStringProperty("0:00 / 0:00");
+    private final DoubleProperty progressFraction = new SimpleDoubleProperty(0.0);
     private final BooleanProperty playing = new SimpleBooleanProperty(false);
     private final ObjectProperty<Image> coverImage = new SimpleObjectProperty<>();
 
@@ -222,6 +226,7 @@ public final class GlobalMediaPlayerService {
             mediaPlayer = null;
         }
         playing.set(false);
+        progressFraction.set(0.0);
         statusText.set("Pret");
     }
 
@@ -263,6 +268,10 @@ public final class GlobalMediaPlayerService {
 
     public StringProperty timeTextProperty() {
         return timeText;
+    }
+
+    public ReadOnlyDoubleProperty progressFractionProperty() {
+        return progressFraction;
     }
 
     public BooleanProperty playingProperty() {
@@ -318,6 +327,7 @@ public final class GlobalMediaPlayerService {
             coverImage.set(loadImageSafely(track.getImage()));
             statusText.set("Chargement...");
             timeText.set("0:00 / 0:00");
+            progressFraction.set(0.0);
 
             mediaPlayer.setOnReady(() -> {
                 // Apply effects if present
@@ -368,6 +378,7 @@ public final class GlobalMediaPlayerService {
 
                 Duration total = mediaPlayer.getTotalDuration();
                 timeText.set(formatDuration(Duration.ZERO) + " / " + formatDuration(total));
+                updateProgressFraction(Duration.ZERO, total);
                 if (autoPlay) {
                     mediaPlayer.play();
                     playing.set(true);
@@ -381,6 +392,7 @@ public final class GlobalMediaPlayerService {
             mediaPlayer.currentTimeProperty().addListener((obs, oldTime, newTime) -> {
                 Duration total = mediaPlayer.getTotalDuration();
                 timeText.set(formatDuration(newTime) + " / " + formatDuration(total));
+                updateProgressFraction(newTime, total);
             });
 
             mediaPlayer.setOnPaused(() -> {
@@ -498,6 +510,15 @@ public final class GlobalMediaPlayerService {
             }
         }
         return "Impossible de lire ce fichier audio";
+    }
+
+    private void updateProgressFraction(Duration current, Duration total) {
+        if (total == null || total.isUnknown() || total.lessThanOrEqualTo(Duration.ZERO)) {
+            progressFraction.set(0.0);
+            return;
+        }
+        double millis = current != null && !current.isUnknown() ? current.toMillis() : 0.0;
+        progressFraction.set(Math.max(0.0, Math.min(1.0, millis / total.toMillis())));
     }
 
     private String formatDuration(Duration duration) {

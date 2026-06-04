@@ -12,6 +12,7 @@
     -fx-max-height: 0;
     -fx-padding: 0;
 }
+
 .scroll-bar:horizontal .track,
 .scroll-bar:horizontal .thumb,
 .scroll-bar:vertical .track,
@@ -19,7 +20,8 @@
     -fx-background-color: transparent;
     -fx-border-color: transparent;
 }
-.scroll-pane > .corner {
+
+.scroll-pane>.corner {
     -fx-background-color: transparent;
 }
 
@@ -89,8 +91,8 @@
     -fx-effect: dropshadow(gaussian, rgba(66, 82, 184, 0.20), 14, 0, 0, 4);
 }
 
-.notifications-menu-button > .arrow-button,
-.notifications-menu-button > .arrow-button > .arrow {
+.notifications-menu-button>.arrow-button,
+.notifications-menu-button>.arrow-button>.arrow {
     -fx-padding: 0;
     -fx-background-color: transparent;
 }
@@ -120,7 +122,7 @@
     -fx-background-radius: 10;
 }
 
-.context-menu.notifications-context-menu .menu-item > .label {
+.context-menu.notifications-context-menu .menu-item>.label {
     -fx-text-fill: #243146;
     -fx-font-size: 13px;
     -fx-font-weight: 600;
@@ -211,7 +213,7 @@
     -fx-padding: 0;
 }
 
-.context-menu.notifications-context-menu .menu-item.notifications-item > .label {
+.context-menu.notifications-context-menu .menu-item.notifications-item>.label {
     -fx-padding: 0;
 }
 
@@ -375,26 +377,9 @@
 }
 
 .profile-cover {
-    -fx-background-image: url('../images/avatar_2.png');
-    -fx-background-size: cover;
-    -fx-background-position: center center;
-    -fx-background-repeat: no-repeat;
-    -fx-background-color: linear-gradient(to bottom right, #1e1366, #2a0845, #6441a5);
+    -fx-background-color: #eef2f8;
     -fx-background-radius: 16 16 0 0;
-}
-
-.cover-title {
-    -fx-text-fill: rgba(255, 255, 255, 0.85);
-    -fx-font-size: 20px;
-    -fx-font-weight: 700;
-}
-
-.cover-brand-row {
     -fx-alignment: center;
-}
-
-.cover-brand-logo {
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 6, 0.15, 0, 1);
 }
 
 .profile-avatar {
@@ -403,7 +388,7 @@
     -fx-border-color: white;
     -fx-border-width: 4;
     -fx-border-radius: 999;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 12, 0, 0, 4);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 12, 0, 0, 4);
     -fx-translate-y: -30;
 }
 
@@ -633,7 +618,7 @@
     -fx-border-color: white;
     -fx-border-radius: 999;
     -fx-border-width: 4;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 4);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 4);
 }
 
 .sidebar-avatar-symbol {
@@ -1790,18 +1775,19 @@
     -fx-border-radius: 16;
     -fx-padding: 14;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(42, 58, 78, 0.08), 12, 0.1, 0, 4);
+    -fx-effect: dropshadow(gaussian, rgba(42, 58, 78, 0.06), 10, 0, 0, 3);
 }
 
 .music-track-card:hover {
-    -fx-effect: dropshadow(gaussian, rgba(42, 58, 78, 0.15), 18, 0.15, 0, 6);
-    -fx-background-color: #fcfdfe;
+    -fx-effect: dropshadow(gaussian, rgba(42, 58, 78, 0.12), 16, 0, 0, 6);
+    -fx-background-color: #fbfcfe;
 }
 
 .music-track-card-active {
     -fx-border-color: #3d3bc2;
-    -fx-background-color: #f8faff;
-    -fx-effect: none;
+    -fx-border-width: 1.5;
+    -fx-background-color: #f5f7ff;
+    -fx-effect: dropshadow(gaussian, rgba(61, 59, 194, 0.15), 14, 0, 0, 4);
 }
 
 .users-scroll,
@@ -1836,10 +1822,10 @@
 }
 
 .music-cover-placeholder {
-    -fx-background-color: transparent;
-    -fx-background-radius: 10;
-    -fx-border-color: #dbe5f2;
-    -fx-border-radius: 10;
+    -fx-background-color: linear-gradient(to bottom right, #eceef5, #dbe2ef);
+    -fx-background-radius: 12;
+    -fx-border-color: #cbd5e1;
+    -fx-border-radius: 12;
 }
 
 .music-cover-placeholder-text {
@@ -1867,7 +1853,9 @@
 
 .artist-root.dark-mode .music-track-card-active {
     -fx-border-color: #8ea8ff;
-    -fx-background-color: #2b395e;
+    -fx-border-width: 1.5;
+    -fx-background-color: #1e2840;
+    -fx-effect: dropshadow(gaussian, rgba(142, 168, 255, 0.2), 14, 0, 0, 4);
 }
 
 .artist-root.dark-mode .music-track-title {
@@ -1902,8 +1890,8 @@
 }
 
 .artist-root.dark-mode .music-cover-placeholder {
-    -fx-background-color: #1a2235;
-    -fx-border-color: #324262;
+    -fx-background-color: linear-gradient(to bottom right, #1e293b, #0f172a);
+    -fx-border-color: #334155;
 }
 
 .artist-root.dark-mode .music-cover-placeholder-text {
@@ -2070,4 +2058,78 @@
     -fx-background-insets: 0, 2;
     -fx-background-radius: 6px;
     -fx-padding: 5px;
+}
+
+/* Modern Music Track Card Extensions */
+.music-cover-hover-overlay {
+    -fx-background-color: rgba(0, 0, 0, 0.45);
+    -fx-background-radius: 12;
+    -fx-alignment: center;
+}
+
+.music-cover-hover-play-button {
+    -fx-background-color: #3d3bc2;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 20px;
+    -fx-min-width: 40px;
+    -fx-min-height: 40px;
+    -fx-max-width: 40px;
+    -fx-max-height: 40px;
+    -fx-padding: 0;
+    -fx-alignment: center;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 8, 0, 0, 2);
+}
+
+.music-cover-hover-play-button:hover {
+    -fx-background-color: #514ee6;
+    -fx-scale-x: 1.08;
+    -fx-scale-y: 1.08;
+}
+
+.music-track-artist {
+    -fx-text-fill: #6b7280;
+    -fx-font-size: 11.5px;
+    -fx-font-weight: normal;
+}
+
+.music-genre-badge {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #475569;
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+    -fx-background-radius: 12px;
+    -fx-padding: 3px 8px;
+    -fx-alignment: center;
+}
+
+.music-eq-badge {
+    -fx-background-color: rgba(61, 59, 194, 0.85);
+    -fx-background-radius: 6px;
+    -fx-padding: 4px 6px;
+}
+
+/* Dark mode overrides for music enhancements */
+.artist-root.dark-mode .music-cover-hover-play-button {
+    -fx-background-color: #8ea8ff;
+    -fx-text-fill: #111827;
+}
+
+.artist-root.dark-mode .music-cover-hover-play-button:hover {
+    -fx-background-color: #a5baff;
+}
+
+.artist-root.dark-mode .music-track-artist {
+    -fx-text-fill: #94a3b8;
+}
+
+.artist-root.dark-mode .music-genre-badge {
+    -fx-background-color: #1e293b;
+    -fx-text-fill: #94a3b8;
+}
+
+.artist-root.dark-mode .music-eq-badge {
+    -fx-background-color: rgba(142, 168, 255, 0.85);
 }
