@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
 import java.util.logging.Logger;
+import utils.EnvLoader;
 
 public class OpenRouterReclamationReplyService {
 
@@ -22,9 +23,9 @@ public class OpenRouterReclamationReplyService {
     private static final String API_URL =
             "https://openrouter.ai/api/v1/chat/completions";
 
-    // 🔑 MET TON API KEY ICI
+    // 🔑 Chargé depuis le fichier .env
     private static final String API_KEY =
-            "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";
+            EnvLoader.get("OPENROUTER_RECLAMATION_API_KEY");
 
     private final HttpClient httpClient;
 

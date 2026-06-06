@@ -20,13 +20,16 @@ public class StripePaymentHandler {
     public static void initialize() {
         try {
             EnvLoader.loadEnv(true); // Force reload .env to catch any changes
-            String apiKey = EnvLoader.get("STRIPE_SECRET_KEY");
+            String apiKey = EnvLoader.get("STRIPE_BOOK_SECRET_KEY");
+            if (apiKey == null || apiKey.isEmpty()) {
+                apiKey = EnvLoader.get("STRIPE_SECRET_KEY");
+            }
             
             if (apiKey != null && !apiKey.isEmpty()) {
                 Stripe.apiKey = apiKey;
                 System.out.println("✓ Stripe API key initialized successfully");
             } else {
-                System.err.println("✗ ERROR: STRIPE_SECRET_KEY not found in .env file!");
+                System.err.println("✗ ERROR: STRIPE_BOOK_SECRET_KEY or STRIPE_SECRET_KEY not found in .env file!");
             }
         } catch (Exception e) {
             System.err.println("✗ ERROR initializing Stripe: " + e.getMessage());

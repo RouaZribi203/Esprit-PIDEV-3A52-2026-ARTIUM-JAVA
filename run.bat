@@ -2,8 +2,8 @@
 setlocal
 set "ROOT=%~dp0"
 
-if not exist "%ROOT%smtp.properties" (
-	echo Le fichier smtp.properties est manquant.
+if not exist "%ROOT%.env" (
+	echo Le fichier .env est manquant.
 	echo Lancement de la configuration SMTP...
 	call "%ROOT%setup-smtp.bat"
 	if errorlevel 1 exit /b 1

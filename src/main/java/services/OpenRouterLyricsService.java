@@ -19,6 +19,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import utils.TranscriptionService;
+import utils.EnvLoader;
 
 public class OpenRouterLyricsService {
     private static final String DEFAULT_MODEL = "llama-3.1-8b-instant";
@@ -88,60 +89,48 @@ public class OpenRouterLyricsService {
     }
 
     private String resolveApiKey() {
-        Properties config = loadConfig();
-
-        String apiKey = config.getProperty("groq.apiKey");
+        String apiKey = System.getProperty("groq.apiKey");
         if (apiKey == null || apiKey.isBlank()) {
-            apiKey = System.getProperty("groq.apiKey");
+            apiKey = EnvLoader.get("GROQ_API_KEY");
         }
         if (apiKey == null || apiKey.isBlank()) {
-            apiKey = System.getenv("GROQ_API_KEY");
+            apiKey = EnvLoader.get("OPENROUTER_API_KEY");
         }
         if (apiKey == null || apiKey.isBlank()) {
-            // Fallback to openrouter key if groq is missing
-            apiKey = config.getProperty("openrouter.apiKey");
-            if (apiKey == null || apiKey.isBlank()) {
-                throw new IllegalStateException("Clé API manquante. Ajoutez groq.apiKey dans config/openrouter.properties.");
-            }
+            apiKey = EnvLoader.get("groq.apiKey");
+        }
+        if (apiKey == null || apiKey.isBlank()) {
+            apiKey = EnvLoader.get("openrouter.apiKey");
+        }
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new IllegalStateException("Clé API manquante. Ajoutez GROQ_API_KEY ou OPENROUTER_API_KEY dans le fichier .env.");
         }
         return apiKey.trim();
     }
 
     private String resolveModel() {
-        Properties config = loadConfig();
-
-        String model = config.getProperty("groq.model");
+        String model = System.getProperty("groq.model");
         if (model == null || model.isBlank()) {
-            model = System.getProperty("groq.model");
+            model = EnvLoader.get("GROQ_MODEL");
         }
         if (model == null || model.isBlank()) {
-            model = System.getenv("GROQ_MODEL");
+            model = EnvLoader.get("OPENROUTER_MODEL");
         }
         if (model == null || model.isBlank()) {
-            // Check if openrouter model is set, otherwise default
-            model = config.getProperty("openrouter.model");
-            if (model == null || model.isBlank() || model.contains("free")) {
-                model = DEFAULT_MODEL;
-            }
+            model = EnvLoader.get("groq.model");
+        }
+        if (model == null || model.isBlank()) {
+            model = EnvLoader.get("openrouter.model");
+        }
+        if (model == null || model.isBlank() || model.contains("free")) {
+            model = DEFAULT_MODEL;
         }
         return model.trim();
     }
 
     private Properties loadConfig() {
-        Properties properties = new Properties();
-
-        String overridePath = System.getProperty("openrouter.config");
-        Path configPath = Paths.get(overridePath != null && !overridePath.isBlank() ? overridePath.trim() : DEFAULT_CONFIG_PATH);
-        if (!Files.exists(configPath)) {
-            return properties;
-        }
-
-        try (var inputStream = Files.newInputStream(configPath)) {
-            properties.load(inputStream);
-        } catch (IOException e) {
-            throw new IllegalStateException("Impossible de lire le fichier de configuration OpenRouter: " + configPath.toAbsolutePath(), e);
-        }
-        return properties;
+        // Retourne des propriétés vides par compatibilité si nécessaire
+        return new Properties();
     }
 
     private String buildPrompt(Musique track) {

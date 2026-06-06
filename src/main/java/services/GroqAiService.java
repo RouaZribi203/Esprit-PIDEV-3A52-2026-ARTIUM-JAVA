@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import utils.EnvLoader;
 
 public class GroqAiService {
 
@@ -19,18 +20,9 @@ public class GroqAiService {
     private static final String MODEL;
 
     static {
-        Properties props = new Properties();
-        try (InputStream in = GroqAiService.class
-                .getClassLoader()
-                .getResourceAsStream("config.properties")) {
-            if (in == null) throw new RuntimeException("config.properties introuvable dans le classpath");
-            props.load(in);
-        } catch (Exception e) {
-            throw new RuntimeException("Impossible de charger config.properties", e);
-        }
-        GROQ_API_KEY = props.getProperty("groq.api.key");
-        GROQ_URL     = props.getProperty("groq.api.url");
-        MODEL        = props.getProperty("groq.model");
+        GROQ_API_KEY = EnvLoader.get("GROQ_API_KEY");
+        GROQ_URL     = EnvLoader.get("GROQ_API_URL");
+        MODEL        = EnvLoader.get("GROQ_MODEL");
     }
 
     public static class AiCommand {

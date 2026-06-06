@@ -197,39 +197,21 @@ public final class EmailService {
 	}
 
 	private static String readConfig(String propertyName, String envName, String defaultValue) {
-		String value = System.getProperty(propertyName);
+		String value = utils.EnvLoader.get(envName);
 		if (value == null || value.isBlank()) {
-			value = System.getenv(envName);
+			value = utils.EnvLoader.get(propertyName);
 		}
 		if (value == null || value.isBlank()) {
-			value = loadFileConfig().getProperty(propertyName);
+			value = System.getProperty(propertyName);
+		}
+		if (value == null || value.isBlank()) {
+			value = System.getenv(envName);
 		}
 		return value == null || value.isBlank() ? defaultValue : value.trim();
 	}
 
 	private static Properties loadFileConfig() {
-		Properties snapshot = cachedFileConfig;
-		if (snapshot != null) {
-			return snapshot;
-		}
-
-		synchronized (EmailService.class) {
-			snapshot = cachedFileConfig;
-			if (snapshot != null) {
-				return snapshot;
-			}
-
-			Properties properties = new Properties();
-			if (Files.exists(SMTP_CONFIG_PATH)) {
-				try (FileInputStream input = new FileInputStream(SMTP_CONFIG_PATH.toFile())) {
-					properties.load(input);
-				} catch (IOException ignored) {
-					// Ignore and fall back to env/system properties.
-				}
-			}
-			cachedFileConfig = properties;
-			return properties;
-		}
+		return new Properties();
 	}
 
 	private static void closeQuietly(AutoCloseable closeable) {

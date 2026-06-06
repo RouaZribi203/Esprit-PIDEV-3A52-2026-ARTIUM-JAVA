@@ -44,6 +44,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import utils.EnvLoader;
 
 import javax.imageio.ImageIO;
 
@@ -518,9 +519,14 @@ public class TicketPdfService {
     }
 
     private String readConfig(String propName, String envName) {
-        String byFile = readFromLocalConfig(propName);
-        if (!byFile.isBlank()) {
-            return byFile;
+        String byEnvLoader = EnvLoader.get(envName);
+        if (byEnvLoader != null && !byEnvLoader.isBlank()) {
+            return byEnvLoader.trim();
+        }
+
+        byEnvLoader = EnvLoader.get(propName);
+        if (byEnvLoader != null && !byEnvLoader.isBlank()) {
+            return byEnvLoader.trim();
         }
 
         String byProp = System.getProperty(propName);
@@ -535,23 +541,11 @@ public class TicketPdfService {
     }
 
     private String readFromLocalConfig(String key) {
-        Properties config = loadLocalQrConfig();
-        String value = config.getProperty(key);
-        return value == null ? "" : value.trim();
+        return "";
     }
 
     private Properties loadLocalQrConfig() {
-        Properties loaded = new Properties();
-        Path configPath = resolveLocalConfigPath();
-        if (Files.exists(configPath) && Files.isRegularFile(configPath)) {
-            try (InputStream in = Files.newInputStream(configPath)) {
-                loaded.load(in);
-            } catch (IOException ignored) {
-                // Fallback to JVM/env config when local file is missing or invalid.
-            }
-        }
-
-        return loaded;
+        return new Properties();
     }
 
     private Path resolveLocalConfigPath() {

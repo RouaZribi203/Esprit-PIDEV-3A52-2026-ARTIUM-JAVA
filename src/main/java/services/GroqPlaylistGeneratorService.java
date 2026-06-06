@@ -20,6 +20,7 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import utils.EnvLoader;
 
 /**
  * Service to generate playlists using Groq AI API based on user prompts.
@@ -264,30 +265,26 @@ public class GroqPlaylistGeneratorService {
     }
 
     private String resolveGroqApiKey() {
-        Properties config = loadConfig();
-
-        String apiKey = config.getProperty("groq.apiKey");
+        String apiKey = System.getProperty("groq.apiKey");
         if (apiKey == null || apiKey.isBlank()) {
-            apiKey = System.getProperty("groq.apiKey");
+            apiKey = EnvLoader.get("GROQ_API_KEY");
         }
         if (apiKey == null || apiKey.isBlank()) {
-            apiKey = System.getenv("GROQ_API_KEY");
+            apiKey = EnvLoader.get("groq.apiKey");
         }
         if (apiKey == null || apiKey.isBlank()) {
-            throw new IllegalStateException("Clé Groq manquante. Ajoutez-la dans config/openrouter.properties (groq.apiKey) ou définissez GROQ_API_KEY.");
+            throw new IllegalStateException("Clé Groq manquante. Ajoutez GROQ_API_KEY dans le fichier .env.");
         }
         return apiKey.trim();
     }
 
     private String resolveModel() {
-        Properties config = loadConfig();
-
-        String model = config.getProperty("groq.model");
+        String model = System.getProperty("groq.model");
         if (model == null || model.isBlank()) {
-            model = System.getProperty("groq.model");
+            model = EnvLoader.get("GROQ_MODEL");
         }
         if (model == null || model.isBlank()) {
-            model = System.getenv("GROQ_MODEL");
+            model = EnvLoader.get("groq.model");
         }
         if (model == null || model.isBlank()) {
             model = DEFAULT_MODEL;
@@ -296,19 +293,7 @@ public class GroqPlaylistGeneratorService {
     }
 
     private Properties loadConfig() {
-        Properties properties = new Properties();
-        Path configPath = Paths.get(DEFAULT_CONFIG_PATH);
-
-        if (!Files.exists(configPath)) {
-            return properties;
-        }
-
-        try (var inputStream = Files.newInputStream(configPath)) {
-            properties.load(inputStream);
-        } catch (IOException e) {
-            throw new IllegalStateException("Impossible de lire le fichier de configuration Groq: " + configPath.toAbsolutePath(), e);
-        }
-        return properties;
+        return new Properties();
     }
 
     private String extractContent(String responseBody) {

@@ -1,196 +1,93 @@
-# Artium - Plateforme Artistique Collaborative
+# ARTIUM
 
-Application desktop JavaFX developpee dans le cadre du projet PIDEV, avec une architecture modulaire autour de plusieurs espaces metier: administration, artiste et amateur.
+## Description
 
-## Vision du projet
+ARTIUM est une application de bureau collaborative développée en JavaFX pour les projets artistiques et culturels dans le cadre du projet PIDEV. L'application propose des espaces distincts selon les rôles utilisateurs : l'administration dispose d'un espace de gestion globale (supervision des comptes, modération des contenus et suivi des réclamations), les artistes peuvent publier et administrer leurs oeuvres, collections et musiques, tandis que les amateurs peuvent parcourir les galeries, louer et lire des livres, générer des playlists intelligentes par IA, et acheter des tickets d'événements. Le projet intègre des fonctionnalités avancées de paiement (Stripe), d'envoi de SMS (Twilio), de génération de PDF (Apache PDFBox) et de recherche sémantique locale. La configuration et la gestion des clés d'API et secrets du projet sont centralisées de manière sécurisée dans un fichier `.env` unique.
 
-Artium centralise plusieurs domaines fonctionnels dans une seule application:
+## Technologies utilisées
 
-- gestion des utilisateurs et authentification
-- bibliotheque (livres, locations, lecture)
-- oeuvres et collections
-- galeries
-- evenements et tickets
-- musique et playlists
-- reclamations et reponses
+Frontend : JavaFX (FXML, CSS)
+Backend : Java 17, Maven, jBCrypt, Apache PDFBox, Stripe SDK, Twilio SDK, Apache HttpClient, org.json
+Base de données : MySQL
 
-## Modules applicatifs
+## Prérequis
 
-### 1) Espace Authentification
+- JDK 17+ (configuré avec `JAVA_HOME`)
+- Maven 3.8+
+- Serveur MySQL 8+ ou MariaDB compatible
+- Ollama (pour la recherche sémantique locale)
+- Whisper CLI (optionnel, pour la transcription d'audios)
 
-- navigation d'entree et pages d'acces (`views/auth`)
-- controleurs principaux: `AuthLandingController`, `ConnexionController`, `InscriptionController`, `ForgotPasswordController`
+## Installation
 
-### 2) Espace Admin
+1. Installer les dépendances Java avec Maven.
 
-- tableau de bord et gestion globale (`views/MainLayout.fxml`, `views/pages`)
-- supervision des contenus et des utilisateurs
-- controleurs principaux: `MainController`, `DashboardController`, `LivresController`, `OeuvresAdminController`, `GaleriesController`, `EvenementsController`
+```bash
+mvn clean install -DskipTests
+```
 
-### 3) Espace Artiste
-
-- gestion des ressources de l'artiste (`views/artist`)
-- publication et administration des contenus artistiques
-- point d'entree: `views/artist/ArtistMain.fxml`
-
-### 4) Espace Amateur
-
-- consultation et interaction utilisateur (`views/amateur`)
-- parcours de decouverte des contenus
-- point d'entree: `views/amateur/AmateurMain.fxml`
-
-#### Recherche IA locale des evenements
-
-La page `views/amateur/Evenements.fxml` utilise maintenant un service de recherche sémantique local basé sur Ollama.
-
-- modele principal de ranking: `nomic-embed-text:latest`
-- serveur local attendu: `http://localhost:11434`
-- fichier de configuration local: `config/ollama.local.properties`
-- modele optionnel pour des evolutions futures: `llama3.2:3b`
-
-Pour preparer le modele d'embedding si besoin:
+2. Créer le fichier d'environnement local.
 
 ```powershell
-ollama pull nomic-embed-text:latest
+Copy-Item .env.example .env
 ```
 
-Si vous voulez tester le modele de chat optionnel:
+3. Ouvrir `.env` et renseigner les clés nécessaires (Stripe, Twilio, Gemini, Google Client ID/Secret, SMTP, etc.).
 
-```powershell
-ollama pull llama3.2:3b
+Le fichier `.env.example` est celui à partager ou à pousser sur Git.
+
+4. Installer Ollama et télécharger le modèle utilisé par le projet.
+
+Le projet utilise `nomic-embed-text` pour la recherche sémantique locale des événements.
+
+```bash
+ollama pull nomic-embed-text
 ```
 
-La recherche se met a jour pendant la saisie, classe les evenements par score de similarite, puis affiche un score sur 10 directement sur chaque carte.
+Si Ollama n'est pas encore lancé, démarrez-le avant de tester la recherche sémantique.
 
-## Architecture technique
+5. Télécharger et préparer le modèle Vosk (pour la reconnaissance vocale).
 
-Le projet suit une organisation en couches, proche d'un modele MVC:
+L'application intègre une fonctionnalité de commande vocale (Speech-to-Text) qui utilise Vosk en local. En raison de sa taille, le modèle linguistique n'est pas inclus dans le repository Git.
+- Téléchargez le modèle français de taille réduite (ex: `vosk-model-small-fr-0.22`) depuis le site [Alphacephei Vosk Models](https://alphacephei.com/vosk/models).
+- Créez le dossier `src/main/resources/vosk-model-fr` s'il n'existe pas.
+- Extrayez-y le contenu du modèle téléchargé (de façon à ce que le dossier `am`, le fichier `README` et les autres fichiers du modèle se trouvent directement sous `src/main/resources/vosk-model-fr`).
 
-- `controllers/` : logique d'interface JavaFX
-- `entities/` : modeles metier (`User`, `Livre`, `Oeuvre`, `Evenement`, etc.)
-- `services/` : acces aux donnees et regles metier (`Jdbc*Service` et services dedies)
-- `utils/` : utilitaires transverses (`MyDatabase`, `SessionManager`, etc.)
-- `resources/views/` : fichiers FXML et styles CSS
+## Services locaux à lancer
 
-## Stack et dependances
+Avant de démarrer l'application, vérifiez que ces services locaux sont disponibles sur la machine:
 
-Dependances principales declarees dans `pom.xml`:
+- Serveur MySQL local (généralement sur le port `3306`)
+- Serveur Ollama local (généralement sur le port `11434`)
 
-- Java 17
-- Maven
-- JavaFX (`javafx-controls`, `javafx-fxml`, `javafx-media`, `javafx-swing`)
-- MySQL Connector/J (`mysql-connector-java` 8.0.33)
-- Apache PDFBox (`pdfbox` 2.0.30)
-- jBCrypt (`jbcrypt` 0.4)
+## Lancement
 
-## Structure du repository
-
-```text
-Java/
-  pom.xml
-  README.md
-  src/
-	main/
-	  java/
-		controllers/
-		entities/
-		services/
-		utils/
-	  resources/
-		views/
-	test/
-```
-
-## Prerequis
-
-Avant de lancer l'application:
-
-- JDK 17 installe et configure (`JAVA_HOME`)
-- Maven 3.8+ installe
-- serveur MySQL accessible localement
-- base de donnees `artium_db` creee
-
-## Configuration base de donnees
-
-La connexion est centralisee dans `src/main/java/utils/MyDatabase.java`.
-
-Valeurs actuellement configurees dans le code:
-
-- URL: `jdbc:mysql://localhost:3306/artium_db`
-- utilisateur: `root`
-- mot de passe: vide
-
-Si besoin, adaptez ces valeurs a votre environnement local.
-
-## Configuration OpenRouter pour les paroles IA
-
-Le module amateur de generation de paroles lit automatiquement un fichier local:
-
-- `config/openrouter.properties`
-
-Exemple:
-
-```properties
-openrouter.apiKey=VOTRE_CLE_OPENROUTER
-# openrouter.model=inclusionai/ling-2.6-1t:free
-```
-
-Si vous preferez, vous pouvez aussi utiliser:
-
-- la variable d'environnement `OPENROUTER_API_KEY`
-- la propriete JVM `-Dopenrouter.apiKey=...`
-
-Priorite de lecture:
-
-1. `config/openrouter.properties`
-2. propriete JVM `openrouter.apiKey` / `openrouter.model`
-3. variables d'environnement `OPENROUTER_API_KEY` / `OPENROUTER_MODEL`
-
-## Notifications e-mail
-
-Deux flux d'e-mail importants sont envoyes en HTML:
-
-- **Mot de passe oublie**: envoi du code de reinitialisation via `services.EmailService.sendPasswordResetCode(...)`
-  - configuration SMTP lue depuis `smtp.properties` ou les variables systeme / environnement associees
-  - en-tete MIME en `text/html; charset=UTF-8`
-- **Reclamation**: notification vers l'administrateur via `utils.EmailUtil.sendEmailToAdmin(...)`
-  - configuration locale chargee depuis `config.properties`
-  - cles utilisees: `smtp.sender.email`, `smtp.sender.password`, `smtp.admin.email`
-  - contenu rendu avec un modele HTML simple et echappe
-
-## Lancement du projet
-
-Depuis la racine du projet:
-
-```powershell
+```bash
 mvn clean javafx:run
 ```
 
-Point d'entree JavaFX: `controllers.MainFX` (configure dans `pom.xml`).
+Pour démarrer en ligne de commande ou via un script, vous pouvez utiliser :
 
-## Fonctionnalites techniques notables
+```bash
+run.bat
+```
 
-- navigation entre scenes centralisee dans `MainFX`
-- theming par role (`dashboard.css`, `artist-theme.css`, `amateur-theme.css`, `auth.css`)
-- gestion de session via `SessionManager`
-- persistance MySQL avec services JDBC dedies
-- support de lecture/manipulation PDF via PDFBox
-- notifications e-mail HTML pour la reinitialisation de mot de passe et les reclamations
+## Préparation de la base de données
 
-## Qualite et bonnes pratiques
+1. Assurez-vous que votre serveur MySQL est démarré.
+2. Créez la base de données `artium_db` via votre outil préféré (ex: phpMyAdmin ou CLI MySQL).
+3. Renseignez les identifiants d'accès dans le fichier `.env` (`DB_URL`, `DB_USER`, `DB_PASSWORD`).
+4. Les tables de l'application seront initialisées ou utilisées directement par les controleurs JDBC du projet.
 
-- separer la logique UI (controllers) de la logique donnees (services)
-- eviter les credentials en dur dans le code pour la production
-- ajouter des tests unitaires dans `src/test/java`
-- verifier les migrations SQL avant execution en equipe
+## Variables d'environnement
 
-## Contribution
+Voir [.env.example](.env.example).
+Toutes les clés d'API, secrets Google/Stripe et identifiants SMTP doivent résider **uniquement** dans le fichier `.env` à la racine du projet. Aucun autre fichier de propriétés local ne doit contenir de clés d'API ou de secrets.
 
-1. Creer une branche de fonctionnalite.
-2. Implementer les changements de maniere modulaire (controller/service/entity).
-3. Verifier le lancement local (`mvn clean javafx:run`).
-4. Ouvrir une Pull Request avec description claire des changements.
+## Recherche sémantique locale
 
-## Etat actuel
+La recherche d'événements dans le module amateur utilise un modèle d'embedding sémantique local via Ollama (`nomic-embed-text:latest`). Elle effectue une recherche en temps réel lors de la saisie, trie les événements par score de similarité cosinus par rapport au prompt de l'utilisateur, et affiche un score de pertinence sur 10 directly sur les cartes d'événements.
 
-Ce README decrit l'architecture et le fonctionnement global constates dans le code present du projet.
+## Démo
+
+Vidéo : https://www.youtube.com/watch?v=LXt9yFnbeq4&list=PLaxA49z0jsugwN5JIb9uLEhbhtYCT0w2E&index=1&t=4s

@@ -94,13 +94,11 @@ public class PaymentFormController {
         // Process in background to avoid freezing UI
         new Thread(() -> {
             try {
-                Properties props = new Properties();
-                try (FileInputStream fis = new FileInputStream("config/stripe.local.properties")) {
-                    props.load(fis);
+                String secretKey = utils.EnvLoader.get("STRIPE_EVENT_SECRET_KEY");
+                if (secretKey == null || secretKey.isEmpty()) {
+                    secretKey = utils.EnvLoader.get("STRIPE_SECRET_KEY");
                 }
-                
-                String secretKey = props.getProperty("stripe.secretKey");
-                String currency = props.getProperty("stripe.currency", "usd");
+                String currency = utils.EnvLoader.get("STRIPE_CURRENCY", "usd");
                 
                 if (secretKey == null || secretKey.isEmpty()) {
                     throw new Exception("Clé Stripe non configurée.");

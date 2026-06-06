@@ -6,20 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="0b0a47d8-73e4-4748-8b13-2192a6f61879" name="Changes" comment="correction blob oeuvre livre">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/GlobalPlayerController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/GlobalPlayerController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/MainFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/MainFX.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/amateur/MusicfrontController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/amateur/MusicfrontController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/MusiquesController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/MusiquesController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controllers/artist/ProfileHeaderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controllers/artist/ProfileHeaderController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/services/GlobalMediaPlayerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/GlobalMediaPlayerService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/amateur/Musique.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/amateur/Musique.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/artist/Musiques.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/artist/Musiques.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/artist/ProfileHeader.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/artist/ProfileHeader.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/components/GlobalPlayer.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/components/GlobalPlayer.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/images/avatar_2.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/images/avatar_2.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/amateur-theme.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/artist-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/artist-theme.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/views/styles/global-player.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/views/styles/global-player.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/utils/EmailUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/utils/EmailUtil.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -275,7 +262,9 @@
       <workItem from="1780354865140" duration="1590000" />
       <workItem from="1780356572050" duration="3755000" />
       <workItem from="1780407853376" duration="1428000" />
-      <workItem from="1780602639153" duration="4563000" />
+      <workItem from="1780602639153" duration="4887000" />
+      <workItem from="1780613233784" duration="255000" />
+      <workItem from="1780759780327" duration="457000" />
     </task>
     <task id="LOCAL-00001" summary="corrections de blob">
       <option name="closed" value="true" />

@@ -11,6 +11,7 @@ import javax.mail.internet.*;
 import java.io.File;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
+import utils.EnvLoader;
 
 public class EmailServiceEvent {
 
@@ -20,15 +21,24 @@ public class EmailServiceEvent {
     private static String SENDER_PASSWORD = "";
 
     static {
-        Properties config = new Properties();
-        try (java.io.FileInputStream fis = new java.io.FileInputStream("config/mail.local.properties")) {
-            config.load(fis);
-            SMTP_HOST = config.getProperty("mail.smtp.host", "smtp.gmail.com");
-            SMTP_PORT = config.getProperty("mail.smtp.port", "587");
-            SENDER_EMAIL = config.getProperty("mail.sender.email", "");
-            SENDER_PASSWORD = config.getProperty("mail.sender.password", "");
-        } catch (Exception e) {
-            System.err.println("Note: config/mail.local.properties introuvable. L'envoi d'emails utilise les identifiants par défaut (s'ils existent).");
+        SMTP_HOST = EnvLoader.get("MAIL_EVENT_SMTP_HOST");
+        if (SMTP_HOST == null || SMTP_HOST.isEmpty()) {
+            SMTP_HOST = EnvLoader.get("SMTP_HOST", "smtp.gmail.com");
+        }
+        
+        SMTP_PORT = EnvLoader.get("MAIL_EVENT_SMTP_PORT");
+        if (SMTP_PORT == null || SMTP_PORT.isEmpty()) {
+            SMTP_PORT = EnvLoader.get("SMTP_PORT", "587");
+        }
+        
+        SENDER_EMAIL = EnvLoader.get("MAIL_EVENT_SENDER_EMAIL");
+        if (SENDER_EMAIL == null || SENDER_EMAIL.isEmpty()) {
+            SENDER_EMAIL = EnvLoader.get("SMTP_USERNAME", "");
+        }
+        
+        SENDER_PASSWORD = EnvLoader.get("MAIL_EVENT_SENDER_PASSWORD");
+        if (SENDER_PASSWORD == null || SENDER_PASSWORD.isEmpty()) {
+            SENDER_PASSWORD = EnvLoader.get("SMTP_PASSWORD", "");
         }
     }
 

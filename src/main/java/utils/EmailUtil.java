@@ -14,20 +14,14 @@ public class EmailUtil {
     private static final String SMTP_HOST = "smtp.gmail.com";
     private static final String SMTP_PORT = "587";
     private static String SENDER_EMAIL = "myriam24bouziri@gmail.com"; // Email expéditeur par défaut
-    private static String SENDER_PASSWORD = ""; // Sera chargé depuis config.properties
-    
+    private static String SENDER_PASSWORD = ""; // Sera chargé depuis le fichier .env
+
     public static String ADMIN_EMAIL = "myriam24bouziri@gmail.com"; // Email de l'admin par défaut
     
     static {
-        try (java.io.FileInputStream fis = new java.io.FileInputStream("config.properties")) {
-            Properties config = new Properties();
-            config.load(fis);
-            SENDER_EMAIL = config.getProperty("smtp.sender.email", SENDER_EMAIL);
-            SENDER_PASSWORD = config.getProperty("smtp.sender.password", SENDER_PASSWORD);
-            ADMIN_EMAIL = config.getProperty("smtp.admin.email", ADMIN_EMAIL);
-        } catch (Exception e) {
-            System.err.println("Avertissement: Impossible de charger config.properties. Assurez-vous que le fichier existe à la racine du projet.");
-        }
+        SENDER_EMAIL = EnvLoader.get("MAIL_SENDER_EMAIL", SENDER_EMAIL);
+        SENDER_PASSWORD = EnvLoader.get("MAIL_SENDER_PASSWORD", SENDER_PASSWORD);
+        ADMIN_EMAIL = EnvLoader.get("MAIL_ADMIN_EMAIL", ADMIN_EMAIL);
     }
     
     public static void sendEmailToAdmin(String subject, String content) {

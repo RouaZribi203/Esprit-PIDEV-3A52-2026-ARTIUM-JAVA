@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
+import utils.EnvLoader;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -330,29 +331,16 @@ public class EventAiSearchService {
     }
 
     private SearchConfig loadConfig() {
-        Properties properties = new Properties();
-
-        Path configPath = resolveConfigPath();
-        if (Files.exists(configPath)) {
-            try {
-                try (var reader = Files.newBufferedReader(configPath, StandardCharsets.UTF_8)) {
-                    properties.load(reader);
-                }
-            } catch (IOException ignored) {
-                // Fall back to defaults and environment variables.
-            }
-        }
-
         String host = firstNonBlank(
                 System.getProperty(HOST_PROPERTY),
+                EnvLoader.get("OLLAMA_HOST"),
                 System.getenv(HOST_ENV),
-                properties.getProperty(HOST_PROPERTY),
                 DEFAULT_HOST);
 
         String embeddingModel = firstNonBlank(
                 System.getProperty(EMBEDDING_MODEL_PROPERTY),
+                EnvLoader.get("OLLAMA_EMBEDDING_MODEL"),
                 System.getenv(EMBEDDING_MODEL_ENV),
-                properties.getProperty(EMBEDDING_MODEL_PROPERTY),
                 DEFAULT_EMBEDDING_MODEL);
 
         return new SearchConfig(host, embeddingModel);

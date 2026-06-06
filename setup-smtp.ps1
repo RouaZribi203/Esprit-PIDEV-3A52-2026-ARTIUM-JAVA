@@ -54,10 +54,10 @@ function Normalize-Bool {
 }
 
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
-$configFile = Join-Path $root 'smtp.properties'
+$configFile = Join-Path $root '.env'
 
 Write-Host 'Configuration SMTP minimale' -ForegroundColor Cyan
-Write-Host 'Les valeurs seront écrites dans smtp.properties a la racine du projet.'
+Write-Host 'Les valeurs seront écrites dans le fichier .env a la racine du projet.'
 
 try {
     $smtpHost = Resolve-Input -CurrentValue $SmtpHost -Prompt 'SMTP host (ex: smtp.gmail.com)' -Required $true
@@ -76,21 +76,61 @@ try {
     $smtpStartTls = Normalize-Bool -Value $smtpStartTls -DefaultValue 'true'
     $smtpSsl = Normalize-Bool -Value $smtpSsl -DefaultValue 'false'
 
-    @(
-        "smtp.host=$smtpHost"
-        "smtp.port=$smtpPort"
-        "smtp.username=$smtpUsername"
-        "smtp.password=$smtpPassword"
-        "smtp.from=$smtpFrom"
-        "smtp.starttls=$smtpStartTls"
-        "smtp.ssl=$smtpSsl"
-    ) | Set-Content -Path $configFile -Encoding ASCII
-
-    if (-not (Test-Path -Path $configFile)) {
-        throw "Echec creation fichier: $configFile"
+    $lines = @()
+    if (Test-Path $configFile) {
+        $lines = Get-Content $configFile
     }
 
-    Write-Host "Configuration enregistree dans $configFile" -ForegroundColor Green
+    $smtpVars = @{
+        "SMTP_HOST" = $smtpHost
+        "SMTP_PORT" = $smtpPort
+        "SMTP_USERNAME" = $smtpUsername
+        "SMTP_PASSWORD" = $smtpPassword
+        "SMTP_FROM" = $smtpFrom
+        "SMTP_STARTTLS" = $smtpStartTls
+        "SMTP_SSL" = $smtpSsl
+    }
+
+    $newLines = @()
+    $processedKeys = @{}
+
+    foreach ($line in $lines) {
+        $trimmed = $line.Trim()
+        if ($trimmed.StartsWith("#") -or -not $trimmed.Contains("=")) {
+            $newLines += $line
+            continue
+        }
+        
+        $eqIndex = $trimmed.IndexOf('=')
+        $key = $trimmed.Substring(0, $eqIndex).Trim()
+        
+        if ($smtpVars.ContainsKey($key)) {
+            $newLines += "$key=$($smtpVars[$key])"
+            $processedKeys[$key] = $true
+        } else {
+            $newLines += $line
+        }
+    }
+
+    $headerAdded = $false
+    foreach ($key in $smtpVars.Keys) {
+        if (-not $processedKeys.ContainsKey($key)) {
+            if (-not $headerAdded) {
+                $newLines += ""
+                $newLines += "# SMTP Configuration"
+                $headerAdded = $true
+            }
+            $newLines += "$key=$($smtpVars[$key])"
+        }
+    }
+
+    $newLines | Set-Content -Path $configFile -Encoding UTF8
+
+    if (-not (Test-Path -Path $configFile)) {
+        throw "Echec creation/modification fichier: $configFile"
+    }
+
+    Write-Host "Configuration SMTP enregistree dans $configFile" -ForegroundColor Green
     exit 0
 }
 catch {

@@ -19,21 +19,13 @@ public class GoogleAuthService {
     private static final String REDIRECT_URI = "http://localhost:9876/callback";
     private static final int PORT = 9876;
 
-    // Chargement sécurisé depuis config.properties
+    // Chargement sécurisé depuis le fichier .env
     private static final String CLIENT_ID;
     private static final String CLIENT_SECRET;
 
     static {
-        Properties props = new Properties();
-        try (InputStream in = GoogleAuthService.class
-                .getClassLoader()
-                .getResourceAsStream("config.properties")) {
-            props.load(in);
-        } catch (Exception e) {
-            throw new RuntimeException("config.properties introuvable", e);
-        }
-        CLIENT_ID     = props.getProperty("google.client.id");
-        CLIENT_SECRET = props.getProperty("google.client.secret");
+        CLIENT_ID     = EnvLoader.get("GOOGLE_CLIENT_ID");
+        CLIENT_SECRET = EnvLoader.get("GOOGLE_CLIENT_SECRET");
     }
 
     public record GoogleUser(String email, String name, String googleId) {}
